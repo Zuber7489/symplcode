@@ -1,0 +1,77 @@
+    <section data-aos="fade-up"
+     data-aos-duration="3000">
+                <div class="we_value_u">
+                  <div class="we_valuebg">
+                    <div class="container">
+                        <div class="we_value_bg">
+                            <div class="we_value_wrap">
+                                <img loading="lazy" src="{{section.settings.image}}" class="img-fluid" alt="" />
+                                <h1>{{section.settings.heading}}</h1>
+                                {{section.settings.text}}
+
+                                <div class="we_btn">
+                                    <a href="{{section.settings.buttonlink1}}" class="btn2">{{section.settings.buttontext1}}</a>
+                                    <a href="{{section.settings.buttonlink2}}" class="btn2">{{section.settings.buttontext2}}</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </section>
+{% schema %}
+{
+  "name": "Loyality Section",
+  "settings": [
+
+   {
+      "type": "textarea",
+      "id": "image",
+      "label": "Image"
+    },
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+ 
+ {
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    },
+
+
+ 
+{
+          "type": "text",
+          "id": "buttontext1",
+          "label": "Button Text 1"
+        },
+{
+          "type": "url",
+          "id": "buttonlink1",
+          "label": "Button Link 1"
+        },
+ 
+{
+          "type": "text",
+          "id": "buttontext2",
+          "label": "Button Text 2"
+        },
+{
+          "type": "url",
+          "id": "buttonlink2",
+          "label": "Button Link 2"
+        }
+ 
+    
+  ],
+  
+  "presets": [
+    {
+      "name": "Loyality Section"
+    }
+  ]
+}
+{% endschema %}

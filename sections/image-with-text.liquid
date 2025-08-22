@@ -1,0 +1,78 @@
+  <section >
+     {% for block in section.blocks %}
+                <div class="going-place" >
+                    <div class="going_place_text">
+                        <div class="section_heading">
+                            <h2>{{block.settings.heading}}</h2>
+                             {{block.settings.text}}
+                          {% if block.settings.buttontext != blank %}
+                            <a href="{{block.settings.buttonlink}}" class="btn">
+                                {{block.settings.buttontext}}
+                            </a>
+                          {% endif %}
+                        </div>
+                    </div>
+                    <div class="going_place_img" data-aos="zoom-in"  data-aos-duration="3000">
+                        <img loading="lazy" src="{{ block.settings.image | img_url: 'master'}}" class="img-fluid" alt="" />
+                    </div>
+                </div>
+
+               {% endfor %}
+            </section>
+
+{% schema %}
+{
+  "name": "Image-text Section",
+ 
+  "blocks": [
+ 
+    {
+      "type": "text",
+      "name": "text",
+      "settings": [
+ 
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+ 
+ 
+ {
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    },
+
+
+ 
+{
+          "type": "text",
+          "id": "buttontext",
+          "label": "Button Text"
+        },
+{
+          "type": "url",
+          "id": "buttonlink",
+          "label": "Button Link"
+        }
+ 
+         
+      ]
+    }
+  
+    
+     
+  ], 
+  "presets": [
+    {
+      "name": "Image-text Section"
+    }
+  ]
+}
+{% endschema %}

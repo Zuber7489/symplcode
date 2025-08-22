@@ -1,0 +1,89 @@
+<section data-aos="fade-up"
+     data-aos-duration="3000">
+                <div class="value_bg value_bg_b">
+                    <div class="container">
+                        <div class="main_heading_wrap">
+                            <h2>{{ section.settings.heading}}</h2>
+                        </div>
+
+                        <div class="advanture_wrap">
+                           {% for block in section.blocks %}
+                            <div class="advanture_wrap_block">
+                                <div class="advanture_wrap_w">
+                                    <div class="advanture_img">
+                                        <span>{{forloop.index}}</span>
+                                        <img loading="lazy" src="{{ block.settings.image | img_url: 'master'}}" class="img-fluid" alt="">
+                                        <p>{{ block.settings.heading}}</p>
+                                        <div class="f_font">
+                                            <p>{{ block.settings.subheading}}</p>
+                                        </div>
+                                    </div>
+
+                                   {{ block.settings.text}}
+                                </div>
+                            </div>
+                          {% endfor %}
+                          
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+{% schema %}
+{
+  "name": "Adventuret Section",
+   "settings": [
+ 
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    } 
+ 
+ 
+    
+  ],
+  "blocks": [
+ 
+    {
+      "type": "text",
+      "name": "text",
+      "settings": [
+ 
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+ {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Sub Heading"
+    },
+ 
+ 
+ {
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    } 
+ 
+         
+      ]
+    }
+  
+    
+     
+  ], 
+  "presets": [
+    {
+      "name": "Adventure Section"
+    }
+  ]
+}
+{% endschema %}

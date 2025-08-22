@@ -1,0 +1,307 @@
+<!-- as_featured_in.liquid -->
+<div class="as-featured-in-section">
+  <div class="container">
+    <h3 class="featured-title">{{ section.settings.title }}</h3>
+    
+    <div class="logo-marquee-container">
+      <div class="logo-marquee">
+        <div class="logo-track">
+          {% for block in section.blocks %}
+            {% if block.type == 'logo' %}
+              <div class="logo-item" {{ block.shopify_attributes }}>
+                {% if block.settings.logo_link != blank %}
+                  <a href="{{ block.settings.logo_link }}" target="_blank" rel="noopener" class="logo-link">
+                {% endif %}
+                
+                {% if block.settings.logo_image != blank %}
+                  <img 
+                    src="{{ block.settings.logo_image | img_url: 'master' }}" 
+                    alt="{{ block.settings.logo_name | escape }}"
+                    class="logo-image"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <span class="logo-text">{{ block.settings.logo_name }}</span>
+                {% endif %}
+                
+                {% if block.settings.logo_link != blank %}
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+        
+        <!-- Clone of the track for seamless looping -->
+        <div class="logo-track">
+          {% for block in section.blocks %}
+            {% if block.type == 'logo' %}
+              <div class="logo-item" {{ block.shopify_attributes }}>
+                {% if block.settings.logo_link != blank %}
+                  <a href="{{ block.settings.logo_link }}" target="_blank" rel="noopener" class="logo-link">
+                {% endif %}
+                
+                {% if block.settings.logo_image != blank %}
+                  <img 
+                    src="{{ block.settings.logo_image | img_url: 'master' }}" 
+                    alt="{{ block.settings.logo_name | escape }}"
+                    class="logo-image"
+                    loading="lazy"
+                  >
+                {% else %}
+                  <span class="logo-text">{{ block.settings.logo_name }}</span>
+                {% endif %}
+                
+                {% if block.settings.logo_link != blank %}
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .as-featured-in-section {
+    background-color: #A3C2C6;
+    padding: 24px 0;
+    overflow: hidden;
+    width: 100%;
+  }
+  
+  .container {
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+  }
+  
+  .featured-title {
+    font-size: 18px;
+    font-weight: 500;
+    text-align: center;
+    color: #000000;
+    margin: 0 0 30px 0;
+  }
+  
+  .logo-marquee-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .logo-marquee {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+  }
+  
+  .logo-track {
+    display: flex;
+    animation: marquee {{ section.settings.scroll_speed | default: 30 }}s linear infinite;
+    will-change: transform;
+  }
+  
+  .logo-item {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+  }
+  
+  .logo-link {
+    display: block;
+    text-decoration: none;
+  }
+  
+  .logo-image {
+    max-height: 27px;
+    width: auto;
+    object-fit: contain;
+  }
+  
+  .logo-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: #000000;
+  }
+  
+  /* Pause animation on hover */
+  .logo-marquee:hover .logo-track {
+    animation-play-state: paused;
+  }
+  
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+  
+  /* Desktop specific styles */
+  @media (min-width: 768px) {
+    .as-featured-in-section {
+      margin-bottom: 30px; /* Added 90px padding bottom for desktop only */
+    }
+  }
+  
+  /* Responsive styles */
+  @media (max-width: 767px) {
+    .as-featured-in-section {
+      padding: 20px 0;
+    }
+    
+    .featured-title {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .logo-item {
+      padding: 0 25px;
+    }
+    
+    .logo-image {
+      max-height: 25px;
+    }
+    
+    .logo-text {
+      font-size: 18px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "As Featured In",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "As Featured In"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "label": "Animation Duration (seconds)",
+      "default": 30,
+      "info": "Total time for one complete animation cycle"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Brand Logo",
+      "settings": [
+        {
+          "type": "text",
+          "id": "logo_name",
+          "label": "Brand Name",
+          "default": "Brand Name",
+          "info": "Used for accessibility and as fallback if no image is uploaded"
+        },
+        {
+          "type": "image_picker",
+          "id": "logo_image",
+          "label": "Logo Image"
+        },
+        {
+          "type": "url",
+          "id": "logo_link",
+          "label": "Logo Link",
+          "info": "Optional link when logo is clicked"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "As Featured In",
+      "category": "Brand",
+      "blocks": [
+        {
+          "type": "logo",
+          "settings": {
+            "logo_name": "GQ"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "logo_name": "The Hundreds"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "logo_name": "Acquire"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "logo_name": "Hypebeast"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "logo_name": "The Hundreds"
+          }
+        },
+        {
+          "type": "logo",
+          "settings": {
+            "logo_name": "GQ"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the logo tracks
+    const logoTracks = document.querySelectorAll('.logo-track');
+    
+    // Get the scroll speed from settings
+    const scrollSpeed = {{ section.settings.scroll_speed | default: 30 }};
+    
+    // Apply the scroll speed to the animation
+    logoTracks.forEach(track => {
+      track.style.animationDuration = scrollSpeed + 's';
+    });
+    
+    // Check if logos are visible and pause animation if not in viewport
+    function handleVisibility() {
+      const marquee = document.querySelector('.logo-marquee-container');
+      if (!marquee) return;
+      
+      const rect = marquee.getBoundingClientRect();
+      const isVisible = (
+        rect.top < window.innerHeight &&
+        rect.bottom > 0
+      );
+      
+      logoTracks.forEach(track => {
+        track.style.animationPlayState = isVisible ? 'running' : 'paused';
+      });
+    }
+    
+    // Check visibility on scroll
+    window.addEventListener('scroll', handleVisibility);
+    
+    // Initial visibility check
+    handleVisibility();
+  });
+</script>

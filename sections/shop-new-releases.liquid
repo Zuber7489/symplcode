@@ -1,0 +1,620 @@
+<!-- sections/shop-new-releases-slider.liquid -->
+<div class="shop-new-releases">
+  <div class="containernewrelease">
+    <h2 class="section-heading">{{ section.settings.heading }}</h2>
+    
+    <div class="slider-container">
+      <div class="slider-wrapper">
+        <div class="slider" id="new-releases-slider">
+          {% for block in section.blocks %}
+            {% if block.type == 'slide' %}
+              <div class="slide" {{ block.shopify_attributes }}>
+                <a href="{{ block.settings.link }}" class="slide-link">
+                  <div class="slide-image-container">
+                    {% if block.settings.image != blank %}
+                      <img 
+                        src="{{ block.settings.image | img_url: 'master' }}" 
+                        alt="{{ block.settings.title | escape }}"
+                        class="slide-image"
+                        loading="lazy"
+                      >
+                    {% else %}
+                      {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                    {% endif %}
+                    
+                    <div class="slide-content">
+                      <h3 class="slide-title">{{ block.settings.title }}</h3>
+                      <p class="slide-price">{{ block.settings.price }}</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      
+      <div class="slider-navigation">
+        <button class="nav-arrow prev" id="prev-button" aria-label="Previous slide">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+           <button class="nav-arrow next" id="next-button" aria-label="Next slide" style="margin-left:21px">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 5L19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-progress">
+          <div class="progress-track"></div>
+          <div class="progress-indicato" id="progress-indicator"></div>
+        </div>
+        
+     
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .shop-new-releases {
+    padding: 55px 0 15px 0;
+    background-color: #ffffff;
+  }
+  
+  .containernewrelease {
+    /* max-width: 1200px; */
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+  
+  .section-heading {
+    font-size: 48px;
+    font-weight: 550;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+    /* text-transform: normal; */
+    color: #000000;
+  }
+  
+  .slider-container {
+    position: relative;
+  }
+  
+  .slider-wrapper {
+    overflow: hidden;
+    position: relative;
+    cursor: grab;
+    user-select: none;
+  }
+  
+  .slider-wrapper:active {
+    cursor: grabbing;
+  }
+  
+  .slider {
+    display: flex;
+    transition: transform 0.3s ease;
+    gap: 10px;
+  }
+  
+  .slide {
+    flex: 0 0 calc(30% - 7.5px);
+    min-width: calc(30% - 7.5px);
+  }
+  
+  .slide-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  .slide-image-container {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    background-color: #f5f5f5;
+  }
+  
+  .slide-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  
+  .slide-link:hover .slide-image {
+    transform: scale(1.05);
+  }
+  
+  .slide-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    /* background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%); */
+    color: #ffffff;
+  }
+  
+  .slide-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    text-transform: normal;
+  }
+  
+  .slide-price {
+    font-size: 16px;
+    margin: 0;
+  }
+  
+  /* Updated navigation style with progress indicator */
+  .slider-navigation {
+    display: flex;
+    align-items: center;
+    margin-top: 30px;
+    max-width: 268px;
+  }
+  
+  .nav-arrow {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    width: 24px;
+    height: 24px;
+  }
+  
+  .nav-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  
+  .nav-arrow svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .nav-progress {
+    position: relative;
+    flex: 1;
+    height: 2px;
+    margin: 0 10px;
+  }
+  
+  .progress-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #e0e0e0;
+  }
+  
+  .progress-indicato {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background-color: #000000;
+    transition: width 0.3s ease;
+  }
+  
+  .placeholder-svg {
+    width: 100%;
+    height: 100%;
+    background-color: #f0f0f0;
+  }
+  
+  @media screen and (max-width: 991px) {
+    .slide {
+      flex: 0 0 calc(33.333% - 7px);
+      min-width: calc(33.333% - 7px);
+    }
+  }
+  
+  @media screen and (max-width: 767px) {
+    .shop-new-releases {
+      padding: 55px 0 15px 0;
+    }
+    
+    .section-heading {
+      font-size: 28px;
+      font-weight:550;
+      letter-spacing:0.5px;
+      margin-bottom: 20px;
+      margin-left: -5px;
+    }
+    
+    .containernewrelease {
+           padding-left: 20px !important;
+        padding-right: 0px !important;
+    }
+    
+    .slider-container {
+      margin-left: -20px; /* Pull slider to screen edge */
+    }
+    
+    .slide {
+      flex: 0 0 90%;
+      min-width: 90%;
+    }
+    
+    .slider {
+      padding-right: 0;
+      padding-left: 15px; /* Add padding back only for first slide */
+    }
+    
+    .slider-navigation {
+      justify-content: center;
+      margin-top: 20px;
+      max-width: none;
+      margin-left: 95px; /* Align with heading */
+      margin-right: 95px;
+    }
+    
+    /* Hide arrows on mobile */
+    .nav-arrow {
+      display: none;
+    }
+    
+    /* Center and set progress bar to 200px on mobile */
+    .nav-progress {
+      width: 200px;
+      margin: 0 auto;
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get slider elements
+    const slider = document.getElementById('new-releases-slider');
+    const slides = slider.querySelectorAll('.slide');
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    const progressIndicator = document.getElementById('progress-indicator');
+    const sliderWrapper = slider.parentElement;
+    
+    // If no slider or slides, exit
+    if (!slider || slides.length === 0) return;
+    
+    // Variables
+    let currentPosition = 0;
+    const slideWidth = slides[0].getBoundingClientRect().width;
+    const slideMargin = 10; // Updated to match new gap
+    let slidesToShow = getVisibleSlides();
+    let maxPosition = Math.max(0, slides.length - slidesToShow);
+    
+    // General drag variables
+    let isDragging = false;
+    let startX = 0;
+    let currentX = 0;
+    let dragOffset = 0;
+    let initialTransform = 0;
+    let hasDragged = false;
+    let isMobileDevice = window.innerWidth <= 767;
+
+    // Touch-specific variables
+    let touchStartY = 0;
+    let touchDirection = null;
+    
+    // Initialize
+    updateButtonState();
+    updateProgressIndicator();
+    
+    // Event listeners
+    prevButton.addEventListener('click', moveToPrev);
+    nextButton.addEventListener('click', moveToNext);
+    window.addEventListener('resize', handleResize);
+    
+    // Mouse swipe event listeners
+    sliderWrapper.addEventListener('mousedown', handleMouseDown);
+    sliderWrapper.addEventListener('mousemove', handleMouseMove);
+    sliderWrapper.addEventListener('mouseup', handleMouseUp);
+    sliderWrapper.addEventListener('mouseleave', handleMouseUp);
+
+    // Touch swipe event listeners for mobile
+    sliderWrapper.addEventListener('touchstart', handleTouchStart);
+    sliderWrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
+    sliderWrapper.addEventListener('touchend', handleTouchEnd);
+    
+    // Prevent default drag behavior on images
+    slider.addEventListener('dragstart', function(e) {
+      e.preventDefault();
+    });
+    
+    // Prevent link clicks during drag
+    slider.addEventListener('click', function(e) {
+      if (hasDragged) {
+        e.preventDefault();
+        e.stopPropagation();
+        hasDragged = false; // Reset immediately after preventing
+      }
+    }, true);
+    
+    // Functions
+    function getVisibleSlides() {
+      const containerWidth = slider.parentElement.clientWidth;
+      const fullSlideWidth = slideWidth + slideMargin;
+      
+      if (window.innerWidth <= 767) return 1;
+      if (window.innerWidth <= 991) return 3;
+      return 3;
+    }
+    
+    function moveToNext() {
+      if (currentPosition < maxPosition) {
+        currentPosition++;
+        updateSliderPosition();
+        updateButtonState();
+        updateProgressIndicator();
+      }
+    }
+    
+    function moveToPrev() {
+      if (currentPosition > 0) {
+        currentPosition--;
+        updateSliderPosition();
+        updateButtonState();
+        updateProgressIndicator();
+      }
+    }
+    
+    function updateSliderPosition() {
+      const fullSlideWidth = slideWidth + slideMargin;
+      const translateX = -currentPosition * fullSlideWidth;
+      slider.style.transform = `translateX(${translateX}px)`;
+    }
+    
+    function updateButtonState() {
+      prevButton.disabled = currentPosition === 0;
+      prevButton.style.opacity = currentPosition === 0 ? '0.3' : '1';
+      
+      nextButton.disabled = currentPosition >= maxPosition;
+      nextButton.style.opacity = currentPosition >= maxPosition ? '0.3' : '1';
+    }
+    
+    function updateProgressIndicator() {
+      if (!progressIndicator) return;
+      const progress = maxPosition > 0 ? (currentPosition / maxPosition) * 100 : 0;
+      progressIndicator.style.width = `${progress}%`;
+    }
+    
+    function handleResize() {
+      isMobileDevice = window.innerWidth <= 767;
+      slidesToShow = getVisibleSlides();
+      maxPosition = Math.max(0, slides.length - slidesToShow);
+      
+      if (currentPosition > maxPosition) {
+        currentPosition = maxPosition;
+      }
+      
+      updateSliderPosition();
+      updateButtonState();
+      updateProgressIndicator();
+    }
+    
+    // Mouse swipe functions
+    function handleMouseDown(e) {
+      isDragging = true;
+      startX = e.clientX;
+      currentX = e.clientX;
+      hasDragged = false;
+      
+      const fullSlideWidth = slideWidth + slideMargin;
+      initialTransform = -currentPosition * fullSlideWidth;
+      
+      sliderWrapper.style.cursor = 'grabbing';
+      slider.style.transition = 'none';
+      e.preventDefault();
+    }
+    
+    function handleMouseMove(e) {
+      if (!isDragging) return;
+      
+      currentX = e.clientX;
+      dragOffset = currentX - startX;
+      
+      const dragThreshold = isMobileDevice ? 15 : 5;
+      if (Math.abs(dragOffset) > dragThreshold) {
+        hasDragged = true;
+      }
+      
+      const newTransform = initialTransform + dragOffset;
+      slider.style.transform = `translateX(${newTransform}px)`;
+      e.preventDefault();
+    }
+    
+    function handleMouseUp(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      
+      sliderWrapper.style.cursor = 'grab';
+      slider.style.transition = 'transform 0.3s ease';
+      
+      const dragThreshold = isMobileDevice ? 30 : 50;
+      
+      if (Math.abs(dragOffset) > dragThreshold) {
+        if (dragOffset > 0 && currentPosition > 0) {
+          moveToPrev();
+        } else if (dragOffset < 0 && currentPosition < maxPosition) {
+          moveToNext();
+        } else {
+          updateSliderPosition();
+        }
+      } else {
+        updateSliderPosition();
+      }
+      
+      dragOffset = 0;
+    }
+
+    // Touch swipe functions
+    function handleTouchStart(e) {
+      if (e.touches.length !== 1) return;
+      isDragging = true; // Use a general dragging flag
+      startX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      currentX = e.touches[0].clientX;
+      hasDragged = false;
+      touchDirection = null;
+
+      const fullSlideWidth = slideWidth + slideMargin;
+      initialTransform = -currentPosition * fullSlideWidth;
+      slider.style.transition = 'none';
+    }
+
+    function handleTouchMove(e) {
+      if (!isDragging || e.touches.length !== 1) return;
+
+      currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      
+      if (touchDirection === null) {
+        const deltaX = Math.abs(currentX - startX);
+        const deltaY = Math.abs(touchStartY - currentY);
+        
+        if (deltaX > 10 || deltaY > 10) {
+          touchDirection = (deltaX > deltaY) ? 'horizontal' : 'vertical';
+        }
+      }
+
+      if (touchDirection === 'horizontal') {
+        e.preventDefault();
+        dragOffset = currentX - startX;
+        
+        if (Math.abs(dragOffset) > 10) {
+          hasDragged = true;
+        }
+        
+        const newTransform = initialTransform + dragOffset;
+        slider.style.transform = `translateX(${newTransform}px)`;
+      }
+    }
+
+    function handleTouchEnd(e) {
+      if (!isDragging) return;
+      
+      const wasHorizontal = touchDirection === 'horizontal';
+      isDragging = false;
+      touchDirection = null;
+
+      slider.style.transition = 'transform 0.3s ease';
+
+      if (!wasHorizontal) {
+          updateSliderPosition(); 
+          return;
+      }
+      
+      const dragThreshold = 30;
+
+      if (Math.abs(dragOffset) > dragThreshold && hasDragged) {
+        if (dragOffset > 0 && currentPosition > 0) {
+          moveToPrev();
+        } else if (dragOffset < 0 && currentPosition < maxPosition) {
+          moveToNext();
+        } else {
+          updateSliderPosition();
+        }
+      } else {
+        updateSliderPosition();
+      }
+
+      dragOffset = 0;
+      // Reset hasDragged after a small delay to allow click prevention to work
+      setTimeout(() => {
+        hasDragged = false;
+      }, 50);
+    }
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Shop New Releases",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "SHOP NEW RELEASES"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "THE DOPE KIT"
+        },
+        {
+          "type": "text",
+          "id": "price",
+          "label": "Price",
+          "default": "$79"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Shop New Releases",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "title": "THE DOPE KIT",
+            "price": "$79"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "title": "THE COMMUTER PACK",
+            "price": "$79"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "title": "THE ALL TERRAIN TOTE",
+            "price": "$79"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "title": "THE WEEKENDER",
+            "price": "$79"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

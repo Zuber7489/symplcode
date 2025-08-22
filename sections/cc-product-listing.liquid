@@ -1,0 +1,51 @@
+<section>
+  {% assign collection_to_use = metaobject['cc-creator-collection'] %}
+
+  <div class="container">
+    <div>
+      <div class="product_slide">
+        {%- assign collection = collections[collection_to_use] -%}
+        {%- assign product_limit = section.settings.grid -%}
+        {% for product in collection.products limit: product_limit %}
+          {%- comment %}<locksmith:1272>{%- endcomment %}
+          {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture -%}
+          {%- if var == 'true' %}{% else %}{% continue %}{% endif -%}
+          {%- comment %}</locksmith:1272>{%- endcomment %}
+
+          {% include 'product-grid' %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "CC Products Section",
+
+
+    "settings": [
+
+{
+        "id": "collection",
+        "type": "collection",
+        "label": "Select collection"
+      },
+      {
+        "type": "range",
+        "id": "grid",
+        "label": "Products to Show",
+        "min": 1,
+        "max": 40,
+        "step": 1,
+        "default": 3
+      }
+
+  ],
+  "presets": [
+    {
+      "name": "CC Products Section"
+    }
+  ]
+}
+{% endschema %}

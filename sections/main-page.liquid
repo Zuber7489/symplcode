@@ -1,0 +1,37 @@
+ 
+<div class="page-width page-width--narrow section-{{ section.id }}-padding">
+    {% if template contains 'affiliate'%}
+  <style>
+    .rte {
+    padding-top: 30px;
+}
+  </style>
+    {% endif %}
+  {% unless template contains 'affiliate'%}
+
+  <h1 class="main-page-title page-title h0">
+    {{ page.title | escape }}
+  </h1>
+  {% endunless %}
+  <div class="rte">
+    {{ page.content }}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Main Page",
+  "settings": [
+ 
+ 
+ 
+    
+  ],
+  
+  "presets": [
+    {
+      "name": "Main page"
+    }
+  ]
+}
+{% endschema %}

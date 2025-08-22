@@ -1,0 +1,2458 @@
+{% comment %}
+  Compare Bags Modal Snippet
+  This snippet contains all the compare bags functionality including:
+  - Modal HTML structure
+  - CSS styles
+  - JavaScript functionality
+  - Event handlers
+  
+  Usage: {% render 'compare-bags-modal' %}
+{% endcomment %}
+
+<!-- Enhanced Compare Bags Modal (New UI Design) -->
+<style>
+#compareBagsModalV2 {
+  display: none; 
+  position: fixed; 
+  z-index: 10001; 
+  left: 0; 
+  top: 0; 
+  width: 100vw; 
+  height: 100dvh;
+  background: rgba(0,0,0,0.45); 
+  overflow: auto; 
+  align-items: center; 
+  justify-content: center;
+}
+
+/* Desktop: per-section label top offsets for precise alignment */
+.compare-modal-specs > .compare-modal-category-label { top: 2px; }
+.compare-modal-fabric > .compare-modal-category-label { top: 1px; }
+.compare-modal-tech-specs > .compare-modal-category-label { top: 28px; }
+.compare-modal-features > .compare-modal-category-label { top: 8px; }
+.compare-modal-overview > .compare-modal-category-label { top: 35px; }
+.compare-modal-available-in-wrapper > .compare-modal-category-label { top: 51px; }
+
+.compare-modal-content {
+  background: #fff; 
+  max-width: 700px; 
+  width: 90vw; 
+  margin: 20px auto; 
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08); 
+  padding: 20px 20px 0 20px; 
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.compare-modal-close {
+  position: absolute; 
+  top: 16px; 
+  right: 16px; 
+  background: none; 
+  border: none; 
+  font-size: 24px; 
+  color: #666; 
+  cursor: pointer;
+}
+
+.compare-modal-header {
+  text-align: center; 
+  margin-bottom: 16px;
+}
+
+.compare-modal-title {
+  font-size: 18px; 
+  font-weight: 500; 
+  color: #333; 
+  margin: 0;
+}
+
+.compare-modal-tabs {
+  display: flex; 
+  margin: 16px 34.5px; 
+  
+  background: #f5f5f5; 
+  border-radius: 20px; 
+  padding: 3px;
+  justify-content: center;
+}
+
+.compare-modal-tab {
+  flex: 1; 
+  text-align: center; 
+  padding: 8px 16px; 
+  font-size: 14px; 
+  font-weight: 500; 
+  color: #666;
+  background: none; 
+  border: none; 
+  cursor: pointer; 
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.compare-modal-tab.active {
+  background: #4a6f64; 
+  color: #fff;
+}
+
+.compare-modal-grid {
+  display: flex;
+  gap: 16px;
+  padding: 0;
+  width: 100%;
+}
+
+#compareBagsGridWrap {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px !important;
+  flex-grow: 1;
+  width: 100%;
+  align-items: stretch;
+}
+
+/* Ensure each product card is a flex container for better control */
+.compare-modal-product {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Force equal heights for matching sections across columns */
+.compare-modal-product[data-card-position="left"] .compare-modal-fabric,
+.compare-modal-product[data-card-position="right"] .compare-modal-fabric {
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+.compare-modal-product[data-card-position="left"] .compare-modal-tech-specs,
+.compare-modal-product[data-card-position="right"] .compare-modal-tech-specs {
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+.compare-modal-product[data-card-position="left"] .compare-modal-overview,
+.compare-modal-product[data-card-position="right"] .compare-modal-overview {
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+.compare-modal-product[data-card-position="left"] .compare-modal-available-in-wrapper,
+.compare-modal-product[data-card-position="right"] .compare-modal-available-in-wrapper {
+  min-height: 0;
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.compare-modal-category-label {
+  font-size: 13px;
+  color: #ccb670;
+  font-weight: 400;
+  transform: rotate(-90deg);
+  text-align: center;
+  white-space: nowrap;
+  position: absolute;
+  left: -7px;
+  top: 0; /* default; overridden per-section below */
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+{% comment %} .compare-modal-features, {% endcomment %}
+.compare-modal-fabric,
+.compare-modal-tech-specs,
+.compare-modal-overview,
+.compare-modal-available-in-wrapper {
+  position: relative;
+  padding-left: 53px;
+      padding-right: 46px;
+}
+
+.compare-modal-specs {
+  padding-left: 0px !important;
+    position: relative;
+}
+
+/* Hide the old left-side labels */
+.compare-modal-labels {
+  display: none !important;
+}
+
+.compare-modal-divider {
+  height: 1px;
+  background: #e0e0e0;
+  margin: 12px 0;
+  width: 100%;
+}
+
+.compare-modal-fabric-divider {
+  grid-column: 1 / -1;
+  height: 1px;
+  background: #e0e0e0;
+  margin: 12px 0;
+  width: 100%;
+  order: 3;
+}
+
+.compare-modal-product {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.compare-modal-img-wrap {
+  margin-bottom: 0;
+  background: #f8f8f8;
+  border-radius: 8px;
+  padding: 15px;
+  height: 189px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 94%;
+  max-width: 228px;
+  margin: 0 auto;
+  
+}
+
+.compare-modal-img {
+  width: 100%; 
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.compare-modal-product-title {
+  font-size: 13px;
+  font-weight: 600 !important;
+  color: #333;
+  margin: 8px 0 12px 0;
+  order: 1;
+  text-align: center;
+}
+
+.compare-modal-specs {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 0px;
+  order: 2;
+  text-align: left;
+  width: 100%;
+  justify-items: anchor-center;
+}
+
+        .compare-modal-spec-item {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
+          padding: 4px 0;
+          gap: 4px;
+        }
+
+        .compare-modal-spec-value {
+          color: #333;
+          font-size: 13px;
+          font-weight: 500;
+          text-align: left;
+          margin: 0;
+        }
+
+        /* Class-based spacing (no nth-child): set different margins */
+        .compare-modal-specs .compare-modal-spec-item--weight {
+          margin-right: 3px;
+        }
+        .compare-modal-specs .compare-modal-spec-item--price {
+          margin-right: -8px;
+        }
+
+.compare-modal-specs-golden-labels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 20px;
+  margin-top: 0;
+  width: 100%;
+}
+
+              .compare-modal-golden-label {
+          font-size: 10px;
+          color: #ccb670;
+          font-weight: 500;
+          text-align: left;
+          margin: 0;
+        }
+
+.compare-modal-features {
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font-size: 12px;
+  color: #666;
+  min-height: 120px;
+  order: 3;
+  width: 100%;
+  position: relative;
+}
+
+/* Remove the old individual dividers */
+.compare-modal-features::before {
+  display: none;
+}
+
+/* Add single divider line that spans across both features sections */
+.compare-modal-product[data-card-position="left"] .compare-modal-features::before {
+  display: block;
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0; /* Account for left padding */
+  height: 1px;
+  background: #e0e0e0;
+  width: calc(200% + 22px); /* Span both columns plus gap and padding */
+  
+}
+
+.compare-modal-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  padding-left:50px;
+}
+
+.compare-modal-features li {
+  margin-bottom: 4px; 
+  position: relative; 
+  padding-left: 10px;
+  line-height: 1.4;
+      color: #333;
+}
+
+.compare-modal-features li:before {
+  
+  position: absolute; 
+  left: 0;
+  color: #333;
+  font-weight: bold;
+}
+
+.compare-modal-features p {
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.compare-modal-features strong,
+.compare-modal-features b {
+  font-weight: 600;
+  color: #333;
+}
+
+.compare-modal-features em,
+.compare-modal-features i {
+  font-style: italic;
+}
+
+.compare-modal-capacity {
+  font-size: 12px; 
+  color: #999; 
+  margin: 8px 0;
+}
+
+.compare-modal-available-in {
+  order: 4;
+  width: 100%;
+  margin-top: 16px;
+  background: #f8f8f8;
+
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.compare-modal-button {
+  display: inline-block; 
+  padding: 8px 32px; 
+  border-radius: 25px; 
+  font-size: 14px;
+  font-weight: 500; 
+  text-decoration: none; 
+  cursor: pointer; 
+  min-width: 235px;
+  transition: all 0.3s ease;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.compare-modal-available-in-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: flex-start;
+  width: 100%;
+  overflow: visible;
+  margin-left: 49px;
+}
+
+/* Size tab specific margin */
+.compare-modal-available-in-content[data-tab="size"] {
+  margin-left: 59px;
+}
+
+/* Fabric tab specific margin */
+.compare-modal-available-in-content[data-tab="fabric"] {
+  margin-left: 49px;
+}
+
+.compare-modal-available-in-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.compare-modal-available-in-item.selected {
+  position: relative;
+}
+
+.compare-modal-available-in-item.selected::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 1px;
+  background-color: #ccc;
+}
+
+.compare-modal-available-in-thumbnail {
+  width: 40px;
+  height: 40px;
+  background: #f8f8f8;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.compare-modal-available-in-item.selected .compare-modal-available-in-thumbnail {
+  background: #f0f0f0;
+
+}
+
+.compare-modal-available-in-item {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.compare-modal-available-in-item:hover {
+  transform: translateY(-2px);
+}
+
+.compare-modal-available-in-item:hover .compare-modal-available-in-thumbnail {
+  background: #f8f8f8;
+
+}
+
+.compare-modal-available-in-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.compare-modal-available-in-material {
+  font-size: 10px;
+  color: #ccb670;
+  text-align: center;
+  font-weight: 500;
+}
+
+.compare-modal-available-in-price {
+  font-size: 11px;
+  font-weight: 600;
+  color: #333;
+  margin-left: 16px;
+  margin-top: 34px;
+}
+
+.compare-modal-button {
+  order: 5;
+  margin-top: 12px;
+}
+
+.compare-modal-button {
+  display: inline-block; 
+  padding: 8px 32px; 
+  border-radius: 25px; 
+  font-size: 14px;
+  font-weight: 500; 
+  text-decoration: none; 
+  cursor: pointer; 
+  min-width: 235px;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.compare-modal-button.primary {
+  background: #2f6f6f; 
+  color: white; 
+  border: none;
+}
+
+.compare-modal-button.secondary {
+  background: #2f6f6f; 
+  color: white; 
+  border: none;
+}
+
+.compare-modal-grid { 
+  align-items: stretch; 
+}
+
+/* Fabric tab specific styles */
+.compare-modal-fabric {
+  font-size: 12px;
+  color: #333;
+  margin: 0;
+  order: 2;
+  text-align: left;
+  font-weight: 600;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+}
+
+/* Add single divider line that spans across both fabric sections */
+.compare-modal-product[data-card-position="left"] .compare-modal-fabric::after {
+  content: '';
+  position: absolute;
+  bottom: -16px;
+  left: 0px; /* Account for left padding */
+  height: 1px;
+  background: #e0e0e0;
+  width: calc(200% + 10px); /* Span both columns plus gap and padding */
+
+}
+
+.compare-modal-fabric strong {
+  text-align: left;
+  display: block;
+  width: 100%;
+}
+
+.compare-modal-tech-specs {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  text-align: left;
+  order: 3;
+  line-height: 1.4;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+}
+
+/* Add single divider line that spans across both tech specs sections */
+.compare-modal-product[data-card-position="left"] .compare-modal-tech-specs::after {
+  content: '';
+  position: absolute;
+  bottom: 0px;
+  left: 0px; /* Account for left padding */
+  height: 1px;
+  background: #e0e0e0;
+  width: calc(200% + 10px); /* Span both columns plus gap and padding */
+  
+}
+
+.compare-modal-tech-specs p {
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.compare-modal-tech-specs strong,
+.compare-modal-tech-specs b {
+  font-weight: 600;
+  color: #333;
+}
+
+.compare-modal-tech-specs em,
+.compare-modal-tech-specs i {
+  font-style: italic;
+  color: #555;
+}
+
+.compare-modal-overview {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  text-align: left;
+  order: 4;
+  line-height: 1.4;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+}
+
+
+
+.compare-modal-overview p {
+  margin: 0 0 8px 0;
+  line-height: 1.5;
+}
+
+.compare-modal-overview strong,
+.compare-modal-overview b {
+  font-weight: 600;
+  color: #333;
+}
+
+.compare-modal-overview em,
+.compare-modal-overview i {
+  font-style: italic;
+  color: #555;
+}
+
+.compare-modal-available-in-wrapper {
+  order: 5;
+  margin-top: auto;
+  padding: 20px;
+  background-color: #f8f8f8;
+  margin-right: -20px;
+  margin-left: -20px;
+  margin-bottom: 0;
+  width: calc(100% + 40px);
+  position: sticky;
+  bottom: 0;
+  box-sizing: border-box;
+}
+
+.compare-modal-available-in-wrapper .compare-modal-category-label {
+  left: 12px;
+  position: absolute;
+}
+
+
+
+/* For 0px to 459px */
+@media (max-width: 459px) {
+    .compare-modal-features ul {
+        padding-left: 9%;
+    }
+}
+
+/* For 460px to 600px */
+@media (min-width: 460px) and (max-width: 500px) {
+    .compare-modal-features ul {
+        padding-left: 10%;
+    }
+}
+
+@media (min-width: 501px) and (max-width: 600px) {
+    .compare-modal-features ul {
+        padding-left: 12%;
+    }
+}
+
+/* For 601px to 700px */
+@media (min-width: 601px) and (max-width: 700px) {
+    .compare-modal-features ul {
+        padding-left: 9%;
+    }
+}
+
+
+
+/* For screen widths up to 450px */
+@media (max-width: 700px) {
+
+  .compare-modal-available-in-wrapper {
+    padding:10px;
+  }
+}
+
+@media (max-width: 400px){
+.compare-modal-specs {
+ padding-left: 5% !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 700px) {
+    .compare-modal-fabric,
+    .compare-modal-tech-specs,
+    .compare-modal-overview {
+        padding-left: 20%;
+    }
+
+  .compare-modal-available-in-wrapper{
+     padding-left: 14%;
+    padding-right: 26px;
+  }
+
+}
+
+@media (max-width: 599px) {
+    .compare-modal-fabric,
+    .compare-modal-tech-specs,
+    .compare-modal-overview {
+        padding-left: 15%;
+        padding-right: 26px;
+    }
+
+      .compare-modal-available-in-wrapper{
+     padding-left: 14%;
+    padding-right: 26px;
+  }
+}
+
+
+@media (max-width: 700px) {
+  .compare-modal-button {
+ min-width: 140px;
+margin-right: 31%;
+padding: 3px 18px;
+  }
+
+  .compare-modal-tabs{
+        margin: 16px 0px;
+  }
+
+  .compare-modal-tab{
+  padding:8px;
+  }
+
+  .compare-modal-product-title{
+  font-size:11px;
+  padding-left:21px;
+  padding-right:21px;
+  }
+  .compare-modal-specs {
+padding-right: 4% !important;
+  }
+.compare-modal-img-wrap {
+  width:100%;
+}
+  .compare-modal-available-in-content {
+    margin-left: 13% !important; /* Or whatever smaller value you prefer */
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+
+
+  
+  /* Adjust divider positioning for mobile */
+  .compare-modal-product[data-card-position="left"] .compare-modal-fabric::after,
+  .compare-modal-product[data-card-position="left"] .compare-modal-tech-specs::after,
+  .compare-modal-product[data-card-position="left"] .compare-modal-overview::after,
+  .compare-modal-product[data-card-position="left"] .compare-modal-features::before {
+    left: 0px; /* Account for mobile padding */
+    width: calc(200% + 10px); /* Adjust for mobile padding and gap */
+  }
+  
+  /* Keep swatches on the same line for mobile */
+  .compare-modal-available-in-content .compare-modal-available-in-item {
+    display: inline-block;
+    margin-right: 8px;
+    vertical-align: top;
+    float: left;
+  }
+}
+
+@media (min-width: 0px) and (max-width: 510px) {
+    .compare-modal-available-in-price {
+       margin-left: 0;
+    margin-top: 0;
+    margin-right: 50%;
+    text-align: center;
+    width: 100%;
+    order: 2;
+    clear: both;
+    }
+}
+
+@media (min-width: 511px) and (max-width: 600px) {
+    .compare-modal-available-in-price {
+       margin-left: 0;
+    margin-top: 0;
+    margin-right: 67%;
+    text-align: center;
+    width: 100%;
+    order: 2;
+    clear: both;
+    }
+}
+
+
+/* 601px to 700px */
+@media (min-width: 601px) and (max-width: 700px) {
+  .compare-modal-features ul {
+    padding-left: 45px;
+  }
+    .compare-modal-available-in-price {
+      margin-left: 0;
+    margin-top: 0;
+    margin-right: 72%;
+    text-align: center;
+    width: 100%;
+    order: 2;
+    clear: both;
+    }
+}
+
+/* Mobile Modal Behavior - Bottom Slide Up and Full Width */
+@media (max-width: 700px) {
+  #compareBagsModalV2 {
+    align-items: flex-end !important;
+    justify-content: center !important;
+    background: rgba(0,0,0,0.45);
+    transition: background 0.3s;
+    overflow-y: auto;
+  }
+  .compare-modal-content {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    border-radius: 18px 18px 0 0 !important;
+    margin: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 16px) !important;
+    position: relative;
+    bottom: 0;
+    left: 0;
+    animation: compareModalSlideUp 0.35s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.12);
+    max-height: 80vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .compare-modal-spec-value{
+      font-size: 11px;
+  }
+  @keyframes compareModalSlideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  
+  /* Mobile responsive adjustments for compare modal elements */
+  .compare-modal-category-label {
+    left: -16px !important;
+  }
+
+  /* Mobile: reduce spacing; weight vs price different */
+  .compare-modal-specs .compare-modal-spec-item--weight {
+    margin-right: 8px;
+  }
+  .compare-modal-specs .compare-modal-spec-item--price {
+    margin-right: -6px;
+  }
+
+  /* Per-section top offsets: mobile */
+  .compare-modal-specs > .compare-modal-category-label { top: 3px !important; }
+  .compare-modal-tech-specs > .compare-modal-category-label { top: 29px !important; }
+  .compare-modal-fabric > .compare-modal-category-label { top: 3px !important; }
+  .compare-modal-features > .compare-modal-category-label { top: 8px !important; }
+  .compare-modal-overview > .compare-modal-category-label { top: 35px !important; }
+  .compare-modal-available-in-wrapper > .compare-modal-category-label { top: 43px !important; left: 2px !important; }
+}
+
+/* Compare Bags button styles */
+.comparemobilebtn {
+  border: 2px solid #2f7d7d; 
+  color: #2f7d7d; 
+  background: transparent; 
+  padding: 6px 16px; 
+  border-radius: 20px; 
+  font-size: 18px; 
+  cursor: pointer; 
+  margin-bottom: 6px; 
+  position: relative; 
+  z-index: 100;
+}
+
+.comparedesktopbtn {
+  border: 2px solid #2f7d7d; 
+  color: #2f7d7d; 
+  background: transparent; 
+  padding: 6px 16px; 
+  border-radius: 20px; 
+  font-size: 18px; 
+  cursor: pointer; 
+  margin: 0; 
+  position: relative; 
+  z-index: 100; 
+  pointer-events: auto;
+}
+
+/* Desktop vs Mobile Button Display Logic */
+@media (max-width: 900px) {
+  .comparemobilebtn {
+    display: block !important;
+    margin-right: 0 !important;
+    font-size: 13px !important;
+    padding: 4px 8px !important;
+  }
+  
+  .comparedesktopbtn {
+    display: none !important;
+  }
+  
+  .mobile-compare-review {
+    display: flex !important;
+    margin-top: 10px !important;
+    margin-bottom: 15px !important;
+    min-width: 129px !important;
+    justify-content: flex-end !important;
+  }
+  
+  /* Ensure mobile button is visible in mobile-single-image section */
+  .mobile-single-image .mobile-compare-review {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: flex-end !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .comparedesktopbtn {
+    display: block;
+    font-size: 15px !important;
+    padding: 5px 14px !important;
+    font-weight: 400 !important;
+    position: relative !important;
+    z-index: 100 !important;
+    pointer-events: auto !important;
+  }
+  
+  .mobile-compare-review {
+    display: none !important;
+  }
+  
+  .comparemobilebtn {
+    display: none !important;
+  }
+}
+.comparemobilebtn {
+  border: 2px solid #2f7d7d; 
+  color: #2f7d7d; 
+  background: transparent; 
+  padding: 6px 16px; 
+  border-radius: 20px; 
+  font-size: 18px; 
+  cursor: pointer; 
+  margin-bottom: 6px; 
+  position: relative; 
+  z-index: 100;
+}
+
+.comparedesktopbtn {
+  border: 2px solid #2f7d7d; 
+  color: #2f7d7d; 
+  background: transparent; 
+  padding: 6px 16px; 
+  border-radius: 20px; 
+  font-size: 18px; 
+  cursor: pointer; 
+  margin: 0; 
+  position: relative; 
+  z-index: 100; 
+  pointer-events: auto;
+}
+
+</style>
+
+<!-- Compare Bags Modal HTML -->
+<div id="compareBagsModalV2">
+  <div class="compare-modal-content">
+    <button class="compare-modal-close" id="compareModalClose">&times;</button>
+    <div class="compare-modal-header">
+      <h2 class="compare-modal-title">Compare Bags</h2>
+    </div>
+    <div class="compare-modal-tabs" id="compareModalTabs" style="display: none;">
+      <button class="compare-modal-tab active" id="compareTabSize" data-tab="size">Size</button>
+      <button class="compare-modal-tab" id="compareTabFabric" data-tab="fabric">Fabric</button>
+    </div>
+    <div class="compare-modal-grid">
+      <div id="compareBagsGridWrap" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+        <!-- Grid will be rendered here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Compare Bags JavaScript -->
+<script>
+// Immediate fallback function to prevent errors
+if (typeof window.openCompareBagsModalV2 === 'undefined') {
+  window.openCompareBagsModalV2 = function() {
+    // Wait for the real function to be available
+    setTimeout(function() {
+      if (typeof window.openCompareBagsModalV2 === 'function' && window.openCompareBagsModalV2.toString().includes('REAL FUNCTION')) {
+        window.openCompareBagsModalV2();
+      }
+    }, 100);
+  };
+}
+
+// Function to decode HTML entities
+function decodeHtmlEntities(text) {
+  if (!text) return text;
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = text;
+  return textarea.value;
+}
+
+// Function to safely parse JSON
+function safeJsonParse(jsonString) {
+  if (!jsonString) return null;
+  
+  try {
+    // If it's already an object, return it
+    if (typeof jsonString === 'object') {
+      return jsonString;
+    }
+    
+    // Try to parse as JSON
+    if (typeof jsonString === 'string') {
+      // First decode HTML entities
+      let cleanedString = decodeHtmlEntities(jsonString);
+      
+      // Clean up common control characters that break JSON parsing
+      cleanedString = cleanedString
+        .replace(/\n/g, '\\n')  // Escape newlines
+        .replace(/\r/g, '\\r')  // Escape carriage returns
+        .replace(/\t/g, '\\t')  // Escape tabs
+        .replace(/\f/g, '\\f')  // Escape form feeds
+        .replace(/\v/g, '\\v'); // Escape vertical tabs
+      // Note: Removed \b escaping as it breaks JSON parsing
+      
+      return JSON.parse(cleanedString);
+    }
+    
+    return null;
+  } catch (error) {
+    return null;
+  }
+}
+
+// Function to parse rich text JSON and preserve HTML formatting
+function parseRichText(richTextJson) {
+  if (!richTextJson) return '';
+  
+  try {
+    // If it's already HTML, return as is
+    if (typeof richTextJson === 'string' && !richTextJson.startsWith('{')) {
+      return richTextJson;
+    }
+    
+    // Try to parse as JSON first
+    if (typeof richTextJson === 'string') {
+      try {
+        const richText = safeJsonParse(richTextJson);
+        
+        if (richText && richText.children) {
+          function extractHTML(node) {
+            if (typeof node === 'string') return node;
+            
+            // Handle text nodes with formatting
+            if (node.type === 'text') {
+              let text = node.value || '';
+              
+              // Apply formatting based on node properties
+              if (node.bold) {
+                text = `<strong>${text}</strong>`;
+              }
+              if (node.italic) {
+                text = `<em>${text}</em>`;
+              }
+              if (node.underline) {
+                text = `<u>${text}</u>`;
+              }
+              
+              return text;
+            }
+            
+            // Handle paragraph nodes
+            if (node.type === 'paragraph') {
+              const content = node.children ? node.children.map(extractHTML).join('') : '';
+              return `<p>${content}</p>`;
+            }
+            
+            // Handle heading nodes
+            if (node.type === 'heading') {
+              const level = node.level || 1;
+              const content = node.children ? node.children.map(extractHTML).join('') : '';
+              return `<h${level}>${content}</h${level}>`;
+            }
+            
+            // Handle list item nodes
+            if (node.type === 'list-item') {
+              const content = node.children ? node.children.map(extractHTML).join('') : '';
+              return `<li>${content}</li>`;
+            }
+            
+            // Handle bulleted list nodes
+            if (node.type === 'bulleted-list') {
+              const content = node.children ? node.children.map(extractHTML).join('') : '';
+              return `<ul>${content}</ul>`;
+            }
+            
+            // Handle numbered list nodes
+            if (node.type === 'numbered-list') {
+              const content = node.children ? node.children.map(extractHTML).join('') : '';
+              return `<ol>${content}</ol>`;
+            }
+            
+            // Handle link nodes
+            if (node.type === 'link') {
+              const content = node.children ? node.children.map(extractHTML).join('') : '';
+              const url = node.url || '#';
+              return `<a href="${url}">${content}</a>`;
+            }
+            
+            // Handle quote nodes
+            if (node.type === 'quote') {
+              const content = node.children ? node.children.map(extractHTML).join('') : '';
+              return `<blockquote>${content}</blockquote>`;
+            }
+            
+            // Handle code nodes
+            if (node.type === 'code') {
+              const content = node.children ? node.children.map(extractHTML).join('') : (node.value || '');
+              return `<code>${content}</code>`;
+            }
+            
+            // Handle preformatted text
+            if (node.type === 'preformatted') {
+              const content = node.children ? node.children.map(extractHTML).join('') : (node.value || '');
+              return `<pre>${content}</pre>`;
+            }
+            
+            // Recursively process children
+            if (node.children && Array.isArray(node.children)) {
+              return node.children.map(extractHTML).join('');
+            }
+            
+            return node.value || '';
+          }
+          
+          const html = richText.children.map(extractHTML).join('');
+          return html;
+        }
+      } catch (jsonError) {
+        // JSON parsing failed, continue to regex fallback
+      }
+    }
+    
+          // Fallback: extract text using regex from the JSON string with formatting
+      if (typeof richTextJson === 'string') {
+        // First try to decode HTML entities
+        const decodedString = decodeHtmlEntities(richTextJson);
+        
+        // Try to extract text with formatting information
+        const textNodes = [];
+        const regex = /"type":"text","value":"([^"]*?)"(?:,"bold":true)?(?:,"italic":true)?/g;
+        let match;
+        
+        while ((match = regex.exec(decodedString)) !== null) {
+          const value = match[1]
+            .replace(/\\n/g, ' ')
+            .replace(/\\"/g, '"')
+            .replace(/\\/g, '')
+            .trim();
+          
+          if (value) {
+            let formattedValue = value;
+            
+            // Check if this node has bold formatting
+            if (match[0].includes('"bold":true')) {
+              formattedValue = `<strong>${value}</strong>`;
+            }
+            
+            // Check if this node has italic formatting
+            if (match[0].includes('"italic":true')) {
+              formattedValue = `<em>${value}</em>`;
+            }
+            
+            textNodes.push(formattedValue);
+          }
+        }
+        
+        if (textNodes.length > 0) {
+          const formattedText = textNodes.join(' ');
+          return formattedText;
+        }
+        
+        // Fallback to simple text extraction if formatting extraction fails
+        const valueMatches = decodedString.match(/"value":"([^"]*?)"/g);
+        if (valueMatches) {
+          const extractedText = valueMatches.map(match => {
+            const value = match.replace(/"value":"/, '').replace(/"$/, '');
+            return value
+              .replace(/\\n/g, ' ')
+              .replace(/\\"/g, '"')
+              .replace(/\\/g, '')
+              .trim();
+          }).filter(text => text.length > 0).join(' ');
+          
+          if (extractedText) {
+            return extractedText;
+          }
+        }
+      }
+    
+    return richTextJson || '';
+  } catch (error) {
+    return richTextJson || '';
+  }
+}
+
+// Add error handling for metafield data
+try {
+
+// Dynamic product data from Shopify with metafields - using JSON data from product template
+const compareProductsData = {
+  // Metafield-based labels for 90-degree left labels and golden labels
+  labels: {
+    // 90-degree left labels
+    specsLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.specsLabel)) || "Specs",
+    featuresLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.featuresLabel)) || "Features",
+    availableInLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.availableInLabel)) || "Available in",
+    fabricLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.fabricLabel)) || "Fabric",
+    techSpecsLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.techSpecsLabel)) || "Tech Specs",
+    overallDifferenceLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.overallDifferenceLabel)) || "Overall Difference",
+    
+    // Golden labels (under spec values)
+    capacityLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.capacityLabel)) || "Capacity",
+    dimensionsLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.dimensionsLabel)) || "Dimensions",
+    weightLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.weightLabel)) || "Weight",
+    priceLabel: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.priceLabel)) || "Price"
+  },
+  
+  currentProduct: {
+    id: window.productMetafieldsData?.currentVariant?.id || {{ current_variant.id | default: product.id }},
+    title: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.productTitle)) || "{{ product.title | escape | default: 'Product' }}",
+    image: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.variantImage)) || window.productMetafieldsData?.currentVariant?.image || "{{ current_variant.featured_image | img_url: '300x300' | default: product.featured_image | img_url: '300x300' | default: '' }}",
+    price: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.customPrice)) || "{{ current_variant.price | money | default: product.price | money }}",
+    url: "{{ product.url | default: '#' }}",
+    isCurrentProduct: true,
+    // Current variant data - using JSON data from product template with rich text parsing
+    capacity: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.capacity)) || "{{ current_variant.option1 | default: '20L' }}",
+    dimensions: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.dimensions)) || "19\" x 18\" x 4\"",
+    weight: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.weight)) || "2.5lbs",
+    fabric: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.fabric)) || "420D Cordura Polycarbonate Nylon",
+    features: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.features)) || "Water bottle pocket, Luggage pass through, Laptop compartment, Carry handle, Water proof, Zippers, Tech caddy",
+    techSpecs: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.techSpecs)) || "Silicon Face Coating: This coating provides extreme weather, strain abrasion resistance without changing the look and hand feel of the fabric. Coal PU Backside: This coating makes the fabric waterproof and also weldable which allows the seams of the bag to be bonded for additional weather resistance.",
+    overview: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.overview)) || "Premium quality bag designed for modern lifestyle.",
+    // Available colors/variants
+    colors: [
+      {% for variant in product.variants %}
+        {% if variant.option1 contains 'Color' or variant.option1 contains 'color' %}
+          "{{ variant.option1 }}",
+        {% endif %}
+      {% endfor %}
+    ]
+  },
+  
+  // Get size variants for comparison - using JSON data
+  sizeVariants: window.productMetafieldsData?.allVariants?.filter(variant => {
+    // Check if this variant has a different size than the current one
+    const currentVariant = window.productMetafieldsData?.currentVariant;
+    if (!currentVariant) return false;
+    
+    // Skip if this is the current variant
+    if (variant.id === currentVariant.id) {
+      return false;
+    }
+    
+    // For size comparison, we want variants with different size (option2) but same fabric (option1)
+    if (variant.option2 !== currentVariant.option2) {
+      return true;
+    }
+    
+    return false;
+  }).map(variant => ({
+    id: variant.id,
+    title: parseRichText(decodeHtmlEntities(variant.metafields?.productTitle)) || "{{ product.title | escape }} " + variant.option1,
+    image: parseRichText(decodeHtmlEntities(variant.metafields?.variantImage)) || variant.image || "{{ product.featured_image | img_url: '300x300' }}",
+    price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
+    url: "{{ product.url }}?variant=" + variant.id,
+    isCurrentProduct: variant.id == {{ current_variant.id | default: 'null' }},
+    variantTitle: variant.option1,
+    capacity: parseRichText(decodeHtmlEntities(variant.metafields?.capacity)) || variant.option1,
+    dimensions: parseRichText(decodeHtmlEntities(variant.metafields?.dimensions)) || "19\" x 18\" x 4\"",
+    weight: parseRichText(decodeHtmlEntities(variant.metafields?.weight)) || "2.5lbs",
+    fabric: parseRichText(decodeHtmlEntities(variant.metafields?.fabric)) || "420D Cordura Polycarbonate Nylon",
+    features: parseRichText(decodeHtmlEntities(variant.metafields?.features)) || "Water bottle pocket, Luggage pass through, Laptop compartment, Carry handle, Water proof, Zippers, Tech caddy",
+    techSpecs: parseRichText(decodeHtmlEntities(variant.metafields?.techSpecs)) || "Silicon Face Coating: This coating provides extreme weather, strain abrasion resistance without changing the look and hand feel of the fabric. Coal PU Backside: This coating makes the fabric waterproof and also weldable which allows the seams of the bag to be bonded for additional weather resistance.",
+    overview: parseRichText(decodeHtmlEntities(variant.metafields?.overview)) || "Premium quality bag designed for modern lifestyle.",
+    colors: [
+      {% for color_variant in product.variants %}
+        {% if color_variant.option1 contains 'Color' or color_variant.option1 contains 'color' %}
+          "{{ color_variant.option1 }}",
+        {% endif %}
+      {% endfor %}
+    ]
+  })) || [],
+  
+  // Get fabric variants for comparison - using JSON data
+  fabricVariants: window.productMetafieldsData?.allVariants?.filter(variant => {
+    // Check if this variant has a different fabric than the current one
+    const currentVariant = window.productMetafieldsData?.currentVariant;
+    if (!currentVariant) return false;
+    
+    // Skip if this is the current variant
+    if (variant.id === currentVariant.id) {
+      return false;
+    }
+    
+    // For fabric comparison, we want variants with different fabric (option1) but same size (option2)
+    // OR variants with same fabric (option1) but different size (option2) - for comprehensive comparison
+    if (variant.option1 !== currentVariant.option1) {
+      return true;
+    }
+    
+    return false;
+  }).map(variant => ({
+    id: variant.id,
+    title: parseRichText(decodeHtmlEntities(variant.metafields?.productTitle)) || "{{ product.title | escape }} " + variant.option2,
+    image: parseRichText(decodeHtmlEntities(variant.metafields?.variantImage)) || variant.image || "{{ product.featured_image | img_url: '300x300' }}",
+    price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
+    url: "{{ product.url }}?variant=" + variant.id,
+    isCurrentProduct: variant.id == {{ current_variant.id | default: 'null' }},
+    variantTitle: variant.option2,
+    capacity: parseRichText(decodeHtmlEntities(variant.metafields?.capacity)) || variant.option1,
+    dimensions: parseRichText(decodeHtmlEntities(variant.metafields?.dimensions)) || "19\" x 18\" x 4\"",
+    weight: parseRichText(decodeHtmlEntities(variant.metafields?.weight)) || "2.5lbs",
+    fabric: parseRichText(decodeHtmlEntities(variant.metafields?.fabric)) || variant.option2,
+    features: parseRichText(decodeHtmlEntities(variant.metafields?.features)) || "Water bottle pocket, Luggage pass through, Laptop compartment, Carry handle, Water proof, Zippers, Tech caddy",
+    techSpecs: parseRichText(decodeHtmlEntities(variant.metafields?.techSpecs)) || "Silicon Face Coating: This coating provides extreme weather, strain abrasion resistance without changing the look and hand feel of the fabric. Coal PU Backside: This coating makes the fabric waterproof and also weldable which allows the seams of the bag to be bonded for additional weather resistance.",
+    overview: parseRichText(decodeHtmlEntities(variant.metafields?.overview)) || "Premium quality bag designed for modern lifestyle.",
+    colors: [
+      {% for color_variant in product.variants %}
+        {% if color_variant.option1 contains 'Color' or color_variant.option1 contains 'color' %}
+          "{{ color_variant.option1 }}",
+        {% endif %}
+      {% endfor %}
+    ]
+  })) || []
+};
+
+
+
+
+
+
+// Function to determine which tabs to show based on available variants
+function determineAvailableTabs() {
+  const sizeVariants = compareProductsData.sizeVariants || [];
+  const fabricVariants = compareProductsData.fabricVariants || [];
+  
+  let defaultTab = 'size';
+  let showTabs = false;
+  let hasMultipleSizes = sizeVariants.length > 0;
+  let hasMultipleFabrics = fabricVariants.length > 0;
+  
+  // Determine which tabs to show based on available variants
+  if (hasMultipleSizes && hasMultipleFabrics) {
+    // Both size and fabric variants - show both tabs
+    showTabs = true;
+    defaultTab = 'size';
+  } else if (hasMultipleSizes && !hasMultipleFabrics) {
+    // Only size variants - show only size tab
+    showTabs = false;
+    defaultTab = 'size';
+  } else if (!hasMultipleSizes && hasMultipleFabrics) {
+    // Only fabric variants - show only fabric tab
+    showTabs = false;
+    defaultTab = 'fabric';
+  } else {
+    // No variants - show only size tab as default
+    showTabs = false;
+    defaultTab = 'size';
+  }
+  
+  return { showTabs, defaultTab, hasMultipleSizes, hasMultipleFabrics };
+}
+
+// Define the modal functions immediately
+window.openCompareBagsModalV2 = function() {
+  const modal = document.getElementById('compareBagsModalV2');
+  
+  if (!modal) {
+    return;
+  }
+  
+  const content = modal.querySelector('.compare-modal-content');
+  modal.style.display = 'flex';
+  
+  // Determine which tabs to show
+  const { showTabs, defaultTab, hasMultipleSizes, hasMultipleFabrics } = determineAvailableTabs();
+  
+  // Show/hide tabs based on available variants
+  const tabsContainer = document.getElementById('compareModalTabs');
+  const sizeTab = document.getElementById('compareTabSize');
+  const fabricTab = document.getElementById('compareTabFabric');
+  
+  if (tabsContainer && sizeTab && fabricTab) {
+    if (hasMultipleSizes && hasMultipleFabrics) {
+      // Both size and fabric variants - show both tabs
+      tabsContainer.style.display = 'flex';
+      sizeTab.style.display = 'block';
+      fabricTab.style.display = 'block';
+      // Make size tab active by default
+      sizeTab.classList.add('active');
+      fabricTab.classList.remove('active');
+    } else if (hasMultipleSizes && !hasMultipleFabrics) {
+      // Only size variants - show only size tab
+      tabsContainer.style.display = 'flex';
+      sizeTab.style.display = 'block';
+      fabricTab.style.display = 'none';
+      // Make size tab active
+      sizeTab.classList.add('active');
+      fabricTab.classList.remove('active');
+    } else if (!hasMultipleSizes && hasMultipleFabrics) {
+      // Only fabric variants - show only fabric tab
+      tabsContainer.style.display = 'flex';
+      sizeTab.style.display = 'none';
+      fabricTab.style.display = 'block';
+      // Make fabric tab active
+      fabricTab.classList.add('active');
+      sizeTab.classList.remove('active');
+    } else {
+      // No variants - show only size tab as default
+      tabsContainer.style.display = 'flex';
+      sizeTab.style.display = 'block';
+      fabricTab.style.display = 'none';
+      // Make size tab active
+      sizeTab.classList.add('active');
+      fabricTab.classList.remove('active');
+    }
+  }
+  
+  // Reset animation for mobile
+  if (window.innerWidth < 700 && content) {
+    content.style.animation = 'none';
+    void content.offsetWidth; // trigger reflow
+    content.style.animation = null;
+  }
+  
+  // Labels are now inside each category div, no need to update separately
+  
+  renderCompareBagsTable(defaultTab);
+  
+  // Equalize heights after modal opens
+  setTimeout(equalizeGridHeights, 200);
+  
+  document.body.style.overflow = 'hidden';
+  enableCompareModalScrollLock();
+};
+
+// Also make it available on document
+document.openCompareBagsModalV2 = window.openCompareBagsModalV2;
+
+window.closeCompareBagsModalV2 = function() {
+  const modal = document.getElementById('compareBagsModalV2');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  document.body.style.overflow = '';
+  disableCompareModalScrollLock();
+};
+
+// Also make it available on document
+document.closeCompareBagsModalV2 = window.closeCompareBagsModalV2;
+
+function switchCompareTab(tab) {
+  // Check if the tab exists and is visible
+  const tabButton = document.querySelector(`[data-tab="${tab}"]`);
+  if (!tabButton || tabButton.style.display === 'none') {
+    return;
+  }
+  
+  // Update tab active states
+  document.querySelectorAll('.compare-modal-tab').forEach(tabBtn => {
+    tabBtn.classList.remove('active');
+  });
+  tabButton.classList.add('active');
+  
+  // Labels are now inside each category div, no need to update separately
+  
+  renderCompareBagsTable(tab);
+}
+
+// Dynamic rendering function for variants
+function renderCompareBagsTable(tab) {
+  try {
+    const gridWrap = document.getElementById('compareBagsGridWrap');
+    if (!gridWrap) {
+      return;
+    }
+    
+    // Choose variants based on selected tab
+    let variants = [];
+    if (tab === 'size') {
+      variants = compareProductsData.sizeVariants || [];
+    } else if (tab === 'fabric') {
+      variants = compareProductsData.fabricVariants || [];
+    }
+    
+    // If no variants found, show only current product with a message
+    if (variants.length === 0) {
+      const products = [compareProductsData.currentProduct];
+      renderProducts(products, tab);
+      
+      // Show a message that no variants are available
+      if (gridWrap.children.length === 1) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'compare-modal-product';
+        messageDiv.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #666;">
+            <p>No ${tab === 'size' ? 'size' : 'fabric'} variants available for comparison.</p>
+            <p style="font-size: 12px; margin-top: 10px;">Please check back later or contact support.</p>
+          </div>
+        `;
+        gridWrap.appendChild(messageDiv);
+      }
+      return;
+    }
+    
+    // Combine current product with appropriate variants (limit to 2 total)
+    const products = [compareProductsData.currentProduct, ...variants].slice(0, 2);
+    
+    renderProducts(products, tab);
+  } catch (error) {
+    // Error handling
+  }
+}
+
+// Function to generate swatch options based on product variants
+function generateSwatchOptions(product, tab, cardPosition = 'left', selectedVariantId = null) {
+  // Get all variants for this product
+  const allVariants = window.productMetafieldsData?.allVariants || [];
+  const currentVariant = window.productMetafieldsData?.currentVariant;
+  
+  // Determine which variant should be marked as selected
+  // If selectedVariantId is provided, use that, otherwise use currentVariant
+  let selectedVariant = selectedVariantId ? 
+    allVariants.find(v => v.id == selectedVariantId) : currentVariant;
+  
+  if (!allVariants.length) {
+    // Fallback to static swatches if no variants
+    return `
+      <div class="compare-modal-available-in-item selected" data-card-position="${cardPosition}">
+        <div class="compare-modal-available-in-thumbnail">
+          <img src="${product.image}" alt="Carbonate">
+        </div>
+        <div class="compare-modal-available-in-material">Carbonate</div>
+      </div>
+      <div class="compare-modal-available-in-item" data-card-position="${cardPosition}">
+        <div class="compare-modal-available-in-thumbnail">
+          <img src="${product.image}" alt="Ballistic">
+        </div>
+        <div class="compare-modal-available-in-material">Ballistic</div>
+      </div>
+    `;
+  }
+  
+  // Get the base variant for this card position
+  let baseVariant = currentVariant;
+  if (cardPosition === 'right') {
+    // For right card, we need to find the appropriate variant based on the tab
+    if (tab === 'size') {
+      // Find a variant with different size but same fabric
+      const currentSize = currentVariant?.option2 || currentVariant?.option1;
+      const currentFabric = currentVariant?.option1 || currentVariant?.option2;
+      baseVariant = allVariants.find(variant => {
+        const variantSize = variant.option2 || variant.option1;
+        const variantFabric = variant.option1 || variant.option2;
+        return variantSize !== currentSize && variantFabric === currentFabric;
+      }) || allVariants.find(variant => variant.id !== currentVariant?.id);
+    } else if (tab === 'fabric') {
+      // Find a variant with different fabric but same size
+      const currentSize = currentVariant?.option2 || currentVariant?.option1;
+      const currentFabric = currentVariant?.option1 || currentVariant?.option2;
+      baseVariant = allVariants.find(variant => {
+        const variantSize = variant.option2 || variant.option1;
+        const variantFabric = variant.option1 || variant.option2;
+        return variantFabric !== currentFabric && variantSize === currentSize;
+      }) || allVariants.find(variant => variant.id !== currentVariant?.id);
+    }
+  }
+  
+  // For right card, update selectedVariant to use baseVariant if no specific variant is selected
+  if (cardPosition === 'right' && !selectedVariantId) {
+    selectedVariant = baseVariant;
+  }
+  
+  // Determine which variants to show based on tab and card position
+  let relevantVariants = [];
+  
+  if (tab === 'size') {
+    // For size tab, show fabric variants for the base variant's size
+    const baseSize = baseVariant?.option2 || baseVariant?.option1;
+    const baseFabric = baseVariant?.option1 || baseVariant?.option2;
+    
+    // Find variants with same size but different fabric
+    relevantVariants = allVariants.filter(variant => {
+      const variantSize = variant.option2 || variant.option1;
+      const variantFabric = variant.option1 || variant.option2;
+      return variantSize === baseSize && variantFabric !== baseFabric;
+    });
+    
+    // If no fabric variants found, show size variants
+    if (relevantVariants.length === 0) {
+      relevantVariants = allVariants.filter(variant => {
+        const variantSize = variant.option2 || variant.option1;
+        return variantSize !== baseSize;
+      });
+    }
+  } else if (tab === 'fabric') {
+    // For fabric tab, show size variants for the base variant's fabric
+    const baseSize = baseVariant?.option2 || baseVariant?.option1;
+    const baseFabric = baseVariant?.option1 || baseVariant?.option2;
+    
+    // Find variants with same fabric but different size
+    relevantVariants = allVariants.filter(variant => {
+      const variantSize = variant.option2 || variant.option1;
+      const variantFabric = variant.option1 || variant.option2;
+      return variantFabric === baseFabric && variantSize !== baseSize;
+    });
+    
+    // If no size variants found, show fabric variants
+    if (relevantVariants.length === 0) {
+      relevantVariants = allVariants.filter(variant => {
+        const variantFabric = variant.option1 || variant.option2;
+        return variantFabric !== baseFabric;
+      });
+    }
+  }
+  
+  // If still no relevant variants found, show all variants except base
+  if (relevantVariants.length === 0) {
+    relevantVariants = allVariants.filter(variant => variant.id !== baseVariant?.id).slice(0, 2);
+  }
+  
+  // Generate swatch HTML
+  let swatchHtml = '';
+  
+  // Add base variant as first swatch
+  if (baseVariant) {
+    let baseOption;
+    if (tab === 'size') {
+      // For size tab, show the fabric option (the other option)
+      baseOption = baseVariant.option1 === (baseVariant.option2 || baseVariant.option1) ? 
+                   baseVariant.option2 : baseVariant.option1;
+    } else {
+      // For fabric tab, show the size option (the other option)
+      baseOption = baseVariant.option2 === (baseVariant.option1 || baseVariant.option2) ? 
+                   baseVariant.option1 : baseVariant.option2;
+    }
+    
+    const isSelected = selectedVariant && selectedVariant.id == baseVariant.id;
+    
+    swatchHtml += `
+      <div class="compare-modal-available-in-item ${isSelected ? 'selected' : ''}" data-variant-id="${baseVariant.id}" data-option="${baseOption}" data-card-position="${cardPosition}">
+        <div class="compare-modal-available-in-thumbnail">
+          <img src="${baseVariant.image || product.image}" alt="${baseOption}">
+        </div>
+        <div class="compare-modal-available-in-material">${baseOption}</div>
+      </div>
+    `;
+  }
+  
+  // Add other variants
+  relevantVariants.forEach(variant => {
+    let option;
+    if (tab === 'size') {
+      // For size tab, show the fabric option (the other option)
+      option = variant.option1 === (variant.option2 || variant.option1) ? 
+               variant.option2 : variant.option1;
+    } else {
+      // For fabric tab, show the size option (the other option)
+      option = variant.option2 === (variant.option1 || variant.option2) ? 
+               variant.option1 : variant.option2;
+    }
+    
+    const isSelected = selectedVariant && selectedVariant.id == variant.id;
+    
+    swatchHtml += `
+      <div class="compare-modal-available-in-item ${isSelected ? 'selected' : ''}" data-variant-id="${variant.id}" data-option="${option}" data-card-position="${cardPosition}">
+        <div class="compare-modal-available-in-thumbnail">
+          <img src="${variant.image || product.image}" alt="${option}">
+        </div>
+        <div class="compare-modal-available-in-material">${option}</div>
+      </div>
+    `;
+  });
+  
+  return swatchHtml;
+}
+
+function renderProducts(products, tab) {
+  try {
+    const gridWrap = document.getElementById('compareBagsGridWrap');
+    if (!gridWrap) {
+      return;
+    }
+    
+    // Render products in grid layout
+    let html = '';
+    products.forEach((prod, index) => {
+      const cardPosition = index === 0 ? 'left' : 'right';
+      
+      if (tab === 'size') {
+        // Size tab content with structured specs in 2x2 grid (values with golden labels below)
+        const specsHtml = `
+          <div class="compare-modal-spec-item compare-modal-spec-item--capacity">
+            <span class="compare-modal-spec-value">${prod.capacity || '20L'}</span>
+            <span class="compare-modal-golden-label">${compareProductsData.labels.capacityLabel}</span>
+          </div>
+          <div class="compare-modal-spec-item compare-modal-spec-item--dimensions">
+            <span class="compare-modal-spec-value">${prod.dimensions || '19" x 18" x 4"'}</span>
+            <span class="compare-modal-golden-label">${compareProductsData.labels.dimensionsLabel}</span>
+          </div>
+          <div class="compare-modal-spec-item compare-modal-spec-item--weight">
+            <span class="compare-modal-spec-value">${prod.weight || '2.5lbs'}</span>
+            <span class="compare-modal-golden-label">${compareProductsData.labels.weightLabel}</span>
+          </div>
+          <div class="compare-modal-spec-item compare-modal-spec-item--price">
+            <span class="compare-modal-spec-value">${prod.price}</span>
+            <span class="compare-modal-golden-label">${compareProductsData.labels.priceLabel}</span>
+          </div>
+        `;
+        
+        // Generate features HTML with proper bullet points
+        const featuresList = prod.features ? 
+          prod.features.split(/[•\n]/).filter(feature => feature.trim()).map(feature => feature.trim()) : 
+          ['Water bottle pocket', 'Luggage pass through', 'Laptop compartment', 'Carry handle', 'Water proof', 'Zippers', 'Tech caddy'];
+        
+        const featuresHtml = `
+          <ul>
+            ${featuresList.map(feature => `<li>${feature}</li>`).join('')}
+          </ul>
+        `;
+        
+        // Generate Available in section HTML with dynamic swatches
+        const availableInHtml = `
+          <div class="compare-modal-available-in">
+            <div class="compare-modal-available-in-content" data-tab="${tab}">
+              ${generateSwatchOptions(prod, tab, cardPosition)}
+              <div class="compare-modal-available-in-price">${prod.price}</div>
+            </div>
+            <button type="button" class="compare-modal-button ${prod.isCurrentProduct ? 'primary' : 'secondary'}" data-variant-id="${prod.id}" data-card-position="${cardPosition}">
+              Add to Bag
+            </button>
+          </div>
+        `;
+        
+        html += `
+          <div class="compare-modal-product" data-card-position="${cardPosition}">
+            <div class="compare-modal-img-wrap">
+              <img class="compare-modal-img" src="${prod.image}" alt="${prod.title}">
+            </div>
+            
+            <h3 class="compare-modal-product-title">${prod.title}</h3>
+            <div class="compare-modal-specs">
+              ${prod.isCurrentProduct ? `<div class="compare-modal-category-label">${compareProductsData.labels.specsLabel}</div>` : ''}
+              ${specsHtml}
+            </div>
+            <div class="compare-modal-features">
+              ${prod.isCurrentProduct ? `<div class="compare-modal-category-label">${compareProductsData.labels.featuresLabel}</div>` : ''}
+              ${featuresHtml}
+            </div>
+            <div class="compare-modal-available-in-wrapper">
+              ${prod.isCurrentProduct ? `<div class="compare-modal-category-label">${compareProductsData.labels.availableInLabel}</div>` : ''}
+              ${availableInHtml}
+            </div>
+          </div>
+        `;
+      } else if (tab === 'fabric') {
+        // Fabric tab content with structured layout
+        const fabricHtml = prod.fabric || 'Fabric type not specified';
+        
+        // Generate Available in section HTML for fabric tab with dynamic swatches
+        const availableInHtml = `
+          <div class="compare-modal-available-in">
+            <div class="compare-modal-available-in-content" data-tab="${tab}">
+              ${generateSwatchOptions(prod, tab, cardPosition)}
+              <div class="compare-modal-available-in-price">${prod.price}</div>
+            </div>
+            <button type="button" class="compare-modal-button ${prod.isCurrentProduct ? 'primary' : 'secondary'}" data-variant-id="${prod.id}" data-card-position="${cardPosition}">
+              Add to Bag
+            </button>
+          </div>
+        `;
+        
+        html += `
+          <div class="compare-modal-product" data-card-position="${cardPosition}">
+            <div class="compare-modal-img-wrap">
+              <img class="compare-modal-img" src="${prod.image}" alt="${prod.title}">
+            </div>
+            
+            <div class="compare-modal-fabric">
+              ${prod.isCurrentProduct ? `<div class="compare-modal-category-label">${compareProductsData.labels.fabricLabel}</div>` : ''}
+              <strong>${fabricHtml}</strong>
+            </div>
+            <div class="compare-modal-tech-specs">
+              ${prod.isCurrentProduct ? `<div class="compare-modal-category-label">${compareProductsData.labels.techSpecsLabel}</div>` : ''}
+              ${prod.techSpecs ? `<p>${prod.techSpecs.replace(/\n/g, '</p><p>')}</p>` : '<p><strong>Silicon Face Coating:</strong> This coating provides extra weather, strain, abrasion resistance without changing the look and hand feel of the fabric.</p><p><strong>Coal PU Backside:</strong> This coating makes the fabric waterproof and also weldable which allows the seams of the bag to be bonded for additional weather resistance.</p>'}
+            </div>
+            <div class="compare-modal-overview">
+              ${prod.isCurrentProduct ? `<div class="compare-modal-category-label">${compareProductsData.labels.overallDifferenceLabel}</div>` : ''}
+              <p><strong>Overall Difference:</strong> ${prod.overview || 'Has a modern technical aesthetic with a smooth supple feel. Has slightly more structure than our ballistic version, without being stiff and rigid like many PU and TPU coated fabrics. It\'s the ideal choice for adventure enthusiast that want a hybrid option to transition between office and outdoors.'}</p>
+                 
+            </div>
+            <div class="compare-modal-available-in-wrapper">
+              ${prod.isCurrentProduct ? `<div class="compare-modal-category-label">${compareProductsData.labels.availableInLabel}</div>` : ''}
+              ${availableInHtml}
+            </div>
+          </div>
+        `;
+      }
+    });
+    
+    gridWrap.innerHTML = html;
+    
+    // Add swatch click event handlers
+    attachSwatchEventHandlers();
+    
+    // Add "Add to Bag" button click event handlers
+    attachAddToBagEventHandlers();
+    
+    // Equalize heights of matching sections across columns
+    setTimeout(equalizeGridHeights, 100);
+  } catch (error) {
+    // Error handling
+  }
+}
+
+// Function to attach swatch click event handlers
+function attachSwatchEventHandlers() {
+  const swatchItems = document.querySelectorAll('.compare-modal-available-in-item');
+  
+  swatchItems.forEach(item => {
+    item.addEventListener('click', function() {
+      const variantId = this.getAttribute('data-variant-id');
+      const option = this.getAttribute('data-option');
+      const cardPosition = this.getAttribute('data-card-position');
+      
+      if (!variantId) return;
+      
+      // Remove active class from all swatches in this group
+      const parentContent = this.closest('.compare-modal-available-in-content');
+      if (parentContent) {
+        parentContent.querySelectorAll('.compare-modal-available-in-item').forEach(swatch => {
+          swatch.classList.remove('selected');
+        });
+      }
+      
+      // Add active class to clicked swatch
+      this.classList.add('selected');
+      
+      // Update only the specific card with new variant
+      updateSpecificCardWithVariant(variantId, cardPosition);
+    });
+  });
+}
+
+// Function to attach "Add to Bag" button click event handlers
+function attachAddToBagEventHandlers() {
+  const addToBagButtons = document.querySelectorAll('.compare-modal-button[data-variant-id]');
+  
+  addToBagButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const variantId = this.getAttribute('data-variant-id');
+      const cardPosition = this.getAttribute('data-card-position');
+      
+      console.log('Add to Bag clicked - Variant ID:', variantId, 'Card Position:', cardPosition);
+      
+      if (!variantId) {
+        console.error('No variant ID found for Add to Bag button');
+        return;
+      }
+      
+      // Check if addItemToCart function exists (from product-template.liquid)
+      if (typeof addItemToCart === 'function') {
+        console.log('Using addItemToCart function with variant ID:', variantId);
+        // Show loading state
+        const originalText = this.textContent;
+        this.textContent = 'Adding...';
+        this.disabled = true;
+        
+        // Add item to cart
+        addItemToCart(variantId, 1, () => {
+          // Restore button state
+          this.textContent = originalText;
+          this.disabled = false;
+        });
+      } else {
+        console.log('addItemToCart function not found, using fallback redirect');
+        // Fallback: redirect to product page with variant
+        const variantData = window.productMetafieldsData?.allVariants?.find(v => v.id == variantId);
+        if (variantData) {
+          window.location.href = "{{ product.url }}?variant=" + variantId;
+        }
+      }
+    });
+  });
+}
+
+// Function to update only a specific card with selected variant
+function updateSpecificCardWithVariant(variantId, cardPosition) {
+  // Find the variant data
+  const variantData = window.productMetafieldsData?.allVariants?.find(v => v.id == variantId);
+  if (!variantData) {
+    return;
+  }
+  
+  // Find the specific card to update
+  const cardElement = document.querySelector(`.compare-modal-product[data-card-position="${cardPosition}"]`);
+  if (!cardElement) {
+    return;
+  }
+  
+  // Get the active tab
+  const activeTab = document.querySelector('.compare-modal-tab.active');
+  const tabName = activeTab ? activeTab.getAttribute('data-tab') : 'size';
+  
+  // Create product data for this variant
+  const productData = {
+    id: variantData.id,
+    title: parseRichText(decodeHtmlEntities(variantData.metafields?.productTitle)) || variantData.title,
+    image: parseRichText(decodeHtmlEntities(variantData.metafields?.variantImage)) || variantData.image,
+    price: parseRichText(decodeHtmlEntities(variantData.metafields?.customPrice)) || variantData.price,
+    url: "{{ product.url }}?variant=" + variantData.id,
+    isCurrentProduct: cardPosition === 'left', // Only left card is current product
+    capacity: parseRichText(decodeHtmlEntities(variantData.metafields?.capacity)) || variantData.option1,
+    dimensions: parseRichText(decodeHtmlEntities(variantData.metafields?.dimensions)) || "19\" x 18\" x 4\"",
+    weight: parseRichText(decodeHtmlEntities(variantData.metafields?.weight)) || "2.5lbs",
+    fabric: parseRichText(decodeHtmlEntities(variantData.metafields?.fabric)) || variantData.option2,
+    features: parseRichText(decodeHtmlEntities(variantData.metafields?.features)) || "Water bottle pocket, Luggage pass through, Laptop compartment, Carry handle, Water proof, Zippers, Tech caddy",
+    techSpecs: parseRichText(decodeHtmlEntities(variantData.metafields?.techSpecs)) || "Silicon Face Coating: This coating provides extreme weather, strain abrasion resistance without changing the look and hand feel of the fabric. Coal PU Backside: This coating makes the fabric waterproof and also weldable which allows the seams of the bag to be bonded for additional weather resistance.",
+    overview: parseRichText(decodeHtmlEntities(variantData.metafields?.overview)) || "Premium quality bag designed for modern lifestyle."
+  };
+  
+      // Update the card content based on the tab
+    if (tabName === 'size') {
+      // Update size tab content
+      const specsHtml = `
+        <div class="compare-modal-spec-item compare-modal-spec-item--capacity">
+          <span class="compare-modal-spec-value">${productData.capacity || '20L'}</span>
+          <span class="compare-modal-golden-label">${compareProductsData.labels.capacityLabel}</span>
+        </div>
+        <div class="compare-modal-spec-item compare-modal-spec-item--dimensions">
+          <span class="compare-modal-spec-value">${productData.dimensions || '19" x 18" x 4"'}</span>
+          <span class="compare-modal-golden-label">${compareProductsData.labels.dimensionsLabel}</span>
+        </div>
+        <div class="compare-modal-spec-item compare-modal-spec-item--weight">
+          <span class="compare-modal-spec-value">${productData.weight || '2.5lbs'}</span>
+          <span class="compare-modal-golden-label">${compareProductsData.labels.weightLabel}</span>
+        </div>
+        <div class="compare-modal-spec-item compare-modal-spec-item--price">
+          <span class="compare-modal-spec-value">${productData.price}</span>
+          <span class="compare-modal-golden-label">${compareProductsData.labels.priceLabel}</span>
+        </div>
+      `;
+      
+      // Generate features HTML with proper bullet points
+      const featuresList = productData.features ? 
+        productData.features.split(/[•\n]/).filter(feature => feature.trim()).map(feature => feature.trim()) : 
+        ['Water bottle pocket', 'Luggage pass through', 'Laptop compartment', 'Carry handle', 'Water proof', 'Zippers', 'Tech caddy'];
+      
+      const featuresHtml = `
+        <ul>
+          ${featuresList.map(feature => `<li>${feature}</li>`).join('')}
+        </ul>
+      `;
+      
+      // Generate Available in section HTML with dynamic swatches
+      const availableInHtml = `
+        <div class="compare-modal-available-in">
+          <div class="compare-modal-available-in-content" data-tab="${tabName}">
+            ${generateSwatchOptions(productData, tabName, cardPosition, variantId)}
+            <div class="compare-modal-available-in-price">${productData.price}</div>
+          </div>
+          <button type="button" class="compare-modal-button secondary" data-variant-id="${productData.id}" data-card-position="${cardPosition}">
+            Add to Bag
+          </button>
+        </div>
+      `;
+    
+    // Update the card content - preserve labels for left card
+    cardElement.innerHTML = `
+      <div class="compare-modal-img-wrap">
+        <img class="compare-modal-img" src="${productData.image}" alt="${productData.title}">
+      </div>
+      
+      <h3 class="compare-modal-product-title">${productData.title}</h3>
+      <div class="compare-modal-specs">
+        ${cardPosition === 'left' ? `<div class="compare-modal-category-label">${compareProductsData.labels.specsLabel}</div>` : ''}
+        ${specsHtml}
+      </div>
+      <div class="compare-modal-features">
+        ${cardPosition === 'left' ? `<div class="compare-modal-category-label">${compareProductsData.labels.featuresLabel}</div>` : ''}
+        ${featuresHtml}
+      </div>
+      <div class="compare-modal-available-in-wrapper">
+        ${cardPosition === 'left' ? `<div class="compare-modal-category-label">${compareProductsData.labels.availableInLabel}</div>` : ''}
+        ${availableInHtml}
+      </div>
+    `;
+    
+      } else if (tabName === 'fabric') {
+      // Update fabric tab content
+      const fabricHtml = productData.fabric || 'Fabric type not specified';
+      
+      // Generate Available in section HTML for fabric tab with dynamic swatches
+      const availableInHtml = `
+        <div class="compare-modal-available-in">
+          <div class="compare-modal-available-in-content" data-tab="${tabName}">
+            ${generateSwatchOptions(productData, tabName, cardPosition, variantId)}
+            <div class="compare-modal-available-in-price">${productData.price}</div>
+          </div>
+          <button type="button" class="compare-modal-button secondary" data-variant-id="${productData.id}" data-card-position="${cardPosition}">
+            Add to Bag
+          </button>
+        </div>
+      `;
+    
+    // Update the card content - preserve labels for left card
+    cardElement.innerHTML = `
+      <div class="compare-modal-img-wrap">
+        <img class="compare-modal-img" src="${productData.image}" alt="${productData.title}">
+      </div>
+      
+      <div class="compare-modal-fabric">
+        ${cardPosition === 'left' ? `<div class="compare-modal-category-label">${compareProductsData.labels.fabricLabel}</div>` : ''}
+        <strong>${fabricHtml}</strong>
+      </div>
+      <div class="compare-modal-tech-specs">
+        ${cardPosition === 'left' ? `<div class="compare-modal-category-label">${compareProductsData.labels.techSpecsLabel}</div>` : ''}
+        ${productData.techSpecs ? `<p>${productData.techSpecs.replace(/\n/g, '</p><p>')}</p>` : '<p><strong>Silicon Face Coating:</strong> This coating provides extra weather, strain, abrasion resistance without changing the look and hand feel of the fabric.</p><p><strong>Coal PU Backside:</strong> This coating makes the fabric waterproof and also weldable which allows the seams of the bag to be bonded for additional weather resistance.</p>'}
+      </div>
+      <div class="compare-modal-overview">
+        ${cardPosition === 'left' ? `<div class="compare-modal-category-label">${compareProductsData.labels.overallDifferenceLabel}</div>` : ''}
+        <p><strong>Overall Difference:</strong> ${productData.overview || 'Has a modern technical aesthetic with a smooth supple feel. Has slightly more structure than our ballistic version, without being stiff and rigid like many PU and TPU coated fabrics. It\'s the ideal choice for adventure enthusiast that want a hybrid option to transition between office and outdoors.'}</p>
+      </div>
+      <div class="compare-modal-available-in-wrapper">
+        ${cardPosition === 'left' ? `<div class="compare-modal-category-label">${compareProductsData.labels.availableInLabel}</div>` : ''}
+        ${availableInHtml}
+      </div>
+    `;
+  }
+  
+  // Re-attach event handlers for the updated swatches
+  const newSwatchItems = cardElement.querySelectorAll('.compare-modal-available-in-item');
+  newSwatchItems.forEach(item => {
+    item.addEventListener('click', function() {
+      const variantId = this.getAttribute('data-variant-id');
+      const option = this.getAttribute('data-option');
+      const cardPosition = this.getAttribute('data-card-position');
+      
+      if (!variantId) return;
+      
+      // Remove active class from all swatches in this group
+      const parentContent = this.closest('.compare-modal-available-in-content');
+      if (parentContent) {
+        parentContent.querySelectorAll('.compare-modal-available-in-item').forEach(swatch => {
+          swatch.classList.remove('selected');
+        });
+      }
+      
+      // Add active class to clicked swatch
+      this.classList.add('selected');
+      
+      // Update only the specific card with new variant
+      updateSpecificCardWithVariant(variantId, cardPosition);
+    });
+  });
+  
+  // Re-attach event handlers for the updated "Add to Bag" buttons
+  const newAddToBagButtons = cardElement.querySelectorAll('.compare-modal-button[data-variant-id]');
+  newAddToBagButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const variantId = this.getAttribute('data-variant-id');
+      const cardPosition = this.getAttribute('data-card-position');
+      
+      if (!variantId) return;
+      
+      // Check if addItemToCart function exists (from product-template.liquid)
+      if (typeof addItemToCart === 'function') {
+        // Show loading state
+        const originalText = this.textContent;
+        this.textContent = 'Adding...';
+        this.disabled = true;
+        
+        // Add item to cart
+        addItemToCart(variantId, 1, () => {
+          // Restore button state
+          this.textContent = originalText;
+          this.disabled = false;
+        });
+      } else {
+        // Fallback: redirect to product page with variant
+        const variantData = window.productMetafieldsData?.allVariants?.find(v => v.id == variantId);
+        if (variantData) {
+          window.location.href = "{{ product.url }}?variant=" + variantId;
+        }
+      }
+    });
+  });
+  
+  // Re-equalize heights after updating card content
+  setTimeout(equalizeGridHeights, 100);
+}
+
+// Function to equalize heights of matching sections across columns
+function equalizeGridHeights() {
+  try {
+    const leftCard = document.querySelector('.compare-modal-product[data-card-position="left"]');
+    const rightCard = document.querySelector('.compare-modal-product[data-card-position="right"]');
+    
+    if (!leftCard || !rightCard) return;
+    
+    // Sections to equalize
+    const sections = [
+      'compare-modal-fabric',
+      'compare-modal-tech-specs', 
+      'compare-modal-overview',
+      'compare-modal-available-in-wrapper'
+    ];
+    
+    sections.forEach(sectionClass => {
+      const leftSection = leftCard.querySelector(`.${sectionClass}`);
+      const rightSection = rightCard.querySelector(`.${sectionClass}`);
+      
+      if (leftSection && rightSection) {
+        // Reset heights to get natural heights
+        leftSection.style.height = '';
+        rightSection.style.height = '';
+        
+        // Get the maximum height
+        const leftHeight = leftSection.offsetHeight;
+        const rightHeight = rightSection.offsetHeight;
+        const maxHeight = Math.max(leftHeight, rightHeight);
+        
+        // Apply the maximum height to both sections
+        if (maxHeight > 0) {
+          leftSection.style.height = maxHeight + 'px';
+          rightSection.style.height = maxHeight + 'px';
+        }
+      }
+    });
+  } catch (error) {
+    console.log('Height equalization error:', error);
+  }
+}
+
+// Function to update modal content with selected variant (kept for backward compatibility)
+function updateModalWithVariant(variantId) {
+  // Find the variant data
+  const variantData = window.productMetafieldsData?.allVariants?.find(v => v.id == variantId);
+  if (!variantData) {
+    return;
+  }
+  
+  // Update current variant in the global data
+  window.productMetafieldsData.currentVariant = variantData;
+  
+  // Update the current product data
+  compareProductsData.currentProduct = {
+    ...compareProductsData.currentProduct,
+    id: variantData.id,
+    title: parseRichText(decodeHtmlEntities(variantData.metafields?.productTitle)) || variantData.title,
+    image: parseRichText(decodeHtmlEntities(variantData.metafields?.variantImage)) || variantData.image,
+    price: parseRichText(decodeHtmlEntities(variantData.metafields?.customPrice)) || variantData.price,
+    capacity: parseRichText(decodeHtmlEntities(variantData.metafields?.capacity)) || variantData.option1,
+    dimensions: parseRichText(decodeHtmlEntities(variantData.metafields?.dimensions)) || "19\" x 18\" x 4\"",
+    weight: parseRichText(decodeHtmlEntities(variantData.metafields?.weight)) || "2.5lbs",
+    fabric: parseRichText(decodeHtmlEntities(variantData.metafields?.fabric)) || variantData.option2,
+    features: parseRichText(decodeHtmlEntities(variantData.metafields?.features)) || "Water bottle pocket, Luggage pass through, Laptop compartment, Carry handle, Water proof, Zippers, Tech caddy",
+    techSpecs: parseRichText(decodeHtmlEntities(variantData.metafields?.techSpecs)) || "Silicon Face Coating: This coating provides extreme weather, strain abrasion resistance without changing the look and hand feel of the fabric. Coal PU Backside: This coating makes the fabric waterproof and also weldable which allows the seams of the bag to be bonded for additional weather resistance.",
+    overview: parseRichText(decodeHtmlEntities(variantData.metafields?.overview)) || "Premium quality bag designed for modern lifestyle.",
+    isCurrentProduct: true
+  };
+  
+  // Update labels with new variant's metafields
+  if (variantData.metafields) {
+    compareProductsData.labels = {
+      // 90-degree left labels
+      specsLabel: parseRichText(decodeHtmlEntities(variantData.metafields.specsLabel)) || "Specs",
+      featuresLabel: parseRichText(decodeHtmlEntities(variantData.metafields.featuresLabel)) || "Features",
+      availableInLabel: parseRichText(decodeHtmlEntities(variantData.metafields.availableInLabel)) || "Available in",
+      fabricLabel: parseRichText(decodeHtmlEntities(variantData.metafields.fabricLabel)) || "Fabric",
+      techSpecsLabel: parseRichText(decodeHtmlEntities(variantData.metafields.techSpecsLabel)) || "Tech Specs",
+      overallDifferenceLabel: parseRichText(decodeHtmlEntities(variantData.metafields.overallDifferenceLabel)) || "Overall Difference",
+      
+      // Golden labels (under spec values)
+      capacityLabel: parseRichText(decodeHtmlEntities(variantData.metafields.capacityLabel)) || "Capacity",
+      dimensionsLabel: parseRichText(decodeHtmlEntities(variantData.metafields.dimensionsLabel)) || "Dimensions",
+      weightLabel: parseRichText(decodeHtmlEntities(variantData.metafields.weightLabel)) || "Weight",
+      priceLabel: parseRichText(decodeHtmlEntities(variantData.metafields.priceLabel)) || "Price"
+    };
+  }
+  
+  // Re-render the modal with updated data
+  const activeTab = document.querySelector('.compare-modal-tab.active');
+  if (activeTab) {
+    const tabName = activeTab.getAttribute('data-tab');
+    renderCompareBagsTable(tabName);
+  }
+}
+
+// Removed renderProducts function - simplified to use direct rendering
+
+// Mobile scroll lock functionality
+let compareModalTouchLock = false;
+
+function preventBodyScroll(e) {
+  if (!compareModalTouchLock) return;
+  const modalContent = document.querySelector('.compare-modal-content');
+  if (!modalContent) return;
+  
+  if (!modalContent.contains(e.target)) {
+    e.preventDefault();
+    return;
+  }
+  
+  // Allow scroll inside modal content if scrollable
+  if (modalContent.scrollHeight > modalContent.clientHeight) {
+    return;
+  }
+  
+  // If not scrollable, prevent
+  e.preventDefault();
+}
+
+function enableCompareModalScrollLock() {
+  compareModalTouchLock = true;
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('touchmove', preventBodyScroll, { passive: false });
+  document.addEventListener('wheel', preventBodyScroll, { passive: false });
+}
+
+function disableCompareModalScrollLock() {
+  compareModalTouchLock = false;
+  document.body.style.overflow = '';
+  document.removeEventListener('touchmove', preventBodyScroll, { passive: false });
+  document.removeEventListener('wheel', preventBodyScroll, { passive: false });
+}
+
+// Simple initialization
+document.addEventListener('DOMContentLoaded', function() {
+  attachCompareButtonListeners();
+  attachModalEventListeners();
+  
+  // Add resize and orientation change listeners for height equalization
+  window.addEventListener('resize', function() {
+    if (document.getElementById('compareBagsModalV2')?.style.display === 'flex') {
+      setTimeout(equalizeGridHeights, 100);
+    }
+  });
+  
+  window.addEventListener('orientationchange', function() {
+    if (document.getElementById('compareBagsModalV2')?.style.display === 'flex') {
+      setTimeout(equalizeGridHeights, 300);
+    }
+  });
+});
+
+// Also try immediately if DOM is already loaded
+if (document.readyState !== 'loading') {
+  attachCompareButtonListeners();
+  attachModalEventListeners();
+  
+  // Add resize and orientation change listeners for height equalization
+  window.addEventListener('resize', function() {
+    if (document.getElementById('compareBagsModalV2')?.style.display === 'flex') {
+      setTimeout(equalizeGridHeights, 100);
+    }
+  });
+  
+  window.addEventListener('orientationchange', function() {
+    if (document.getElementById('compareBagsModalV2')?.style.display === 'flex') {
+      setTimeout(equalizeGridHeights, 300);
+    }
+  });
+}
+
+function attachCompareButtonListeners() {
+  // Check if modal exists
+  const modal = document.getElementById('compareBagsModalV2');
+  
+  // Attach to Compare Bags buttons - use multiple selectors for better coverage
+  const buttons = document.querySelectorAll('[data-compare-button="true"], #compareBtnMobile, #compareBtnDesktop, .comparedesktopbtn, .comparemobilebtn');
+  
+  buttons.forEach(btn => {
+    if (!btn) return; // Skip if button is null
+    
+    // Remove any existing listeners to prevent duplicates
+    btn.removeEventListener('click', handleCompareButtonClick);
+    
+    btn.addEventListener('click', handleCompareButtonClick);
+  });
+}
+
+function attachModalEventListeners() {
+  // Close modal button
+  const closeBtn = document.getElementById('compareModalClose');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      closeCompareBagsModalV2();
+    });
+  }
+  
+  // Tab switching
+  const tabs = document.querySelectorAll('.compare-modal-tab');
+  tabs.forEach(tab => {
+    if (!tab) return; // Skip if tab is null
+    
+    tab.addEventListener('click', function(e) {
+      e.preventDefault();
+      const tabName = this.getAttribute('data-tab');
+      if (tabName) {
+        switchCompareTab(tabName);
+      }
+    });
+  });
+  
+  // Close modal when clicking outside
+  const modal = document.getElementById('compareBagsModalV2');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeCompareBagsModalV2();
+      }
+    });
+  }
+  
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      const modal = document.getElementById('compareBagsModalV2');
+      if (modal && modal.style.display === 'flex') {
+        closeCompareBagsModalV2();
+      }
+    }
+  });
+}
+
+function handleCompareButtonClick(e) {
+  e.preventDefault();
+  if (typeof openCompareBagsModalV2 === 'function') {
+    openCompareBagsModalV2();
+  }
+}
+
+// Make switchCompareTab globally available
+window.switchCompareTab = switchCompareTab;
+document.switchCompareTab = switchCompareTab;
+
+// Function to update modal with current variant data
+window.updateCompareModalWithVariant = function(variantId) {
+  // Find the variant data from the global product data
+  const variantData = window.productMetafieldsData?.allVariants?.find(v => v.id == variantId);
+  
+  if (variantData) {
+    // Update current variant in the global data
+    window.productMetafieldsData.currentVariant = variantData;
+    
+    // Update current product data
+    compareProductsData.currentProduct = {
+      ...compareProductsData.currentProduct,
+      id: variantData.id,
+      title: parseRichText(decodeHtmlEntities(variantData.metafields?.productTitle)) || variantData.title,
+      image: parseRichText(decodeHtmlEntities(variantData.metafields?.variantImage)) || variantData.image,
+      price: parseRichText(decodeHtmlEntities(variantData.metafields?.customPrice)) || variantData.price,
+      capacity: parseRichText(decodeHtmlEntities(variantData.metafields?.capacity)) || variantData.option1,
+      dimensions: parseRichText(decodeHtmlEntities(variantData.metafields?.dimensions)) || "19\" x 18\" x 4\"",
+      weight: parseRichText(decodeHtmlEntities(variantData.metafields?.weight)) || "2.5lbs",
+      fabric: parseRichText(decodeHtmlEntities(variantData.metafields?.fabric)) || variantData.option2,
+      features: parseRichText(decodeHtmlEntities(variantData.metafields?.features)) || "Water bottle pocket, Luggage pass through, Laptop compartment, Carry handle, Water proof, Zippers, Tech caddy",
+      techSpecs: parseRichText(decodeHtmlEntities(variantData.metafields?.techSpecs)) || "Silicon Face Coating: This coating provides extreme weather, strain abrasion resistance without changing the look and hand feel of the fabric. Coal PU Backside: This coating makes the fabric waterproof and also weldable which allows the seams of the bag to be bonded for additional weather resistance.",
+      overview: parseRichText(decodeHtmlEntities(variantData.metafields?.overview)) || "Premium quality bag designed for modern lifestyle.",
+      isCurrentProduct: true
+    };
+    
+    // Update labels with new variant's metafields
+    if (variantData.metafields) {
+      compareProductsData.labels = {
+        // 90-degree left labels
+        specsLabel: parseRichText(decodeHtmlEntities(variantData.metafields.specsLabel)) || "Specs",
+        featuresLabel: parseRichText(decodeHtmlEntities(variantData.metafields.featuresLabel)) || "Features",
+        availableInLabel: parseRichText(decodeHtmlEntities(variantData.metafields.availableInLabel)) || "Available in",
+        fabricLabel: parseRichText(decodeHtmlEntities(variantData.metafields.fabricLabel)) || "Fabric",
+        techSpecsLabel: parseRichText(decodeHtmlEntities(variantData.metafields.techSpecsLabel)) || "Tech Specs",
+        overallDifferenceLabel: parseRichText(decodeHtmlEntities(variantData.metafields.overallDifferenceLabel)) || "Overall Difference",
+        
+        // Golden labels (under spec values)
+        capacityLabel: parseRichText(decodeHtmlEntities(variantData.metafields.capacityLabel)) || "Capacity",
+        dimensionsLabel: parseRichText(decodeHtmlEntities(variantData.metafields.dimensionsLabel)) || "Dimensions",
+        weightLabel: parseRichText(decodeHtmlEntities(variantData.metafields.weightLabel)) || "Weight",
+        priceLabel: parseRichText(decodeHtmlEntities(variantData.metafields.priceLabel)) || "Price"
+      };
+    }
+    
+    // If modal is open, update only the left card (current product card)
+    const modal = document.getElementById('compareBagsModalV2');
+    if (modal && modal.style.display === 'flex') {
+      // Update only the left card with the new variant data
+      updateSpecificCardWithVariant(variantId, 'left');
+    }
+  }
+};
+
+// Listen for variant changes
+document.addEventListener('DOMContentLoaded', function() {
+  // Listen for variant selector changes
+  const variantSelectors = document.querySelectorAll('select[name="id"], input[name="id"]');
+  variantSelectors.forEach(selector => {
+    selector.addEventListener('change', function() {
+      const variantId = this.value;
+      window.updateCompareModalWithVariant(variantId);
+    });
+  });
+  
+  // Listen for Shopify variant change events
+  if (typeof Shopify !== 'undefined' && Shopify.onVariantChange) {
+    Shopify.onVariantChange = function(variant) {
+      window.updateCompareModalWithVariant(variant.id);
+    };
+  }
+});
+
+} catch (error) {
+  // Ensure function is available even if there's an error
+  if (typeof window.openCompareBagsModalV2 === 'undefined') {
+    window.openCompareBagsModalV2 = function() {
+      alert('Modal is loading, please try again in a moment.');
+    };
+  }
+}
+</script> 

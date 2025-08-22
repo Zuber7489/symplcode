@@ -1,0 +1,330 @@
+<div class="r-side-cart">
+  <div class="r-side-cart-head">
+    <p class="caha">My Cart</p>
+    <a href="javascript:;" class="cart-icon"
+      ><img
+        loading="lazy"
+        src="//cdn.shopify.com/s/files/1/0418/4548/9815/t/4/assets/Button_Schlieien.svg?v=60560125308726855"
+    ></a>
+  </div>
+  {% if cart.item_count > 0 %}
+    <form class="Cart_Drawer__Content" action="{{ routes.cart_url }}" method="POST" novalidate>
+      <div class="min-cart-wrap">
+        {% for item in cart.items %}
+          <div class="r-prod-row" data-line="{{forloop.index}}">
+            <div class="r-img-outer">
+              {% if item.variant.compare_at_price > item.variant.price %}
+              {% endif %}
+              <a href="{{item.url}}"><img loading="lazy" src="{{ item | img_url: 'large' }}" class="img-fluid"></a>
+            </div>
+            <div class="r-prod-info">
+              <div class="r-prod-detail">
+                <p class="htite">{{ item.product.title }}</p>
+                {% unless item.variant.title contains 'Default' %}
+                  <p>{{ item.variant.title }}</p>
+                {% endunless %}
+                <p>
+                  <div class="pn-price-item" data-id="{{ item.key }}">{{ item.price | money }}</div>
+                </p>
+              </div>
+
+              <div class="r-prod-qty">
+                <button type="button" class="qty__adjust qty__adjust--minus" tabindex="0">-</button>
+                <input type="text" class="form-control" value="{{ item.quantity }}">
+                <button
+                  type="button"
+                  class="qty__adjust qty__adjust--plus"
+                  aria-label="Increase item quantity by one"
+                  tabindex="0"
+                >
+                  +
+                </button>
+              </div>
+
+              <div class="r-prod-price">
+                <span>
+                  <div class="pn-total-line-item" data-id="{{ item.key }}">{{ item.line_price | money }}</div>
+                </span>
+              </div>
+              <a href="javascript:;" class="remove-cart">x</a>
+            </div>
+            <div class="spinner"></div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="min-cart-footer">
+        <div class="total">
+          <span>Total:</span>
+          <span class="t-price "
+            ><span class="wh-original-price wh-original-cart-total">{{ cart.total_price | money }}</span>
+            <span class="wh-cart-total"></span
+          ></span>
+        </div>
+
+        <button type="submit" name="checkout" class="btn btn-black">Checkout</button>
+      </div>
+    </form>
+  {% else %}
+    <p style="text-align:center;">Cart is empty</p>
+  {% endif %}
+</div>
+
+<script>
+  //     main add to cart ajax
+  $(document).ready(function () {
+    function addItem(form_id) {
+      $.ajax({
+        type: "POST",
+        url: "/cart/add.js",
+        dataType: "json",
+        data: $("#" + form_id).serialize(),
+        success: Shopify.onSuccess,
+        error: Shopify.onError,
+      });
+    }
+    $("#AddToCart").click(function (e) {
+      e.preventDefault();
+
+      $(this).prop("disabled", true);
+      var id = $(this).parents("form").attr("id");
+      // console.log(id);
+      addItem(id);
+    });
+
+    $("#AddToCart2").click(function (e) {
+      e.preventDefault();
+
+      $(this).prop("disabled", true);
+      var id = $(this).parents("form").attr("id");
+      alert(id);
+      addItem(id);
+    });
+
+    $("#AddToCart1").click(function (e) {
+      e.preventDefault();
+      if (!$("#custom").val()) {
+        alert("Bitte Text einfügen");
+      } else {
+        $(this).prop("disabled", true);
+        var id = $(this).parents("form").attr("id");
+        // console.log(id);
+        addItem(id);
+      }
+    });
+    $(".add_to_cart_button").each(function () {
+      $(this).click(function (e) {
+        e.preventDefault();
+
+        var id = $(this).parents("form").attr("id");
+
+        addItem(id);
+      });
+    });
+    $(".m-radio").change(function () {
+      var id = $(this)
+        .parent(".c-radio")
+        .parent(".r-select-size")
+        .parents("form")
+        .attr("id");
+
+      addItem(id);
+    });
+
+    Shopify.onSuccess = function () {
+      var elem = $("#AddToCart");
+      elem.removeAttr("disabled");
+      var quantity = parseInt(jQuery('[name="quantity"]').val(), 10) || 1;
+      $.ajax({
+        type: "GET",
+        url: "/cart",
+        dataType: "html",
+        success: function (data) {
+          sucss(data);
+        },
+      });
+    };
+    Shopify.onError = function (XMLHttpRequest, textStatus) {
+      console.log("errorerror");
+      // Shopify returns a description of the error in XMLHttpRequest.responseText.
+      // It is JSON.
+      // Example: {"description":"The product 'Amelia - Small' is already sold out.","status":500,"message":"Cart Error"}
+      var data = eval("(" + XMLHttpRequest.responseText + ")");
+      if (!!data.message) {
+        alert(data.message + "(" + data.status + "): " + data.description);
+      } else {
+        alert("Error : " + Shopify.fullMessagesFromErrors(data).join("; ") + ".");
+      }
+
+      $(".addtocart").removeAttr("disabled");
+    };
+
+    Shopify.fullMessagesFromErrors = function (errors) {
+      var fullMessages = [];
+      jQuery.each(errors, function (attribute, messages) {
+        jQuery.each(messages, function (index, message) {
+          fullMessages.push(attribute + " " + message);
+        });
+      });
+      return fullMessages;
+    };
+  });
+
+  //     sucess functio of ajax add to cart
+  function sucss(data) {
+    var $list = $(data);
+    $list = $("<div>").append($list);
+    var cartcount = $list.find(".count").html();
+    console.log($list);
+    $(".count").html(cartcount);
+    console.log(cartcount);
+
+    $(".jjkao").hide();
+
+    $.ajax({
+      type: "GET",
+      url: "/cart",
+      dataType: "json",
+      success: function (dataa) {
+        console.log(dataa);
+        if (dataa.item_count == "1") {
+          if (dataa.items[0].variant_id == "39583139627196") {
+            $.ajax({
+              type: "POST",
+              url: "/cart/clear.js",
+              success: Shopify.onSuccess,
+              dataType: "json",
+            });
+          }
+        }
+
+        //                for(var i=0; i<dataa.items.length; i++) {
+        //                  console.log(dataa.items[i].variant_id);
+
+        //            if(dataa.items[i].variant_id=='40900530012319') {
+
+        //            	  var variant = dataa.items[i].variant_id;
+        //            }
+        //                }
+      },
+    });
+
+    if (cartcount == "0") {
+      $(".hcart").hide();
+    } else {
+      $(".hcart").show();
+    }
+    $(".hcart").html(cartcount);
+    $(".cart-btn").html(
+      "<span class='fa fa-shopping-bag'></span><span>" + cartcount + "</span>"
+    );
+    var abcc = $list.find(".r-side-cart").html();
+
+    $(".r-side-cart").html(abcc);
+    $("body").addClass("g-cart-open");
+    $(".r-side-cart").addClass("active");
+
+    $(".cart-icon").click(function () {
+      $(".r-side-cart").addClass("active");
+    });
+
+    $(".r-side-cart-head .cart-icon").click(function () {
+      $(".r-side-cart").removeClass("active");
+    });
+    $(".cart-link").click(function () {
+      $(".r-side-cart").addClass("active");
+      $("body").addClass("g-cart-open");
+    });
+    $(".r-prod-qty .qty__adjust").on("click", function () {
+      var $button = $(this);
+      var oldValue = $button.parent(".r-prod-qty").find("input").val();
+
+      if ($button.hasClass("qty__adjust--plus")) {
+        var newVal = parseFloat(oldValue) + 1;
+      } else {
+        // Don't allow decrementing below zero
+        if (oldValue > 1) {
+          var newVal = parseFloat(oldValue) - 1;
+        } else {
+          newVal = 1;
+        }
+      }
+
+      $button.parent().find("input").val(newVal);
+    });
+
+    $(".m-radio").change(function () {
+      var id = $(this)
+        .parent(".c-radio")
+        .parent(".r-select-size")
+        .parents("form")
+        .attr("id");
+
+      addItem(id);
+    });
+
+    $(".r-prod-qty .qty__adjust").on("click", function (e) {
+      e.preventDefault();
+      var qty = $(this).parent(".r-prod-qty").find("input").val();
+      var line = $(this).parents(".r-prod-row").attr("data-line");
+      $(this).parents(".r-prod-row").addClass("is-loading");
+
+      $.ajax({
+        type: "POST",
+        url: "/cart/change.js",
+        dataType: "json",
+        data: "quantity=" + qty + "&line=" + line,
+        success: Shopify.onSuccess,
+        error: Shopify.onError,
+      });
+    });
+    $(".remove-cart").on("click", function (e) {
+      e.preventDefault();
+
+      var line = $(this).parents(".r-prod-row").attr("data-line");
+      $(this).parents(".r-prod-row").addClass("is-loading");
+
+      $.ajax({
+        type: "POST",
+        url: "/cart/change.js",
+        dataType: "json",
+        data: "quantity=" + 0 + "&line=" + line,
+        success: Shopify.onSuccess,
+        error: Shopify.onError,
+      });
+    });
+  }
+
+  $(document).ready(function () {
+    $(".r-prod-qty .qty__adjust").on("click", function (e) {
+      e.preventDefault();
+      var qty = $(this).parent(".r-prod-qty").find("input").val();
+      var line = $(this).parents(".r-prod-row").attr("data-line");
+      $(this).parents(".r-prod-row").addClass("is-loading");
+
+      $.ajax({
+        type: "POST",
+        url: "/cart/change.js",
+        dataType: "json",
+        data: "quantity=" + qty + "&line=" + line,
+        success: Shopify.onSuccess,
+        error: Shopify.onError,
+      });
+    });
+
+    $(".remove-cart").on("click", function (e) {
+      e.preventDefault();
+
+      var line = $(this).parents(".r-prod-row").attr("data-line");
+      $(this).parents(".r-prod-row").addClass("is-loading");
+
+      $.ajax({
+        type: "POST",
+        url: "/cart/change.js",
+        dataType: "json",
+        data: "quantity=" + 0 + "&line=" + line,
+        success: Shopify.onSuccess,
+        error: Shopify.onError,
+      });
+    });
+  });
+</script>

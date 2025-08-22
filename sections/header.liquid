@@ -1,0 +1,1178 @@
+<!-- header section start -->
+<div class="top_bar">
+  <div class="container">
+    <div class="announcement-container">
+      <button class="announcement-arrow announcement-arrow-left" aria-label="Previous announcement" style="color: #000;">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="color: #000;">
+          <path d="M15 18L9 12L15 6" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      
+      <div class="announcement-slider">
+        <div class="announcement-slide active" data-index="0" data-color="{{ section.settings.bg_color_1 }}">
+          <p style="font-size:14px">{{ section.settings.tb_text_1 }}</p>
+        </div>
+        
+        <div class="announcement-slide" data-index="1" data-color="{{ section.settings.bg_color_2 }}">
+          <p style="font-size:14px">{{ section.settings.tb_text_2 }}</p>
+        </div>
+        
+        <div class="announcement-slide" data-index="2" data-color="{{ section.settings.bg_color_3 }}">
+          <p style="font-size:14px">{{ section.settings.tb_text_3 }}</p>
+        </div>
+      </div>
+      
+      <button class="announcement-arrow announcement-arrow-right" aria-label="Next announcement">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Global Neue Haas Display Font Declarations */
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('{{ "NeueHaasDisplayBlack.ttf" | asset_url }}') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('{{ "NeueHaasDisplayBold.ttf" | asset_url }}') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('{{ "NeueHaasDisplayMedium.ttf" | asset_url }}') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('{{ "NeueHaasDisplayRoman.ttf" | asset_url }}') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('{{ "NeueHaasDisplayLight.ttf" | asset_url }}') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'Neue Haas Display';
+    src: url('{{ "NeueHaasDisplayThin.ttf" | asset_url }}') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+  }
+
+  /* Global Font Application */
+  * {
+    font-family: 'Neue Haas Display', sans-serif !important;
+  }
+
+  body,
+  html,
+  h1, h2, h3, h4, h5, h6,
+  p, span, div, a, button, input, select, textarea,
+  .announcement-slide p,
+  .h_menu_ul li a,
+  .header_m_wrap ul li a {
+    font-family: 'Neue Haas Display', sans-serif !important;
+  }
+
+  .top_bar {
+    width: 100%;
+    position: relative;
+    transition: background-color 0.3s ease;
+    background-color: {{ section.settings.bg_color_1 }};
+    margin-bottom: 0; /* Remove any bottom margin */
+    border-bottom: none; /* Remove any border */
+  }
+  
+  .announcement-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    height: 15px;
+    width: 100%;
+  }
+  
+  .announcement-slider {
+    flex: 1;
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    max-width: 100%;
+    margin-bottom: -1px;
+  }
+  
+  .announcement-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+  }
+  
+  .announcement-slide.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 5;
+  }
+  
+  .announcement-slide p {
+    margin: 0;
+    text-align: center;
+    font-weight: 500;
+  }
+  
+  .announcement-arrow {
+    background: transparent;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    color: #333;
+    transition: opacity 0.2s ease;
+  }
+  
+  .announcement-arrow:hover {
+    opacity: 0.7;
+  }
+  
+  .announcement-arrow svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .announcement-arrow-left {
+    margin-right: 5px;
+  }
+  
+  .announcement-arrow-right {
+    margin-left: 5px;
+  }
+  
+  /* Text case styles - IMPORTANT: Override any existing text-transform */
+  .h_menu_ul li a,
+  .h_menu_ul li .m-js,
+  .header_m_wrap ul li a {
+    text-transform: capitalize !important; /* Default to capitalize */
+  }
+  
+  .text-uppercase {
+    text-transform: uppercase !important;
+  }
+  
+  .text-lowercase {
+    text-transform: lowercase !important;
+  }
+  
+  .text-capitalize {
+    text-transform: capitalize !important;
+  }
+  
+  /* Less bold subitems */
+  .header_m_wrap ul li a {
+    font-weight: 400 !important; /* Changed from bold to normal/medium */
+  }
+  
+  @media (max-width: 767px) {
+    .announcement-slide p {
+      font-size: 10px !important;
+      padding: 0 25px;
+    }
+    
+    .announcement-arrow {
+      padding: 8px;
+    }
+    
+    .announcement-arrow svg {
+      width: 12px;
+      height: 12px;
+    }
+  }
+  
+  /* Header elements black by default, but NOT inside .hero_banner or .full-width-header-left-text */
+  .top_bar, .header_wrap, .h_menu_ul li a, .cart_menu a, .cart_menu svg, .cart_menu img, .logo img {
+    color: #000 !important;
+    filter: invert(0) !important;
+  }
+  .hero_banner *, .full-width-header-left-text *, .hero_banner, .full-width-header-left-text {
+    color: #fff !important;
+    filter: none !important;
+  }
+</style>
+
+{% if template == 'index' %}
+  <style>
+    /* Logo and icons white on homepage */
+    .logo img,
+    .cart-i img,
+    .cart_menu ul li a img {
+      filter: brightness(0) invert(1) !important;
+    }
+    .search_box svg {
+      color: #fff !important;
+    }
+    .search_box svg path {
+      fill: currentColor !important;
+    }
+    .h_menu_ul li a {
+      color: #fff !important;
+    }
+    /* Cart count white on homepage */
+    #cart-count {
+      color: #fff !important;
+    }
+    @media (max-width: 767px) {
+      {% if section.settings.mobile_header_color == 'white' %}
+        .logo img,
+        .cart-i img,
+        .cart_menu ul li a img {
+          filter: brightness(0) invert(1) !important;
+        }
+        .search_box svg {
+          color: #fff !important;
+        }
+        .search_box svg path {
+          fill: #fff !important;
+          stroke: #fff !important;
+        }
+        .search_box a {
+          color: #fff !important;
+        }
+        .h_menu_ul li a {
+          color: #fff !important;
+        }
+        /* Mobile menu hamburger icon */
+        .header__nav-button span {
+          background: #fff !important;
+        }
+        /* Cart count */
+        #cart-count {
+          color: #fff !important;
+        }
+      {% else %}
+        .logo img,
+        .cart-i img,
+        .cart_menu ul li a img {
+          filter: brightness(0) invert(0) !important;
+        }
+        .search_box svg {
+          color: #000 !important;
+        }
+        .search_box svg path {
+          fill: #000 !important;
+          stroke: #000 !important;
+        }
+        .search_box a {
+          color: #000 !important;
+        }
+        .h_menu_ul li a {
+          color: #000 !important;
+        }
+        /* Mobile menu hamburger icon */
+        .header__nav-button span {
+          background: #000 !important;
+        }
+        /* Cart count */
+        #cart-count {
+          color: #000 !important;
+        }
+      {% endif %}
+    }
+  </style>
+{% else %}
+  <style>
+    /* Logo and icons black on other pages */
+    .logo img,
+    .cart-i img,
+    .ace {
+      filter: brightness(0) invert(0) !important;
+     
+    }
+    .search_box svg {
+      color: #000 !important;
+    }
+    .search_box svg path {
+      fill: currentColor !important;
+    }
+    .h_menu_ul li a {
+      color: #000 !important;
+    }
+    @media (max-width: 767px) {
+      .logo img,
+      .cart-i img,
+      .ace {
+        filter: brightness(0) invert(0) !important;
+      }
+      .search_box svg {
+        color: #000 !important;
+      }
+      .search_box svg path {
+        fill: currentColor !important;
+      }
+    }
+  </style>
+{% endif %}
+
+<style>
+  .announcement-slide p {
+    color: #000 !important;
+  }
+
+  /* Mobile category navigation styles */
+  @media (max-width: 767px) {
+    .h_menu_ul li a.m-js {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      /* padding: 20px 25px; /* Increased padding */ */
+      border-bottom: 1px solid #eee;
+      color: #000 !important;
+      font-size: 16px;
+      min-height: 60px; /* Ensure minimum height */
+      box-sizing: border-box;
+    }
+    
+    .h_menu_ul li a.m-js .d_arrow {
+      cursor: pointer;
+      padding: 8px; /* Increased padding for better touch target */
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+      margin-left: 15px; /* Add some space between text and arrow */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 30px; /* Ensure arrow has enough space */
+      min-height: 30px;
+    }
+    
+    .h_menu_ul li a.m-js .d_arrow svg {
+      width: 12px; /* Consistent arrow size */
+      height: 12px;
+      transition: transform 0.3s ease;
+    }
+    
+    /* Rotate arrow when dropdown is open */
+    .h_menu_ul li:has(.header_meagamenu.show) .d_arrow svg {
+      transform: rotate(180deg);
+    }
+    
+    .header_meagamenu {
+      display: none !important;
+      background: #f9f9f9;
+      border-top: 1px solid #eee;
+      margin-top: 0;
+      width: 100%;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .header_meagamenu.show {
+      display: block !important;
+    }
+    
+    .header_m_wrap ul {
+      padding: 15px 0; /* Increased padding */
+      margin: 0;
+      width: 100%;
+    }
+    
+    .header_m_wrap ul li {
+      border-bottom: 1px solid #ddd;
+      width: 100%;
+    }
+    
+    .header_m_wrap ul li:last-child {
+      border-bottom: none;
+    }
+    
+    .header_m_wrap ul li a {
+      padding: 15px 30px; /* Increased padding */
+      display: block;
+      font-size: 14px;
+      color: #666;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    
+    .header_m_wrap ul li a:hover {
+      background: #f0f0f0;
+      color: #000;
+    }
+  }
+</style>
+
+<style>
+  .header_wrap {
+    position: fixed;
+    top: 40px;
+    left: 0;
+    width: 100%;
+    z-index: 1002;
+    transition: transform 0.3s ease, background 0.3s, box-shadow 0.3s, top 0.3s;
+    margin-top: -1px; /* Remove any gap between announcement bar and header */
+  }
+  .header_wrap.header-hidden {
+    transform: translateY(-100%);
+  }
+  .header_wrap.sticky-bg {
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    top: 0;
+  }
+  .header_wrap.sticky-bg,
+  .header_wrap.sticky-bg * {
+    color: #111 !important;
+    fill: #111 !important;
+    filter: none !important;
+  }
+  .header_wrap.sticky-bg img,
+  .header_wrap.sticky-bg svg {
+    filter: none !important;
+  }
+  /* Cart count black when sticky */
+  .header_wrap.sticky-bg #cart-count {
+    color: #000 !important;
+  }
+  /* Override mobile header colors when sticky */
+  @media (max-width: 767px) {
+    .header_wrap.sticky-bg .logo img,
+    .header_wrap.sticky-bg .cart-i img,
+    .header_wrap.sticky-bg .cart_menu ul li a img {
+      filter: brightness(0) invert(0) !important;
+    }
+    .header_wrap.sticky-bg .search_box svg {
+      color: #000 !important;
+    }
+    .header_wrap.sticky-bg .search_box svg path {
+      fill: #000 !important;
+      stroke: #000 !important;
+    }
+    .header_wrap.sticky-bg .search_box a {
+      color: #000 !important;
+    }
+    .header_wrap.sticky-bg .h_menu_ul li a {
+      color: #000 !important;
+    }
+    .header_wrap.sticky-bg .header__nav-button span {
+      background: #000 !important;
+    }
+    .header_wrap.sticky-bg #cart-count {
+      color: #000 !important;
+    }
+  }
+  .header_wrap:hover,
+  .header_wrap:focus-within {
+    background: #fff !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .header_wrap:hover *,
+  .header_wrap:focus-within * {
+    color: #111 !important;
+    fill: #111 !important;
+    filter: none !important;
+  }
+  .header_wrap:hover img,
+  .header_wrap:hover svg,
+  .header_wrap:focus-within img,
+  .header_wrap:focus-within svg {
+    filter: none !important;
+  }
+  /* Cart count black on hover */
+  .header_wrap:hover #cart-count,
+  .header_wrap:focus-within #cart-count {
+    color: #000 !important;
+  }
+  /* Hamburger menu black on hover */
+  .header_wrap:hover .header__nav-button span,
+  .header_wrap:focus-within .header__nav-button span {
+    background: #000 !important;
+  }
+  .top_bar {
+    position: static;
+    width: 100%;
+    border-bottom: none; /* Ensure no border */
+  }
+  
+  /* Ensure no gap between announcement and header */
+  .header_wrap .container {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  @media (max-width: 767px) {
+    .header_wrap {
+      top: 40px;
+    }
+    .header_wrap.sticky-bg {
+      top: 0;
+    }
+    .top_bar {
+      position: static;
+    }
+  }
+</style>
+
+<header id="header" class="shrink2 scrolling_down">
+  <div class="header_wrap ">
+    <div class="container">
+      <div class="header_menu">
+        <div class="mobile_menu">
+          <a href="#menu" class="header__nav-button"><span></span><span></span><span></span></a>
+        </div>
+        <div class="logo">
+          <a href="/"><img loading="lazy" src="{{ 'logo.svg' | asset_url }}" class="img-fluid" alt=""></a>
+        </div>
+        <!--
+          <div class="h_menu">
+              <nav>
+                  <ul>
+                       {% for link in linklists.main-menu.links %}
+                    {%- comment %}<locksmith:af30>{% endcomment -%}
+                      {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: link, subject_parent: linklists.main-menu, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% else %}{% continue %}{% endif -%}
+                    {%- comment %}</locksmith:af30>{% endcomment -%}
+                    <li> <a href="{{link.url}}">{{link.title}} </a></li>
+                {% endfor %}
+                  </ul>
+              </nav>
+          </div>
+        -->
+
+        <div class="h_menu">
+          <ul class="h_menu_ul">
+            {% for block in section.blocks %}
+              {% if block.type == 'Megamenu' %}
+                {% if block.settings.enable %}
+                  <li>
+                    <a
+                      class="m-js text-capitalize"
+                      href="{% if block.settings.link != blank %}{{block.settings.link}}{% else %}javascript:;{% endif %}"
+                      style="color: #000;"
+                      data-category-link="{% if block.settings.link != blank %}{{block.settings.link}}{% else %}#{% endif %}"
+                      data-category-name="{{- block.settings.heading | downcase | replace: ' ', '-' -}}"
+                    >
+                      {{- block.settings.heading }}
+
+                      <span class="d_arrow">
+                        <svg
+                          version="1.1"
+                          id="Layer_1"
+                          xmlns="http://www.w3.org/2000/svg"
+                          xmlns:xlink="http://www.w3.org/1999/xlink"
+                          x="0px"
+                          y="0px"
+                          viewBox="0 0 11 6"
+                          xml:space="preserve"
+                          style="color: #000;"
+                        >
+                          <path class="st0" d="M5.4,4.4l4.5-4.2c0.2-0.3,0.7-0.3,0.9,0c0,0,0,0,0,0c0.3,0.3,0.3,0.7,0,1c0,0,0,0,0,0L5.9,5.8 C5.6,6.1,5.2,6.1,5,5.8L0.2,1.1c-0.3-0.3-0.3-0.7,0-0.9C0.4,0,0.8,0,1.1,0.2c0,0,0,0,0,0L5.4,4.4z" stroke="black" fill="black"></path>
+                        </svg>
+                      </span>
+                    </a>
+
+                    <div class="header_meagamenu">
+                      <div class="header_m_wrap">
+                        <ul>
+                          {% for i in (1..50) %}
+                            {% capture image %}image{{i}}{% endcapture %}
+                            {% capture link %}buttonlink{{i}}{% endcapture %}
+                            {% capture heading %}heading{{i}}{% endcapture %}
+
+                            {% if block.settings[image] != blank %}
+                              <li>
+                                <a href="{{block.settings[link]}}" class="text-capitalize" style="color: #000;">
+                                  <span>
+                                    <img
+                                      loading="lazy"
+                                      src="{{ block.settings[image]| img_url: 'master'}}"
+                                      class="img-fluid"
+                                      alt=""
+                                      style="filter: invert(0);"
+                                    >
+                                  </span>
+
+                                  {{ block.settings[heading] }}
+                                </a>
+                              </li>
+                            {% endif %}
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                  </li>
+                {% else %}
+                  <li>
+                    <a href="{{block.settings.link}}" class="text-capitalize" style="color: #000;">{{ block.settings.heading }}</a>
+                  </li>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="cart_menu">
+          <ul>
+            <li class="search_box">
+              <a href="javascript:;" style="color: #000;">
+                <svg
+                  version="1.1"
+                  xmlns="http://www.w3.org/2000/svg"
+                  x="0px"
+                  y="0px"
+                  width="24px"
+                  height="24px"
+                  viewBox="0 0 512 512"
+                  enable-background="new 0 0 512 512"
+                  xml:space="preserve"
+                >
+                  <path
+                    id="search-svg"
+                    d="M460.355,421.59L353.844,315.078c20.041-27.553,31.885-61.437,31.885-98.037
+                    C385.729,124.934,310.793,50,218.686,50C126.58,50,51.645,124.934,51.645,217.041c0,92.106,74.936,167.041,167.041,167.041
+                    c34.912,0,67.352-10.773,94.184-29.158L419.945,462L460.355,421.59z M100.631,217.041c0-65.096,52.959-118.056,118.055-118.056
+                    c65.098,0,118.057,52.959,118.057,118.056c0,65.096-52.959,118.056-118.057,118.056C153.59,335.097,100.631,282.137,100.631,217.041
+                    z"
+                    fill="currentColor"
+                    stroke="currentColor"
+                  ></path>
+                </svg>
+
+                <span>X</span>
+              </a>
+              <div class="serch_box_v">
+                <form action="">
+                  <input placeholder="Search">
+                </form>
+              </div>
+            </li>
+            <li>
+              <a href="/account"><img class="ace" src="{{'My_Account_Icon.svg' | asset_url}}"></a>
+            </li>
+            <li class="cart-i">
+              <a href="/cart">
+                <img src="{{'bag.svg' | asset_url}}">
+                <span class="count" id="cart-count" style="color: #000;">{{ cart.item_count }}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- <div class="header-space"></div> -->
+
+<!-- header section end -->
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Announcement bar functionality
+    const topBar = document.querySelector('.top_bar');
+    const slides = document.querySelectorAll('.announcement-slide');
+    const prevButton = document.querySelector('.announcement-arrow-left');
+    const nextButton = document.querySelector('.announcement-arrow-right');
+    let currentSlide = 0;
+    let autoRotateInterval;
+    
+    // Skip if no slides
+    if (slides.length <= 1) {
+      document.querySelectorAll('.announcement-arrow').forEach(arrow => {
+        arrow.style.display = 'none';
+      });
+    } else {
+      // Only set up slider if we have multiple slides
+      
+      function showSlide(index) {
+        // Hide all slides
+        slides.forEach(slide => {
+          slide.classList.remove('active');
+        });
+        
+        // Show selected slide
+        slides[index].classList.add('active');
+        
+        // Update top_bar background color
+        const bgColor = slides[index].getAttribute('data-color');
+        if (topBar && bgColor) {
+          topBar.style.backgroundColor = bgColor;
+        }
+      }
+      
+      function nextSlide() {
+        currentSlide = (currentSlide + 1) % slides.length;
+        showSlide(currentSlide);
+      }
+      
+      function prevSlide() {
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        showSlide(currentSlide);
+      }
+      
+      // Auto rotation (every 4 seconds)
+      function startAutoRotate() {
+        if (autoRotateInterval) {
+          clearInterval(autoRotateInterval);
+        }
+        autoRotateInterval = setInterval(nextSlide, 4000);
+      }
+      
+      // Event listeners for arrows
+      if (prevButton) {
+        prevButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          prevSlide();
+          startAutoRotate(); // Reset timer on manual navigation
+        });
+      }
+      
+      if (nextButton) {
+        nextButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          nextSlide();
+          startAutoRotate(); // Reset timer on manual navigation
+        });
+      }
+      
+      // Initialize first slide
+      showSlide(currentSlide);
+      
+      // Start auto-rotation
+      startAutoRotate();
+    }
+    
+    // Toggle case functionality (Ctrl+Shift+C shortcut)
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        const menuItems = document.querySelectorAll('.h_menu_ul li a, .h_menu_ul li .m-js, .header_m_wrap ul li a');
+        
+        menuItems.forEach(item => {
+          if (item.classList.contains('text-uppercase')) {
+            item.classList.remove('text-uppercase');
+            item.classList.add('text-lowercase');
+          } else if (item.classList.contains('text-lowercase')) {
+            item.classList.remove('text-lowercase');
+            item.classList.add('text-capitalize');
+          } else if (item.classList.contains('text-capitalize')) {
+            item.classList.remove('text-capitalize');
+            item.classList.add('text-uppercase');
+          } else {
+            // Default to adding uppercase if no class exists
+            item.classList.add('text-uppercase');
+          }
+        });
+      }
+    });
+
+    // Get header element
+    const header = document.getElementById('header');
+    
+    // Header hover effect
+    if (header) {
+      header.addEventListener('mouseenter', () => {
+        header.classList.add('header-relative');
+      });
+      
+      header.addEventListener('mouseleave', () => {
+        header.classList.remove('header-relative');
+      });
+    }
+
+    // Sticky header functionality for mobile
+    let lastScrollTop = 0;
+    const scrollThreshold = 10; // Lower threshold to trigger sooner
+    
+    function handleScroll() {
+      const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+      
+      // Check if we're on mobile
+      if (window.innerWidth <= 767 && header) {
+        if (currentScroll > scrollThreshold) {
+          // Scrolled down beyond threshold - add scrolling_down class
+          header.classList.add('scrolling_down');
+          // Force the background color with inline style for maximum specificity
+          header.style.backgroundColor = '#ffffff';
+          document.body.classList.add('has-sticky-header');
+        } else {
+          // At the top - remove scrolling classes
+          header.classList.remove('scrolling_down');
+          // Reset to transparent
+          header.style.backgroundColor = 'transparent';
+          document.body.classList.remove('has-sticky-header');
+        }
+      }
+      
+      lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+    }
+    
+    // Listen for scroll events
+    window.addEventListener('scroll', handleScroll, false);
+    
+    // Check on resize as well (in case of orientation change)
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 767 && header) {
+        // If we're not on mobile anymore, remove scrolling classes
+        header.classList.remove('scrolling_down');
+        header.style.backgroundColor = '';
+        document.body.classList.remove('has-sticky-header');
+      } else {
+        // If we're back on mobile, check scroll position
+        handleScroll();
+      }
+    });
+    
+    // Initial check
+    handleScroll();
+
+    // Simple mobile category navigation fix
+    document.querySelectorAll('.h_menu_ul li a.m-js').forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        if (window.innerWidth <= 767) {
+          const categoryLink = link.getAttribute('data-category-link');
+          const categoryNameSlug = link.getAttribute('data-category-name');
+          
+          // Check if click is on arrow
+          if (e.target.closest('.d_arrow')) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Toggle accordion/megamenu
+            const megamenu = link.parentElement.querySelector('.header_meagamenu');
+            const arrow = link.querySelector('.d_arrow svg');
+            
+            if (megamenu) {
+              if (megamenu.classList.contains('show')) {
+                megamenu.classList.remove('show');
+                if (arrow) arrow.style.transform = 'rotate(0deg)';
+              } else {
+                // Close all other open menus first
+                document.querySelectorAll('.header_meagamenu.show').forEach(function(m) {
+                  m.classList.remove('show');
+                  const otherArrow = m.parentElement.querySelector('.d_arrow svg');
+                  if (otherArrow) otherArrow.style.transform = 'rotate(0deg)';
+                });
+                
+                megamenu.classList.add('show');
+                if (arrow) arrow.style.transform = 'rotate(180deg)';
+              }
+            }
+          } else {
+            // Click on category name - navigate to collection
+            if (categoryLink && categoryLink !== '#') {
+              window.location.href = categoryLink;
+            } else {
+              // Fallback: construct collection URL from category name
+              const collectionUrl = '/collections/' + categoryNameSlug;
+              window.location.href = collectionUrl;
+            }
+          }
+        }
+      });
+    });
+
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+    const siteHeader = document.querySelector('.header_wrap');
+
+    function onScroll() {
+      if (!siteHeader) return;
+      if (window.scrollY <= 0) {
+        // Always show header at the very top, with gap for announcement bar
+        siteHeader.classList.remove('header-hidden', 'sticky-bg');
+        siteHeader.style.top = '40px';
+        return;
+      }
+      if (window.scrollY > lastScrollY && window.scrollY > 100) {
+        siteHeader.classList.add('header-hidden');
+        siteHeader.classList.remove('sticky-bg');
+        siteHeader.style.top = '0';
+      } else {
+        siteHeader.classList.remove('header-hidden');
+        siteHeader.classList.add('sticky-bg');
+        siteHeader.style.top = '0';
+      }
+      lastScrollY = window.scrollY;
+    }
+
+    // Always show header on load
+    if (siteHeader) {
+      siteHeader.classList.remove('header-hidden');
+      if (window.scrollY > 0) {
+        siteHeader.classList.add('sticky-bg');
+        siteHeader.style.top = '0';
+      } else {
+        siteHeader.classList.remove('sticky-bg');
+        siteHeader.style.top = '40px';
+      }
+    }
+
+    window.addEventListener('scroll', function() {
+      if (!ticking) {
+        window.requestAnimationFrame(function() {
+          onScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    // --- Cart Count Live Update ---
+    function updateCartCount() {
+      fetch('/cart.js')
+        .then(response => response.json())
+        .then(cart => {
+          var countSpan = document.getElementById('cart-count');
+          if (countSpan) {
+            countSpan.textContent = cart.item_count;
+          }
+        });
+    }
+
+    // Listen for custom cart:refresh event (trigger this after AJAX cart updates)
+    document.addEventListener('cart:refresh', updateCartCount);
+
+    // Optionally, update on page load (for partial reloads)
+    document.addEventListener('DOMContentLoaded', updateCartCount);
+  });
+</script>
+
+{% schema %}
+  {
+    "name": "Header",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Announcement Bar 1"
+      },
+      {
+        "type": "text",
+        "label": "Announcement Text 1",
+        "id": "tb_text_1",
+        "default": "Free Standard Shipping for U.S. Orders"
+      },
+      {
+        "type": "color",
+        "label": "Background Color 1",
+        "id": "bg_color_1",
+        "default": "#f5f5f5"
+      },
+      {
+        "type": "header",
+        "content": "Announcement Bar 2"
+      },
+      {
+        "type": "text",
+        "label": "Announcement Text 2",
+        "id": "tb_text_2",
+        "default": "30-Day Returns on All Orders"
+      },
+      {
+        "type": "color",
+        "label": "Background Color 2",
+        "id": "bg_color_2",
+        "default": "#e6f3ff"
+      },
+      {
+        "type": "header",
+        "content": "Announcement Bar 3"
+      },
+      {
+        "type": "text",
+        "label": "Announcement Text 3",
+        "id": "tb_text_3",
+        "default": "Sign Up for 10% Off Your First Order"
+      },
+      {
+        "type": "color",
+        "label": "Background Color 3",
+        "id": "bg_color_3",
+        "default": "#f0f0f0"
+      },
+      {
+        "type": "header",
+        "content": "Mobile Header Settings"
+      },
+      {
+        "type": "select",
+        "id": "mobile_header_color",
+        "label": "Mobile Header Color (Homepage Only)",
+        "default": "black",
+        "options": [
+          {
+            "value": "black",
+            "label": "Black (for light backgrounds)"
+          },
+          {
+            "value": "white",
+            "label": "White (for dark backgrounds)"
+          }
+        ]
+      }
+    ],
+    "blocks": [
+      {
+        "type": "Megamenu",
+        "name": "Megamenu",
+        "settings": [
+          {
+            "type": "textarea",
+            "id": "heading",
+            "label": "Link Heading"
+          },
+          {
+            "type": "url",
+            "id": "link",
+            "label": "Link Heading"
+          },
+          {
+            "type": "checkbox",
+            "id": "enable",
+            "label": "Enable Megamenu"
+          },
+          {
+            "type": "textarea",
+            "id": "heading1",
+            "label": "Heading 1"
+          },
+          {
+            "id": "image1",
+            "type": "image_picker",
+            "label": "Image 1"
+          },
+          {
+            "type": "url",
+            "id": "buttonlink1",
+            "label": "Button Link"
+          },
+          {
+            "type": "textarea",
+            "id": "heading2",
+            "label": "Heading 2"
+          },
+          {
+            "id": "image2",
+            "type": "image_picker",
+            "label": "Image 2"
+          },
+          {
+            "type": "url",
+            "id": "buttonlink2",
+            "label": "Button Link 2"
+          },
+          {
+            "type": "textarea",
+            "id": "heading3",
+            "label": "Heading 3"
+          },
+          {
+            "id": "image3",
+            "type": "image_picker",
+            "label": "Image 3"
+          },
+          {
+            "type": "url",
+            "id": "buttonlink3",
+            "label": "Button Link 3"
+          },
+          {
+            "type": "textarea",
+            "id": "heading4",
+            "label": "Heading 4"
+          },
+          {
+            "id": "image4",
+            "type": "image_picker",
+            "label": "Image 4"
+          },
+          {
+            "type": "url",
+            "id": "buttonlink4",
+            "label": "Button Link 4"
+          },
+          {
+            "type": "textarea",
+            "id": "heading5",
+            "label": "Heading 5"
+          },
+          {
+            "id": "image5",
+            "type": "image_picker",
+            "label": "Image 5"
+          },
+          {
+            "type": "url",
+            "id": "buttonlink5",
+            "label": "Button Link 5"
+          },
+          {
+            "type": "textarea",
+            "id": "heading6",
+            "label": "Heading 6"
+          },
+          {
+            "id": "image6",
+            "type": "image_picker",
+            "label": "Image 6"
+          },
+          {
+            "type": "url",
+            "id": "buttonlink6",
+            "label": "Button Link 6"
+          },
+          {
+            "type": "textarea",
+            "id": "heading7",
+            "label": "Heading 7"
+          },
+          {
+            "id": "image7",
+            "type": "image_picker",
+            "label": "Image 7"
+          },
+          {
+            "type": "url",
+            "id": "buttonlink7",
+            "label": "Button Link 7"
+          },
+          {
+            "type": "textarea",
+            "id": "heading8",
+            "label": "Heading 8"
+          },
+          {
+            "id": "image8",
+            "type": "image_picker",
+            "label": "Image 8"
+          },
+          {
+            "type": "url",
+            "id": "buttonlink8",
+            "label": "Button Link 8"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

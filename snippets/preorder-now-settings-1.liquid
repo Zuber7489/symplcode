@@ -1,0 +1,68 @@
+<script type="text/javascript">
+  {% if cart %}
+    window.pn.cart = {};
+  	window.pn.cart = {{cart | json}}
+    window.pn.cart.items = [];
+
+    {% for item in cart.items %}
+      var cart_item = {{item | json}};
+      cart_item["collection_ids"] = [];
+      {% for c in item.product.collections %}
+        cart_item["collection_ids"].push({{c.id}})
+        {% endfor %}
+      window.pn.cart.items.push(cart_item);
+    {% endfor %}
+
+    if (typeof window.pn.cart.items == "object") {
+      for (var i=0; i<window.pn.cart.items.length; i++) {
+        ["sku", "vendor", "url", "image", "handle", "product_type", "product_description"].map(function(a) {
+          delete window.pn.cart.items[i][a]
+        })
+      }
+    }
+  {% endif %}
+</script>
+
+{% raw %}
+<script>
+if(typeof pn === "undefined"){
+  pn = {};
+}
+if(typeof pn.settings === "undefined"){
+  pn.settings = {};
+}
+pn.settings.defaultSetting={"id":39361191,"a":"ADD TO CART","b":true,"c":null,"d":"Out of stock","e":false,"f":"Only {{qty}} remaining","g":"","h":"below","i":false,"j":"","k":null,"l":"2023-11-28T15:30:00.000Z","m":"default","n":null,"o":true,"handle":null,"p":null,"y":null,"q":false,"r":true,"s":null,"t":null,"u":1,"v":false,"w":"ribbon","tag":null,"x":null,"z":"no_discount","aa":"0.0","ab":0,"price":"0.0","compare_at_price":"0.0","partial_payment_z":"no_partial_discount","partial_payment_aa":"0.0","partial_payment_ab":0,"selling_plan_group_id":null,"selling_plan_group_name":null,"partial_payment_charge_date":null};
+pn.settings.singleProductSettings=[{"id":39361409,"a":"ADD TO CART","b":true,"c":195,"d":"Out of stock","e":false,"f":"Only {{qty}} remaining","g":"Ships Early January","h":"below","i":true,"j":"Pre-Order","k":"2023-09-06T17:55:00.000Z","l":"2024-01-08T18:55:00.000Z","m":"variant","n":"40414217306146","o":false,"handle":"travel-pack","p":"6996352466978","y":"https://cdn.shopify.com/s/files/1/0563/8802/6402/files/Travel.jpg?v=1699928434","q":true,"r":false,"s":239,"t":null,"u":1,"v":true,"w":"circle","tag":null,"x":"Pre-Order Item (Ships Early January)","z":"no_discount","aa":"0.0","ab":0,"price":"0.0","compare_at_price":"0.0","partial_payment_z":"no_partial_discount","partial_payment_aa":"0.0","partial_payment_ab":0,"selling_plan_group_id":"gid://shopify/SellingPlanGroup/316506146","selling_plan_group_name":"Pre-order","partial_payment_charge_date":"2023-09-13T07:00:00.000Z"},{"id":39361252,"a":"ADD TO CART","b":true,"c":146,"d":"Out of stock","e":false,"f":"Only {{qty}} remaining","g":"Ships End November","h":"below","i":false,"j":"Pre-Order","k":"2023-09-08T01:15:00.000Z","l":"2023-11-29T07:00:00.000Z","m":"variant","n":"41063499792418","o":false,"handle":"weekender-pack","p":"6939156545570","y":"https://cdn.shopify.com/s/files/1/0563/8802/6402/files/Weekender_2.jpg?v=1699928218","q":true,"r":false,"s":160,"t":null,"u":1,"v":true,"w":"circle","tag":null,"x":"Ships End November","z":"no_discount","aa":"0.0","ab":0,"price":"0.0","compare_at_price":"0.0","partial_payment_z":"no_partial_discount","partial_payment_aa":"0.0","partial_payment_ab":0,"selling_plan_group_id":"gid://shopify/SellingPlanGroup/316473378","selling_plan_group_name":"Pre-order","partial_payment_charge_date":"2023-09-13T07:00:00.000Z"},{"id":40356640,"a":"ADD TO CART","b":true,"c":294,"d":"Out of stock","e":false,"f":"Only {{qty}} remaining","g":"Ships End November","h":"below","i":false,"j":"Pre-Order","k":"2023-11-14T16:37:00.000Z","l":"2023-11-29T07:00:00.000Z","m":"variant","n":"41157686460450","o":false,"handle":"all-terrain-tote","p":"7227803959330","y":"https://cdn.shopify.com/s/files/1/0563/8802/6402/files/AllTerrainTote_0.jpg?v=1700417718","q":true,"r":false,"s":272,"t":null,"u":1,"v":false,"w":"circle","tag":null,"x":"Ships End November","z":"no_discount","aa":"0.0","ab":0,"price":"0.0","compare_at_price":"0.0","partial_payment_z":"no_partial_discount","partial_payment_aa":"0.0","partial_payment_ab":0,"selling_plan_group_id":"gid://shopify/SellingPlanGroup/366379042","selling_plan_group_name":"Pre-order","partial_payment_charge_date":"2023-11-22T08:00:00.000Z"},{"id":40430674,"a":"ADD TO CART","b":true,"c":null,"d":"Out of stock","e":false,"f":"Only {{qty}} remaining","g":"Ships Early January","h":"below","i":true,"j":"Pre-Order","k":"2023-11-19T03:04:00.000Z","l":null,"m":"variant","n":"41238931537954","o":false,"handle":"tech-kit","p":"7269561991202","y":"https://cdn.shopify.com/s/files/1/0563/8802/6402/files/TechKit-1a.jpg?v=1700521327","q":false,"r":false,"s":283,"t":null,"u":1,"v":false,"w":"circle","tag":null,"x":"Pre-Order Item (Ships Early January)","z":"no_discount","aa":"0.0","ab":0,"price":"0.0","compare_at_price":"0.0","partial_payment_z":"no_partial_discount","partial_payment_aa":"0.0","partial_payment_ab":0,"selling_plan_group_id":"gid://shopify/SellingPlanGroup/370933794","selling_plan_group_name":"Pre-order","partial_payment_charge_date":"2023-11-27T08:00:00.000Z"},{"id":40430669,"a":"ADD TO CART","b":true,"c":null,"d":"Out of stock","e":false,"f":"Only {{qty}} remaining","g":"Ships Early January","h":"below","i":true,"j":"Pre-Order","k":"2023-11-19T03:02:00.000Z","l":null,"m":"variant","n":"41212689678370","o":false,"handle":"phone-sling","p":"7258362216482","y":"https://cdn.shopify.com/s/files/1/0563/8802/6402/files/phonesling1b.jpg?v=1700520839","q":false,"r":false,"s":276,"t":null,"u":1,"v":false,"w":"circle","tag":null,"x":"Pre-Order Item (Ships Early January)","z":"no_discount","aa":"0.0","ab":0,"price":"0.0","compare_at_price":"0.0","partial_payment_z":"no_partial_discount","partial_payment_aa":"0.0","partial_payment_ab":0,"selling_plan_group_id":"gid://shopify/SellingPlanGroup/370868258","selling_plan_group_name":"Pre-order","partial_payment_charge_date":"2023-11-27T08:00:00.000Z"},{"id":40430679,"a":"ADD TO CART","b":true,"c":292,"d":"Out of stock","e":false,"f":"Only {{qty}} remaining","g":"Ships Early January","h":"below","i":true,"j":"Pre-Order","k":"2023-11-19T03:12:00.000Z","l":null,"m":"variant","n":"41213226909730","o":false,"handle":"motion-sling","p":"7258517635106","y":"https://cdn.shopify.com/s/files/1/0563/8802/6402/files/MotionSling-1c.jpg?v=1700520409","q":true,"r":false,"s":292,"t":null,"u":1,"v":false,"w":"circle","tag":null,"x":"Pre-Order Item (Ships Early January)","z":"no_discount","aa":"0.0","ab":0,"price":"0.0","compare_at_price":"0.0","partial_payment_z":"no_partial_discount","partial_payment_aa":"0.0","partial_payment_ab":0,"selling_plan_group_id":"gid://shopify/SellingPlanGroup/370966562","selling_plan_group_name":"Pre-order","partial_payment_charge_date":"2023-11-27T08:00:00.000Z"}];
+pn.settings.tagSettings=[];
+</script>
+<style type="text/css">
+  .pn-original-subtotal{
+    text-decoration: line-through;
+    display:inline-block;
+  }
+  .pn-discounted-subtotal{
+    font-weight:bold;
+    margin-left:20px;
+    display:inline-block;
+    font-size: 1.3em;
+  }
+
+  .pn-line-item-original-price {
+    text-decoration: line-through;
+  }
+
+  .pn-line-item-discounted-price {
+    font-size: 1.2em;
+    margin-left: 8px;
+  }
+</style>
+{% endraw %}
+
+
+<div id="pn-mixed-cart-warning" class="pn-modal">
+  <div id="pn-mixed-cart-warning-content">
+    <span id="pn-modal-close-btn">x</span>
+    <p class="pn-mixed-cart-heading" id="pn-mixed-cart-warning-title"></p>
+    <div id="pn-mixed-cart-warning-text"></div>
+  </div>
+</div>

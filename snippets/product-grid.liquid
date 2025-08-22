@@ -1,0 +1,49 @@
+<div class="item single-collection">
+  <div class="pr_wrap">
+    <div class="pr_imga product_slide_img">
+      <a href="{{ product.url | within: collection }}">
+        <img src="{{ product.featured_image.src | img_url: 'large' }}" alt="" width="100%">
+        <img src="{{ product.images[1] | img_url: 'large' }}" alt="" class="sec-img" width="100%">
+      </a>
+    </div>
+    <div class="pr_heading product_slide_text">
+      <h4>
+        <a href="{{ product.url | within: collection }}">{{ product.title }}</a>
+      </h4>
+      <!-- Start of Judge.me code -->
+      <div
+        style="{{ jm_style }}"
+        class="jdgm-widget jdgm-preview-badge"
+        data-id="{{ product.id }}"
+        data-auto-install="false"
+      >
+        {{ product.metafields.judgeme.badge }}
+      </div>
+      <!-- End of Judge.me code -->
+      <p class="price-element">
+        {{ product.selected_or_first_available_variant.price | money }}
+        {% if product.selected_or_first_available_variant.compare_at_price
+            > product.selected_or_first_available_variant.price
+        -%}
+          <s>{{ product.selected_or_first_available_variant.compare_at_price | money }}</s>
+        {%- endif %}
+      </p>
+    </div>
+
+    <div check222 class="collection-info">
+      <form action="/cart/add" method="post" enctype="multipart/form-data" id="AddToCartForm{{product.id }}">
+        {% if product.available %}
+          <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+          <a href="javascript:;" class="btn add_to_cart_button my_btn">ADD TO CART</a>
+
+        {% else %}
+          {% if product.handle == 'ipad-mini-case-6th-gen-2021' %}
+            <a href="javascript:;" class="btn add_to_cart_button" disabled>Coming Soon</a>
+          {% else %}
+            <a href="javascript:;" class="btn add_to_cart_button" disabled>SOLD OUT</a>
+          {% endif %}
+        {% endif %}
+      </form>
+    </div>
+  </div>
+</div>

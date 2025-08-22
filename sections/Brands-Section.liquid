@@ -1,0 +1,63 @@
+<section data-aos="fade-up"
+     data-aos-duration="3000">
+                <div class="earth_bg">
+                    <div class="container">
+                        <div class="main_heading_wrap">
+                            <h2>{{section.settings.heading}}</h2>
+                        </div>
+
+                        <div class="earth_wrap">
+                            <ul>
+                               {% for block in section.blocks %}
+                                <li>
+                                    <img loading="lazy" src="{{ block.settings.image | img_url: 'master'}}" class="img-fluid" alt="">
+                                </li>
+                               {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+{% schema %}
+{
+  "name": "Brands Section",
+ 
+  "blocks": [
+ 
+    {
+      "type": "text",
+      "name": "text",
+      "settings": [
+ 
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    } 
+ 
+         
+      ]
+    }
+  
+    
+     
+  ], 
+  "settings": [
+
+ 
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    }
+ 
+    
+  ],
+  "presets": [
+    {
+      "name": "Brands Section"
+    }
+  ]
+}
+{% endschema %}

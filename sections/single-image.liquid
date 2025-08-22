@@ -1,0 +1,49 @@
+ {% if section.settings.image != blank %}
+<section class="section_padding">
+   {% if section.settings.heading != blank %}
+         <div class="main_heading_wrap">
+                                <h3 style="color:black">{{section.settings.heading}}</h3>
+                            </div>
+  {% endif %}
+                <div class="single_product_bnner">
+                    <img src="{{ section.settings.image | img_url: 'master'}}" class="img-fluid {% if section.settings.image1 != blank %}desktop-only{% endif %}" alt="" />
+                   {% if section.settings.image1 != blank %} 
+                     <img src="{{ section.settings.image1 | img_url: 'master'}}" class="img-fluid mobile-only" alt="">
+                   {% endif %}
+                </div>
+            </section>
+{% endif %}
+
+
+{% schema %}
+{
+  "name": "Single Image Section",
+ 
+ 
+  "settings": [
+
+   {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+ {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image Desktop"
+    } ,
+ {
+      "type": "image_picker",
+      "id": "image1",
+      "label": "Image Mobile"
+    } 
+ 
+    
+  ],
+  "presets": [
+    {
+      "name": "Single Image Section"
+    }
+  ]
+}
+{% endschema %}

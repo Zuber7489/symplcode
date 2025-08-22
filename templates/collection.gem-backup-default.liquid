@@ -1,0 +1,2259 @@
+<!-- Fixed Collection Template with Thumbnails and Color Swatches -->
+
+<div class="collection-page">
+  <!-- Collection Header -->
+  <div class="collection-header">
+    <div class="containerednew">
+      <h1 class="collection-title">{{ collection.title | default: 'Shop all bags' }}</h1>
+      {% if collection.description != blank %}
+        <div class="collection-description">
+          {{ collection.description }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <div class="containerednew">
+       
+      <button class="filters-toggle mobile-only" onclick="toggleMobileFilters()">
+        <span>Filters</span>
+     
+      </button>
+
+      <!-- Desktop Filters -->
+      <div class="desktop-filters">
+        
+        <div class="facets">
+          
+          <form class="facets__form" id="FacetFiltersForm">
+      <button
+  style="
+    background: #000;
+    color: white;
+    border: none;
+    padding: 0.75rem 3.5rem;
+    border-radius: 25px;
+    margin-right:30px;
+  "
+>
+  <span>Filters</span>
+
+</button>
+
+            <!-- All Available Filters from Search & Discovery -->
+            {% for filter in collection.filters %}
+              <details class="facets__item" {% if filter.active_values.size > 0 %}open{% endif %}>
+                <summary class="facets__summary">
+                  <span>{{ filter.label }}</span>
+                  <svg class="arrow-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </summary>
+                <ul class="facets__list" role="list">
+                  {% case filter.type %}
+                    {% when 'boolean' %}
+                      <!-- Boolean filters (like Availability) -->
+                      {% for filter_value in filter.values %}
+                        <li class="facets__list-item">
+                          <label class="facets__item-label" for="Filter-{{ filter.param_name }}-{{ forloop.index }}">
+                            <input
+                              type="checkbox"
+                              name="{{ filter_value.param_name }}"
+                              value="{{ filter_value.value }}"
+                              id="Filter-{{ filter.param_name }}-{{ forloop.index }}"
+                              class="facets__checkbox"
+                              {% if filter_value.active %}checked{% endif %}
+                              {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}
+                            >
+                            <span>{{ filter_value.label }} ({{ filter_value.count }})</span>
+                          </label>
+                        </li>
+                      {% endfor %}
+                    
+                    {% when 'list' %}
+                      <!-- List filters (like Size, Color, Activity) -->
+                                              {% for filter_value in filter.values %}
+                          <li class="facets__list-item">
+                            <label class="facets__item-label" for="Filter-{{ filter.param_name }}-{{ forloop.index }}">
+                              <input
+                                type="checkbox"
+                                name="{{ filter_value.param_name }}"
+                                value="{{ filter_value.value }}"
+                                id="Filter-{{ filter.param_name }}-{{ forloop.index }}"
+                                class="facets__checkbox"
+                                {% if filter_value.active %}checked{% endif %}
+                                {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}
+                              >
+                              <!-- Special handling for fabric filters (previously color) -->
+                              {% if filter.label contains 'Color' or filter.label contains 'color' or filter.label contains 'Fabric' or filter.label contains 'fabric' or filter.label contains 'Material' or filter.label contains 'material' %}
+                                {% assign fabric_name = filter_value.label | downcase | replace: ' ', '' %}
+                                <span class="fabric-swatch fabric-{{ fabric_name }}"></span>
+                              {% endif %}
+                              
+                              <!-- Enhanced display labels for Features filter -->
+                              {% assign display_label = filter_value.label %}
+                              {% if filter.label contains 'Features' or filter.label contains 'features' or filter.label contains 'Feature' or filter.label contains 'Bag/Case features' %}
+                                {% assign lower_label = filter_value.label | downcase %}
+                                {% assign lower_value = filter_value.value | downcase %}
+                                
+                                {% if lower_label == 'other' or lower_value contains 'other' %}
+                                  {% if lower_value contains 'limited' %}
+                                    {% assign display_label = 'Limited Edition' %}
+                                  {% elsif lower_value contains 'waterproof' %}
+                                    {% assign display_label = 'Waterproof' %}
+                                  {% elsif lower_value contains 'tsa' %}
+                                    {% assign display_label = 'TSA Approved' %}
+                                  {% elsif lower_value contains 'dustproof' %}
+                                    {% assign display_label = 'Dustproof' %}
+                                  {% else %}
+                                    {% assign display_label = filter_value.label %}
+                                  {% endif %}
+                                {% endif %}
+                              {% endif %}
+                              
+                              <span>{{ display_label }} ({{ filter_value.count }})</span>
+                            </label>
+                          </li>
+                        {% endfor %}
+                    
+                    {% when 'price_range' %}
+                      <!-- Price range filter -->
+                      <li class="facets__list-item">
+                        <div class="facets__price-range">
+                          <div class="facets__price-inputs">
+                            <input
+                              type="number"
+                              name="{{ filter.min_value.param_name }}"
+                              id="Filter-{{ filter.label }}-GTE"
+                              {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                              placeholder="From"
+                              min="0"
+                              max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                              class="facets__price-input"
+                            >
+                            <span class="facets__price-separator">to</span>
+                            <input
+                              type="number"
+                              name="{{ filter.max_value.param_name }}"
+                              id="Filter-{{ filter.label }}-LTE"
+                              {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                              placeholder="To"
+                              min="0"
+                              max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                              class="facets__price-input"
+                            >
+                          </div>
+                        </div>
+                      </li>
+                  {% endcase %}
+                </ul>
+              </details>
+            {% endfor %}
+
+            <!-- Manual Tag-Based Filters (if no native filters available) -->
+            {% if collection.filters.size == 0 %}
+              <!-- Activity Filter -->
+              {% assign activity_tags = 'Travel,Business,Gym,School,Hiking' | split: ',' %}
+              <details class="facets__item">
+                <summary class="facets__summary">
+                  <span>Activity</span>
+                  <svg class="arrow-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </summary>
+                <ul class="facets__list" role="list">
+                  {% for activity in activity_tags %}
+                    {% assign tag_name = 'activity_' | append: activity | downcase %}
+                    {% assign is_active = false %}
+                    {% for current_tag in collection.current_tags %}
+                      {% if current_tag == tag_name %}
+                        {% assign is_active = true %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    <li class="facets__list-item">
+                      <label class="facets__item-label">
+                        <input 
+                          type="checkbox" 
+                          class="facets__checkbox tag-filter" 
+                          data-tag="{{ tag_name }}"
+                          {% if is_active %}checked{% endif %}
+                        >
+                        <span>{{ activity }}</span>
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </details>
+
+              <!-- Category Filter -->
+              {% assign category_tags = 'Backpack,Wallet,Handbag,Briefcase' | split: ',' %}
+              <details class="facets__item">
+                <summary class="facets__summary">
+                  <span>Category</span>
+                  <svg class="arrow-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </summary>
+                <ul class="facets__list" role="list">
+                  {% for category in category_tags %}
+                    {% assign tag_name = 'category_' | append: category | downcase %}
+                    {% assign is_active = false %}
+                    {% for current_tag in collection.current_tags %}
+                      {% if current_tag == tag_name %}
+                        {% assign is_active = true %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    <li class="facets__list-item">
+                      <label class="facets__item-label">
+                        <input 
+                          type="checkbox" 
+                          class="facets__checkbox tag-filter" 
+                          data-tag="{{ tag_name }}"
+                          {% if is_active %}checked{% endif %}
+                        >
+                        <span>{{ category }}</span>
+                      </label>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </details>
+            {% endif %}
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Mobile Filter Panel -->
+      <div class="mobile-filters" id="mobile-filters">
+        <div class="mobile-filters-header">
+          <h3>Filters</h3>
+          <button class="close-filters" onclick="toggleMobileFilters()">×</button>
+        </div>
+        <div class="mobile-filters-content">
+          <div class="facets facets--vertical">
+            <form class="facets__form" id="MobileFacetFiltersForm">
+              <!-- Same filters as desktop for mobile -->
+              {% for filter in collection.filters %}
+                <details class="facets__item" {% if filter.active_values.size > 0 %}open{% endif %}>
+                  <summary class="facets__summary">
+                    <span>{{ filter.label }}</span>
+                    <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </summary>
+                  <ul class="facets__list" role="list">
+                    {% case filter.type %}
+                      {% when 'boolean' %}
+                        {% for filter_value in filter.values %}
+                          <li class="facets__list-item">
+                            <label class="facets__item-label" for="MobileFilter-{{ filter.param_name }}-{{ forloop.index }}">
+                              <input
+                                type="checkbox"
+                                name="{{ filter_value.param_name }}"
+                                value="{{ filter_value.value }}"
+                                id="MobileFilter-{{ filter.param_name }}-{{ forloop.index }}"
+                                class="facets__checkbox"
+                                {% if filter_value.active %}checked{% endif %}
+                                {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}
+                              >
+                              <span>{{ filter_value.label }} ({{ filter_value.count }})</span>
+                            </label>
+                          </li>
+                        {% endfor %}
+                      {% when 'list' %}
+                        {% if filter.label contains 'Color' or filter.label contains 'color' or filter.label contains 'COLOUR' or filter.label contains 'Fabric' or filter.label contains 'fabric' or filter.label contains 'Material' or filter.label contains 'material' %}
+                          <!-- Special Fabric/Color Grid Layout -->
+                                                      <div class="mobile-fabric-grid">
+                              {% for filter_value in filter.values %}
+                                {% assign fabric_name = filter_value.label | downcase | replace: ' ', '' %}
+                                <div class="mobile-fabric-item">
+                                  <input
+                                    type="checkbox"
+                                    name="{{ filter_value.param_name }}"
+                                    value="{{ filter_value.value }}"
+                                    id="MobileFilter-{{ filter.param_name }}-{{ forloop.index }}"
+                                    class="facets__checkbox"
+                                    {% if filter_value.active %}checked{% endif %}
+                                    {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}
+                                    style="display: none;"
+                                  >
+                                  <label for="MobileFilter-{{ filter.param_name }}-{{ forloop.index }}" style="display: flex; align-items: center; width: 100%; cursor: pointer;">
+                                    <div class="mobile-fabric-swatch fabric-{{ fabric_name }}"></div>
+                                    <span class="mobile-fabric-text">{{ filter_value.label }}</span>
+                                  </label>
+                                </div>
+                              {% endfor %}
+                            </div>
+                        {% else %}
+                          <!-- Regular List Layout -->
+                          {% for filter_value in filter.values %}
+                            <li class="facets__list-item">
+                              <label class="facets__item-label" for="MobileFilter-{{ filter.param_name }}-{{ forloop.index }}">
+                                <input
+                                  type="checkbox"
+                                  name="{{ filter_value.param_name }}"
+                                  value="{{ filter_value.value }}"
+                                  id="MobileFilter-{{ filter.param_name }}-{{ forloop.index }}"
+                                  class="facets__checkbox"
+                                  {% if filter_value.active %}checked{% endif %}
+                                  {% if filter_value.count == 0 and filter_value.active == false %}disabled{% endif %}
+                                >
+                                <!-- Enhanced display labels for Features filter in mobile -->
+                                {% assign display_label = filter_value.label %}
+                                {% if filter.label contains 'Features' or filter.label contains 'features' or filter.label contains 'Feature' or filter.label contains 'Bag/Case features' %}
+                                  {% assign lower_label = filter_value.label | downcase %}
+                                  {% assign lower_value = filter_value.value | downcase %}
+                                  
+                                  {% if lower_label == 'other' or lower_value contains 'other' %}
+                                    {% if lower_value contains 'limited' %}
+                                      {% assign display_label = 'Limited Edition' %}
+                                    {% elsif lower_value contains 'waterproof' %}
+                                      {% assign display_label = 'Waterproof' %}
+                                    {% elsif lower_value contains 'tsa' %}
+                                      {% assign display_label = 'TSA Approved' %}
+                                    {% elsif lower_value contains 'dustproof' %}
+                                      {% assign display_label = 'Dustproof' %}
+                                    {% else %}
+                                      {% assign display_label = filter_value.label %}
+                                    {% endif %}
+                                  {% endif %}
+                                {% endif %}
+                                <span>{{ display_label }} ({{ filter_value.count }})</span>
+                              </label>
+                            </li>
+                          {% endfor %}
+                        {% endif %}
+                      {% when 'price_range' %}
+                        <li class="facets__list-item">
+                          <div class="facets__price-range">
+                            <div class="facets__price-inputs">
+                              <input
+                                type="number"
+                                name="{{ filter.min_value.param_name }}"
+                                id="MobileFilter-{{ filter.label }}-GTE"
+                                {% if filter.min_value.value %}value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                                placeholder="From"
+                                min="0"
+                                max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                                class="facets__price-input"
+                              >
+                              <span class="facets__price-separator">to</span>
+                              <input
+                                type="number"
+                                name="{{ filter.max_value.param_name }}"
+                                id="MobileFilter-{{ filter.label }}-LTE"
+                                {% if filter.max_value.value %}value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"{% endif %}
+                                placeholder="To"
+                                min="0"
+                                max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                                class="facets__price-input"
+                              >
+                            </div>
+                          </div>
+                        </li>
+                    {% endcase %}
+                  </ul>
+                </details>
+              {% endfor %}
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Category Navigation -->
+  <div class="mobile-category-nav">
+    <div class="containerednew">
+      <div class="category-nav-scroll">
+        <div class="category-nav-items">
+          {% assign current_collection_handle = collection.handle %}
+          {% assign category_collections = 'backpacks,slings,totes,accessories,wallets' | split: ',' %}
+          
+          <!-- Check if current collection is in our category list -->
+          {% assign is_category_collection = false %}
+          {% for category_handle in category_collections %}
+            {% if current_collection_handle == category_handle %}
+              {% assign is_category_collection = true %}
+              {% break %}
+            {% endif %}
+          {% endfor %}
+          
+          <!-- All Products - only active if NOT on a specific category collection -->
+          <a href="/collections/all" class="category-nav-item {% unless is_category_collection %}active{% endunless %}">
+            All
+          </a>
+          
+          <!-- Dynamic Categories based on collections -->
+          {% for category_handle in category_collections %}
+            {% assign category_collection = collections[category_handle] %}
+            {% if category_collection %}
+              <a href="{{ category_collection.url }}" 
+                 class="category-nav-item {% if current_collection_handle == category_handle %}active{% endif %}">
+                {{ category_collection.title }}
+              </a>
+            {% else %}
+              <!-- Fallback for collections that might not exist -->
+              <a href="/collections/{{ category_handle }}" 
+                 class="category-nav-item {% if current_collection_handle == category_handle %}active{% endif %}">
+                {{ category_handle | capitalize }}
+              </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Filter Chips -->
+  <div class="active-filters-section">
+    <div class="containerednew">
+      <div class="active-filters-wrapper">
+        {% assign active_filters_count = 0 %}
+        {% for filter in collection.filters %}
+          {% for filter_value in filter.active_values %}
+            {% assign active_filters_count = active_filters_count | plus: 1 %}
+          {% endfor %}
+        {% endfor %}
+
+        {% if active_filters_count > 0 %}
+          <div class="active-filters-chips">
+            {% for filter in collection.filters %}
+              {% for filter_value in filter.active_values %}
+                {% comment %}Enhanced display labels for Features filter chips{% endcomment %}
+                {% assign chip_display_label = filter_value.label %}
+                {% if filter.label contains 'Features' or filter.label contains 'features' or filter.label contains 'Feature' or filter.label contains 'Bag/Case features' %}
+                  {% assign lower_label = filter_value.label | downcase %}
+                  {% assign lower_value = filter_value.value | downcase %}
+                  
+                  {% if lower_label == 'other' or lower_value contains 'other' %}
+                    {% if lower_value contains 'limited' %}
+                      {% assign chip_display_label = 'Limited Edition' %}
+                    {% elsif lower_value contains 'waterproof' %}
+                      {% assign chip_display_label = 'Waterproof' %}
+                    {% elsif lower_value contains 'tsa' %}
+                      {% assign chip_display_label = 'TSA Approved' %}
+                    {% elsif lower_value contains 'dustproof' %}
+                      {% assign chip_display_label = 'Dustproof' %}
+                    {% else %}
+                      {% assign chip_display_label = filter_value.label %}
+                    {% endif %}
+                  {% endif %}
+                {% endif %}
+                
+                <div class="filter-chip">
+                  <span class="chip-label">{{ chip_display_label }}</span>
+                  <a href="{{ filter_value.url_to_remove }}" class="chip-close" title="Remove {{ chip_display_label }}">⊗</a>
+                </div>
+              {% endfor %}
+            {% endfor %}
+            
+            {% if active_filters_count > 1 %}
+              <a href="{{ collection.url }}" class="remove-all-btn">Remove All</a>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Section -->
+<div class="products-section">
+  <div class="containered">
+    <div class="products-grid">
+      {% for product in collection.products %}
+        {% assign has_size_variants = false %}
+        {% assign has_style_variants = false %}
+        {% assign size_option = false %}
+        {% assign style_option = false %}
+        
+        {% for option in product.options_with_values %}
+          {% assign option_name_lower = option.name | downcase %}
+          {% if option_name_lower == 'size' %}
+            {% assign size_option = option %}
+            {% assign has_size_variants = true %}
+          {% elsif option_name_lower == 'style' %}
+            {% assign style_option = option %}
+            {% assign has_style_variants = true %}
+          {% endif %}
+        {% endfor %}
+
+        {% if has_size_variants %}
+          {% for size_value in size_option.values %}
+            {% assign size_variant = product.variants | where: 'option1', size_value | first %}
+            {% unless size_variant %}
+              {% assign size_variant = product.variants | where: 'option2', size_value | first %}
+            {% endunless %}
+            {% unless size_variant %}
+              {% assign size_variant = product.variants | where: 'option3', size_value | first %}
+            {% endunless %}
+
+            {% if size_variant %}
+              <div class="product-card">
+                {% comment %}Find the first fabric variant for this size{% endcomment %}
+                {% assign first_fabric_variant = size_variant %}
+                {% for option in product.options_with_values %}
+                  {% assign option_name_lower = option.name | downcase %}
+                  {% if option_name_lower == 'color' or option_name_lower == 'colour' %}
+                    {% assign first_color = option.values.first %}
+                    {% for variant in product.variants %}
+                      {% if variant.option1 == size_value and variant.option2 == first_color %}
+                        {% assign first_fabric_variant = variant %}
+                        {% break %}
+                      {% elsif variant.option2 == size_value and variant.option1 == first_color %}
+                        {% assign first_fabric_variant = variant %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+                
+                <a href="{{ product.url }}?variant={{ first_fabric_variant.id }}" class="product-link">
+                  <!-- Product Image -->
+                  <div class="product-image-wrapper" 
+                       onmouseenter="showSecondImage('{{ product.id }}-{{ size_variant.id }}')" 
+                       onmouseleave="showFirstImage('{{ product.id }}-{{ size_variant.id }}')">
+                    {% if size_variant.featured_image %}
+                      <img 
+                        id="main-image-product-{{ product.id }}-{{ size_variant.id }}"
+                        src="{{ size_variant.featured_image | img_url: '2000x2000' }}" 
+                        alt="{{ size_variant.featured_image.alt | escape }}"
+                        class="product-image"
+                        loading="lazy"
+                        data-first-image="{{ size_variant.featured_image | img_url: '2000x2000' }}"
+                        {% if product.images[1] %}
+                        data-second-image="{{ product.images[1] | img_url: '2000x2000' }}"
+                        {% endif %}
+                      >
+                    {% elsif product.featured_image %}
+                      <img 
+                        id="main-image-product-{{ product.id }}-{{ size_variant.id }}"
+                        src="{{ product.featured_image | img_url: '2000x2000' }}" 
+                        alt="{{ product.featured_image.alt | escape }}"
+                        class="product-image"
+                        loading="lazy"
+                        data-first-image="{{ product.featured_image | img_url: '2000x2000' }}"
+                        {% if product.images[1] %}
+                        data-second-image="{{ product.images[1] | img_url: '2000x2000' }}"
+                        {% endif %}
+                      >
+                    {% else %}
+                      <div class="product-image-placeholder">
+                        <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+                          <rect width="100" height="100" fill="#f3f4f6"/>
+                          <text x="50" y="50" text-anchor="middle" dy=".3em" fill="#9ca3af">No Image</text>
+                        </svg>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <!-- Fabric/Color Swatches -->
+                  {% assign fabric_option = false %}
+                  {% assign color_option = false %}
+                  {% assign has_fabric_options = false %}
+                  {% assign has_color_options = false %}
+                  {% assign display_option = false %}
+                  
+                  {% comment %}First, look for dedicated Fabric option{% endcomment %}
+                  {% for option in product.options_with_values %}
+                    {% assign option_name_lower = option.name | downcase %}
+                    {% if option_name_lower == 'fabric' %}
+                      {% assign fabric_option = option %}
+                      {% assign has_fabric_options = true %}
+                      {% assign display_option = option %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% comment %}If no Fabric option found, look for Color option (backward compatibility){% endcomment %}
+                  {% unless has_fabric_options %}
+                    {% for option in product.options_with_values %}
+                      {% assign option_name_lower = option.name | downcase %}
+                      {% if option_name_lower == 'color' or option_name_lower == 'colour' %}
+                        {% assign fabric_option = option %}
+                        {% assign has_fabric_options = true %}
+                        {% assign display_option = option %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endunless %}
+                  {% if has_fabric_options %}
+                    <div class="fabric-swatches" style="display: flex; gap: 10px; margin-bottom: 0.5rem;">
+                      {% for value in display_option.values %}
+                        {% comment %}Find the variant with current size and this color{% endcomment %}
+                        {% assign current_size = size_value %}
+                        {% assign matched_variant = null %}
+                        
+                        {% for variant in product.variants %}
+                          {% if variant.option1 == current_size and variant.option2 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option2 == current_size and variant.option1 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option1 == current_size and variant.option3 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option3 == current_size and variant.option1 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option2 == current_size and variant.option3 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option3 == current_size and variant.option2 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% unless matched_variant %}
+                          {% assign matched_variant = product.variants | where: 'option1', value | first %}
+                          {% unless matched_variant %}
+                            {% assign matched_variant = product.variants | where: 'option2', value | first %}
+                          {% endunless %}
+                          {% unless matched_variant %}
+                            {% assign matched_variant = product.variants | where: 'option3', value | first %}
+                          {% endunless %}
+                        {% endunless %}
+                        
+                        <div 
+                          class="color-swatch-variant" 
+                          data-image="{% if matched_variant.featured_image %}{{ matched_variant.featured_image | img_url: '2000x2000' }}{% endif %}"
+                          data-product-id="{{ product.id }}-{{ size_variant.id }}"
+                          data-variant-index="{{ forloop.index0 }}"
+                          title="{{ value | capitalize }}"
+                          style="display:inline-block; cursor:pointer; text-align:center;"
+                          onclick="updateProductLink(this, '{{ product.url }}', '{{ matched_variant.id }}'); event.preventDefault(); event.stopPropagation();"
+                        >
+                          <div class="variant-thumbnail" style="width: 48px; height: 48px; overflow: hidden; box-sizing: border-box; background: #f6f6f6; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                            {% if matched_variant.featured_image %}
+                              <img src="{{ matched_variant.featured_image | img_url: '100x100', crop: 'center' }}" alt="{{ value }}" style="width: 100%; height: 100%; object-fit: contain;" />
+                            {% else %}
+                              <div style="width: 100%; height: 100%; background-color: #eee; display: flex; align-items: center; justify-content: center; color: #888; font-size: 10px; font-weight: bold;">{{ value | slice: 0, 2 | upcase }}</div>
+                            {% endif %}
+                          </div>
+                          <div class="variant-underline" style="width: 48px; height: 0.125rem; background: {% if forloop.first %}black{% else %}transparent{% endif %}; margin-top: 3px;"></div>
+                          <div class="variant-text" style="font-size: 14px; color: #b48a3a; font-weight: normal; letter-spacing: 0.5px; margin-top: 5px; white-space: nowrap; display: inline-block; margin-right: 17px;">{{ value | capitalize }}</div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+
+                  <!-- Product Info -->
+                  <div class="product-info">
+                    <h3 class="product-title">
+                      {% comment %}Try multiple metafield sources in hierarchy{% endcomment %}
+                      {% assign custom_title = first_fabric_variant.metafields.custom.product_title %}
+                      {% unless custom_title != blank %}
+                        {% assign custom_title = size_variant.metafields.custom.product_title %}
+                      {% endunless %}
+                      {% unless custom_title != blank %}
+                        {% assign custom_title = product.metafields.custom.product_title %}
+                      {% endunless %}
+                      
+                      {% if custom_title != blank %}
+                        {{ custom_title }}
+                      {% else %}
+                        {% assign base_title = product.title | split: ' ' %}
+                        {% assign display_title = '' %}
+                        {% for part in base_title %}
+                          {% unless part contains 'L' %}
+                            {% assign display_title = display_title | append: part | append: ' ' %}
+                          {% endunless %}
+                        {% endfor %}
+                        {{ display_title | strip }} {{ size_value }}
+                      {% endif %}
+                    </h3>
+                    <div class="product-price">
+                      {% if size_variant.compare_at_price > size_variant.price %}
+                        <span class="price-sale">{{ size_variant.price | money }}</span>
+                        <span class="price-compare">{{ size_variant.compare_at_price | money }}</span>
+                      {% else %}
+                        <span class="price-regular">{{ size_variant.price | money }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% elsif has_style_variants %}
+          {% for style_value in style_option.values %}
+            {% assign style_variant = product.variants | where: 'option1', style_value | first %}
+            {% unless style_variant %}
+              {% assign style_variant = product.variants | where: 'option2', style_value | first %}
+            {% endunless %}
+            {% unless style_variant %}
+              {% assign style_variant = product.variants | where: 'option3', style_value | first %}
+            {% endunless %}
+
+            {% if style_variant %}
+              <div class="product-card">
+                {% comment %}Find the first fabric variant for this style{% endcomment %}
+                {% assign first_fabric_variant = style_variant %}
+                {% for option in product.options_with_values %}
+                  {% assign option_name_lower = option.name | downcase %}
+                  {% if option_name_lower == 'color' or option_name_lower == 'colour' %}
+                    {% assign first_color = option.values.first %}
+                    {% for variant in product.variants %}
+                      {% if variant.option1 == style_value and variant.option2 == first_color %}
+                        {% assign first_fabric_variant = variant %}
+                        {% break %}
+                      {% elsif variant.option2 == style_value and variant.option1 == first_color %}
+                        {% assign first_fabric_variant = variant %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+                
+                <a href="{{ product.url }}?variant={{ first_fabric_variant.id }}" class="product-link">
+                  <!-- Product Image -->
+                  <div class="product-image-wrapper" 
+                       onmouseenter="showSecondImage('{{ product.id }}-{{ style_variant.id }}')" 
+                       onmouseleave="showFirstImage('{{ product.id }}-{{ style_variant.id }}')">
+                    {% if style_variant.featured_image %}
+                      <img 
+                        id="main-image-product-{{ product.id }}-{{ style_variant.id }}"
+                        src="{{ style_variant.featured_image | img_url: '2000x2000' }}" 
+                        alt="{{ style_variant.featured_image.alt | escape }}"
+                        class="product-image"
+                        loading="lazy"
+                        data-first-image="{{ style_variant.featured_image | img_url: '2000x2000' }}"
+                        {% if product.images[1] %}
+                        data-second-image="{{ product.images[1] | img_url: '2000x2000' }}"
+                        {% endif %}
+                      >
+                    {% elsif product.featured_image %}
+                      <img 
+                        id="main-image-product-{{ product.id }}-{{ style_variant.id }}"
+                        src="{{ product.featured_image | img_url: '2000x2000' }}" 
+                        alt="{{ product.featured_image.alt | escape }}"
+                        class="product-image"
+                        loading="lazy"
+                        data-first-image="{{ product.featured_image | img_url: '2000x2000' }}"
+                        {% if product.images[1] %}
+                        data-second-image="{{ product.images[1] | img_url: '2000x2000' }}"
+                        {% endif %}
+                      >
+                    {% else %}
+                      <div class="product-image-placeholder">
+                        <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+                          <rect width="100" height="100" fill="#f3f4f6"/>
+                          <text x="50" y="50" text-anchor="middle" dy=".3em" fill="#9ca3af">No Image</text>
+                        </svg>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <!-- Fabric/Color Swatches -->
+                  {% assign fabric_option = false %}
+                  {% assign color_option = false %}
+                  {% assign has_fabric_options = false %}
+                  {% assign has_color_options = false %}
+                  {% assign display_option = false %}
+                  
+                  {% comment %}First, look for dedicated Fabric option{% endcomment %}
+                  {% for option in product.options_with_values %}
+                    {% assign option_name_lower = option.name | downcase %}
+                    {% if option_name_lower == 'fabric' %}
+                      {% assign fabric_option = option %}
+                      {% assign has_fabric_options = true %}
+                      {% assign display_option = option %}
+                      {% break %}
+                    {% endif %}
+                  {% endfor %}
+                  
+                  {% comment %}If no Fabric option found, look for Color option (backward compatibility){% endcomment %}
+                  {% unless has_fabric_options %}
+                    {% for option in product.options_with_values %}
+                      {% assign option_name_lower = option.name | downcase %}
+                      {% if option_name_lower == 'color' or option_name_lower == 'colour' %}
+                        {% assign fabric_option = option %}
+                        {% assign has_fabric_options = true %}
+                        {% assign display_option = option %}
+                        {% break %}
+                      {% endif %}
+                    {% endfor %}
+                  {% endunless %}
+                  {% if has_fabric_options %}
+                    <div class="fabric-swatches" style="display: flex; gap: 10px; margin-bottom: 0.5rem;">
+                      {% for value in display_option.values %}
+                        {% comment %}Find the variant with current style and this color{% endcomment %}
+                        {% assign current_style = style_value %}
+                        {% assign matched_variant = null %}
+                        
+                        {% for variant in product.variants %}
+                          {% if variant.option1 == current_style and variant.option2 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option2 == current_style and variant.option1 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option1 == current_style and variant.option3 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option3 == current_style and variant.option1 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option2 == current_style and variant.option3 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% elsif variant.option3 == current_style and variant.option2 == value %}
+                            {% assign matched_variant = variant %}
+                            {% break %}
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% unless matched_variant %}
+                          {% assign matched_variant = product.variants | where: 'option1', value | first %}
+                          {% unless matched_variant %}
+                            {% assign matched_variant = product.variants | where: 'option2', value | first %}
+                          {% endunless %}
+                          {% unless matched_variant %}
+                            {% assign matched_variant = product.variants | where: 'option3', value | first %}
+                          {% endunless %}
+                        {% endunless %}
+                        
+                        <div 
+                          class="color-swatch-variant" 
+                          data-image="{% if matched_variant.featured_image %}{{ matched_variant.featured_image | img_url: '2000x2000' }}{% endif %}"
+                          data-product-id="{{ product.id }}-{{ style_variant.id }}"
+                          data-variant-index="{{ forloop.index0 }}"
+                          title="{{ value | capitalize }}"
+                          style="display:inline-block; cursor:pointer; text-align:center;"
+                          onclick="updateProductLink(this, '{{ product.url }}', '{{ matched_variant.id }}'); event.preventDefault(); event.stopPropagation();"
+                        >
+                          <div class="variant-thumbnail" style="width: 48px; height: 48px; overflow: hidden; box-sizing: border-box; background: #f6f6f6; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                            {% if matched_variant.featured_image %}
+                              <img src="{{ matched_variant.featured_image | img_url: '100x100', crop: 'center' }}" alt="{{ value }}" style="width: 100%; height: 100%; object-fit: contain;" />
+                            {% else %}
+                              <div style="width: 100%; height: 100%; background-color: #eee; display: flex; align-items: center; justify-content: center; color: #888; font-size: 10px; font-weight: bold;">{{ value | slice: 0, 2 | upcase }}</div>
+                            {% endif %}
+                          </div>
+                          <div class="variant-underline" style="width: 48px; height: 0.125rem; background: {% if forloop.first %}black{% else %}transparent{% endif %}; margin-top: 3px;"></div>
+                          <div class="variant-text" style="font-size: 14px; color: #b48a3a; font-weight: normal; letter-spacing: 0.5px; margin-top: 5px; white-space: nowrap; display: inline-block; margin-right: 17px;">{{ value | capitalize }}</div>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+
+                  <!-- Product Info -->
+                  <div class="product-info">
+                    <h3 class="product-title">
+                      {% comment %}Try multiple metafield sources in hierarchy{% endcomment %}
+                      {% assign custom_title = first_fabric_variant.metafields.custom.product_title %}
+                      {% unless custom_title != blank %}
+                        {% assign custom_title = style_variant.metafields.custom.product_title %}
+                      {% endunless %}
+                      {% unless custom_title != blank %}
+                        {% assign custom_title = product.metafields.custom.product_title %}
+                      {% endunless %}
+                      
+                      {% if custom_title != blank %}
+                        {{ custom_title }}
+                      {% else %}
+                        {% assign base_title = product.title | split: ' ' %}
+                        {% assign display_title = '' %}
+                        {% for part in base_title %}
+                          {% unless part contains 'L' %}
+                            {% assign display_title = display_title | append: part | append: ' ' %}
+                          {% endunless %}
+                        {% endfor %}
+                        {{ display_title | strip }} {{ style_value }}
+                      {% endif %}
+                    </h3>
+                    <div class="product-price">
+                      {% if style_variant.compare_at_price > style_variant.price %}
+                        <span class="price-sale">{{ style_variant.price | money }}</span>
+                        <span class="price-compare">{{ style_variant.compare_at_price | money }}</span>
+                      {% else %}
+                        <span class="price-regular">{{ style_variant.price | money }}</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <!-- Regular product card without size variants -->
+          <div class="product-card">
+            <a href="{{ product.url }}" class="product-link">
+              <!-- Product Image -->
+              <div class="product-image-wrapper" 
+                   onmouseenter="showSecondImage('{{ product.id }}')" 
+                   onmouseleave="showFirstImage('{{ product.id }}')">
+                {% if product.featured_image %}
+                  <img 
+                    id="main-image-product-{{ product.id }}"
+                    src="{{ product.featured_image | img_url: '2000x2000' }}" 
+                    alt="{{ product.featured_image.alt | escape }}"
+                    class="product-image"
+                    loading="lazy"
+                    data-first-image="{{ product.featured_image | img_url: '2000x2000' }}"
+                    {% if product.images[1] %}
+                    data-second-image="{{ product.images[1] | img_url: '2000x2000' }}"
+                    {% endif %}
+                  >
+                {% else %}
+                  <div class="product-image-placeholder">
+                    <svg width="100" height="100" viewBox="0 0 100 100" fill="none">
+                      <rect width="100" height="100" fill="#f3f4f6"/>
+                      <text x="50" y="50" text-anchor="middle" dy=".3em" fill="#9ca3af">No Image</text>
+                    </svg>
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- Fabric/Color Swatches -->
+              {% assign fabric_option = false %}
+              {% assign color_option = false %}
+              {% assign has_fabric_options = false %}
+              {% assign has_color_options = false %}
+              {% assign display_option = false %}
+              
+              {% comment %}First, look for dedicated Fabric option{% endcomment %}
+              {% for option in product.options_with_values %}
+                {% assign option_name_lower = option.name | downcase %}
+                {% if option_name_lower == 'fabric' %}
+                  {% assign fabric_option = option %}
+                  {% assign has_fabric_options = true %}
+                  {% assign display_option = option %}
+                  {% break %}
+                {% endif %}
+              {% endfor %}
+              
+              {% comment %}If no Fabric option found, look for Color option (backward compatibility){% endcomment %}
+              {% unless has_fabric_options %}
+                {% for option in product.options_with_values %}
+                  {% assign option_name_lower = option.name | downcase %}
+                  {% if option_name_lower == 'color' or option_name_lower == 'colour' %}
+                    {% assign fabric_option = option %}
+                    {% assign has_fabric_options = true %}
+                    {% assign display_option = option %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+              {% endunless %}
+              {% if has_fabric_options %}
+                <div class="fabric-swatches" style="display: flex; gap: 10px; margin-bottom: 0.5rem;">
+                  {% for value in display_option.values %}
+                    {% comment %}Find the variant with this color{% endcomment %}
+                    {% assign matched_variant = product.variants | where: 'option1', value | first %}
+                    {% unless matched_variant %}
+                      {% assign matched_variant = product.variants | where: 'option2', value | first %}
+                    {% endunless %}
+                    {% unless matched_variant %}
+                      {% assign matched_variant = product.variants | where: 'option3', value | first %}
+                    {% endunless %}
+                    
+                    <div 
+                      class="color-swatch-variant" 
+                      data-image="{% if matched_variant.featured_image %}{{ matched_variant.featured_image | img_url: '2000x2000' }}{% endif %}"
+                      data-product-id="{{ product.id }}"
+                      data-variant-index="{{ forloop.index0 }}"
+                      title="{{ value | capitalize }}"
+                      style="display:inline-block; cursor:pointer; text-align:center;"
+                      onclick="updateProductLink(this, '{{ product.url }}', '{{ matched_variant.id }}'); event.preventDefault(); event.stopPropagation();"
+                    >
+                      <div class="variant-thumbnail" style="width: 48px; height: 48px; overflow: hidden; box-sizing: border-box; background: #f6f6f6; display: flex; align-items: center; justify-content: center; margin-bottom: 5px;">
+                        {% if matched_variant.featured_image %}
+                          <img src="{{ matched_variant.featured_image | img_url: '100x100', crop: 'center' }}" alt="{{ value }}" style="width: 100%; height: 100%; object-fit: contain;" />
+                        {% else %}
+                          <div style="width: 100%; height: 100%; background-color: #eee; display: flex; align-items: center; justify-content: center; color: #888; font-size: 10px; font-weight: bold;">{{ value | slice: 0, 2 | upcase }}</div>
+                        {% endif %}
+                      </div>
+                      <div class="variant-underline" style="width: 48px; height: 0.125rem; background: {% if forloop.first %}black{% else %}transparent{% endif %}; margin-top: 3px;"></div>
+                      <div class="variant-text" style="font-size: 14px; color: #b48a3a; font-weight: normal; letter-spacing: 0.5px; margin-top: 5px; white-space: nowrap; display: inline-block; margin-right: 17px;">{{ value | capitalize }}</div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <!-- Product Info -->
+              <div class="product-info">
+                <h3 class="product-title">
+                  {% comment %}Try multiple metafield sources for products without size variants{% endcomment %}
+                  {% assign custom_title = product.selected_or_first_available_variant.metafields.custom.product_title %}
+                  {% unless custom_title != blank %}
+                    {% assign custom_title = product.metafields.custom.product_title %}
+                  {% endunless %}
+                  
+                  {% if custom_title != blank %}
+                    {{ custom_title }}
+                  {% else %}
+                    {% assign base_title = product.title | split: ' ' %}
+                    {% assign display_title = '' %}
+                    {% for part in base_title %}
+                      {% unless part contains 'L' %}
+                        {% assign display_title = display_title | append: part | append: ' ' %}
+                      {% endunless %}
+                    {% endfor %}
+                    {{ display_title | strip }}
+                  {% endif %}
+                </h3>
+                <div class="product-price">
+                  {% if product.compare_at_price > product.price %}
+                    <span class="price-sale">{{ product.price | money }}</span>
+                    <span class="price-compare">{{ product.compare_at_price | money }}</span>
+                  {% else %}
+                    <span class="price-regular">{{ product.price | money }}</span>
+                  {% endif %}
+                </div>
+              </div>
+            </a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="no-products">
+          <p>No products found in this collection.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if paginate.pages > 1 %}
+      <div class="pagination-wrapper">
+        {{ paginate | default_pagination }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Shop by Category Section -->
+<div class="shopbycategory" style="padding: 0 17px;">
+  {% section 'shop-by-category' %}
+</div>
+
+
+</div>
+
+<!-- Mobile Filter Overlay -->
+<div class="mobile-filter-overlay" id="mobile-filter-overlay" onclick="toggleMobileFilters()"></div>
+
+<script>
+// Mobile filter toggle
+function toggleMobileFilters() {
+  const mobileFilters = document.getElementById('mobile-filters');
+  const overlay = document.getElementById('mobile-filter-overlay');
+  const body = document.body;
+  
+  mobileFilters.classList.toggle('active');
+  overlay.classList.toggle('active');
+  body.classList.toggle('no-scroll');
+}
+
+// Handle filter form submissions
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('change', function(e) {
+    if (e.target.matches('.facets input[type="checkbox"]') && !e.target.classList.contains('tag-filter')) {
+      const form = e.target.closest('form');
+      if (form) {
+        const formData = new FormData(form);
+        const searchParams = new URLSearchParams();
+        
+        for (let [key, value] of formData.entries()) {
+          if (value && value.trim() !== '') {
+            searchParams.append(key, value);
+          }
+        }
+        
+        const currentSort = new URLSearchParams(window.location.search).get('sort_by');
+        if (currentSort) {
+          searchParams.set('sort_by', currentSort);
+        }
+        
+        const newUrl = window.location.pathname + '?' + searchParams.toString();
+        window.location.href = newUrl;
+      }
+    }
+    
+    // Handle tag-based filters
+    if (e.target.classList.contains('tag-filter')) {
+      const selectedTags = [];
+      document.querySelectorAll('.tag-filter:checked').forEach(function(checkbox) {
+        selectedTags.push(checkbox.getAttribute('data-tag'));
+      });
+      
+      let newUrl = window.location.pathname.split('/').slice(0, 3).join('/');
+      if (selectedTags.length > 0) {
+        newUrl += '/' + selectedTags.join('+');
+      }
+      
+      const currentSort = new URLSearchParams(window.location.search).get('sort_by');
+      if (currentSort) {
+        newUrl += '?sort_by=' + currentSort;
+      }
+      
+      window.location.href = newUrl;
+    }
+  });
+});
+
+// Close mobile filters on escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const mobileFilters = document.getElementById('mobile-filters');
+    if (mobileFilters.classList.contains('active')) {
+      toggleMobileFilters();
+    }
+  }
+});
+
+// Only one filter dropdown open at a time
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.facets__item').forEach(function(details) {
+    details.addEventListener('toggle', function(e) {
+      if (details.open) {
+        document.querySelectorAll('.facets__item').forEach(function(other) {
+          if (other !== details) {
+            other.removeAttribute('open');
+          }
+        });
+      }
+    });
+  });
+});
+
+// Close open filter dropdown if clicking outside
+document.addEventListener('click', function(event) {
+  const openDetails = document.querySelectorAll('.facets__item[open]');
+  openDetails.forEach(function(details) {
+    if (!details.contains(event.target)) {
+      details.removeAttribute('open');
+    }
+  });
+});
+
+// Product image hover functionality
+function showSecondImage(productId) {
+  const img = document.getElementById('main-image-product-' + productId);
+  if (img && img.dataset.secondImage) {
+    img.src = img.dataset.secondImage;
+  }
+}
+
+function showFirstImage(productId) {
+  const img = document.getElementById('main-image-product-' + productId);
+  if (img && img.dataset.firstImage) {
+    img.src = img.dataset.firstImage;
+  }
+}
+
+// Variant image change and link update functionality
+function updateProductLink(element, productUrl, variantId) {
+  // Update the product card link
+  const productCard = element.closest('.product-card');
+  const productLink = productCard.querySelector('.product-link');
+  const newUrl = `${productUrl}?variant=${variantId}`;
+  productLink.href = newUrl;
+
+  // Update variant image
+  const productId = element.getAttribute('data-product-id');
+  const imageUrl = element.getAttribute('data-image');
+  
+  if (imageUrl) {
+    const img = document.getElementById('main-image-product-' + productId);
+    if (img) {
+      img.src = imageUrl;
+      img.dataset.firstImage = imageUrl;
+    }
+  }
+  
+  // Update active variant styling
+  const allUnderlines = productCard.querySelectorAll('.variant-underline');
+  allUnderlines.forEach(underline => {
+    underline.style.background = 'transparent';
+  });
+  
+  const activeVariant = element.querySelector('.variant-underline');
+  if (activeVariant) {
+    activeVariant.style.background = 'black';
+  }
+}
+
+// Fixed variant matching logic ensures correct size + color combinations
+
+</script>
+
+<style>
+/* Reset and Base Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #fff !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+}
+
+body.no-scroll {
+  overflow: hidden;
+}
+
+/* Container Styles */
+.containered {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding: 0 38px;
+  /* max-width: 1440px; */
+}
+
+.containerednew {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding: 0 56px;
+  
+}
+
+/* Collection Header */
+.collection-header {
+  padding: 2rem 0;
+  margin-top: 50px;
+  background: #fff;
+}
+
+.collection-title {
+  font-size: 4.5rem;
+  font-weight: bold;
+  color: #000;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+  margin-top: 50px;
+}
+
+.collection-description {
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  color: #374151;
+  line-height: 1.6;
+  font-family: math;
+}
+
+/* Filters Section */
+.filters-section {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  background: #fff;
+}
+
+.filters-toggle {
+  background: #000;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 25px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  justify-content: center;
+}
+
+.filters-toggle:hover {
+  background: #374151;
+}
+
+.mobile-only {
+  display: none;
+}
+
+.desktop-filters {
+  display: block;
+}
+
+.facets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.facets__form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+}
+
+.facets__item {
+  position: relative;
+}
+
+.facets__summary {
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  color: gray;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-transform: capitalize;
+  transition: background-color 0.2s;
+  border-radius: 0.375rem;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  list-style: none;
+}
+
+.facets__summary:hover {
+  background: #f3f4f6;
+}
+
+.facets__summary .arrow-icon {
+  transition: transform 0.2s;
+  margin-left: 0.5rem;
+}
+
+.facets__item[open] .facets__summary .arrow-icon {
+  transform: rotate(180deg);
+}
+
+.facets__summary::-webkit-details-marker {
+  display: none;
+}
+
+.facets__list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  z-index: 10;
+  padding: 0.5rem 0;
+  margin: 0;
+  list-style: none;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.facets__list-item {
+  margin: 0;
+  padding: 0;
+}
+
+.facets__item-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  color: #222;
+  border-radius: 6px;
+  transition: background 0.2s;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+.facets__item-label:hover {
+  background: #f3f4f6;
+}
+
+.facets__checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #000;
+  border-radius: 4px;
+  border: 1.5px solid #d1d5db;
+  cursor: pointer;
+}
+
+/* Price Range Inputs */
+.facets__price-range {
+  padding: 0.5rem 1rem;
+}
+
+.facets__price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.facets__price-input {
+  width: 80px;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.facets__price-separator {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* Fabric Swatches in Filters (previously Color Swatches) */
+.fabric-swatch, .color-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  margin-right: 0.5rem;
+}
+
+/* Color Swatches - for actual colors */
+.color-black, .fabric-black { background: #000; }
+.color-gray, .fabric-gray { background: #6b7280; }
+.color-brown, .fabric-brown { background: #92400e; }
+.color-navy, .fabric-navy { background: #1e3a8a; }
+.color-white, .fabric-white { background: #fff; }
+.color-blue, .fabric-blue { background: #002e5d; }
+.color-green, .fabric-green { background: #1b3c36; }
+.color-red, .fabric-red { background: #dc2626; }
+.color-beige, .fabric-beige { background: #f5f5dc; }
+.color-tan, .fabric-tan { background: #d2b48c; }
+
+/* Fabric Material Swatches - patterns/textures for different materials */
+.fabric-carbonate { 
+  background: linear-gradient(45deg, #2d3748 25%, transparent 25%), 
+              linear-gradient(-45deg, #2d3748 25%, transparent 25%), 
+              linear-gradient(45deg, transparent 75%, #2d3748 75%), 
+              linear-gradient(-45deg, transparent 75%, #2d3748 75%);
+  background-size: 4px 4px;
+  background-position: 0 0, 0 2px, 2px -2px, -2px 0px;
+  background-color: #4a5568;
+}
+
+.fabric-ballistic { 
+  background: repeating-linear-gradient(
+    45deg,
+    #1a202c,
+    #1a202c 2px,
+    #2d3748 2px,
+    #2d3748 4px
+  );
+}
+
+.fabric-cordura { 
+  background: radial-gradient(circle at 2px 2px, #4a5568 1px, transparent 1px);
+  background-size: 8px 8px;
+  background-color: #2d3748;
+}
+
+.fabric-nylon { 
+  background: linear-gradient(90deg, #4a5568 50%, #2d3748 50%);
+  background-size: 2px 2px;
+}
+
+/* Mobile Filters */
+.mobile-filters {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 100%;
+  height: 100vh;
+  background: white;
+  z-index: 1000;
+  transition: right 0.3s ease;
+  overflow-y: auto;
+}
+
+.mobile-filters.active {
+  right: 0;
+}
+
+.mobile-filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+}
+
+.mobile-filters-header h3 {
+  margin: 0;
+  font-size: 2.75rem;
+  font-weight: 400;
+  color: #000;
+  letter-spacing: 0.02em;
+}
+
+.close-filters {
+  background: none;
+  border: none;
+  font-size: 3.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #666;
+  border-radius: 0;
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 300;
+}
+
+.close-filters:hover {
+  background: #f5f5f5;
+}
+
+.mobile-filters-content {
+  padding: 0;
+}
+
+.facets--vertical .facets__form {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.facets--vertical .facets__item {
+  width: 100%;
+  margin-bottom: 0;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.facets--vertical .facets__summary {
+  background: #f8f8f8;
+  padding: 2.5rem 1.5rem;
+  font-size: 2.25rem;
+  font-weight: 400;
+  color: #333;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  list-style: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.facets--vertical .facets__summary::-webkit-details-marker {
+  display: none;
+}
+
+.facets--vertical .facets__summary .arrow-icon {
+  transition: transform 0.2s;
+  margin-left: auto;
+}
+
+.facets--vertical .facets__item[open] .facets__summary .arrow-icon {
+  transform: rotate(180deg);
+}
+
+.facets--vertical .facets__summary:hover {
+  background: #f0f0f0;
+}
+
+.facets--vertical .facets__list {
+  position: static;
+  box-shadow: none;
+  border: none;
+  background: white;
+  border-radius: 0;
+  margin-top: 0;
+  padding: 0;
+  max-height: none;
+}
+
+.facets--vertical .facets__item-label {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: #374151;
+  border-bottom: 1px solid #f3f4f6;
+  line-height: 1.2;
+}
+
+.facets--vertical .facets__item-label:last-child {
+  border-bottom: none;
+}
+
+.facets--vertical .facets__item-label:hover {
+  background: #f9fafb;
+}
+
+.facets--vertical .facets__checkbox {
+  width: 24px;
+  height: 24px;
+  margin-right: 12px;
+}
+
+/* Mobile Fabric/Color Swatches Grid */
+.mobile-fabric-grid, .mobile-color-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 0;
+}
+
+.mobile-fabric-item, .mobile-color-item {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.mobile-fabric-item:hover, .mobile-color-item:hover {
+  background: #f9fafb;
+}
+
+.mobile-fabric-item:nth-child(odd), .mobile-color-item:nth-child(odd) {
+  border-right: 1px solid #f3f4f6;
+}
+
+.mobile-fabric-swatch, .mobile-color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  margin-right: 15px;
+  border: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+
+.mobile-fabric-text, .mobile-color-text {
+  font-size: 1.25rem;
+  color: #374151;
+  font-weight: 400;
+}
+
+/* Color Swatch Colors */
+.color-black { background-color: #000000; }
+.color-blue { background-color: #1e40af; }
+.color-brown { background-color: #92400e; }
+.color-green { background-color: #059669; }
+.color-grey { background-color: #6b7280; }
+.color-gray { background-color: #6b7280; }
+.color-orange { background-color: #ea580c; }
+.color-pink { background-color: #ec4899; }
+.color-purple { background-color: #7c3aed; }
+.color-red { background-color: #dc2626; }
+.color-white { background-color: #ffffff; border-color: #d1d5db; }
+.color-yellow { background-color: #eab308; }
+.color-titanium { background-color: #a8a29e; }
+.color-silver { background-color: #9ca3af; }
+
+/* Mobile Price Range Styling */
+.facets--vertical .facets__price-range {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.facets--vertical .facets__price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.facets--vertical .facets__price-input {
+  flex: 1;
+  min-width: 100px;
+  padding: 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  background: white;
+}
+
+.facets--vertical .facets__price-separator {
+  font-size: 1.1rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+
+
+/* Mobile Category Navigation */
+.mobile-category-nav {
+  display: none;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 0 0.5rem 0;
+  margin-bottom: 1rem;
+}
+
+.category-nav-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.category-nav-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.category-nav-items {
+  display: flex;
+  gap: 0;
+  padding: 0 0.5rem;
+  min-width: max-content;
+}
+
+.category-nav-item {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  color: #666;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  border-radius: 0;
+  transition: all 0.2s ease;
+  border-bottom: 2px solid transparent;
+  text-transform: capitalize;
+  min-width: max-content;
+  background: transparent;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.category-nav-item:hover {
+  color: #000;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.category-nav-item.active {
+  color: #000;
+  border-bottom-color: #000;
+  font-weight: 600;
+  /* background: rgba(0, 0, 0, 0.03); */
+}
+
+.mobile-filter-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.mobile-filter-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Active Filter Chips */
+.active-filters-section {
+  background: #fff;
+  padding: 1rem 0;
+  margin-bottom: 1.5rem;
+}
+
+.active-filters-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.active-filters-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  background: #f5f5f5;
+  border: 1px solid #d1d1d1;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  color: #333;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  font-weight: 400;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.filter-chip:hover {
+  background: #ebebeb;
+  border-color: #c1c1c1;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.chip-label {
+  font-weight: 400;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.2;
+}
+
+.chip-close {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0;
+  margin-left: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-weight: normal;
+}
+
+.chip-close:hover {
+  background: #dc3545;
+  color: white;
+  transform: scale(1.05);
+}
+
+.remove-all-btn {
+  background: transparent;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  font-size: 0.95rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-weight: 400;
+  border-radius: 20px;
+  margin-left: 0.5rem;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.2;
+}
+
+.remove-all-btn:hover {
+  background: #dc3545;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 1px 3px rgba(220,53,69,0.3);
+}
+
+/* Products Section */
+.products-section {
+  padding: 2rem;
+  background: #fff;
+}
+
+.products-header {
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.products-count {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.sort-dropdown {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-label {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+#SortBy {
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(264px, 1fr));
+  gap: 2rem;
+  padding-left: 0;
+  padding-right: 0;
+  max-width: 100%;
+}
+
+@media (min-width: 1200px) {
+  .products-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.product-card {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+}
+
+.product-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.product-image-wrapper {
+  background: #F6F6F6;
+  border-radius: 12px;
+  aspect-ratio: 1/1.3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s, opacity 0.3s ease;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.product-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Product Color Swatches */
+.product-colors {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  justify-content: center;
+}
+
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.color-dot:hover {
+  transform: scale(1.2);
+}
+
+/* Color Dot Styles */
+.color-dot.color-black { background: #000; }
+.color-dot.color-brown { background: #8B4513; }
+.color-dot.color-gray { background: #808080; }
+.color-dot.color-grey { background: #808080; }
+.color-dot.color-navy { background: #000080; }
+.color-dot.color-blue { background: #0066CC; }
+.color-dot.color-white { background: #fff; border-color: #ccc; }
+.color-dot.color-red { background: #dc2626; }
+.color-dot.color-green { background: #16a34a; }
+.color-dot.color-tan { background: #D2B48C; }
+.color-dot.color-beige { background: #F5F5DC; }
+
+/* Product Info */
+.product-info {
+  /* text-align: center; */
+}
+
+.product-title {
+  font-weight: 500;
+  color: #000;
+  margin-bottom: 0.5rem;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.product-price {
+  font-weight: 500;
+  color: #000;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  /* justify-content: center; */
+}
+
+.price-sale {
+  color: #dc2626;
+}
+
+.price-compare {
+  text-decoration: line-through;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+/* Activity Badge */
+.product-activity {
+  margin-top: 0.5rem;
+}
+
+.activity-badge {
+  background: #e5e7eb;
+  color: #374151;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+/* No Products */
+.no-products {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 0;
+  color: #6b7280;
+}
+
+.no-products h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #000;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #374151;
+}
+
+/* Desktop and Large Screens */
+@media (max-width: 1024px) {
+  .containered,
+  .containerednew {
+    padding: 0 19px;
+  }
+}
+
+/* Tablet */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .containered,
+  .containerednew {
+    padding: 0 24px;
+  }
+  
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .mobile-only {
+    display: flex;
+  }
+  .variant-text{
+        margin-right: 2px !important;
+  }
+  /* Legacy color-swatches styling (commented out)
+  .color-swatches{
+    gap:0px !important;
+  }
+  .variant-text{
+    font-size:10px !important;
+  } */
+  
+  /* New fabric-swatches styling */
+  .fabric-swatches {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 0.5rem;
+  }
+.shopbycategory{
+  padding:0px !important;
+}
+  .desktop-filters {
+    display: none;
+  }
+
+  .mobile-category-nav {
+    display: block;
+  }
+
+  .filters-section {
+    border-bottom: none;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 0 0 0;
+  }
+
+  .filters-toggle {
+    width: 30%;
+    margin-bottom: 16px;
+    font-size: 15px;
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .products-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .collection-title {
+    font-size: 2.5rem;
+  }
+
+  .collection-description {
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    font-family: sans-serif;
+  }
+
+  .products-section .containered {
+    padding: 0 0.75rem !important;
+  }
+
+  .active-filters-section {
+    padding: 0.75rem 0;
+    margin-bottom: 1rem;
+  }
+
+  .active-filters-chips {
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+  }
+
+  .filter-chip {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 15px;
+    gap: 0.3rem;
+  }
+
+  .chip-label {
+    font-size: 0.8rem;
+  }
+
+  .chip-close {
+    font-size: 0.8rem;
+    width: 14px;
+    height: 14px;
+    margin-left: 0.15rem;
+  }
+
+  .remove-all-btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 15px;
+    margin-left: 0.25rem;
+  }
+
+  .products-section {
+    padding: 1rem 0;
+  }
+
+  .product-image-wrapper {
+    aspect-ratio: 1/1.3;
+  }
+}
+
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .products-section .containered {
+    padding: 0 0.75rem !important;
+  }
+
+  .collection-title {
+    font-size: 5.2rem;
+    margin-top: 34px;
+  }
+
+  .product-title {
+    font-size: 14px;
+  }
+
+  .product-price {
+    font-size: 14px;
+    margin-bottom:14px;
+  }
+}
+
+/* Animation for filter dropdowns */
+.facets__item[open] .facets__list {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(-10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+</style>

@@ -1,0 +1,71 @@
+     <section data-aos="fade-up"
+     data-aos-duration="3000">
+                <div class="affilate_section">
+                    <div class="affilate_p">
+                      {% for block in section.blocks %}
+                        <div class="item">
+                            <div class="aff_w">
+                                <div class="aff_wrap_d">
+                                    <div class="aff_img">
+                                        <a href="{{block.settings.buttonlink}}">
+                                            <img loading="lazy" src="{{ block.settings.image | img_url: 'master'}}" class="img-fluid" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="aff_text">
+                                        <h2><a href="{{block.settings.buttonlink}}">{{block.settings.buttontext}}</a></h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+ {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+{% schema %}
+{
+  "name": "Carousel Section",
+ 
+  "blocks": [
+ 
+    {
+      "type": "text",
+      "name": "text",
+      "settings": [
+ 
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+ 
+ 
+ 
+ 
+
+ 
+{
+          "type": "text",
+          "id": "buttontext",
+          "label": "Button Text"
+        },
+{
+          "type": "url",
+          "id": "buttonlink",
+          "label": "Button Link"
+        }
+ 
+         
+      ]
+    }
+  
+    
+     
+  ], 
+  "presets": [
+    {
+      "name": "Carousel Section"
+    }
+  ]
+}
+{% endschema %}

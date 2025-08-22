@@ -1,0 +1,74 @@
+<section data-aos="fade-up"
+     data-aos-duration="3000">
+                <div class="recommand_section">   
+                  
+                  
+                  <a href="/pages/press">
+                  
+                  <div class="recommand_section-bg">
+                    <div class="container">
+                        <div class="recommanded_wrap">
+                            <h5>{{section.settings.heading}}</h5>
+
+                            <div class="recommandd_w">
+                              {% for block in section.blocks %}
+                                <div class="recommand_width">
+                                    <div class="recommand_img">
+                                     <img loading="lazy" src="{{ block.settings.image | img_url: 'master'}}" class="img-fluid" alt="" />
+                                    </div>
+                                </div>
+
+                                {% endfor %}
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                  </a>
+                 
+                </div>
+            </section>
+
+
+{% schema %}
+{
+  "name": "Logo Section",
+   "class": "logo-sec",
+  "blocks": [
+ 
+    {
+      "type": "text",
+      "name": "text",
+      "settings": [
+ 
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    } 
+ 
+         
+      ]
+    }
+  
+    
+     
+  ], 
+  "settings": [
+
+ 
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    }
+ 
+    
+  ],
+  "presets": [
+    {
+      "name": "Logo Section"
+    }
+  ]
+}
+{% endschema %}

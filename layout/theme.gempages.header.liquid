@@ -1,0 +1,144 @@
+{%- comment %}<locksmith:5f8f>{%- endcomment %}
+{%- include 'locksmith' -%}
+{%- comment %}</locksmith:5f8f>{%- endcomment %}
+
+<!doctype html>
+<html class="no-js" lang="{{ request.locale.iso_code }}">
+  <head>
+    {{ locksmith_initializations }}
+    <script>
+      var head = document.head;
+      var script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = "https://185274.t.hyros.com/v1/lst/universal-script?ph=05b7b608ab3f3866a6689b208475f3685a2097827b8af2716f74a281a51bde95&tag=!clicked&origin=SHOPIFY&ref_url=" + document.URL ;
+      head.appendChild(script);
+    </script>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="">
+    <link rel="canonical" href="{{ canonical_url }}">
+
+    <script src="https://kit.fontawesome.com/5e226041e5.js" crossorigin="anonymous"></script>
+
+    {%- if settings.favicon != blank -%}
+      <link rel="icon" type="image/png" href="{{ settings.favicon | img_url: '32x32' }}">
+    {%- endif -%}
+
+    <title>
+      {{ page_title }}
+      {%- if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif -%}
+      {%- if current_page != 1 %} &ndash; Page {{ current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+
+    {% if page_description %}
+      {%- comment %}<locksmith:4660>{%- endcomment %}
+      {%- capture var %}{% render 'locksmith-variables', variable: 'transparent', hiding_scope: 'resource' %}{% endcapture -%}
+      {%- if var == 'true' %}<meta name="description" content="{{ page_description | escape }}">{% endif -%}
+      {%- comment %}original: <meta name="description" content="{{ page_description | escape }}">{%- endcomment %}
+      {%- comment %}</locksmith:4660>{%- endcomment %}
+    {% endif %}
+    <script src="{{ 'jquery.js' | asset_url}}"></script>
+
+    {% render 'meta-tags' %}
+    {% render 'header-css' %}
+    {%- render 'header-scripts.zipifypages', renderctx: 'thm' -%}
+    {{ content_for_header }}
+    {%- render 'bold-common' -%}
+    {%- render 'bold-includes' -%}
+    {% if template contains 'customers' %}
+      {{ 'shopify_common.js' | shopify_asset_url | script_tag }}
+    {% endif %}
+
+    <!-- <script async defer src="https://tools.luckyorange.com/core/lo.js?site-id=5b6e8bf0"></script> -->
+
+    {% render 'judgeme_core' %}
+
+    {{ shop.metafields.loox.global_html_head }}
+
+    {% if content_for_header contains 'fastbundle.co' %}
+      {% render 'fast_bundle_service' %}
+    {% endif %}
+
+    {% if template contains 'cart' %}
+      {{ 'base.css' | asset_url | stylesheet_tag }}
+    {% endif %}
+
+    <script src="{{ 'cart.js' | asset_url}}" defer="defer"></script>
+
+    {% include 'bss-product-labels-configs' %}
+
+    <style>
+      .collection-info .btn {
+          background-color: transparent !important;
+          border: 1px solid !important;
+          color: black !important;
+        font-size: 1.6rem !important;
+        font-family: 'HelveticaNeue' !important;
+      }
+      .collection-info .btn:hover {
+          background: #000 !important;
+          color: #ffffff !important;
+          -webkit-transition: 0.5s ease all !important;
+          -o-transition: 0.5s ease all !important;
+          transition: 0.5s ease all !important;
+      }
+    </style>
+
+    {% render 'shogun-head' %}
+  </head>
+
+  <body class="gradient {{ template.name }} {{ page_image }}" id="{{ page_title }}">
+    <div id="page">
+      {% comment %}{% section 'slide-cart' %}{% endcomment %}
+      {% section 'header' %}
+      {% capture ICART_FULL_PAGE_LAYOUT %}{{ content_for_layout }}{% endcapture -%}
+      
+
+      
+    </div>
+    
+
+    {% if template contains 'collection' %}
+      <style>
+        body{background:#F5F5F5}
+      </style>
+    {% endif %}
+
+    <!--
+      <script>
+              var value= jQuery('.single_product_wraps h3').text();
+        if (value == 'Get 50% off with the purchase of any symplº traction pad (Use code 50OFFEXTENDER).'){
+            var removeData=value.replace("(Use code 50OFFEXTENDER).","<div class='my_text' style='font-size: 16px;padding-top: 10px;'>(Use code 50OFFEXTENDER).</div>");
+            jQuery('.single_product_wraps h3').empty().append(removeData);
+        }
+              else if (value == 'Get 50% off with the purchase of a symplº front traction pad (Use code 50OFFSPACER).'){
+                var removeData=value.replace("(Use code 50OFFSPACER).","<div class='my_text' style='font-size: 16px;padding-top: 10px;'>(Use code 50OFFSPACER).</div>");
+              jQuery('.single_product_wraps h3').empty().append(removeData);
+              }
+              else {
+                jQuery('.single_product_wraps h3').empty().append(value);
+              }
+      </script>
+    -->
+
+    
+    {{ shop.metafields.loox.global_html_body }}
+
+    <!-- PickyStory snippet "main_widget_script", do not modify. Safe to remove after the app is uninstalled -->
+    {% if content_for_header contains 'pickystory' %}
+      <script defer src="https://cdn.pickystory.com/widget/dist/latest/pickystory-widget.min.js"></script>
+    {% endif %}
+    <!-- PickyStory end snippet "main_widget_script" -->
+    
+    
+    
+    {% if content_for_header contains 'product_label' -%}
+      
+      
+      
+    {%- endif %}
+  </body>
+</html>

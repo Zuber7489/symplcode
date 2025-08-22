@@ -1,0 +1,61 @@
+<section class="section_padding">
+                <div class="tandc_w ss_design">
+                  {% for block in section.blocks %}
+                    <div class="tech_and_change">
+                        <div class="tech_and_close_img" data-aos="zoom-in"  data-aos-duration="3000">
+                            <img src="{{ block.settings.image | img_url: 'master'}}" class="img-fluid" alt="">
+                        </div>
+                        <div class="tech_and_close_wrap">
+                            <div class="tech_and_change_list">
+                                <h3>{{block.settings.heading}}</h3>
+                                {{block.settings.text}}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                </div>
+            </section>
+
+{% schema %}
+{
+  "name": "Image-text 2 Section",
+ 
+  "blocks": [
+ 
+    {
+      "type": "text",
+      "name": "text",
+      "settings": [
+ 
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+ 
+ 
+ {
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    } 
+         
+      ]
+    }
+  
+    
+     
+  ], 
+  "presets": [
+    {
+      "name": "Image-text 2 Section"
+    }
+  ]
+}
+{% endschema %}

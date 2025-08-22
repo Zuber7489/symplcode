@@ -1,0 +1,66 @@
+<section data-aos="fade-up"
+     data-aos-duration="3000">
+
+  <div class="container">
+  
+      <div class="facilty_wrap">
+            {% for block in section.blocks %}
+                                <div class="facilty_wrap_w">
+                                    <div class="facilty_text">
+                                        <h4>{{block.settings.heading}}</h4>
+                                        <div class="f_text">
+                                         {{block.settings.subheading}}
+                                            <img src="{{block.settings.image}}" class="img-fluid" alt="" />
+                                        </div>
+                                    </div>
+                                </div>
+                         {% endfor %}
+                            </div>
+    
+  
+  </div>
+  
+</section>
+
+
+{% schema %}
+{
+  "name": "Icon bar",
+ 
+  "blocks": [
+ 
+    {
+      "type": "text",
+      "name": "text",
+      "settings": [
+  {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+ {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "SubHeading"
+    },
+   {
+      "type": "textarea",
+      "id": "image",
+      "label": "Image"
+    } 
+ 
+         
+      ]
+    }
+  
+    
+     
+  ], 
+ 
+  "presets": [
+    {
+      "name": "Icon bar"
+    }
+  ]
+}
+{% endschema %}

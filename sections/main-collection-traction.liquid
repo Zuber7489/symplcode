@@ -1,0 +1,101 @@
+ 
+            <section data-aos="fade-up"
+     data-aos-duration="3000">
+              <div class="slbanner-wrap">
+                <div class="slbanner_img">
+                       <img src="{{collection.image | img_url: 'master' }}" class="img-fluid" alt="" />
+                   </div>
+                 
+              </div>
+            </section>
+
+        
+
+            <section>
+                <div class="avilable_s_bg av_bg">
+                    <div class="container">
+                        <div class="main_heading_wrap">
+                            <h1>{{collection.title}}</h1>
+                            
+                        </div>
+
+                         
+
+                        <div class="p_crousel2">
+                          
+           {% for product in collection.products %}
+ 
+        {%- comment %}<locksmith:0a25>{% endcomment -%}
+          {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% else %}{% continue %}{% endif -%}
+        {%- comment %}</locksmith:0a25>{% endcomment -%}
+ 
+        {% include 'product-grid-item' %}
+              {% endfor %}
+                        
+                        </div>
+
+                        
+                  </div>
+                </div>
+            </section>
+  
+ 
+
+ 
+ 
+<script>
+    	
+  	/*-- Collection images Show on swatch hover --*/
+   $('.product-color .thumb-dd').click(function() {
+      var id= $(this).attr('data-id');
+       console.log(id);
+      $('.thumb-dd').removeClass('active');
+    $(this).addClass('active');
+    
+      var thumb_src = $(this).closest('.variant-dd').find('.img-variant > img').attr('src');
+              var pric = $(this).closest('.variant-dd').find('.img-variant').attr('data-price');
+       console.log(thumb_src);
+      $(this).parents('.single-collection').find('a img').attr('src',thumb_src);
+      
+      var path = $(this).parents('.product-details').find('a.prod-heading').attr('data-href');
+      $(this).parents('.product-details').siblings('.ci').find('a').attr('href',path+'?variant='+id);
+      $(this).parents('.product-details').find('a.prod-heading').attr('href',path+'?variant='+id);
+             $(this).parents('.single-collection').find('.pra').html(pric);
+    });
+</script>
+
+<style>
+  .swatch input{display:none;}
+.swatch label{float:left;    width: 26px;
+  height: 26px;
+  border: 3px solid white;
+  border-radius: 50%; margin:0;}
+.swatch label.active{    box-shadow: inset 0 0 0 2px #ffffff !important;
+    border: 2px solid #74797c !important;}
+.swatch .swatch-element{float:left;-webkit-transform:translateZ(0);-webkit-font-smoothing:antialiased;margin:0px 1px 0 0;position:relative;}
+
+
+.bg--black {
+  background-color: rgb(0, 0, 0);
+}
+.bg--red {
+  background-color: rgb(149, 1, 10) ;
+}
+.bg--brown {
+  background-color: rgb(133, 73, 10) ;
+}
+  .collection-info .swatch-wrap.swatch {
+    display: flex;
+    justify-content: center;
+    margin: 10px auto;
+}
+  .collection-info .swatch label {
+    min-width: 25px !important;
+    width: 25px !important;
+    height: 25px !important;
+}
+  .p_crousel2 .pr_heading h6 {
+ 
+    min-height: 53px;
+}
+</style>

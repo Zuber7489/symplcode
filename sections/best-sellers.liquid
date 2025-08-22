@@ -1,0 +1,859 @@
+    <!-- best_sellers_section.liquid -->
+<div class="best-sellers-section" id="best-sellers-section">
+  <div class="containeredd">
+    <h2 class="section-titled">{{ section.settings.title }}</h2>
+    
+    <div class="products-carousel">
+      <div class="carousel-container">
+        <div class="carousel-track" id="best-sellers-track">
+          {% assign collection = collections[section.settings.collection] %}
+          {% for product in collection.products limit: section.settings.products_to_show %}
+            {% assign product_index = forloop.index %}
+            <div class="product-card">
+              <a href="{{ product.url }}" class="product-link">
+                <div class="product-image-container">
+                  {% if product.featured_image != blank %}
+                    <img 
+                      src="{{ product.featured_image | img_url: '2000x2000', scale: 2 }}" 
+                      alt="{{ product.title }}"
+                      class="product-image"
+                      loading="lazy"
+                    >
+                  {% else %}
+                    <div class="placeholder-image">
+                      {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+                    </div>
+                  {% endif %}
+                </div>
+                <div class="product-info">
+                  <h3 class="product-title">{{ product.title }}</h3>
+                  
+                  {% assign subtitle_key = 'subtitle_' | append: product_index %}
+                  {% if section.settings[subtitle_key] != blank %}
+                    <p class="product-subtitle">{{ section.settings[subtitle_key] }}</p>
+                  {% elsif section.settings.default_subtitle != blank %}
+                    <p class="product-subtitle">{{ section.settings.default_subtitle }}</p>
+                  {% endif %}
+                  
+                  <div class="product-price">
+                    {% if product.compare_at_price > product.price %}
+                      <span class="sale-price">{{ product.price | money }}</span>
+                      <span class="compare-price">{{ product.compare_at_price | money }}</span>
+                    {% else %}
+                      <span class="regular-price">{{ product.price | money }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      
+      <div class="carousel-controls">
+        <button class="carousel-control prev" id="best-sellers-prev" aria-label="Previous products">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 12H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 19L5 12L12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+          <button class="carousel-control next" id="best-sellers-next" aria-label="Next products" style="margin-left:17px">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 5L19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="carousel-progress">
+          <div class="progress-bar">
+            <div class="progress-indicator" id="best-sellers-progress"></div>
+          </div>
+        </div>
+     
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .best-sellers-section {
+    padding: 60px 0;
+    background-color: #ffffff;
+  }
+  
+  .containeredd {
+    /* max-width: 1400px; */
+    margin: 0 auto;
+    padding: 0 40px; /* Updated from 20px to 40px as requested */
+  }
+  
+  .section-titled {
+    font-size: 48px; /* Updated from 28px to 48px as requested */
+    font-weight: 550; /* Updated from 700 to 550 as requested */
+    letter-spacing: 0.5px; /* Added 0.5px letter spacing as requested */
+    margin-bottom: 30px;
+    text-transform: normal; /* Changed from uppercase to normal as requested */
+    color: #000000;
+    /* margin-left:3px; */
+  }
+  
+  .products-carousel {
+    position: relative;
+  }
+  
+  .carousel-container {
+    overflow: hidden;
+    position: relative;
+    margin: 0 -10px;
+    cursor: grab;
+  }
+  
+  .carousel-container.grabbing {
+    cursor: grabbing;
+  }
+  
+  .carousel-track {
+    display: flex;
+    /* MODIFIED: Smoother transition */
+    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1); 
+    will-change: transform;
+  }
+  
+  .carousel-track.no-transition {
+    transition: none;
+  }
+  
+  .product-card {
+    flex: 0 0 calc(25% - 20px);
+    margin: 0 5px;
+    background-color: #ffffff;
+    border-radius: 0;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+  
+  .product-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    pointer-events: auto;
+  }
+  
+  .product-image-container {
+    position: relative;
+    padding-top: 100%; /* 1:1 Aspect Ratio */
+    background-color: #f5f5f5;
+    overflow: hidden;
+    border-radius:11px;
+  }
+  
+  .product-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #F6F6F6;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+  
+  .product-link:hover .product-image {
+    transform: scale(1.05);
+  }
+  
+  .placeholder-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+  }
+  
+  .placeholder-svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.5;
+  }
+  
+  .product-info {
+    padding: 15px 0;
+    /* text-align: center; */
+  }
+  
+  .product-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .product-subtitle {
+    font-size: 13px;
+    /* color: #666666; */
+    margin: 0 0 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .product-price {
+    font-size: 14px;
+    font-weight: 700;
+    color: #000000;
+  }
+  
+  .sale-price {
+    color: #e53e3e;
+    margin-right: 8px;
+  }
+  
+  .compare-price {
+    text-decoration: line-through;
+    color: #718096;
+    font-weight: 400;
+  }
+  
+  .carousel-controls {
+    display: flex;
+    align-items: center;
+    /* justify-content: center; */
+    margin-top: 20px;
+  }
+  
+  .carousel-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #000000;
+    transition: opacity 0.3s ease;
+  }
+  
+  .carousel-control:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  
+  .carousel-progress {
+    flex: 1;
+    max-width: 200px;
+    margin: 0 20px;
+  }
+  
+  .progress-bar {
+    height: 2px;
+    background-color: #e2e8f0;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  
+  .progress-indicator {
+    height: 100%;
+    background-color: #000000;
+    width: 0;
+    transition: width 0.3s ease;
+  }
+  
+  /* Touch feedback effect */
+  .product-card.touch-active .product-image-container {
+    opacity: 0.8;
+  }
+  
+  @media (max-width: 1023px) {
+    .product-card {
+      flex: 0 0 calc(33.333% - 20px);
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .best-sellers-section {
+      padding: 50px 0;
+    }
+    
+    .containeredd {
+      padding: 0;
+    }
+    
+    .section-titled {
+      font-size: 28px;
+      font-weight: 550;
+      letter-spacing: 0.5px;
+      margin-bottom: 15px;
+      margin-left: 12px;
+    }
+    
+    .product-card {
+      flex: 0 0 180px; /* Set exact width to match "We think you'll love these" */
+      margin: 0 3.5px; /* Reduced from 5px to 2px */
+    }
+    
+    .product-image-container {
+      width: 180px; /* Set exact width */
+      height: 180px; /* Set exact height */
+      padding-top: 0; /* Remove aspect ratio padding since we're using fixed dimensions */
+      position: relative;
+      background-color: #f5f5f5;
+      overflow: hidden;
+      border-radius: 11px;
+    }
+    
+    .carousel-container {
+      margin: 0;
+      overflow: hidden;
+      padding-left: 10px;
+    }
+    
+    .carousel-track {
+      padding-right: 0;
+    }
+    
+    .product-info {
+      padding: 10px 0;
+    }
+    
+    .product-title {
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+    
+    .product-subtitle {
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+    
+    .product-price {
+      font-size: 13px;
+    }
+    
+    .carousel-controls {
+      margin-top: 15px;
+      justify-content: center; /* Center the progress bar */
+    }
+    
+    .carousel-control {
+      display: none; /* Hide arrows on mobile */
+    }
+    
+    .carousel-progress {
+      max-width: 200px; /* Made 25% longer (100px * 1.25 = 125px) */
+      margin: 0; /* Remove side margins to center properly */
+    }
+    
+    .product-image {
+      position: absolute;
+      top: 0;
+            left: 17px;
+        width: 89%;
+        height: 101%;
+      object-fit: cover; /* Change to cover to fill the container better */
+      transform: translate(-5%, -5%); /* Center the enlarged image */
+    }
+    
+    .product-link:hover .product-image {
+      transform: translate(-5%, -5%) scale(1.05); /* Maintain the centered position when hovering */
+    }
+  }
+  
+  /* iPhone SE and smaller devices */
+  @media (max-width: 375px) {
+    .product-card {
+      /* flex: 0 0 calc(80% - 16px); */
+      margin: 0 3.5px; /* Reduced from 8px to 2px to match mobile view */
+    }
+    
+    .carousel-track {
+      padding-right: 30%;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    initBestSellersCarousel();
+  });
+
+  function initBestSellersCarousel() {
+    const carouselTrack = document.getElementById('best-sellers-track');
+    const productCards = carouselTrack ? carouselTrack.querySelectorAll('.product-card') : [];
+    const prevButton = document.getElementById('best-sellers-prev');
+    const nextButton = document.getElementById('best-sellers-next');
+    const progressIndicator = document.getElementById('best-sellers-progress');
+    
+    if (!carouselTrack || productCards.length === 0) return;
+    
+    let currentIndex = 0;
+    let cardWidth;
+    let totalCards = productCards.length;
+    let visibleCards;
+    let isDragging = false;
+    let startPos = 0;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+    let animationID = 0;
+    let clickPrevented = false;
+    let lastDeltaX = 0; // Track swipe/drag direction
+    let hasDragged = false; // Track if user has actually dragged
+    
+    // Calculate dimensions
+    function calculateDimensions() {
+      // Force a reflow to get accurate dimensions
+      carouselTrack.style.display = 'flex';
+      void carouselTrack.offsetWidth;
+      
+      const firstCard = productCards[0];
+      if (!firstCard) return; // Guard against no product cards
+      const style = window.getComputedStyle(firstCard);
+      const marginLeft = parseInt(style.marginLeft) || 0;
+      const marginRight = parseInt(style.marginRight) || 0;
+      
+      // Get the actual width including margins
+      cardWidth = firstCard.offsetWidth + marginLeft + marginRight;
+      
+      // Calculate visible cards based on container width
+      const containerWidth = carouselTrack.parentElement.offsetWidth;
+      visibleCards = Math.floor(containerWidth / cardWidth);
+      
+      // Ensure at least one card is visible
+      visibleCards = Math.max(1, visibleCards);
+    }
+    
+    // Initialize
+    calculateDimensions();
+    updateCarousel();
+    updateProgressBar();
+    
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      calculateDimensions();
+      
+      // Adjust current index if needed
+      if (currentIndex > totalCards - visibleCards) {
+        currentIndex = Math.max(0, totalCards - visibleCards);
+      }
+      
+      updateCarousel();
+      updateProgressBar();
+    });
+    
+    // Previous button click - Move 2 products at a time
+    if (prevButton) {
+      prevButton.addEventListener('click', function() {
+        if (currentIndex > 0) {
+          currentIndex = Math.max(0, currentIndex - 2);
+          updateCarousel();
+          updateProgressBar();
+        }
+      });
+    }
+    
+    // Next button click - Move 2 products at a time
+    if (nextButton) {
+      nextButton.addEventListener('click', function() {
+        if (currentIndex < totalCards - visibleCards) {
+          currentIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          updateCarousel();
+          updateProgressBar();
+        }
+      });
+    }
+    
+    // Update carousel position
+    function updateCarousel() {
+      if (isNaN(cardWidth) || cardWidth <= 0) { // Guard against invalid cardWidth
+        calculateDimensions(); // Recalculate if needed
+        if (isNaN(cardWidth) || cardWidth <= 0) return; // Still invalid, exit
+      }
+      const translateX = -currentIndex * cardWidth;
+      carouselTrack.style.transform = `translateX(${translateX}px)`;
+      
+      // Update button states
+      if (prevButton) {
+        prevButton.disabled = currentIndex === 0;
+        prevButton.style.opacity = currentIndex === 0 ? '0.3' : '1';
+      }
+      
+      if (nextButton) {
+        nextButton.disabled = currentIndex >= totalCards - visibleCards;
+        nextButton.style.opacity = currentIndex >= totalCards - visibleCards ? '0.3' : '1';
+      }
+    }
+    
+    // Update progress bar
+    function updateProgressBar() {
+      if (!progressIndicator) return;
+      
+      const maxIndex = Math.max(0, totalCards - visibleCards);
+      const progress = maxIndex > 0 ? (currentIndex / maxIndex) * 100 : (totalCards > 0 ? 100 : 0);
+      progressIndicator.style.width = `${progress}%`;
+    }
+    
+    // Prevent link clicks during drag
+    carouselTrack.addEventListener('click', function(e) {
+      if (hasDragged) {
+        e.preventDefault();
+        e.stopPropagation();
+        hasDragged = false; // Reset after preventing click
+      }
+    });
+
+    // Mouse drag support (SWIPE/FLICK)
+    let mouseStartTime = 0;
+    let mouseStartX = 0;
+    let mouseLastX = 0;
+    let mouseLastTime = 0;
+
+    carouselTrack.addEventListener('mousedown', function(e) {
+      if (e.button !== 0) return; // Only left mouse button
+      e.preventDefault(); // Prevent image drag/select
+      isDragging = true;
+      clickPrevented = false;
+      hasDragged = false; // Reset drag state
+      mouseStartX = startPos = e.clientX;
+      mouseLastX = e.clientX;
+      mouseStartTime = mouseLastTime = Date.now();
+      prevTranslate = -currentIndex * cardWidth;
+      carouselTrack.classList.add('no-transition');
+      cancelAnimationFrame(animationID);
+      animationID = requestAnimationFrame(animation);
+    });
+
+    // Forward mousedown from product cards to carouselTrack
+    productCards.forEach(card => {
+      card.addEventListener('mousedown', function(e) {
+        if (e.button !== 0) return;
+        e.preventDefault(); // Prevent image drag/select
+        // Forward the event to carouselTrack
+        carouselTrack.dispatchEvent(new MouseEvent('mousedown', e));
+      });
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      const currentPosition = e.clientX;
+      const diff = currentPosition - mouseStartX;
+      lastDeltaX = diff;
+      currentTranslate = prevTranslate + diff;
+      mouseLastX = currentPosition;
+      mouseLastTime = Date.now();
+      const maxTranslate = 0;
+      const minTranslate = -(totalCards - visibleCards) * cardWidth;
+      if (currentTranslate > maxTranslate) {
+        currentTranslate = maxTranslate + diff * 0.3;
+      } else if (currentTranslate < minTranslate) {
+        currentTranslate = minTranslate + diff * 0.3;
+      }
+      if (Math.abs(diff) > 5) {
+        clickPrevented = true;
+        hasDragged = true; // Mark that user has dragged
+      }
+    });
+
+    function mouseDragEnd(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      carouselTrack.classList.remove('no-transition');
+      const movedBy = mouseLastX - mouseStartX;
+      const timeElapsed = (mouseLastTime - mouseStartTime) || 1; // ms
+      const velocity = movedBy / timeElapsed; // px/ms
+      let targetIndex = currentIndex;
+      // Flick threshold: fast enough movement
+      const flickVelocity = 0.5; // px/ms (adjust as needed)
+      if (cardWidth > 0) {
+        if (Math.abs(velocity) > flickVelocity) {
+          // Flicked fast: move two cards in the direction
+          if (velocity < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
+          }
+        } else if (Math.abs(movedBy) > cardWidth * 0.15) {
+          // Slow drag, but far enough: move two cards in the direction
+          if (movedBy < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
+          }
+        } else {
+          // Not enough movement: stay on current
+          targetIndex = currentIndex;
+        }
+      }
+      targetIndex = Math.max(0, Math.min(totalCards - visibleCards, targetIndex));
+      currentIndex = targetIndex;
+      updateCarousel();
+      updateProgressBar();
+      cancelAnimationFrame(animationID);
+      setTimeout(() => {
+        clickPrevented = false;
+      }, 550);
+    }
+    window.addEventListener('mouseup', mouseDragEnd);
+    carouselTrack.addEventListener('mouseleave', mouseDragEnd);
+    
+    // Add touch feedback effect
+    productCards.forEach(card => {
+      card.addEventListener('touchstart', function() {
+        this.classList.add('touch-active');
+      }, { passive: true }); // passive: true for touchstart feedback
+      
+      card.addEventListener('touchend', function() {
+        this.classList.remove('touch-active');
+      });
+      
+      card.addEventListener('touchcancel', function() {
+        this.classList.remove('touch-active');
+      });
+    });
+
+    // --- Touch swipe support for mobile ---
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchCurrentX = 0;
+    let touchStartTime = 0;
+    let touchPrevTranslate = 0;
+    let touchIsDragging = false;
+    let touchHasDragged = false;
+    let touchDirection = null; // 'horizontal' or 'vertical'
+
+    carouselTrack.addEventListener('touchstart', function(e) {
+      if (e.touches.length !== 1) return;
+      touchIsDragging = true;
+      touchHasDragged = false;
+      touchDirection = null; // Reset direction lock
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchCurrentX = e.touches[0].clientX;
+      touchStartTime = Date.now();
+      touchPrevTranslate = -currentIndex * cardWidth;
+      carouselTrack.classList.add('no-transition');
+    }, { passive: false });
+
+    carouselTrack.addEventListener('touchmove', function(e) {
+      if (!touchIsDragging || e.touches.length !== 1) return;
+
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+
+      if (touchDirection === null) {
+        const deltaX = Math.abs(currentX - touchStartX);
+        const deltaY = Math.abs(currentY - touchStartY);
+
+        // A small threshold to prevent locking direction on accidental micro-movements
+        if (deltaX > 5 || deltaY > 5) {
+          if (deltaX > deltaY) {
+            touchDirection = 'horizontal';
+          } else {
+            touchDirection = 'vertical';
+          }
+        }
+      }
+
+      if (touchDirection === 'horizontal') {
+        e.preventDefault(); // Prevent scroll only when swiping horizontally
+        touchCurrentX = currentX;
+        const diff = touchCurrentX - touchStartX;
+        currentTranslate = touchPrevTranslate + diff;
+        
+        // Add resistance at the carousel ends
+        const maxTranslate = 0;
+        const minTranslate = -(totalCards - visibleCards) * cardWidth;
+        if (currentTranslate > maxTranslate) {
+          currentTranslate = maxTranslate + diff * 0.3;
+        } else if (currentTranslate < minTranslate) {
+          currentTranslate = minTranslate + diff * 0.3;
+        }
+        
+        carouselTrack.style.transform = `translateX(${currentTranslate}px)`;
+        
+        if (Math.abs(diff) > 5) {
+          touchHasDragged = true;
+          hasDragged = true; // For click prevention
+        }
+      }
+      // If 'vertical', do nothing to allow native page scroll
+    }, { passive: false });
+
+    carouselTrack.addEventListener('touchend', function(e) {
+      if (!touchIsDragging) return;
+
+      const wasHorizontal = touchDirection === 'horizontal';
+      
+      touchIsDragging = false;
+      touchDirection = null; // Reset for the next touch
+
+      if (!wasHorizontal) {
+          return; // Exit if it wasn't a horizontal swipe
+      }
+      
+      carouselTrack.classList.remove('no-transition');
+      const movedBy = touchCurrentX - touchStartX;
+      const timeElapsed = (Date.now() - touchStartTime) || 1;
+      const velocity = movedBy / timeElapsed;
+      let targetIndex = currentIndex;
+      const flickVelocity = 0.5; // px/ms
+      
+      if (cardWidth > 0) {
+        if (Math.abs(velocity) > flickVelocity) {
+          // Flicked
+          if (velocity < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
+          }
+        } else if (Math.abs(movedBy) > cardWidth * 0.15) {
+          // Dragged far enough
+          if (movedBy < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
+          }
+        }
+      }
+      
+      targetIndex = Math.max(0, Math.min(totalCards - visibleCards, targetIndex));
+      currentIndex = targetIndex;
+      updateCarousel();
+      updateProgressBar();
+      
+      setTimeout(() => {
+        hasDragged = false;
+      }, 550);
+    });
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Best Sellers",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Section Title",
+      "default": "SHOP BEST SELLERS"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Collection",
+      "info": "Select the collection to display products from"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "label": "Products to show",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Product Subtitles"
+    },
+    {
+      "type": "text",
+      "id": "default_subtitle",
+      "label": "Default Subtitle (optional)",
+      "default": "Premium Quality",
+      "info": "Default subtitle for all products if individual subtitles are not set"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_1",
+      "label": "Product 1 Subtitle",
+      "default": "Premium Travel Backpack"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_2",
+      "label": "Product 2 Subtitle",
+      "default": "Perfect for Weekend Trips"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_3",
+      "label": "Product 3 Subtitle",
+      "default": "Ideal for Daily Commute"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_4",
+      "label": "Product 4 Subtitle",
+      "default": "Versatile All-Terrain Tote"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_5",
+      "label": "Product 5 Subtitle",
+      "default": "Lightweight Travel Companion"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_6",
+      "label": "Product 6 Subtitle",
+      "default": "Durable Everyday Carry"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_7",
+      "label": "Product 7 Subtitle",
+      "default": "Spacious Storage Solution"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_8",
+      "label": "Product 8 Subtitle",
+      "default": "Stylish Urban Design"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_9",
+      "label": "Product 9 Subtitle",
+      "default": "Water-Resistant Material"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_10",
+      "label": "Product 10 Subtitle",
+      "default": "Compact Travel Solution"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_11",
+      "label": "Product 11 Subtitle",
+      "default": "Ergonomic Comfort Design"
+    },
+    {
+      "type": "text",
+      "id": "subtitle_12",
+      "label": "Product 12 Subtitle",
+      "default": "Premium Quality Materials"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Best Sellers",
+      "category": "Collection",
+      "settings": {
+        "title": "SHOP BEST SELLERS",
+        "products_to_show": 8
+      }
+    }
+  ]
+}
+{% endschema %}

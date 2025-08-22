@@ -1,0 +1,30 @@
+{% case media.media_type %}
+ 
+      {% when 'image' %}
+     
+         
+     <div class="sp">
+                          <a href="{{ media.src | img_url: 'master' }}" data-fancybox="gallery">
+                           <img src="{{ media.src | img_url: 'master' }}" class="img-fluid" />
+                          </a>
+                            </div>
+      
+      {% when 'video' %}
+ 
+       
+     <div class="sp">
+                                  
+                                  <div class="dsdsds554">
+                        
+                       {{ media | video_tag: controls: false, autoplay: true, loop:true }}
+  
+                                    
+                                  </div>
+                    
+                            </div>
+             
+       
+      {% else %}
+ 
+        
+    {% endcase %}

@@ -1,0 +1,109 @@
+<!-- hero_banner section start -->
+<div
+  data-aos="fade-up"
+  data-aos-duration="3000"
+  class="hero_banner banner_centered"
+>
+  
+  <div class="banner-wrap-img {% if section.settings.fix %}bwi-inner{% endif %}">
+    <img checkss src="{{ section.settings.image | img_url: 'master'}}" class="img-fluid desktop-only">
+    <img src="{{ section.settings.image1 | img_url: 'master'}}" class="img-fluid mobile-only">
+  </div>
+
+  <div class="container">
+    <div class="hero_b">
+      <div class="hero_banner_wrap">
+        <div class="main_heading_wrap">
+          <h1>{{ section.settings.heading }}</h1>
+          {{ section.settings.text }}
+
+          {% if section.settings.btn_url %}
+            <div class="cta">
+              <a href="{{ section.settings.btn_url }}" class="btn2 btn3">{{ section.settings.btn_text }}</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- hero_banner section end -->
+
+<style>
+      .banner_centered .main_heading_wrap .banner_text p{
+        max-width: 480px;
+      }
+
+      @media (max-width: 600px){
+        .banner_centered .hero_b {
+        top: {{section.settings.ptop}}px;
+        transform: translateY(15%) translateX(-50%);
+    }
+        .banner_centered .main_heading_wrap .btn2 {
+      margin-top: 12px;
+  }
+      }
+</style>
+
+{% schema %}
+{
+  "name": "Full Width Centered Text",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "fix",
+      "label": "Fix Scaling issue"
+    },
+
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image desktop"
+    },
+ {
+      "type": "image_picker",
+      "id": "image1",
+      "label": "Image mobile"
+    },
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+
+ {
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Button Text"
+    },
+    {
+      "type": "url",
+      "id": "btn_url",
+      "label": "Button Link"
+    },
+    {
+      "type": "number",
+      "id": "ptop",
+      "label": "Spacing top",
+      "default": 0
+    }
+
+
+
+
+
+  ],
+
+  "presets": [
+    {
+      "name": "Full Width Centered Text"
+    }
+  ]
+}
+{% endschema %}

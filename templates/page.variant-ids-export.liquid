@@ -1,0 +1,52 @@
+{% comment %}
+  Variant IDs Export for Facebook Feed
+  Add this as a new page template or use in collection template
+{% endcomment %}
+
+<h2>All Product Variants with IDs</h2>
+
+{% assign all_products = collections.all.products %}
+{% for product in all_products %}
+  <h3>{{ product.title }}</h3>
+  <ul>
+    {% for variant in product.variants %}
+      <li>
+        <strong>{{ variant.title }}</strong><br>
+        Variant ID: {{ variant.id }}<br>
+        Product URL: {{ shop.url }}{{ product.url }}<br>
+        Variant URL: {{ shop.url }}{{ product.url }}?variant={{ variant.id }}<br>
+        Price: {{ variant.price | money }}<br>
+        Available: {{ variant.available }}<br>
+        ---
+      </li>
+    {% endfor %}
+  </ul>
+{% endfor %}
+
+{% comment %}
+  Facebook Feed XML Format (use this structure):
+{% endcomment %}
+
+<h2>Facebook Feed XML Structure</h2>
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;rss version="2.0" xmlns:g="http://base.google.com/ns/1.0"&gt;
+&lt;channel&gt;
+{% for product in collections.all.products limit: 3 %}
+  {% for variant in product.variants %}
+  &lt;item&gt;
+    &lt;g:id&gt;{{ variant.id }}&lt;/g:id&gt;
+    &lt;g:title&gt;{{ variant.title | escape }}&lt;/g:title&gt;
+    &lt;g:description&gt;{{ product.description | strip_html | escape }}&lt;/g:description&gt;
+    &lt;g:link&gt;{{ shop.url }}{{ product.url }}?variant={{ variant.id }}&lt;/g:link&gt;
+    &lt;g:image_link&gt;{{ variant.featured_image | default: product.featured_image | img_url: 'grande' }}&lt;/g:image_link&gt;
+    &lt;g:availability&gt;{% if variant.available %}in stock{% else %}out of stock{% endif %}&lt;/g:availability&gt;
+    &lt;g:price&gt;{{ variant.price | money_without_currency }} {{ shop.currency }}&lt;/g:price&gt;
+    &lt;g:brand&gt;{{ shop.name }}&lt;/g:brand&gt;
+    &lt;g:condition&gt;new&lt;/g:condition&gt;
+  &lt;/item&gt;
+  {% endfor %}
+{% endfor %}
+&lt;/channel&gt;
+&lt;/rss&gt;
+</pre> 

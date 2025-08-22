@@ -1,0 +1,55 @@
+<div class="quality_wrap" data-aos="fade-up"
+     data-aos-duration="3000">
+  <div class="quality_row">
+    <h2 class="quality_title">{{section.settings.heading}}</h2>
+    <div class="quality_content"> {{section.settings.text}} </div>
+  </div>
+</div>
+<div class="get-start-wrap">
+  <div id="shopify-section-corporate-2" class="shopify-section">
+    <div class="section_head">
+      <h2>{{section.settings.heading2}}</h2>
+      {{section.settings.text2}} </div>
+  </div>
+  <div class="corporate-sales-form">
+    <div class="klaviyo-form-RaUEYC"></div>
+  </div>
+</div>
+{% schema %}
+{
+  "name": "Main corporate",
+  
+  "settings": [
+
+ 
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading 1"
+    },
+{
+      "type": "richtext",
+      "id": "text",
+      "label": "text 1"
+    },
+ {
+      "type": "textarea",
+      "id": "heading2",
+      "label": "Heading 2"
+    },
+{
+      "type": "richtext",
+      "id": "text2",
+      "label": "text 2"
+    }
+ 
+ 
+    
+  ],
+  "presets": [
+    {
+      "name": "Main corporate"
+    }
+  ]
+}
+{% endschema %} 

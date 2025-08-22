@@ -1,0 +1,88 @@
+ 
+
+
+ 
+
+ 
+ 
+            <div data-aos="fade-up"
+     data-aos-duration="3000" class="hero_banner">
+              
+          <div class="banner-wrap-img">
+                        <img src="{{ section.settings.image | img_url: 'master'}}" class="img-fluid desktop-only" />
+                       <img src="{{ section.settings.image1 | img_url: 'master'}}" class="img-fluid mobile-only" />
+            
+                
+              
+              </div>
+              
+                <div class="container">
+                    <div class="hero_b">   
+                        <div class="hero_banner_wrap">
+                            <div class="main_heading_wrap sdfsf55">
+                                <h1>{{section.settings.heading}}</h1>
+                                {{section.settings.text}}
+                               <a href="{{section.settings.link}}" class="btn">
+                                {{section.settings.buttontext}}
+                            </a>
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <!-- hero_banner section end -->
+
+{% schema %}
+{
+  "name": "loyalty-1",
+  "settings": [
+
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image desktop"
+    },
+ {
+      "type": "image_picker",
+      "id": "image1",
+      "label": "Image mobile"
+    },
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+ 
+ {
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    },
+ {
+      "type": "textarea",
+      "id": "buttontext",
+      "label": "buttontext"
+    },
+ {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    }
+
+
+ 
+ 
+    
+  ],
+  
+  "presets": [
+    {
+      "name": "loyalty-1"
+    }
+  ]
+}
+{% endschema %}

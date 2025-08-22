@@ -1,0 +1,959 @@
+
+
+<style {% if section.settings.section_preload == "false" %} class="gps-link gps-style" type="text/disabled-css" {% endif %}>.gps-559680054662005806.gps.gpsil [style*="--ai:"]{align-items:var(--ai)}.gps-559680054662005806.gps.gpsil [style*="--as:"]{align-self:var(--as)}.gps-559680054662005806.gps.gpsil [style*="--aspect:"]{aspect-ratio:var(--aspect)}.gps-559680054662005806.gps.gpsil [style*="--bg:"]{background:var(--bg)}.gps-559680054662005806.gps.gpsil [style*="--bga:"]{background-attachment:var(--bga)}.gps-559680054662005806.gps.gpsil [style*="--bgc:"]{background-color:var(--bgc)}.gps-559680054662005806.gps.gpsil [style*="--bgi:"]{background-image:var(--bgi)}.gps-559680054662005806.gps.gpsil [style*="--bgp:"]{background-position:var(--bgp)}.gps-559680054662005806.gps.gpsil [style*="--bgr:"]{background-repeat:var(--bgr)}.gps-559680054662005806.gps.gpsil [style*="--bgs:"]{background-size:var(--bgs)}.gps-559680054662005806.gps.gpsil [style*="--b:"]{border:var(--b)}.gps-559680054662005806.gps.gpsil [style*="--hvr-b:"]:hover{border:var(--hvr-b)}.gps-559680054662005806.gps.gpsil [style*="--focus-b:"]:focus{border:var(--focus-b)}.gps-559680054662005806.gps.gpsil [style*="--bb:"]{border-bottom:var(--bb)}.gps-559680054662005806.gps.gpsil [style*="--hvr-bb:"]:hover{border-bottom:var(--hvr-bb)}.gps-559680054662005806.gps.gpsil [style*="--focus-bb:"]:focus{border-bottom:var(--focus-bb)}.gps-559680054662005806.gps.gpsil [style*="--bc:"]{border-color:var(--bc)}.gps-559680054662005806.gps.gpsil [style*="--bblr:"]{border-bottom-left-radius:var(--bblr)}.gps-559680054662005806.gps.gpsil [style*="--hvr-bblr:"]:hover{border-bottom-left-radius:var(--hvr-bblr)}.gps-559680054662005806.gps.gpsil [style*="--focus-bblr:"]:focus{border-bottom-left-radius:var(--focus-bblr)}.gps-559680054662005806.gps.gpsil [style*="--bbrr:"]{border-bottom-right-radius:var(--bbrr)}.gps-559680054662005806.gps.gpsil [style*="--hvr-bbrr:"]:hover{border-bottom-right-radius:var(--hvr-bbrr)}.gps-559680054662005806.gps.gpsil [style*="--focus-bbrr:"]:focus{border-bottom-right-radius:var(--focus-bbrr)}.gps-559680054662005806.gps.gpsil [style*="--bs:"]{border-style:var(--bs)}.gps-559680054662005806.gps.gpsil [style*="--bt:"]{border-top:var(--bt)}.gps-559680054662005806.gps.gpsil [style*="--hvr-bt:"]:hover{border-top:var(--hvr-bt)}.gps-559680054662005806.gps.gpsil [style*="--focus-bt:"]:focus{border-top:var(--focus-bt)}.gps-559680054662005806.gps.gpsil [style*="--btlr:"]{border-top-left-radius:var(--btlr)}.gps-559680054662005806.gps.gpsil [style*="--hvr-btlr:"]:hover{border-top-left-radius:var(--hvr-btlr)}.gps-559680054662005806.gps.gpsil [style*="--focus-btlr:"]:focus{border-top-left-radius:var(--focus-btlr)}.gps-559680054662005806.gps.gpsil [style*="--btrr:"]{border-top-right-radius:var(--btrr)}.gps-559680054662005806.gps.gpsil [style*="--hvr-btrr:"]:hover{border-top-right-radius:var(--hvr-btrr)}.gps-559680054662005806.gps.gpsil [style*="--focus-btrr:"]:focus{border-top-right-radius:var(--focus-btrr)}.gps-559680054662005806.gps.gpsil [style*="--bw:"]{border-width:var(--bw)}.gps-559680054662005806.gps.gpsil [style*="--bottom:"]{bottom:var(--bottom)}.gps-559680054662005806.gps.gpsil [style*="--shadow:"]{box-shadow:var(--shadow)}.gps-559680054662005806.gps.gpsil [style*="--c:"]{color:var(--c)}.gps-559680054662005806.gps.gpsil [style*="--cg:"]{-moz-column-gap:var(--cg);column-gap:var(--cg)}.gps-559680054662005806.gps.gpsil [style*="--ff:"]{font-family:var(--ff)}.gps-559680054662005806.gps.gpsil [style*="--size:"]{font-size:var(--size)}.gps-559680054662005806.gps.gpsil [style*="--weight:"]{font-weight:var(--weight)}.gps-559680054662005806.gps.gpsil [style*="--fs:"]{font-style:var(--fs)}.gps-559680054662005806.gps.gpsil [style*="--gg:"]{grid-gap:var(--gg)}.gps-559680054662005806.gps.gpsil [style*="--gtc:"]{grid-template-columns:var(--gtc)}.gps-559680054662005806.gps.gpsil [style*="--h:"]{height:var(--h)}.gps-559680054662005806.gps.gpsil [style*="--jc:"]{justify-content:var(--jc)}.gps-559680054662005806.gps.gpsil [style*="--left:"]{left:var(--left)}.gps-559680054662005806.gps.gpsil [style*="--ls:"]{letter-spacing:var(--ls)}.gps-559680054662005806.gps.gpsil [style*="--lh:"]{line-height:var(--lh)}.gps-559680054662005806.gps.gpsil [style*="--tdt:"]{text-decoration-thickness:var(--tdt)}.gps-559680054662005806.gps.gpsil [style*="--tdc:"]{text-decoration-color:var(--tdc)}.gps-559680054662005806.gps.gpsil [style*="--tdl:"]{text-decoration-line:var(--tdl)}.gps-559680054662005806.gps.gpsil [style*="--m:"]{margin:var(--m)}.gps-559680054662005806.gps.gpsil [style*="--mb:"]{margin-bottom:var(--mb)}.gps-559680054662005806.gps.gpsil [style*="--ml:"]{margin-left:var(--ml)}.gps-559680054662005806.gps.gpsil [style*="--mr:"]{margin-right:var(--mr)}.gps-559680054662005806.gps.gpsil [style*="--objf:"]{-o-object-fit:var(--objf);object-fit:var(--objf)}.gps-559680054662005806.gps.gpsil [style*="--op:"]{opacity:var(--op)}.gps-559680054662005806.gps.gpsil [style*="--o:"]{order:var(--o)}.gps-559680054662005806.gps.gpsil [style*="--pc:"]{place-content:var(--pc)}.gps-559680054662005806.gps.gpsil [style*="--p:"]{padding:var(--p)}.gps-559680054662005806.gps.gpsil [style*="--pb:"]{padding-bottom:var(--pb)}.gps-559680054662005806.gps.gpsil [style*="--pl:"]{padding-left:var(--pl)}.gps-559680054662005806.gps.gpsil [style*="--pr:"]{padding-right:var(--pr)}.gps-559680054662005806.gps.gpsil [style*="--pt:"]{padding-top:var(--pt)}.gps-559680054662005806.gps.gpsil [style*="--pos:"]{position:var(--pos)}.gps-559680054662005806.gps.gpsil [style*="--right:"]{right:var(--right)}.gps-559680054662005806.gps.gpsil [style*="--ta:"]{text-align:var(--ta)}.gps-559680054662005806.gps.gpsil [style*="--ts:"]{text-shadow:var(--ts)}.gps-559680054662005806.gps.gpsil [style*="--tt:"]{text-transform:var(--tt)}.gps-559680054662005806.gps.gpsil [style*="--top:"]{top:var(--top)}.gps-559680054662005806.gps.gpsil [style*="--t:"]{transform:var(--t)}.gps-559680054662005806.gps.gpsil [style*="--ws:"]{white-space:var(--ws)}.gps-559680054662005806.gps.gpsil [style*="--w:"]{width:var(--w)}.gps-559680054662005806.gps.gpsil [style*="--z:"]{z-index:var(--z)}.gps-559680054662005806.gps.gpsil [style*="--line-clamp:"]{-webkit-box-orient:vertical;-webkit-line-clamp:var(--line-clamp);display:-webkit-box;overflow:hidden}@media only screen and (max-width:1024px){.gps-559680054662005806.gps.gpsil [style*="--aspect-tablet:"]{aspect-ratio:var(--aspect-tablet)}.gps-559680054662005806.gps.gpsil [style*="--bottom-tablet:"]{bottom:var(--bottom-tablet)}.gps-559680054662005806.gps.gpsil [style*="--size-tablet:"]{font-size:var(--size-tablet)}.gps-559680054662005806.gps.gpsil [style*="--gtc-tablet:"]{grid-template-columns:var(--gtc-tablet)}.gps-559680054662005806.gps.gpsil [style*="--h-tablet:"]{height:var(--h-tablet)}.gps-559680054662005806.gps.gpsil [style*="--jc-tablet:"]{justify-content:var(--jc-tablet)}.gps-559680054662005806.gps.gpsil [style*="--left-tablet:"]{left:var(--left-tablet)}.gps-559680054662005806.gps.gpsil [style*="--lh-tablet:"]{line-height:var(--lh-tablet)}.gps-559680054662005806.gps.gpsil [style*="--mb-tablet:"]{margin-bottom:var(--mb-tablet)}.gps-559680054662005806.gps.gpsil [style*="--o-tablet:"]{order:var(--o-tablet)}.gps-559680054662005806.gps.gpsil [style*="--pb-tablet:"]{padding-bottom:var(--pb-tablet)}.gps-559680054662005806.gps.gpsil [style*="--pl-tablet:"]{padding-left:var(--pl-tablet)}.gps-559680054662005806.gps.gpsil [style*="--pr-tablet:"]{padding-right:var(--pr-tablet)}.gps-559680054662005806.gps.gpsil [style*="--pt-tablet:"]{padding-top:var(--pt-tablet)}.gps-559680054662005806.gps.gpsil [style*="--right-tablet:"]{right:var(--right-tablet)}.gps-559680054662005806.gps.gpsil [style*="--top-tablet:"]{top:var(--top-tablet)}.gps-559680054662005806.gps.gpsil [style*="--t-tablet:"]{transform:var(--t-tablet)}.gps-559680054662005806.gps.gpsil [style*="--ws-tablet:"]{white-space:var(--ws-tablet)}.gps-559680054662005806.gps.gpsil [style*="--w-tablet:"]{width:var(--w-tablet)}.gps-559680054662005806.gps.gpsil [style*="--line-clamp-tablet:"]{-webkit-box-orient:vertical;-webkit-line-clamp:var(--line-clamp-tablet);display:-webkit-box;overflow:hidden}}@media only screen and (max-width:767px){.gps-559680054662005806.gps.gpsil [style*="--aspect-mobile:"]{aspect-ratio:var(--aspect-mobile)}.gps-559680054662005806.gps.gpsil [style*="--bottom-mobile:"]{bottom:var(--bottom-mobile)}.gps-559680054662005806.gps.gpsil [style*="--cg-mobile:"]{-moz-column-gap:var(--cg-mobile);column-gap:var(--cg-mobile)}.gps-559680054662005806.gps.gpsil [style*="--size-mobile:"]{font-size:var(--size-mobile)}.gps-559680054662005806.gps.gpsil [style*="--gg-mobile:"]{grid-gap:var(--gg-mobile)}.gps-559680054662005806.gps.gpsil [style*="--gtc-mobile:"]{grid-template-columns:var(--gtc-mobile)}.gps-559680054662005806.gps.gpsil [style*="--h-mobile:"]{height:var(--h-mobile)}.gps-559680054662005806.gps.gpsil [style*="--jc-mobile:"]{justify-content:var(--jc-mobile)}.gps-559680054662005806.gps.gpsil [style*="--left-mobile:"]{left:var(--left-mobile)}.gps-559680054662005806.gps.gpsil [style*="--lh-mobile:"]{line-height:var(--lh-mobile)}.gps-559680054662005806.gps.gpsil [style*="--mb-mobile:"]{margin-bottom:var(--mb-mobile)}.gps-559680054662005806.gps.gpsil [style*="--o-mobile:"]{order:var(--o-mobile)}.gps-559680054662005806.gps.gpsil [style*="--pb-mobile:"]{padding-bottom:var(--pb-mobile)}.gps-559680054662005806.gps.gpsil [style*="--pl-mobile:"]{padding-left:var(--pl-mobile)}.gps-559680054662005806.gps.gpsil [style*="--pr-mobile:"]{padding-right:var(--pr-mobile)}.gps-559680054662005806.gps.gpsil [style*="--pt-mobile:"]{padding-top:var(--pt-mobile)}.gps-559680054662005806.gps.gpsil [style*="--right-mobile:"]{right:var(--right-mobile)}.gps-559680054662005806.gps.gpsil [style*="--top-mobile:"]{top:var(--top-mobile)}.gps-559680054662005806.gps.gpsil [style*="--t-mobile:"]{transform:var(--t-mobile)}.gps-559680054662005806.gps.gpsil [style*="--ws-mobile:"]{white-space:var(--ws-mobile)}.gps-559680054662005806.gps.gpsil [style*="--w-mobile:"]{width:var(--w-mobile)}.gps-559680054662005806.gps.gpsil [style*="--line-clamp-mobile:"]{-webkit-box-orient:vertical;-webkit-line-clamp:var(--line-clamp-mobile);display:-webkit-box;overflow:hidden}}.gps-559680054662005806 .gp-pointer-events-none{pointer-events:none}.gps-559680054662005806 .gp-invisible{visibility:hidden}.gps-559680054662005806 .gp-absolute{position:absolute}.gps-559680054662005806 .gp-relative{position:relative}.gps-559680054662005806 .gp-left-0{left:0}.gps-559680054662005806 .gp-top-0{top:0}.gps-559680054662005806 .gp-z-0{z-index:0}.gps-559680054662005806 .gp-z-\[90\]{z-index:90}.gps-559680054662005806 .\!gp-m-0{margin:0!important}.gps-559680054662005806 .\!gp-m-auto{margin:auto!important}.gps-559680054662005806 .gp-mx-auto{margin-left:auto;margin-right:auto}.gps-559680054662005806 .gp-mb-0{margin-bottom:0}.gps-559680054662005806 .gp-block{display:block}.gps-559680054662005806 .gp-flex{display:flex}.gps-559680054662005806 .gp-inline-flex{display:inline-flex}.gps-559680054662005806 .gp-grid{display:grid}.gps-559680054662005806 .gp-contents{display:contents}.gps-559680054662005806 .\!gp-hidden{display:none!important}.gps-559680054662005806 .gp-hidden{display:none}.gps-559680054662005806 .gp-h-0{height:0}.gps-559680054662005806 .gp-h-5{height:20px}.gps-559680054662005806 .gp-h-full{height:100%}.gps-559680054662005806 .gp-w-5{width:20px}.gps-559680054662005806 .gp-w-full{width:100%}.gps-559680054662005806 .\!gp-min-w-full{min-width:100%!important}.gps-559680054662005806 .\!gp-max-w-full{max-width:100%!important}.gps-559680054662005806 .\!gp-max-w-none{max-width:none!important}.gps-559680054662005806 .gp-max-w-full{max-width:100%}.gps-559680054662005806 .gp-cursor-default{cursor:default}.gps-559680054662005806 .gp-cursor-pointer{cursor:pointer}.gps-559680054662005806 .gp-grid-flow-row{grid-auto-flow:row}.gps-559680054662005806 .gp-grid-rows-\[1fr\]{grid-template-rows:1fr}.gps-559680054662005806 .gp-flex-col{flex-direction:column}.gps-559680054662005806 .gp-flex-wrap{flex-wrap:wrap}.gps-559680054662005806 .gp-items-start{align-items:flex-start}.gps-559680054662005806 .gp-items-end{align-items:flex-end}.gps-559680054662005806 .gp-items-center{align-items:center}.gps-559680054662005806 .gp-justify-center{justify-content:center}.gps-559680054662005806 .gp-gap-3{gap:12px}.gps-559680054662005806 .gp-overflow-hidden{overflow:hidden}.gps-559680054662005806 .gp-break-words{overflow-wrap:break-word}.gps-559680054662005806 .\!gp-rounded-none{border-radius:0!important}.gps-559680054662005806 .gp-bg-g-bg-3{background-color:var(--g-c-bg-3)}.gps-559680054662005806 .gp-bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity))}.gps-559680054662005806 .\!gp-pb-0{padding-bottom:0!important}.gps-559680054662005806 .gp-text-center{text-align:center}.gps-559680054662005806 .gp-no-underline{text-decoration-line:none}.gps-559680054662005806 .gp-decoration-g-highlight{text-decoration-color:var(--g-c-highlight)}.gps-559680054662005806 .gp-opacity-0{opacity:0}.gps-559680054662005806 .gp-opacity-25{opacity:.25}.gps-559680054662005806 .gp-opacity-30{opacity:.3}.gps-559680054662005806 .gp-opacity-75{opacity:.75}.gps-559680054662005806 .gp-outline-1{outline-width:1px}.gps-559680054662005806 .-gp-outline-offset-1{outline-offset:-1px}.gps-559680054662005806 .gp-transition-colors{transition-duration:.15s;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke;transition-timing-function:cubic-bezier(.4,0,.2,1)}.gps-559680054662005806 .gp-transition-opacity{transition-duration:.15s;transition-property:opacity;transition-timing-function:cubic-bezier(.4,0,.2,1)}.gps-559680054662005806 .gp-duration-200{transition-duration:.2s}.gps-559680054662005806 .gp-ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.gps-559680054662005806 .disabled\:gp-btn-disabled:disabled{cursor:default}.gps-559680054662005806 .disabled\:gp-opacity-30:disabled{opacity:.3}@media (hover:hover) and (pointer:fine){.gps-559680054662005806 .gp-group:hover .group-hover\:gp-opacity-0{opacity:0}}.gps-559680054662005806 .gp-group\/button:active .group-active\/button\:\!gp-text-inherit{color:inherit!important}.gps-559680054662005806 .data-\[disabled\=true\]\:gp-hidden[data-disabled=true],.gps-559680054662005806 .data-\[hidden\=true\]\:gp-hidden[data-hidden=true]{display:none}.gps-559680054662005806 .data-\[outline\=active\]\:gp-outline[data-outline=active]{outline-style:solid}.gps-559680054662005806 .gp-group[data-state=loading] .group-data-\[state\=loading\]\:gp-visible{visibility:visible}.gps-559680054662005806 .gp-group[data-state=loading] .group-data-\[state\=loading\]\:gp-invisible{visibility:hidden}@keyframes gp-spin{to{transform:rotate(1turn)}}.gps-559680054662005806 .gp-group[data-state=loading] .group-data-\[state\=loading\]\:gp-animate-spin{animation:gp-spin 1s linear infinite}@media (max-width:1024px){.gps-559680054662005806 .tablet\:\!gp-hidden{display:none!important}.gps-559680054662005806 .tablet\:gp-hidden{display:none}}@media (max-width:767px){.gps-559680054662005806 .mobile\:\!gp-hidden{display:none!important}.gps-559680054662005806 .mobile\:gp-hidden{display:none}}.gps-559680054662005806 .\[\&\>\*\>div\]\:gp-contents>*>div{display:contents}.gps-559680054662005806 .\[\&\>\*\]\:gp-grid-rows-\[subgrid\]>*{grid-template-rows:subgrid}.gps-559680054662005806 .\[\&\>\*\]\:gp-gap-y-0>*{row-gap:0}.gps-559680054662005806 .\[\&_\*\]\:gp-max-w-full *{max-width:100%}.gps-559680054662005806 .\[\&_p\]\:gp-whitespace-pre-line p{white-space:pre-line}</style>
+
+
+    
+
+    {% assign locationOrigin = request.origin | append: routes.root_url | split: '/' | join: '/' %}
+
+    
+        <section
+          class="gp-mx-auto gp-max-w-full [&_*]:gp-max-w-full {% if section.settings.section_preload == "false" %}gps-lazy {% endif %}"
+          style="--w:100%;--w-tablet:100%;--w-mobile:100%"
+        >
+          
+    <gp-row gp-data='{"background":{"desktop":{"attachment":"scroll","color":"#FFFFFF","image":{"height":0,"src":"","width":0},"position":{"x":50,"y":50},"repeat":"no-repeat","size":"cover","type":"color"}},"uid":"gMf8oL-EoR"}' data-id="gMf8oL-EoR" id="gMf8oL-EoR" data-same-height-subgrid-container class="gMf8oL-EoR gp-relative gp-mx-auto gp-mb-0 gp-grid gp-max-w-full gp-transition-colors gp-duration-200 gp-ease-in-out [&_*]:gp-max-w-full gp-grid-rows-[1fr]" style="--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:grid;--d-mobile:grid;--d-tablet:grid;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--pt:50px;--pl:100px;--pb:var(--g-s-4xl);--pr:100px;--pt-mobile:25px;--pl-mobile:15px;--pb-mobile:var(--g-s-4xl);--pr-mobile:15px;--pt-tablet:50px;--pl-tablet:15px;--pb-tablet:var(--g-s-4xl);--pr-tablet:15px;--cg:var(--g-s-2xl);--gtc:minmax(0, 12fr);--w:100%;--w-tablet:100%;--w-mobile:100%;--bgc:#FFFFFF;--bgi:url();--bgp:50% 50%;--bgs:cover;--bgr:no-repeat;--bga:scroll;--pc:start">
+      
+
+      <div
+      data-same-height-display-contents
+      style="--jc:start"
+      class="gww32hy0xM gp-relative gp-flex gp-flex-col"
+    >
+      
+    
+
+    
+
+    
+    <gp-row gp-data='{"background":{"desktop":{"attachment":"scroll","color":"transparent","image":{"height":0,"src":"","width":0},"position":{"x":50,"y":50},"repeat":"no-repeat","size":"cover","type":"color"}},"uid":"gJ9ftXhZnu"}' data-id="gJ9ftXhZnu" id="gJ9ftXhZnu" data-same-height-subgrid-container class="gJ9ftXhZnu gp-relative gp-mx-auto gp-mb-0 gp-grid gp-max-w-full gp-transition-colors gp-duration-200 gp-ease-in-out [&_*]:gp-max-w-full gp-grid-rows-[1fr]" style="--bs:solid;--bw:0px;--bc:#121212;--shadow:none;--d:grid;--d-mobile:grid;--d-tablet:grid;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:0px;--pl:25px;--pr:25px;--mb-mobile:0px;--pl-mobile:0px;--pr-mobile:0px;--cg:32px;--gtc:minmax(0, 12fr);--w:100%;--bgc:transparent;--bgi:url();--bgp:50% 50%;--bgs:cover;--bgr:no-repeat;--bga:scroll;--pc:start">
+      
+
+      <div
+      data-same-height-display-contents
+      style="--jc:start"
+      class="gKJgtpw6KO gp-relative gp-flex gp-flex-col"
+    >
+      
+    {% assign locationOrigin = request.origin | append: routes.root_url | split: '/' | join: '/' %}
+    <div data-id="gkoP394Tax"
+        class="gkoP394Tax"
+        style="--ta:center;--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:block;--d-mobile:block;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:0px;--dynamic-source-color:#F4F4F4"
+        data-test-force-publish="1753816327331"
+      >
+      <div class="gp-flex" style="--jc:center">
+        <h2
+          data-gp-text
+          class=" gp-text-instant gp-text"
+          style="--w:100%;--w-tablet:100%;--w-mobile:100%;--tdt:auto;--ts:none;--ta:center;--c:#242424;--fs:normal;--ff:var(--g-font-BebasKai, 'BebasKai'), var(--g-font-heading, heading);--weight:400;--ls:normal;--size:50px;--size-tablet:45px;--size-mobile:34px;--lh:130%;--lh-tablet:130%;--lh-mobile:130%;word-break:break-word;overflow:hidden;--tdl:"
+        >
+          {{ section.settings.ggkoP394Tax_text | replace: '$locationOrigin', locationOrigin }}
+        </h2>
+      </div>
+    </div>
+    
+    {% assign locationOrigin = request.origin | append: routes.root_url | split: '/' | join: '/' %}
+    <div data-id="gW6q09Msnc"
+        class="gW6q09Msnc"
+        style="--ta:center;--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:block;--d-mobile:block;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:50px;--mb-mobile:30px;--pl-mobile:10px;--pr-mobile:10px;--mb-tablet:44px;--dynamic-source-color:#F4F4F4"
+        data-test-force-publish="1753816327331"
+      >
+      <div class="gp-flex" style="--jc:center">
+        <h2
+          data-gp-text
+          class=" gp-text-instant gp-text"
+          style="--w:100%;--w-tablet:100%;--w-mobile:100%;--tdt:auto;--ts:none;--ta:center;--c:#575757;--fs:normal;--ff:var(--g-font-sans-serif, 'sans-serif'), var(--g-font-heading, heading);--weight:400;--ls:normal;--size:19px;--size-tablet:19px;--size-mobile:14px;--lh:150%;--lh-tablet:150%;--lh-mobile:150%;word-break:break-word;overflow:hidden;--tdl:"
+        >
+          {{ section.settings.ggW6q09Msnc_text | replace: '$locationOrigin', locationOrigin }}
+        </h2>
+      </div>
+    </div>
+    
+    
+        <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-product-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+        <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-same-height-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+        
+
+    
+    <div
+      class="gp-relative gp-flex gNLB-zsGrF"
+      style="--d:block;--d-mobile:block;--d-tablet:block;--mb:95px;--mb-mobile:0px"
+    >
+      <div class='gp-flex gp-w-full' style="--jc:center">
+        <div
+          style="--bs:none;--bw:0px;--bc:transparent;--shadow:none;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--pt:0px;--pb:0px;--pt-mobile:0px;--pb-mobile:0px;--w:1000px"
+        >
+          {%- assign gpBkProduct = product -%}
+          {%- assign gpBkProducts = products -%}
+          
+      {%- liquid
+        assign productHandles = ''| split: ','
+        assign products = null
+        assign target_collection = null
+        assign productSrc = 'DynamicCollection'
+        assign c = 0
+        assign limit = 25
+        if request.page_type == 'collection' or preview_page_type == 'collection'
+          assign target_collection = collection
+          if target_collection == empty or target_collection == null
+            if '482328215586' == 'latest'
+              assign target_collection = collections | sort: 'updated_at'  | first
+            else
+              for collection in collections
+                if collection.id == 482328215586
+                  assign target_collection = collection
+                  break
+                endif
+              endfor
+            endif
+          endif
+          paginate target_collection.products by 25
+            assign products = target_collection.products  
+          endpaginate
+        else
+          if productSrc == 'RelatedProduct'
+            
+    
+  
+          elsif productSrc == 'PickProduct'
+            unless false
+              assign products = null | sort
+              for handle in productHandles
+                assign productH = all_products[handle] | sort
+                assign products = products | concat: productH
+              endfor
+              assign limit = products.length
+            else
+              if 0 == 0
+                paginate collections.all.products by 100000
+                  assign products = collections.all.products  | sort : "created_at"  | reverse
+                endpaginate
+              endif
+            endunless
+          else
+            if '482328215586' == 'latest'
+              assign target_collection = collections | sort: 'updated_at'  | first
+            else
+              for collection in collections
+                if collection.id == 482328215586
+                  assign target_collection = collection
+                  break
+                endif
+              endfor
+            endif
+            paginate target_collection.products by 25
+              assign products = target_collection.products  
+            endpaginate
+          endif
+        endif
+      -%}
+    
+          
+    {%- if products == null -%}
+    {%- if count == 0 and 0 == 0 -%}
+      {% if 'DynamicCollection' == 'RelatedProduct' -%}
+          <div>{{ 'gempages.ProductList.no_related_products' | t }}</div>
+        {% else %}
+          <div>{{ 'gempages.ProductList.no_products_found' | t }}</div>
+      {%- endif -%}
+    {%- endif -%}
+    {%-else-%}
+      
+    <div
+      items-repeat="true" data-id="gNLB-zsGrF"
+      style="--cg:50px;--cg-mobile:24px;--gtc:repeat(2, minmax(0, 1fr));--gtc-tablet:repeat(4, minmax(0, 1fr));--gtc-mobile:repeat(2, minmax(0, 1fr))"
+      class="!gp-m-auto gp-grid gp-w-full gp-grid-flow-row"
+    >
+      
+      <gp-same-height
+        class="gp-contents"
+        style="visibility: hidden"
+        gp-data='{"targetUid":"gHMR-J0gEU","slidesToShow":{"desktop":"2","mobile":2,"tablet":4},"rowGap":{"desktop":"35px","mobile":"20px"}}'>
+        
+      {%- assign count = 0 -%}
+      {%- for product in products limit: limit -%}
+      {%- if product.id != empty -%}
+      {%- assign count = count | plus: 1 -%}
+      {%- assign variant = product.selected_or_first_available_variant -%}
+      {%- assign product_form_id = 'product-form-' | append: "gNLB-zsGrF" | append: product.id -%}
+        
+      <gp-product
+        gp-context='{"variantSelected": {{ variant | json | escape }}, "quantity": 1 ,  "formId": "{{ product_form_id }}"}'
+        gp-data='{"variantSelected": {{ variant | json | escape }}, "quantity": 1, "productUrl":{{ product.url | json | escape }}, "productHandle":{{ product.handle | json | escape }}, "collectionUrl": {{ collection.url | json | escape }}, "collectionHandle": {{ collection.handle | json | escape }},"pageContext" : {"pageType":"GP_COLLECTION","sectionName":"","isPreviewing":false,"isOptimizePlan":false,"isTranslateWithLocale":false,"isLazyLoadSection":true,"isLazyLoadImage":false,"hasCollectionHandle":true,"numberOfProductOfProductList":0,"pageBackground":"","fontType":"google","primaryLocale":"","showPriceCurrency":false,"enableLazyLoadImage":false}}'
+        class="gp-contents"
+
+      >
+        {%- form 'product', product, id: product_form_id, class: 'form contents gp-contents [&>*>div]:gp-contents [&>*]:gp-grid-rows-[subgrid] [&>*]:gp-gap-y-0 gp-child-item-gNLB-zsGrF',  data-type: 'add-to-cart-form', autocomplete: 'off' -%}
+        <input type="hidden" name="id" value="{{ variant.id }}" />
+        <input type="hidden" min="1" name="quantity"  value="{{ quantity }}" />
+        <button type="submit" onclick="return false;" style="display:none;"></button>
+          
+      
+            
+    
+
+    
+
+    
+    <gp-row gp-data='{"background":{"desktop":{"attachment":"scroll","color":"transparent","image":{"height":0,"src":"","width":0},"position":{"x":50,"y":50},"repeat":"no-repeat","size":"cover","type":"color"}},"uid":"gHMR-J0gEU"}' data-id="gHMR-J0gEU" id="gHMR-J0gEU" data-same-height-subgrid-container class="gHMR-J0gEU gp-relative gp-mx-auto gp-mb-0 gp-grid gp-max-w-full gp-transition-colors gp-duration-200 gp-ease-in-out [&_*]:gp-max-w-full gp-grid-rows-[1fr]" style="--cg:var(--g-s-2xl);--gtc:minmax(0, 12fr);--w:100%;--w-tablet:100%;--w-mobile:100%;--bgc:transparent;--bgi:url();--bgp:50% 50%;--bgs:cover;--bgr:no-repeat;--bga:scroll;--pc:start">
+      
+
+      <div
+      data-same-height-display-contents
+      style="--ai:normal;--jc:start;--o:0"
+      class="gLXZzUU_81 gp-relative gp-flex gp-flex-col"
+    >
+      
+    
+
+    
+
+    
+    <gp-row gp-data='{"background":{"desktop":{"attachment":"scroll","color":"transparent","image":{"height":0,"src":"","width":0},"position":{"x":50,"y":50},"repeat":"no-repeat","size":"cover","type":"color"}},"uid":"g8lfaKCPnn"}' data-id="g8lfaKCPnn" id="g8lfaKCPnn" data-same-height-subgrid-container class="g8lfaKCPnn gp-relative gp-mx-auto gp-mb-0 gp-grid gp-max-w-full gp-transition-colors gp-duration-200 gp-ease-in-out [&_*]:gp-max-w-full gp-grid-rows-[1fr]" style="--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:grid;--d-mobile:grid;--d-tablet:grid;--op:100%;--pageType:GP_COLLECTION;--pos:static;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:0px;--cg:var(--g-s-2xl);--gtc:minmax(0, 12fr);--w:100%;--w-tablet:100%;--w-mobile:100%;--bgc:transparent;--bgi:url();--bgp:50% 50%;--bgs:cover;--bgr:no-repeat;--bga:scroll;--pc:start">
+      
+
+      <div
+      data-same-height-display-contents
+      style="--jc:start"
+      class="gB1VgQVt78 gp-relative gp-flex gp-flex-col"
+    >
+      <div gp-el-wrapper style="--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:none;--d-mobile:none;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--pos:absolute;--right:8px;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:var(--g-s-l);--top:8px;--z:1" class="g37dC0lG96 ">
+      
+    {% liquid
+      assign price = variant.price | times: 1.0
+      assign salePrice = variant.compare_at_price | times: 1.0
+      assign priceSave = salePrice | minus: price
+      assign prefixVal = 
+      assign suffixVal = 
+    %}
+    {% if salePrice == null or price == null %}{% assign pricePercentage = prefixVal | append: ' 0% ' | append: suffixVal %}{% else %}{% assign salePercent = priceSave | divided_by: salePrice | times: 100  | round %}
+          {% assign pricePercentage = prefixVal | append: ' ' | append: salePercent | append: '% ' | append: suffixVal %}{% endif %}
+
+    <gp-product-tag
+      class="gp-block data-[disabled=true]:gp-hidden"
+      style="--ta:left"
+      data-id="g37dC0lG96"
+      data-disabled="{% if salePercent > 0 %}false{% else %}true{% endif %}"
+      gp-data='{"setting":{"customContent":{"prefix":"","suffix":"","unit":"percentage"},"translate":"customContent"}, "id": "g37dC0lG96", "locale": "{{shop.locale}}", "currency": "{{shop.currency}}", "moneyFormat": "{{ shop.money_format | replace: '"', '\"' | escape }}"}'
+      price-save="{{priceSave}}"
+    >
+      <div class="gp-inline-flex gp-flex-wrap gp-items-end gp-gap-3" >
+        <div class="gp-flex gp-items-center gp-w-full gp-h-full  gp-bg-g-bg-3" style="--pl:12px;--pr:12px;--pt:4px;--pb:4px;--bs:none;--bw:0px;--bc:transparent;--c:#EA3335;--bgc:var(--g-c-bg-3, bg-3);--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px">
+          
+    {% assign locationOrigin = request.origin | append: routes.root_url | split: '/' | join: '/' %}
+    <div id="p-tag-g37dC0lG96" data-id
+        
+        style="--dynamic-source-color:#F4F4F4"
+        data-test-force-publish="1753816327348"
+      >
+      <div  >
+        <div
+          data-gp-text
+          class=" gp-text-instant"
+          style="--w:100%;--tdt:auto;--ta:left;--c:#EA3335;--fs:normal;--ff:var(--g-font-heading, heading);--weight:700;--ls:normal;--size:13px;--size-tablet:13px;--size-mobile:12px;--lh:150%;--lh-tablet:150%;--lh-mobile:150%;word-break:break-word;overflow:hidden;--tdl:"
+        >
+          {{ pricePercentage }}
+        </div>
+      </div>
+    </div>
+    
+        </div>
+      </div>
+
+  </gp-product-tag>
+  <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-product-tag-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+  
+      </div>
+  <style>
+    .gem-slider-item-gGoGxXk2Nz-{{product.id}}.gp-gallery-image-item::after, .gem-slider-item-gp-gallery-gGoGxXk2Nz-{{product.id}}.gp-gallery-image-item::after {
+      content: "";
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      z-index: 999;
+      top: 0;
+      left: 0;
+      
+  border-width: 1px 1px 1px 1px;
+  border-color: #000000;
+  
+      
+    }
+    .gem-slider-item-gGoGxXk2Nz-{{product.id}}.gp-gallery-image-item[data-outline=active]:after, .gem-slider-item-gp-gallery-gGoGxXk2Nz-{{product.id}}.gp-gallery-image-item[data-outline=active]:after {
+      pointer-events: none;
+    }
+  </style>
+  
+    {% assign featured_image = product.featured_image %}
+    {% if variant != null and variant.featured_image != null %}{% assign featured_image = variant.featured_image %}{% endif %}
+  
+    <gp-product-images
+      gp-data='
+    {
+      "id":"gGoGxXk2Nz",
+      "pageContext": {"pageType":"GP_COLLECTION","sectionName":"","isPreviewing":false,"isOptimizePlan":false,"isTranslateWithLocale":false,"isLazyLoadSection":true,"isLazyLoadImage":false,"hasCollectionHandle":true,"numberOfProductOfProductList":0,"pageBackground":"","fontType":"google","primaryLocale":"","showPriceCurrency":false,"enableLazyLoadImage":false},
+      "setting":{"arrowIcon":"<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 32 32\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n              <rect width=\"32\" height=\"32\" rx=\"16\" fill=\"white\"/>\n              <path d=\"M12.7434 20.8964C12.4176 21.2223 12.4176 21.7506 12.7434 22.0764C13.0693 22.4023 13.5976 22.4023 13.9234 22.0764L19.6227 16.3771C19.8311 16.1687 19.8311 15.8308 19.6227 15.6224L13.9234 9.9231C13.5976 9.59725 13.0693 9.59725 12.7434 9.9231C12.4176 10.2489 12.4176 10.7772 12.7434 11.1031L17.6401 15.9998L12.7434 20.8964Z\" fill=\"black\"/>\n              </svg>\n              ","borderActive":{"borderType":"none","borderWidth":"1px","color":"#000000","isCustom":"false","width":"1px 1px 1px 1px"},"clickOpenLightBox":{"desktop":false,"mobile":false,"tablet":false},"dragToScroll":true,"ftArrowIcon":"<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n    <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M12 0C18.6274 0 24 5.37258 24 12C24 18.6274 18.6274 24 12 24C5.37258 24 0 18.6274 0 12C0 5.37258 5.37258 0 12 0ZM10.6828 8.13017C10.5266 7.95661 10.2734 7.95661 10.1172 8.13017C9.96095 8.30374 9.96095 8.58515 10.1172 8.75871L13.0343 12L10.1172 15.2413C9.96095 15.4149 9.96095 15.6963 10.1172 15.8698C10.2734 16.0434 10.5266 16.0434 10.6828 15.8698L13.8828 12.3143C14.0391 12.1407 14.0391 11.8593 13.8828 11.6857L10.6828 8.13017Z\" fill=\"currentColor\"/>\n    </svg>","ftArrowIconColor":"#000000","ftClickOpenLightBox":{"desktop":"product-link"},"ftDotActiveColor":{"desktop":"line-3"},"ftDotColor":{"desktop":"bg-1"},"ftDotGapToCarousel":{"desktop":16},"ftDotSize":{"desktop":12},"ftDotStyle":{"desktop":"none"},"ftNavigationPosition":{"desktop":"none","mobile":"none","tablet":"none"},"hoverEffect":"other","loop":{"desktop":false},"navigationPosition":{"desktop":"inside","mobile":"inside","tablet":"inside"},"otherImage":1,"pauseOnHover":true,"preDisplay":"1st-images","speed":1,"type":{"desktop":"images","mobile":"images","tablet":"images"},"typeDisplay":"all-images","zoom":150,"zoomType":"default"},
+      "styles":{"align":{"desktop":"center","mobile":"center","tablet":"center"},"dotActiveColor":{"desktop":"line-3"},"dotColor":{"desktop":"bg-1"},"ftCorner":{"bblr":"0px","bbrr":"0px","btlr":"0px","btrr":"0px","radiusType":"custom"},"ftLayout":{"desktop":"cover"},"ftShape":{"desktop":{"gap":"","height":"","shape":"vertical","shapeLinked":true,"shapeValue":"3/4","width":"100%"},"mobile":{"shape":"original","shapeLinked":true,"width":"100%"},"tablet":{"shape":"original","shapeLinked":true,"width":"100%"}},"itemSpacing":{"desktop":"var(--g-s-s)","mobile":"var(--g-s-s)"},"layout":{"desktop":"cover"},"position":{"desktop":"only-feature","mobile":"only-feature","tablet":"only-feature"},"ratioLayout":{"desktop":[20,80],"mobile":[20,80],"tablet":[20,80]},"ratioLayoutRight":{"desktop":[80,20],"mobile":[80,20],"tablet":[80,20]},"shape":{"desktop":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1","width":"100%"},"mobile":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"},"tablet":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"}},"shapeFor1Col":{"desktop":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1","width":"100%"},"mobile":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"},"tablet":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"}},"shapeFor2Col":{"desktop":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1","width":"50%"},"mobile":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"},"tablet":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"}},"shapeForBottom":{"desktop":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1","width":"20%"},"mobile":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"},"tablet":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"}},"shapeForFtOnly":{"desktop":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"},"mobile":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"},"tablet":{"height":"","shape":"square","shapeLinked":true,"shapeValue":"1/1"}},"spacing":{"desktop":"var(--g-s-s)","mobile":"var(--g-s-s)"},"verticalLayout":{"desktop":false},"verticalLayoutRow":{"desktop":true}},
+      "productUrl":{{product.url | json | escape}},
+      "product":{{product | json | escape}},
+      "collectionUrl": {{ collection.url | json | escape }},
+      "collection": {{ collection | json | escape}}
+    }
+  '
+      section-id="{{section.id}}" data-id="gGoGxXk2Nz"
+      style="--bs:solid;--bw:0px;--bc:#121212;--shadow:none;--d:block;--d-mobile:block;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:0px;--mb-tablet:9px"
+      class="gp-relative gp-w-full gGoGxXk2Nz "
+    >
+      <div
+        class="{% if product.media.size > 1 %}gp-grid gp-w-full !gp-m-0 gp-relative{% else %}gp-w-full !gp-m-0 gp-relative{% endif %}"
+        style="{% if product.media.size > 1 %}--gtc: minmax(0, 12fr);--gtc-tablet: minmax(0, 12fr);--gtc-mobile: minmax(0, 12fr);--gg: var(--g-s-s);--gg-mobile: var(--g-s-s);{% else %}--gtc: minmax(0, 12fr);--gg: var(--g-s-s);--gg-mobile: var(--g-s-s);{% endif %}"
+      >
+        
+    {% capture featureImageOnlyOne %}
+      
+        {% assign featureMedia = variant.featured_media %}
+        {% unless featureMedia %}
+        {% assign featureMedia = product.featured_media %}
+        {% endunless %}
+        {% if product.media.size > 1 %}
+          {% assign featureMedia = product.media.first %}
+        {% endif %}
+        {% assign largestRatio = 0 %}
+        {% assign height = featureMedia.height | times: 1.0 %}
+        {% assign width = featureMedia.width | times: 1.0 %}
+        {% assign ratio = height | divided_by: width %}
+        {% if ratio > largestRatio %}{% assign largestRatio = ratio %}{% endif %}
+        {% assign productImageWidth = 0 %}
+        {% case featureMedia.media_type %}
+          {% when 'image' %}
+            {% assign productImageWidth = featureMedia.width %}
+          {% else %}
+            {% assign productImageWidth = featureMedia.preview_image.width %}
+        {% endcase %}
+        {% if featureMedia == null %}{% assign productImageWidth = 1600 %}{% endif %}
+        <div
+          class='gp-feature-image-carousel gp-feature-image-only'
+          style="--jc: center;--jc-tablet: center;--jc-mobile: center;--o: 0;--o-tablet: 0;--o-mobile: 0;--d: flex;--d-mobile: flex;--d-tablet: flex;"
+        >
+          <div
+            class="gp-relative"
+            style="--w: 100%;--w-tablet: 100%;--w-mobile: 100%;--bblr: 0px;--bbrr: 0px;--btlr: 0px;--btrr: 0px;--hvr-bblr: 0px;--hvr-bbrr: 0px;--hvr-btlr: 0px;--hvr-btrr: 0px;--focus-bblr: 0px;--focus-bbrr: 0px;--focus-btlr: 0px;--focus-btrr: 0px;-undefined-bblr: 0px;-undefined-bbrr: 0px;-undefined-btlr: 0px;-undefined-btrr: 0px;--h: auto;--h-tablet: auto;--h-mobile: auto;"
+          >
+            
+      
+    {% if product %}
+      
+    {% assign content = section.settings.ggLy9BvVLA6_displayContent %}
+
+    {%if content.size > 0 %}
+      {% if variant.compare_at_price and variant.compare_at_price > 0 %}
+        {% assign amountDiscount = variant.compare_at_price | minus: variant.price %}
+        {% assign percentDiscount = amountDiscount | times: 100.0 | divided_by: variant.compare_at_price | round%}
+      {% else %}
+        {% assign amountDiscount = 0 %}
+        {% assign percentDiscount = 0 %}
+      {% endif %}
+
+      {% assign percentDiscountValue = percentDiscount | append: "%" %}
+      {% assign amountDiscountValue = amountDiscount | money_without_trailing_zeros %}
+      {% assign price = variant.price | divided_by: 100 %}
+      {% assign minPriceValue = product.variants | map: "price" | sort | first | money_without_trailing_zeros %}
+      {% assign inventoryQuantityValue = variant.inventory_quantity %}
+
+      {% assign percentDiscountKey = "{percent_discount}" %}
+      {% assign amountDiscountKey = "{amount_discount}" %}
+      {% assign minPriceKey = "{min_price}" %}
+      {% assign inventoryQuantityKey = "{inventory_quantity}" %}
+    {% endif %}
+  
+      
+  {% assign isShow = true %}
+  {% assign conditionTriggers = "" %}
+  {% assign isInventoryStatus = false %}
+  {% assign isDiscountPrice = false %}
+  {% assign isPriceRange = false %}
+  {% assign isCreationDate = false %}
+  {% assign isProductTag = false %}
+  
+      {% assign type = "out_of_stock" %}
+      {% assign shouldContinue = false %}
+      {% if variant.inventory_policy == "continue" and type != "out_of_stock" %}
+        {% assign shouldContinue = true %}
+      {% endif %}
+      {% if variant.inventory_management == null or shouldContinue  %}
+        {% assign conditionTriggers = conditionTriggers | append: "," | append: true %}
+      {% elsif variant.inventory_quantity != null %}
+        {% assign compareValue = variant.inventory_quantity %}
+        {% if type == "in_stock" %}
+          {% assign conditionType = "exact_or_above" %}
+          {% assign from = 1 %}
+          {% assign to = 15 %}
+          
+    {% assign enabled = false %}
+    {% case conditionType %}
+      {% when "exact" %}
+        {% if compareValue == from %}
+          {% assign enabled = true %}
+        {% endif %}
+      {% when "above" %}
+        {% if compareValue > from %}
+          {% assign enabled = true %}
+        {% endif %}
+      {% when "below" %}
+        {% if compareValue < from %}
+          {% assign enabled = true %}
+        {% endif %}
+      {% when "exact_or_above" %}
+        {% if compareValue >= from %}
+          {% assign enabled = true %}
+        {% endif %}
+      {% when "exact_or_below" %}
+        {% if compareValue <= from %}
+          {% assign enabled = true %}
+        {% endif %}
+      {% when "between" %}
+        {% if compareValue >= from and compareValue <= to %}
+          {% assign enabled = true %}
+        {% endif %}
+      {% else %}
+        {% assign enabled = false %}
+    {% endcase %}
+  
+          {% if conditionType == "below" or conditionType == "exact_or_below" %}
+            {% assign min = 1 %}
+            {% assign from = 1 %}
+            {% assign to = from | minus: min | plus: 1 %}
+            {% if compareValue >= from and compareValue <= to %}
+              {% assign enabled = true %}
+            {% else %}
+              {% assign enabled = false %}
+            {% endif %}
+          {% endif %}
+          {% assign isInventoryStatus = enabled %}
+        {% else %}
+          {% if compareValue <= 0 and variant.inventory_policy != "continue"  %}
+            {% assign isInventoryStatus = true %}
+          {% endif %}
+        {% endif %}
+        {% assign conditionTriggers = conditionTriggers | append: "," | append: isInventoryStatus %}
+      {% else %}
+        {% assign conditionTriggers = conditionTriggers | append: "," | append: false %}
+      {% endif %}
+
+  
+  {% assign trigger_arr = conditionTriggers | split: "," %}
+  {% for trigger in trigger_arr %}
+    {% if trigger == "false" %}
+      {% assign isShow = false %}
+    {% endif %}
+  {% endfor %}
+  {% assign price = variant.price | times: 1.0 %}
+  {% assign salePrice = variant.compare_at_price | times: 1.0 %}
+  {% assign priceSave = salePrice | minus: price %}
+  {% assign isDiscountContent = false %}
+  {% assign isTextBadge = true %}
+  {% if priceSave <= 0 or isDiscountContent == false or isTextBadge == false or variant.inventory_management == nil %}
+    {% assign isShow = false %}
+  {% endif %}
+  {% if isShow %}
+    {% assign className = "" %}
+  {% else %}
+    {% assign className = "!gp-hidden" %}
+  {% endif %}
+  
+      <gp-product-badge
+        data-id="gLy9BvVLA6" id="g-product-badge-gLy9BvVLA6" gp-data-hidden="false"
+        gp-data='{"minPrice":"{{ minPriceValue | replace: '"', '\\"' | escape }}","variantIDs":"{{  product.variants | map: "id" | json | escape }}","variantInventoryQuantities":"{{ product.variants | map: "inventory_quantity" | json | escape }}","amountDiscount":"{{amountDiscountValue | replace: '"', '\\"' | escape }}","percentDiscount":"{{percentDiscountValue}}","price":"{{price}}","displayTrigger":[{"conditionType":"exact_or_above","from":"1","priority":0,"quantityType":"exact_or_above","to":"15","triggerEvent":"inventory_status","type":"out_of_stock"}],"uid":"gLy9BvVLA6","productCreatedAt":"{{product.created_at | date: "%Y-%m-%d" }}","productTags":"{{ product.tags | join: "," }}","isTextBadge":true}'
+        class="containerClass {{className}}"
+        style="--pos:absolute;z-index:1;--bs:none;--bw:1px 1px 1px 1px;--bc:#121212;--shadow:none;--d:block;--d-mobile:block;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--bottom:0px;--left:calc((100% - 100%) / 2 + 0px);--right:unset;--top:unset;--t:unset;--bottom-tablet:0px;--left-tablet:calc((100% - 100%) / 2 + 0px);--right-tablet:unset;--top-tablet:unset;--t-tablet:unset;--bottom-mobile:0px;--left-mobile:calc((100% - 100%) / 2 + 0px);--right-mobile:unset;--top-mobile:unset;--t-mobile:unset;--w:auto;--w-tablet:auto;--w-mobile:auto;--h:auto;--h-tablet:auto;--h-mobile:auto"
+        data-display-content="{{ section.settings.ggLy9BvVLA6_displayContent }}"
+      >
+        <div class="gp-h-full">
+          <div
+            data-product-id id="gLy9BvVLA6"
+            class="gp-h-full"
+            style="opacity:1"
+          >
+            <style></style>
+            
+                <div class="gp-w-full gp-h-full gp-overflow-hidden product-badge-item">
+                  <div
+                    class="gp-w-full gp-h-full gp-flex gp-items-center gp-justify-center gp-overflow-hidden"
+                    style="height:100%"
+                  >
+                    <pre
+                      id="product-badge-content"
+                      class="gp-break-words gp-text-center "
+                      style="--ws:pre;--ws-tablet:pre;--ws-mobile:pre;--ff:var(--g-font-sans-serif, 'sans-serif'), var(--g-font-body, body);--weight:400;--size:12px;--size-mobile:11px;--lh:180%;--lh-tablet:120%;--lh-mobile:100%;--c:var(--g-c-text-3, text-3);--ts:none"
+                    >{{ content | replace: percentDiscountKey, percentDiscountValue | replace: amountDiscountKey, amountDiscountValue | replace: inventoryQuantityKey, inventoryQuantityValue | replace: minPriceKey, minPriceValue }}</pre>
+                  </div>
+                </div>
+          </div>
+        </div>
+      </gp-product-badge>
+       <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-product-badge-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+    {% endif %}
+  
+    
+            <div
+              type="gp-feature-image-only"
+              product-id="{{product.id}}"
+              product-media="{{product.media.size}}"
+              class="gp-group gp-z-0 gp-flex !gp-min-w-full !gp-max-w-full gp-w-full gp-relative gp-items-start gp-justify-center gp-overflow-hidden gp-outline-1 -gp-outline-offset-1 gp-image-item gp-ft-image-item data-[outline=active]:gp-outline gp-featured-image-wrapper
+              style="max-width: 100%;outline-color: var(--g-c-brand, brand);--bblr: 0px;--bbrr: 0px;--btlr: 0px;--btrr: 0px;--hvr-bblr: 0px;--hvr-bbrr: 0px;--hvr-btlr: 0px;--hvr-btrr: 0px;--focus-bblr: 0px;--focus-bbrr: 0px;--focus-btlr: 0px;--focus-btrr: 0px;-undefined-bblr: 0px;-undefined-bbrr: 0px;-undefined-btlr: 0px;-undefined-btrr: 0px;--h: auto;--h-tablet: auto;--h-mobile: auto;width: {{productImageWidth}}px;"
+            >
+              <div
+                class="gp-w-full gp-relative {% if featureMedia == null or featureMedia.media_type == 'image' %}{{ 'gp-h-0' }}{% else %}{{ 'gp-h-full !gp-pb-0' }}{% endif %}"
+                style="--pb: calc((4/3)*100%);--pb-tablet: calc(({%if largestRatio == 0%} 100 / 100 {%else%} {{largestRatio}} {%endif%})*100%);--pb-mobile: calc(({%if largestRatio == 0%} 100 / 100 {%else%} {{largestRatio}} {%endif%})*100%); {% if featureMedia.media_type == 'video' or featureMedia.media_type == 'external_video' %}{{ 'display: flex; align-items: center; justify-content: center' }}{% endif %}"
+              >
+                
+    {% case featureMedia.media_type %}
+      {% when 'image' %}
+        
+      
+    {% assign src = featureMedia.src %}
+    
+    
+    <img
+      alt="{{featureMedia.alt}}" width="{{featureMedia.width}}" height="{{featureMedia.height}}" draggable="false" quality-type quality-percent data-sizes="auto" sizes="(max-width: 768px) 50vw, 100vw" src="{{src | image_url}}" isNotLazyload="true" srcset="{{src | img_url: '480x480'}} 480w, {{src | img_url: '768x768'}} 768w,{{src | img_url: '1024x1024'}} 1024w,{{src | img_url: '1440x1440'}} 1440w" base-src="{{src | image_url}}" loading="lazy"
+      id="{% if featureMedia != null %}{{featureMedia.id}}{% endif %}"
+      style="--aspect:3/4;--aspect-tablet:{{featureMedia.width}}/{{featureMedia.height}};--aspect-mobile:{{featureMedia.width}}/{{featureMedia.height}};--objf:cover"
+      class="gp-w-full gp-h-full gp-absolute gp-top-0 gp-left-0 featured-image-only gp-cursor-pointer !gp-rounded-none gp-w-full gp-transition-opacity group-hover:gp-opacity-0 {{shouldHidden}}"
+    />
+      <div class="zoom-element !gp-max-w-none gp-absolute gp-left-0 gp-top-0 gp-opacity-0 gp-transition-opacity gp-bg-white gp-pointer-events-none">
+            
+    {% assign src = featureMedia.src %}
+    {% assign media_length = product.media | size %}
+      {% assign other_image_index = 1 | plus: 0 %}
+      {% if other_image_index >= media_length %}
+        {% assign other_image_index = media_length | minus: 1 %}
+      {% endif %}
+      {% assign otherImage = product.media[other_image_index] %}
+      {% if otherImage.media_type != 'image' %}{% assign src = otherImage.preview_image.src %}{% else %}{% assign src = otherImage.src %}{% endif %}
+    
+    
+    <img
+      alt="{{featureMedia.alt}}" width="{{featureMedia.width}}" height="{{featureMedia.height}}" draggable="false" quality-type quality-percent data-sizes="auto" sizes="(max-width: 768px) 50vw, 100vw" src="{{src | image_url}}" isNotLazyload="true" srcset="{{src | img_url: '480x480'}} 480w, {{src | img_url: '768x768'}} 768w,{{src | img_url: '1024x1024'}} 1024w,{{src | img_url: '1440x1440'}} 1440w" base-src="{{src | image_url}}" loading="lazy"
+      id="{% if featureMedia != null %}{{featureMedia.id}}{% endif %}"
+      style="--aspect:3/4;--aspect-tablet:{{featureMedia.width}}/{{featureMedia.height}};--aspect-mobile:{{featureMedia.width}}/{{featureMedia.height}};--objf:cover"
+      class="gp-w-full gp-h-full gp-absolute gp-top-0 gp-left-0 featured-image-only gp-cursor-pointer !gp-rounded-none image-zoom"
+    />
+          </div>
+       
+    
+      {% when 'external_video' %}
+        {% assign mediaSourceVideo = featureMedia | external_video_url %}
+        
+    <iframe
+      src="{{mediaSourceVideo}}" alt="{{featureMedia.alt}}" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" frameborder="0" width="100%" height="100%" controls="true" allowfullscreen="true"
+      style="--aspect:3/4;--aspect-tablet:;--aspect-mobile:"
+      class="feature-video gp-w-full gp-h-full gp-relative"
+    >
+    </iframe>
+  
+      {% when 'video' %}
+        {% assign mediaSourceVideo = featureMedia.sources.last.url %}
+        
+  <gp-lite-html5-embed>
+    
+    <video
+    id="gp-video-undefined" title="{{featureMedia.alt}}" preload="none" data-src="{{mediaSourceVideo}}" poster data-poster
+      style="width:100%;max-height:100%"
+      class="gp-w-full gp-lazyload-video"
+      controls
+      
+      
+      
+      playsinline
+      src=""
+    >
+      
+    </video>
+    
+  </gp-lite-html5-embed>
+        <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-lite-html5-embed-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+  
+      {% when 'model' %}
+        
+    <model-viewer
+      src="{% if featureMedia.sources.first.url contains '.glb' %}{{ featureMedia.sources.first.url }}{% else %}{{featureMedia.sources.last.url}}{% endif %}" alt="{{featureMedia.preview_image.alt}}" data-shopify-feature="1.12" width="100%" poster="{{featureMedia.preview_image.src | product_img_url: '1024x1024'}}" ar-status="not-presenting" camera-controls="true"
+      class="gp-w-full gp-h-full model-viewer gp-z-[90]"
+      style="--aspect:3/4;--aspect-tablet:1/1;--aspect-mobile:1/1">
+    </model-viewer>
+  
+      {% else %}
+        
+    
+    <img
+      alt="No Image" width="2237" height="1678" draggable="false" quality-type quality-percent data-sizes="auto" sizes="(max-width: 768px) 50vw, 100vw" src isNotLazyload="true" srcset loading="lazy"
+      id=""
+      style="--aspect:3/4;--aspect-tablet:undefined/undefined;--aspect-mobile:undefined/undefined;--objf:cover"
+      class="gp-w-full gp-h-full gp-absolute gp-top-0 gp-left-0 featured-image-only gp-cursor-pointer !gp-rounded-none"
+    />
+    {% endcase %}
+    
+              </div>
+            </div>
+          </div>
+        </div>
+      
+    {% endcapture %}
+    {% if product.media.size > 1 %}
+         
+        {{ featureImageOnlyOne }}
+      {% else %}{{ featureImageOnlyOne }}{% endif %}
+  
+        
+      </div>
+    </gp-product-images>
+    <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-product-images-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+  
+    
+
+    
+
+    
+    <gp-row gp-data='{"background":{"desktop":{"attachment":"scroll","color":"transparent","image":{"height":0,"src":"","width":0},"position":{"x":50,"y":50},"repeat":"no-repeat","size":"cover","type":"color"}},"uid":"gVHjmEX44y"}' data-id="gVHjmEX44y" id="gVHjmEX44y" data-same-height-subgrid-container class="gVHjmEX44y gp-relative gp-mx-auto gp-mb-0 gp-grid gp-max-w-full gp-transition-colors gp-duration-200 gp-ease-in-out [&_*]:gp-max-w-full gp-grid-rows-[1fr]" style="--bs:none;--bw:1px 1px 1px 1px;--bc:#121212;--shadow:none;--d:grid;--d-mobile:grid;--d-tablet:grid;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:10px;--cg:8px;--gtc:minmax(0, 12fr);--gtc-mobile:minmax(0, 12fr);--w:100%;--bgc:transparent;--bgi:url();--bgp:50% 50%;--bgs:cover;--bgr:no-repeat;--bga:scroll;--pc:start">
+      
+
+      <div
+      data-same-height-display-contents
+      style="--jc:start"
+      class="gcI8gFMaA7 gp-relative gp-flex gp-flex-col"
+    >
+      
+    {%- liquid
+      assign inventory_quantity = variant.inventory_quantity | default: 0
+      assign is_in_stock = variant.available
+    -%}
+    <gp-product-button
+      style="--pos:static;--top:0px"
+      gp-data-wrapper="true"
+      gp-href="{{ request.origin }}{{ routes.root_url | split: '/' | join: '/' }}/cart"
+      class="gp-product-button"
+      gp-label-out-of-stock="{{ section.settings.ggdfXJQGyS-_outOfStockLabel }}"
+      gp-label-unavailable="{{ section.settings.ggdfXJQGyS-_unavailableLabel }}"
+      gp-data='{"styles":{"errorTypo":{"attrs":{"color":"error"},"type":"paragraph-2"},"successTypo":{"attrs":{"color":"success"},"type":"paragraph-2"}},"setting":{"errorType":"built-in","actionEffect":"open-cart-drawer","label":"ADD TO CART","errorMessage":"Cannot add product to cart","successMessage":"Add product to cart successfully","outOfStockLabel":"Out of stock","customURL":{"link":"/cart","target":"_self"}},"variantID":"{{variant.id}}","disabled":"{{variant.available}}","totalVariant":"{{total_combinations}}"}'
+      data-variant-selection-required-message="{{ section.settings.ggdfXJQGyS-_variantSelectionRequiredMessage }}"
+    >
+      
+    <gp-button
+      gp-data='{}'
+      
+      class="gp-flex gp-flex-col"
+    >
+      <div style="--bs:none;--bw:1px 1px 1px 1px;--bc:#121212;--shadow:none;--d:none;--d-mobile:none;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--ta:center" class="{% unless variant.available %} !gp-hidden {% endunless %}">
+        <style>[data-id="gdfXJQGyS-"].gp-button-base::before, [data-id="gdfXJQGyS--interaction"].gp-button-base::before {
+      
+    content: "";
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    
+    
+  
+    }
+  
+      
+  [data-id="gdfXJQGyS-"]:hover::before, [data-id="gdfXJQGyS--interaction"]:hover::before {
+    
+    
+  }</style>
+        
+        <button
+          data-id="gdfXJQGyS-" dataId="gdfXJQGyS-" data-state="idle" aria-label="ADD TO CART"
+          name="add" gp-data-hidden="{% unless variant.available %}true{% endunless %}"
+          type="submit"
+          style="--w:100%;--w-tablet:100%;--w-mobile:100%;--h:Auto;--h-tablet:28px;--h-mobile:28px;--pl:16px;--pr:16px;--pt:8px;--pb:8px;--pl-tablet:16px;--pr-tablet:16px;--pt-tablet:8px;--pb-tablet:8px;--shadow:none;--bgi:;--ff:var(--g-font-sans-serif, 'sans-serif'), var(--g-font-body, body);--weight:400;--size:14px;--size-tablet:16px;--size-mobile:14px;--lh:150%;--lh-tablet:180%;--lh-mobile:180%;--tt:none"
+          class="gp-button-atc tcustomizer-submit-button gdfXJQGyS- gp-button-base gp-group gp-relative gp-inline-flex gp-max-w-full gp-items-center gp-justify-center gp-no-underline gp-transition-colors gp-duration-200 disabled:gp-btn-disabled disabled:gp-opacity-30  undefined"
+        >
+        
+  <svg
+    class="gp-invisible gp-absolute gp-h-5 gp-w-5 group-data-[state=loading]:gp-animate-spin group-data-[state=loading]:gp-visible"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      class="gp-opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      stroke-width="4"
+    ></circle>
+    <path
+      class="gp-opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    ></path>
+  </svg>
+
+        <div class="gp-inline-flex">
+          
+          
+    <span
+      data-gp-text
+      style="--ff:var(--g-font-sans-serif, 'sans-serif'), var(--g-font-body, body);--weight:400;--size:14px;--size-tablet:16px;--size-mobile:14px;--lh:150%;--lh-tablet:180%;--lh-mobile:180%;--tt:none;--ts:none;word-break:break-word"
+      class="gp-content-product-button group-active/button:!gp-text-inherit gp-relative gp-flex gp-h-full gp-items-center gp-overflow-hidden gp-break-words group-data-[state=loading]:gp-invisible [&_p]:gp-whitespace-pre-line gp-text button-text"
+    >
+      {{ section.settings.ggdfXJQGyS-_label }}
+    </span>
+        </div>
+        
+    
+  <div style="--mr:2px;--ml:2px;display:block !important"></div>
+
+    
+  
+        </button>
+      </div>
+      <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-button-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+    </gp-button>
+  
+      
+    <gp-button
+      gp-data='{}'
+      
+      class="gp-flex gp-flex-col"
+    >
+      <div style="--bs:none;--bw:1px 1px 1px 1px;--bc:#121212;--shadow:none;--d:none;--d-mobile:none;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--ta:center" class="{% if variant.available %} !gp-hidden {% endif %}">
+        <style>[data-id="gdfXJQGyS--sold-out"].gp-button-base::before, [data-id="gdfXJQGyS--sold-out-interaction"].gp-button-base::before {
+      
+    content: "";
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    
+    
+  
+    }
+  
+      
+  [data-id="gdfXJQGyS--sold-out"]:hover::before, [data-id="gdfXJQGyS--sold-out-interaction"]:hover::before {
+    
+    
+  }</style>
+        
+        <button
+          data-id="gdfXJQGyS--sold-out" dataId="gdfXJQGyS--sold-out" data-state="idle" aria-label="{{ section.settings.ggdfXJQGyS-_outOfStockLabel }}"
+          gp-data-hidden="{% if variant.available %}true{% endif %}"
+          type="button"
+          style="--w:100%;--w-tablet:100%;--w-mobile:100%;--h:Auto;--h-tablet:28px;--h-mobile:28px;--pl:16px;--pr:16px;--pt:8px;--pb:8px;--pl-tablet:16px;--pr-tablet:16px;--pt-tablet:8px;--pb-tablet:8px;--shadow:none;--bgi:;--ff:var(--g-font-sans-serif, 'sans-serif'), var(--g-font-body, body);--weight:400;--size:14px;--size-tablet:16px;--size-mobile:14px;--lh:150%;--lh-tablet:180%;--lh-mobile:180%;--tt:none"
+          class="gp-cursor-default gp-opacity-30 btn-disabled gp-button-sold-out gdfXJQGyS--sold-out gp-button-base gp-group gp-relative gp-inline-flex gp-max-w-full gp-items-center gp-justify-center gp-no-underline gp-transition-colors gp-duration-200 disabled:gp-btn-disabled disabled:gp-opacity-30 "
+        >
+        
+        <div class="gp-inline-flex">
+          
+          
+    <span
+      data-gp-text
+      style="--ff:var(--g-font-sans-serif, 'sans-serif'), var(--g-font-body, body);--weight:400;--size:14px;--size-tablet:16px;--size-mobile:14px;--lh:150%;--lh-tablet:180%;--lh-mobile:180%;--tt:none;--ts:none;word-break:break-word"
+      class="gp-content-product-button group-active/button:!gp-text-inherit gp-relative gp-flex gp-h-full gp-items-center gp-overflow-hidden gp-break-words group-data-[state=loading]:gp-invisible [&_p]:gp-whitespace-pre-line gp-text button-text"
+    >
+      {{ section.settings.ggdfXJQGyS-_outOfStockLabel }}
+    </span>
+        </div>
+        
+    
+  <div style="--mr:2px;--ml:2px;display:block !important"></div>
+
+    
+  
+        </button>
+      </div>
+      <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-button-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+    </gp-button>
+  
+    </gp-product-button>
+    <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-product-button-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+  
+    </div>
+
+      
+    </gp-row>
+  
+  
+    </div>
+
+      
+    </gp-row>
+  
+  <div gp-el-wrapper style="--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:block;--d-mobile:block;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:var(--g-s-xs);--mb-tablet:0px" class="gpfbBlwTIY ">
+      {% unless product %}<p>{{ 'gempages.ProductTitle.product_not_found' | t }}</p>{% else %}<a  class="gp-product-title-link-wrapper">
+        
+    {% assign locationOrigin = request.origin | append: routes.root_url | split: '/' | join: '/' %}
+    <div data-id="gpfbBlwTIY"
+        class="gpfbBlwTIY"
+        style="--dynamic-source-color:#F4F4F4"
+        data-test-force-publish="1753816327358"
+      >
+      <div  >
+        <h2
+          data-gp-text
+          class=" gp-text-instant"
+          style="--w:100%;--tdt:auto;--ta:left;--line-clamp:2;--line-clamp-tablet:2;--line-clamp-mobile:0;--c:#242424;--fs:normal;--ff:var(--g-font-body, body);--weight:400;--ls:normal;--size:16px;--size-tablet:16px;--size-mobile:14px;--lh:150%;--lh-tablet:150%;--lh-mobile:150%;word-break:break-word;overflow:hidden;--tdl:"
+        >
+          {{ product.title }}
+        </h2>
+      </div>
+    </div>
+    
+        </a>{% endunless %}
+      </div>
+    
+
+    
+
+    
+    <gp-row gp-data='{"background":{"desktop":{"attachment":"scroll","color":"transparent","image":{"height":0,"src":"","width":0},"position":{"x":50,"y":50},"repeat":"no-repeat","size":"cover","type":"color"}},"uid":"gscjj8Rytt"}' data-id="gscjj8Rytt" id="gscjj8Rytt" data-same-height-subgrid-container class="gscjj8Rytt gp-relative gp-mx-auto gp-mb-0 gp-grid gp-max-w-full gp-transition-colors gp-duration-200 gp-ease-in-out [&_*]:gp-max-w-full gp-grid-rows-[1fr]" style="--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:grid;--d-mobile:grid;--d-tablet:grid;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mb:var(undefined);--cg:10px;--gtc:minmax(0, auto) minmax(0, auto);--w:100%;--w-tablet:100%;--w-mobile:100%;--bgc:transparent;--bgi:url();--bgp:50% 50%;--bgs:cover;--bgr:no-repeat;--bga:scroll;--pc:start">
+      
+
+      <div
+      data-same-height-display-contents
+      style="--ai:normal;--jc:center;--o:0"
+      class="g_pOJA_8Rk gp-relative gp-flex gp-flex-col"
+    >
+      
+      <gp-product-price
+        id="shopify-text-element-gOOELT-Spi" data-id="gOOELT-Spi"
+        class="gp-product-price group-data-[state=loading]:gp-invisible data-[hidden=true]:gp-hidden gOOELT-Spi"
+        style="--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:block;--d-mobile:block;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px;--mr:var(undefined)"
+        gp-data='{"uid":"gOOELT-Spi","locale":"{{shop.locale}}","currency":"{{shop.currency}}","moneyFormat":"{{ shop.money_format | replace: '"', '\\"' | escape }}"}'
+      >
+        
+    {% assign locationOrigin = request.origin | append: routes.root_url | split: '/' | join: '/' %}
+    <div id="p-price-gOOELT-Spi" data-id
+        
+        style="--dynamic-source-color:#F4F4F4"
+        data-test-force-publish="1753816327359"
+      >
+      <div  >
+        <div
+          data-gp-text
+          class="gp-price gp-money gp-decoration-g-highlight  gp-text-instant"
+          style="--w:100%;--tdc:var(--g-c-highlight, highlight);--tdt:1px;--ta:left;--c:#242424;--fs:normal;--ff:var(--g-font-body, body);--weight:700;--ls:normal;--size:16px;--size-tablet:16px;--size-mobile:14px;--lh:150%;--lh-tablet:150%;--lh-mobile:150%;word-break:break-word;overflow:hidden;--tdl:"
+        >
+          
+     {% if variant.price %}
+       {{ variant.price | money}}
+     {% endif %}
+   
+        </div>
+      </div>
+    </div>
+    
+      </gp-product-price>
+      <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-product-price-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+  
+    </div><div
+      data-same-height-display-contents
+      style="--ai:normal;--jc:center;--o:0"
+      class="gQeafM2ptN gp-relative gp-flex gp-flex-col"
+    >
+      
+      <gp-product-price
+        id="shopify-text-element-gJkMSA_pIE" data-id="gJkMSA_pIE"
+        class="gp-product-price group-data-[state=loading]:gp-invisible data-[hidden=true]:gp-hidden gJkMSA_pIE"
+        style="--bs:none;--bw:0px;--bc:transparent;--shadow:none;--d:block;--d-mobile:block;--d-tablet:block;--op:100%;--pageType:GP_COLLECTION;--bblr:0px;--bbrr:0px;--btlr:0px;--btrr:0px;--hvr-bblr:0px;--hvr-bbrr:0px;--hvr-btlr:0px;--hvr-btrr:0px;--focus-bblr:0px;--focus-bbrr:0px;--focus-btlr:0px;--focus-btrr:0px;-undefined-bblr:0px;-undefined-bbrr:0px;-undefined-btlr:0px;-undefined-btrr:0px"
+        gp-data='{"uid":"gJkMSA_pIE","locale":"{{shop.locale}}","currency":"{{shop.currency}}","moneyFormat":"{{ shop.money_format | replace: '"', '\\"' | escape }}"}'
+      >
+        
+    {% assign locationOrigin = request.origin | append: routes.root_url | split: '/' | join: '/' %}
+    <div id="p-price-gJkMSA_pIE" data-id
+        
+        style="--dynamic-source-color:#F4F4F4"
+        data-test-force-publish="1753816327359"
+      >
+      <div  >
+        <div
+          data-gp-text
+          class="gp-price gp-money  gp-text-instant"
+          style="--w:100%;--tdc:#B4B4B4;--tdt:1px;--ta:left;--c:#B4B4B4;--fs:normal;--ff:var(--g-font-body, body);--weight:400;--ls:normal;--size:16px;--size-tablet:16px;--size-mobile:14px;--lh:150%;--lh-tablet:150%;--lh-mobile:150%;word-break:break-word;overflow:hidden;--tdl:"
+        >
+          
+     {% if variant.price %}
+       {{ variant.price | money}}
+     {% endif %}
+   
+        </div>
+      </div>
+    </div>
+    
+      </gp-product-price>
+      <script {% if section.settings.section_preload == "false" %}class="gps-link" delay {% else %}src{% endif %}="https://assets.gemcommerce.com/assets-v2/gp-product-price-v7-5.js?v={{ shop.metafields.GEMPAGES.ASSETS_VERSION }}" defer="defer"></script>
+  
+    </div>
+
+      
+    </gp-row>
+  
+  
+    </div>
+
+      
+    </gp-row>
+  
+  
+          
+    
+        {%- endform -%}
+      </gp-product>
+  
+      {%- endif -%}
+      {% endfor %}
+      {%- if count == 0 and 0 == 0 -%}
+        {% if 'DynamicCollection' == 'RelatedProduct' -%}
+          <div>{{ 'gempages.ProductList.no_related_products' | t }}</div>
+        {% else %}
+          <div>{{ 'gempages.ProductList.no_products_found' | t }}</div>
+        {%- endif -%}
+      {%- endif -%}
+    
+      </gp-same-height>
+    
+      
+    </div>
+  
+    {%- endif -%}
+    
+          {%- assign product = gpBkProduct -%}
+          {%- assign products = gpBkProducts -%}
+        </div>
+      </div>
+    </div>
+  
+    </div>
+
+      
+    </gp-row>
+  
+  
+    </div>
+
+      
+    </gp-row>
+  
+        </section>
+      
+  
+
+
+{% schema %}
+  {
+    
+    "name": "Section 1",
+    "tag": "section",
+    "class": "gps-559680054662005806 gps gpsil",
+    "settings": [{"type":"paragraph","content":"Section design by GemPages. [Click here to start design](https://admin.shopify.com/store/erica-336/apps/gempages-cro/app/shopify/edit?pageType=GP_COLLECTION&editorId=559680054561342510&sectionId=559680054662005806)"},{"type":"select","label":"Section Preload","id":"section_preload","options":[{"label":"On","value":"true"},{"label":"Off","value":"false"},{"label":"Off Lazy Script","value":"off_lazy_script"}],"default":"false"},{"type":"text","label":"Checksum","id":"checksum"},{"type":"html","id":"ggkoP394Tax_text","label":"ggkoP394Tax_text","default":"WALLETS"},{"type":"html","id":"ggW6q09Msnc_text","label":"ggW6q09Msnc_text","default":"<span style=\"font-size:19px;\">RFID-blocking protection, secure magnetic closures and a slim profile that feels just right in your hand,</span><br><span style=\"font-size:19px;\"><strong>Ditch the bulk. Carry smarter.</strong></span>"},{"type":"html","id":"ggLy9BvVLA6_displayContent","label":"ggLy9BvVLA6_displayContent","default":"Out of Stock"},{"type":"html","id":"ggdfXJQGyS-_label","label":"ggdfXJQGyS-_label","default":"ADD TO CART"},{"type":"html","id":"ggdfXJQGyS-_outOfStockLabel","label":"ggdfXJQGyS-_outOfStockLabel","default":"Out of stock"},{"type":"html","id":"ggdfXJQGyS-_unavailableLabel","label":"ggdfXJQGyS-_unavailableLabel","default":"Unavailable"},{"type":"html","id":"ggdfXJQGyS-_variantSelectionRequiredMessage","label":"ggdfXJQGyS-_variantSelectionRequiredMessage","default":"Please select a variant to add product to cart"}],
+    "blocks": [{"type": "@app"}],
+    "locales": {}
+  }
+{% endschema %}

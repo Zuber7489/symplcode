@@ -1,0 +1,66 @@
+   <section >
+                <div class="protect_us_bg video-w">
+                  <video class="video-background desktop" playsinline="" loop="" autoplay="" no-controls muted >
+                    <source src="{{section.settings.video}}" type="video/mp4">
+                </video>
+                  <video class="video-background mobile" playsinline="" loop="" autoplay="" no-controls muted >
+                    <source src="{{section.settings.video1}}" type="video/mp4">
+                </video>
+              
+                    <div class="doa video_heading_wrap">
+                      <h2>{{section.settings.heading}}</h2>
+                      {% if section.settings.image != blank %}
+                       <img src="{{ section.settings.image | img_url: 'master'}}" class="img-fluid" alt="" />
+                      {% endif %}
+                      <a href="/collections/move-freely" class="btn2  vana">SHOP Move Freely™️</a>
+                    </div>
+                </div>
+            </section>  
+
+
+
+       
+
+
+
+
+
+
+{% schema %}
+{
+  "name": "Video Section",
+ 
+  
+    "settings": [
+ 
+ {
+      "type": "url",
+      "id": "video",
+      "label": "video url Desktop"
+    },
+ {
+      "type": "url",
+      "id": "video1",
+      "label": "video url Mobile"
+    },
+ 
+ {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    } ,
+ {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Icon Image"
+    } 
+ 
+    
+  ],
+  "presets": [
+    {
+      "name": "Video Section"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,69 @@
+ 
+
+  <div data-aos="fade-up"
+     data-aos-duration="3000" class="hero_banner">
+              
+          <div class="banner-wrap-img">
+                       <img src="{{ section.settings.image | img_url: 'master'}}" class="img-fluid desktop-only" />
+                       <img check src="{{ section.settings.image1 | img_url: 'master'}}" class="img-fluid mobile-only" />
+              
+          
+              
+              </div>
+              
+                <div class="container">
+                    <div class="hero_b">   
+                        <div class="hero_banner_wrap">
+                            <div class="main_heading_wrap sdfsf55">
+                                <h1>{{section.settings.heading}}</h1>
+                                {{section.settings.text}}
+                              
+                          </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- hero_banner section end -->
+{% schema %}
+{
+  "name": "Page Banner",
+  "settings": [
+
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    } ,
+ {
+      "type": "image_picker",
+      "id": "image1",
+      "label": "Image Mobile"
+    } ,
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+ 
+ {
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    }
+
+
+ 
+ 
+    
+  ],
+  
+  "presets": [
+    {
+      "name": "Page Banner"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,44 @@
+ <section >
+                <div class="protect_us_bg banner-video-box">
+                  <video class="video-backgroundss b-video" poster="{{ section.settings.image | img_url: 'master'}}" no-controls>
+                    <source loading="lazy" src="{{section.settings.video}}" type="video/mp4">
+                </video>
+              
+                   <div class="b-playpause"><i class="fas fa-play" aria-hidden="true"></i></div>
+                  
+                </div>
+            </section>
+
+{% schema %}
+{
+  "name": "Video Sound Section",
+ 
+  
+    "settings": [
+ 
+ {
+      "type": "url",
+      "id": "video",
+      "label": "video url"
+    },
+ 
+ {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    } ,
+ {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Icon Image"
+    } 
+ 
+    
+  ],
+  "presets": [
+    {
+      "name": "Video Sound Section"
+    }
+  ]
+}
+{% endschema %}

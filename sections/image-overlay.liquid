@@ -1,0 +1,75 @@
+            <section data-aos="fade-up"
+     data-aos-duration="3000">
+                <div class="banner_5_section">
+                    <div class="banner_5" style="    background: url({{ section.settings.image | img_url: 'master'}})top left no-repeat;
+    background-size: cover;">
+                        <div class="container">
+                            <div class="heading_copy">
+                                <div class="main_heading_wrap" style="color:{{section.settings.color}}">
+                                    <h1 style="color:{{section.settings.color}}">{{section.settings.heading}}</h1>
+                                    {{section.settings.text}}
+                                  {% if section.settings.buttontext != blank %}
+                                  <a href=" {{section.settings.buttonlink}}" class="btn2"> {{section.settings.buttontext}}</a>
+                              {% endif %} 
+                              </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+<style>
+  .banner_5 .main_heading_wrap p {
+    color: {{section.settings.color}};
+}
+</style>
+{% schema %}
+{
+  "name": "Image-overlay Section",
+ 
+  
+    "settings": [
+
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+  {
+      "type": "color",
+      "id": "color",
+      "label": "color"
+    },
+ {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+ 
+ {
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    },
+
+
+ 
+{
+          "type": "text",
+          "id": "buttontext",
+          "label": "Button Text"
+        },
+{
+          "type": "url",
+          "id": "buttonlink",
+          "label": "Button Link"
+        }
+ 
+    
+  ],
+  "presets": [
+    {
+      "name": "Image-overlay Section"
+    }
+  ]
+}
+{% endschema %}

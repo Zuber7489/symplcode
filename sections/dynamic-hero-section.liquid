@@ -1,0 +1,936 @@
+<!-- Dynamic Hero Section - Supports both Product Metafields and Theme Editor -->
+<div
+  class="dynamic-hero-section {% if section.settings.text_alignment %}hero-align-{{ section.settings.text_alignment }}{% else %}hero-align-center{% endif %}"
+  data-auto-slide="{{ section.settings.auto_slide }}"
+  {% if section.settings.slide_interval != blank %}data-slide-interval="{{ section.settings.slide_interval | times: 1000 }}"{% endif %}
+  data-template="{{ template.name }}"
+  data-product-id="{{ product.id }}"
+>
+  <div class="dynamic-hero-slider">
+    {% comment %} PRODUCT PAGE: Use metafields for dynamic content {% endcomment %}
+    {% if template.name == 'product' and product.metafields.custom.hero_content %}
+      {% assign hero_content = product.metafields.custom.hero_content.value %}
+      {% if hero_content %}
+        <!-- Debug: Hero content found -->
+        <!-- {{ hero_content | json }} -->
+        {% for item in hero_content %}
+          <div class="dynamic-hero-slide" data-slide-index="{{ forloop.index0 }}">
+            <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
+              {% if item.content_type == 'image' %}
+                <img 
+                  src="{{ item.desktop_image }}" 
+                  class="hero-media-content hero-desktop-only" 
+                  alt="{{ item.heading | default: product.title }}"
+                  loading="eager"
+                  decoding="async"
+                  onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
+                <img 
+                  src="{{ item.mobile_image }}" 
+                  class="hero-media-content hero-mobile-only" 
+                  alt="{{ item.heading | default: product.title }}"
+                  loading="eager"
+                  decoding="async"
+                  onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
+              {% elsif item.content_type == 'video' %}
+                <div class="hero-video-container hero-desktop-only">
+                  <video 
+                    class="hero-video" 
+                    {% if item.autoplay %}autoplay{% endif %} 
+                    {% if item.loop %}loop{% endif %} 
+                    {% if item.muted %}muted{% endif %} 
+                    playsinline 
+                    {% if item.controls %}controls{% endif %} 
+                    poster="{% if item.video_poster %}{{ item.video_poster | img_url: '1920x' }}{% endif %}"
+                    preload="{% if forloop.first %}metadata{% else %}none{% endif %}"
+                    loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+                    {% if item.desktop_video != blank %}
+                      <source src="{{ item.desktop_video }}" type="video/mp4">
+                    {% endif %}
+                  </video>
+                </div>
+                <div class="hero-video-container hero-mobile-only">
+                  <video 
+                    class="hero-video" 
+                    {% if item.autoplay %}autoplay{% endif %} 
+                    {% if item.loop %}loop{% endif %} 
+                    {% if item.muted %}muted{% endif %} 
+                    playsinline 
+                    {% if item.controls %}controls{% endif %} 
+                    poster="{% if item.video_poster_mobile %}{{ item.video_poster_mobile | img_url: '768x' }}{% elsif item.video_poster %}{{ item.video_poster | img_url: '768x' }}{% endif %}"
+                    preload="{% if forloop.first %}metadata{% else %}none{% endif %}"
+                    loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+                    {% if item.mobile_video != blank %}
+                      <source src="{{ item.mobile_video }}" type="video/mp4">
+                    {% elsif item.desktop_video != blank %}
+                      <source src="{{ item.desktop_video }}" type="video/mp4">
+                    {% endif %}
+                  </video>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="hero-container">
+              <div class="hero-content" style="{% if item.mobile_padding_top != blank %}--mobile-padding-top: {{ item.mobile_padding_top }}px;{% endif %}">
+                <div class="hero-content-wrapper">
+                  <div class="hero-text-content">
+                    <h1 class="hero-title">{{ item.heading | default: product.title }}</h1>
+                    <div class="hero-description">{{ item.text | default: product.description | truncate: 200 }}</div>
+
+                    {% if item.btn_url %}
+                      <div class="hero-cta-wrapper">
+                        <a href="{{ item.btn_url }}" class="hero-cta-button">{{ item.btn_text | default: 'Shop Now' }}</a>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endif %}
+
+    {% comment %} STATIC PAGES: Use theme editor blocks {% endcomment %}
+    {% if template.name != 'product' or product.metafields.custom.hero_content == blank %}
+      {% for block in section.blocks %}
+        {% if block.type == 'slide' %}
+          <div class="dynamic-hero-slide" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
+            <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
+              {% if block.settings.content_type == 'image' %}
+                <img 
+                  src="{{ block.settings.desktop_image | img_url: '1920x' }}" 
+                  srcset="{{ block.settings.desktop_image | img_url: '1200x' }} 1200w, {{ block.settings.desktop_image | img_url: '1920x' }} 1920w"
+                  sizes="100vw"
+                  class="hero-media-content hero-desktop-only" 
+                  alt="{{ block.settings.heading }}"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  decoding="async">
+                <img 
+                  src="{{ block.settings.mobile_image | img_url: '768x' }}" 
+                  srcset="{{ block.settings.mobile_image | img_url: '480x' }} 480w, {{ block.settings.mobile_image | img_url: '768x' }} 768w"
+                  sizes="100vw"
+                  class="hero-media-content hero-mobile-only" 
+                  alt="{{ block.settings.heading }}"
+                  loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+                  decoding="async">
+              {% elsif block.settings.content_type == 'video' %}
+                <div class="hero-video-container hero-desktop-only">
+                  <video 
+                    class="hero-video" 
+                    {% if block.settings.autoplay %}autoplay{% endif %} 
+                    {% if block.settings.loop %}loop{% endif %} 
+                    {% if block.settings.muted %}muted{% endif %} 
+                    playsinline 
+                    {% if block.settings.controls %}controls{% endif %} 
+                    poster="{% if block.settings.video_poster %}{{ block.settings.video_poster | img_url: '1920x' }}{% endif %}"
+                    preload="{% if forloop.first %}metadata{% else %}none{% endif %}"
+                    loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+                    {% if block.settings.desktop_video != blank %}
+                      <source src="{{ block.settings.desktop_video }}" type="video/mp4">
+                    {% endif %}
+                  </video>
+                </div>
+                <div class="hero-video-container hero-mobile-only">
+                  <video 
+                    class="hero-video" 
+                    {% if block.settings.autoplay %}autoplay{% endif %} 
+                    {% if block.settings.loop %}loop{% endif %} 
+                    {% if block.settings.muted %}muted{% endif %} 
+                    playsinline 
+                    {% if block.settings.controls %}controls{% endif %} 
+                    poster="{% if block.settings.video_poster_mobile %}{{ block.settings.video_poster_mobile | img_url: '768x' }}{% elsif block.settings.video_poster %}{{ block.settings.video_poster | img_url: '768x' }}{% endif %}"
+                    preload="{% if forloop.first %}metadata{% else %}none{% endif %}"
+                    loading="{% if forloop.first %}eager{% else %}lazy{% endif %}">
+                    {% if block.settings.mobile_video != blank %}
+                      <source src="{{ block.settings.mobile_video }}" type="video/mp4">
+                    {% elsif block.settings.desktop_video != blank %}
+                      <source src="{{ block.settings.desktop_video }}" type="video/mp4">
+                    {% endif %}
+                  </video>
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="hero-container">
+              <div class="hero-content" style="{% if block.settings.mobile_padding_top != blank %}--mobile-padding-top: {{ block.settings.mobile_padding_top }}px;{% endif %}">
+                <div class="hero-content-wrapper">
+                  <div class="hero-text-content">
+                    <h1 class="hero-title">{{ block.settings.heading }}</h1>
+                    <div class="hero-description">{{ block.settings.text }}</div>
+
+                    {% if block.settings.btn_url %}
+                      <div class="hero-cta-wrapper">
+                        <a href="{{ block.settings.btn_url }}" class="hero-cta-button">{{ block.settings.btn_text }}</a>
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <!-- Slider navigation -->
+  {% assign slide_count = 0 %}
+  {% if template.name == 'product' and product.metafields.custom.hero_content %}
+    {% assign slide_count = product.metafields.custom.hero_content.value.size %}
+  {% else %}
+    {% assign slide_count = section.blocks.size %}
+  {% endif %}
+  
+  {% if slide_count > 1 %}
+    <div class="hero-slider-nav">
+      <button class="hero-slider-prev" aria-label="Previous slide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="hero-slider-next" aria-label="Next slide">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Slider dots -->
+    <div class="hero-slider-dots">
+      {% for i in (1..slide_count) %}
+        <button class="hero-slider-dot {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.index0 }}" aria-label="Go to slide {{ forloop.index }}">
+          <span class="dot-inner"></span>
+        </button>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<style>
+  /* Dynamic Hero Section Styles */
+  .dynamic-hero-section {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .dynamic-hero-slider {
+    position: relative;
+    width: 100%;
+    height: 50vh;
+    min-height: 400px;
+  }
+
+  .dynamic-hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  .dynamic-hero-slide:first-child {
+    opacity: 1;
+    z-index: 1;
+  }
+
+  .dynamic-hero-slide.active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .hero-media-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .hero-media-content {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .hero-video-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .hero-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  .hero-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  .hero-content {
+    text-align: center;
+    color: #fff;
+    padding-top: var(--mobile-padding-top, 50px);
+  }
+
+  .hero-content-wrapper {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .hero-text-content {
+    padding: 40px;
+    border-radius: 8px;
+  }
+
+  .hero-title {
+    margin-bottom: 15px;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 48px;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-description {
+    margin-bottom: 20px;
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1.5;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero-cta-wrapper {
+    margin-top: 30px;
+  }
+
+  .hero-cta-button {
+    border-radius: 50px;
+    padding: 12px 32px;
+    border: 0.8px solid #ffffff;
+    transition: none;
+    display: inline-block;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    background-color: transparent;
+    color: #ffffff;
+    font-size: 16px;
+    text-transform: none;
+    min-width: 160px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .hero-cta-button:hover {
+    border: 0.8px solid #ffffff;
+    background-color: transparent;
+    color: #ffffff;
+    text-decoration: none;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .hero-cta-button:active {
+    transform: none;
+  }
+
+  .hero-cta-button:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  /* Slider Navigation - Hidden */
+  .hero-slider-nav {
+    display: none;
+  }
+
+  /* Slider Dots */
+  .hero-slider-dots {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    z-index: 3;
+  }
+
+  .hero-slider-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+  }
+
+  .hero-slider-dot.active {
+    background: #fff;
+    border-color: #fff;
+  }
+
+  .hero-slider-dot:hover {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Text Alignment Variants */
+  .hero-align-left .hero-content {
+    text-align: left;
+  }
+
+  .hero-align-center .hero-content {
+    text-align: center;
+  }
+
+  .hero-align-justify .hero-content {
+    text-align: justify;
+  }
+
+  /* Mobile Styles */
+  @media (max-width: 768px) {
+    .dynamic-hero-slider {
+      height: 50vh;
+      min-height: 300px;
+    }
+
+    .hero-title {
+      font-size: 28px !important;
+      margin-bottom: 10px;
+    }
+
+    .hero-description {
+      font-size: 16px !important;
+    }
+
+    .hero-cta-button {
+      padding: 10px 24px;
+      font-size: 14px;
+      min-width: 140px;
+    }
+
+    .hero-text-content {
+      padding: 20px;
+      margin: 0 10px;
+    }
+
+    .hero-slider-prev,
+    .hero-slider-next {
+      display: none;
+    }
+
+    .hero-slider-dots {
+      bottom: 20px;
+    }
+  }
+
+  /* Hide mobile/desktop specific content */
+  .hero-mobile-only {
+    display: none;
+  }
+
+  .hero-desktop-only {
+    display: block;
+  }
+
+  @media (min-width: 768px) {
+    .hero-title {
+      font-size: 56px;
+    }
+
+    .hero-description {
+      font-size: 20px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-mobile-only {
+      display: block;
+    }
+
+    .hero-desktop-only {
+      display: none;
+    }
+  }
+
+  /* Extra small screens */
+  @media (max-width: 480px) {
+    .hero-title {
+      font-size: 24px !important;
+      line-height: 1.3;
+    }
+
+    .hero-description {
+      font-size: 14px !important;
+    }
+
+    .hero-cta-button {
+      padding: 8px 20px;
+      font-size: 13px;
+      min-width: 120px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const heroSection = document.querySelector('.dynamic-hero-section');
+    if (!heroSection) return;
+
+    const slider = heroSection.querySelector('.dynamic-hero-slider');
+    const slides = heroSection.querySelectorAll('.dynamic-hero-slide');
+    const prevBtn = heroSection.querySelector('.hero-slider-prev');
+    const nextBtn = heroSection.querySelector('.hero-slider-next');
+    const dots = heroSection.querySelectorAll('.hero-slider-dot');
+    
+    let currentSlide = 0;
+    let autoSlideInterval;
+    const autoSlide = heroSection.dataset.autoSlide === 'true';
+    const slideInterval = parseInt(heroSection.dataset.slideInterval) || 5000;
+
+    // Touch/swipe variables
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let isSwiping = false;
+    const minSwipeDistance = 50; // Minimum distance for a swipe to be registered
+    
+    // Auto-slide pause variables
+    let userInteractionTimeout;
+    const userInteractionDelay = 3000; // 3 seconds delay after user interaction
+
+    // Initialize slider immediately
+    function initSlider() {
+      // Show first slide immediately
+      if (slides.length > 0) {
+        slides[0].classList.add('active');
+        slides[0].style.zIndex = '2';
+        if (dots.length > 0) dots[0].classList.add('active');
+        currentSlide = 0;
+      }
+      
+      // Start auto-slide if enabled and multiple slides
+      if (autoSlide && slides.length > 1) {
+        startAutoSlide();
+      }
+    }
+
+    // Show slide
+    function showSlide(index) {
+      // Remove active class from all slides and dots
+      slides.forEach(slide => {
+        slide.classList.remove('active');
+        slide.style.zIndex = '0';
+      });
+      dots.forEach(dot => dot.classList.remove('active'));
+      
+      // Add active class to current slide and dot
+      if (slides[index]) {
+        slides[index].classList.add('active');
+        slides[index].style.zIndex = '2';
+      }
+      if (dots[index]) dots[index].classList.add('active');
+      
+      currentSlide = index;
+    }
+
+    // Next slide
+    function nextSlide() {
+      const next = (currentSlide + 1) % slides.length;
+      showSlide(next);
+    }
+
+    // Previous slide
+    function prevSlide() {
+      const prev = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(prev);
+    }
+
+    // Start auto-slide
+    function startAutoSlide() {
+      // Clear any existing timeout
+      if (userInteractionTimeout) {
+        clearTimeout(userInteractionTimeout);
+        userInteractionTimeout = null;
+      }
+      
+      autoSlideInterval = setInterval(nextSlide, slideInterval);
+    }
+
+    // Stop auto-slide
+    function stopAutoSlide() {
+      if (autoSlideInterval) {
+        clearInterval(autoSlideInterval);
+      }
+    }
+
+    // Pause auto-slide temporarily after user interaction
+    function pauseAutoSlideTemporarily() {
+      stopAutoSlide();
+      
+      // Clear any existing timeout
+      if (userInteractionTimeout) {
+        clearTimeout(userInteractionTimeout);
+      }
+      
+      // Resume auto-slide after delay
+      userInteractionTimeout = setTimeout(() => {
+        if (autoSlide && slides.length > 1) {
+          startAutoSlide();
+        }
+      }, userInteractionDelay);
+    }
+
+    // Handle swipe detection
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+      const verticalDistance = Math.abs(touchEndY - touchStartY);
+      const horizontalDistance = Math.abs(swipeDistance);
+
+      // Only register horizontal swipes if they're more horizontal than vertical
+      // and meet the minimum distance threshold
+      if (horizontalDistance > verticalDistance && horizontalDistance > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          // Swipe right - go to previous slide
+          prevSlide();
+        } else {
+          // Swipe left - go to next slide
+          nextSlide();
+        }
+        
+        // Pause auto-slide temporarily after user interaction
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      }
+    }
+
+    // Touch event handlers
+    function handleTouchStart(e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      isSwiping = false;
+      
+      // Stop auto-slide during touch
+      if (autoSlide) {
+        stopAutoSlide();
+      }
+    }
+
+    function handleTouchMove(e) {
+      if (!isSwiping) {
+        isSwiping = true;
+      }
+    }
+
+    function handleTouchEnd(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      touchEndY = e.changedTouches[0].clientY;
+      
+      if (isSwiping) {
+        handleSwipe();
+      } else {
+        // If no swipe was detected, resume auto-slide after delay
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      }
+    }
+
+    // Add touch event listeners to slider
+    if (slider) {
+      slider.addEventListener('touchstart', handleTouchStart, { passive: true });
+      slider.addEventListener('touchmove', handleTouchMove, { passive: true });
+      slider.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
+
+    // Event listeners
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        prevSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      });
+    }
+
+    // Dot navigation
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', () => {
+        showSlide(index);
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      });
+    });
+
+    // Pause auto-slide on hover
+    slider.addEventListener('mouseenter', stopAutoSlide);
+    slider.addEventListener('mouseleave', () => {
+      if (autoSlide) startAutoSlide();
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        prevSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      } else if (e.key === 'ArrowRight') {
+        nextSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      }
+    });
+
+    // Initialize immediately for faster loading
+    initSlider();
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Dynamic Hero Section",
+  "tag": "section",
+  "class": "dynamic-hero-section-wrapper",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product Page Integration"
+    },
+    {
+      "type": "paragraph",
+      "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content' as a JSON list."
+    },
+    {
+      "type": "header",
+      "content": "Static Page Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "fix",
+      "label": "Fix Scaling Issue",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Text Alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left Aligned"
+        },
+        {
+          "value": "center",
+          "label": "Center Aligned"
+        },
+        {
+          "value": "justify",
+          "label": "Justified"
+        }
+      ],
+      "default": "center",
+      "info": "Controls how text is aligned within the content area"
+    },
+    {
+      "type": "header",
+      "content": "Slider Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_slide",
+      "label": "Enable Auto-Slide",
+      "default": true,
+      "info": "Automatically rotate through slides"
+    },
+    {
+      "type": "range",
+      "id": "slide_interval",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "label": "Auto-Slide Interval",
+      "default": 5,
+      "info": "Time between slide transitions (in seconds)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Slide",
+      "settings": [
+        {
+          "type": "select",
+          "id": "content_type",
+          "label": "Content Type",
+          "options": [
+            {
+              "value": "image",
+              "label": "Image"
+            },
+            {
+              "value": "video",
+              "label": "Video"
+            }
+          ],
+          "default": "image"
+        },
+        {
+          "type": "header",
+          "content": "Image Settings"
+        },
+        {
+          "type": "image_picker",
+          "id": "desktop_image",
+          "label": "Desktop Image",
+          "info": "Recommended size: 1920 x 1080 pixels"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile Image",
+          "info": "Recommended size: 768 x 1024 pixels"
+        },
+        {
+          "type": "header",
+          "content": "Video Settings"
+        },
+        {
+          "type": "text",
+          "id": "desktop_video",
+          "label": "Desktop Video URL",
+          "info": "First upload your video in Settings > Files, then copy the URL here. MP4 format recommended."
+        },
+        {
+          "type": "text",
+          "id": "mobile_video",
+          "label": "Mobile Video URL (optional)",
+          "info": "If not provided, desktop video will be used. Upload in Settings > Files."
+        },
+        {
+          "type": "image_picker",
+          "id": "video_poster",
+          "label": "Video Poster Image (Desktop)",
+          "info": "Shown before video plays"
+        },
+        {
+          "type": "image_picker",
+          "id": "video_poster_mobile",
+          "label": "Video Poster Image (Mobile)",
+          "info": "If not provided, desktop poster will be used"
+        },
+        {
+          "type": "checkbox",
+          "id": "autoplay",
+          "label": "Autoplay video",
+          "default": true,
+          "info": "Autoplays on supported browsers"
+        },
+        {
+          "type": "checkbox",
+          "id": "loop",
+          "label": "Loop video",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "muted",
+          "label": "Mute video",
+          "default": true,
+          "info": "Video must be muted for autoplay to work"
+        },
+        {
+          "type": "checkbox",
+          "id": "controls",
+          "label": "Show video controls",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Content Settings"
+        },
+        {
+          "type": "textarea",
+          "id": "heading",
+          "label": "Heading"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "btn_text",
+          "label": "Button Text"
+        },
+        {
+          "type": "url",
+          "id": "btn_url",
+          "label": "Button Link"
+        },
+        {
+          "type": "header",
+          "content": "Mobile Settings"
+        },
+        {
+          "type": "number",
+          "id": "mobile_padding_top",
+          "label": "Mobile - Padding from top (%)",
+          "info": "Adjust text position from top on mobile",
+          "default": 50
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Dynamic Hero Section",
+      "blocks": [
+        {
+          "type": "slide"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %} 

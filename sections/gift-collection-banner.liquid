@@ -1,0 +1,115 @@
+<!--
+  <section>
+    <div class="slbanner-wrap">
+
+      <div class="slbanner_img">
+             <img src="{{collection.image | img_url: 'master' }}" class="img-fluid" alt="" />
+         </div>
+
+    </div>
+  </section>
+-->
+
+<section>
+  <div class="avilable_s_bg av_bg">
+    <div class="container">
+     <!-- <div class="main_heading_wrap">
+        <img src="{{'globe.svg' | asset_url}}" class="glo">
+        <h3 class="blk">SUSTAINABLE TRAVEL ESSENTIALS</h3>
+      </div>
+      -->
+      <div class="p_crousel2">
+        {% for product in collection.products %}
+          {%- comment %}<locksmith:7b44>{% endcomment -%}
+            {%- capture var %}{% render 'locksmith-variables', scope: 'subject', subject: product, subject_parent: collection, variable: 'transparent' %}{% endcapture %}{% if var == "true" %}{% else %}{% continue %}{% endif -%}
+          {%- comment %}</locksmith:7b44>{% endcomment -%}
+          {% include 'product-grid-item' %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  /*-- Collection images Show on swatch hover --*/
+  $('.product-color .thumb-dd').click(function() {
+     var id= $(this).attr('data-id');
+      console.log(id);
+
+
+     var thumb_src = $(this).closest('.variant-dd').find('.img-variant > img').attr('src');
+             var pric = $(this).closest('.variant-dd').find('.img-variant').attr('data-price');
+      console.log(thumb_src);
+     $(this).parents('.single-collection').find('a img').attr('src',thumb_src);
+
+     var path = $(this).parents('.product-details').find('a.prod-heading').attr('data-href');
+     $(this).parents('.product-details').siblings('.ci').find('a').attr('href',path+'?variant='+id);
+     $(this).parents('.product-details').find('a.prod-heading').attr('href',path+'?variant='+id);
+            $(this).parents('.single-collection').find('.pra').html(pric);
+   });
+</script>
+
+<style>
+      .swatch input{display:none;}
+    .swatch label{float:left;    width: 26px;
+      height: 26px;
+      border: 3px solid #dad7d7;
+      border-radius: 50%; margin:0;}
+    .swatch input:checked + label{box-shadow:rgb(216, 216, 216) 0px 0px 0px 1px;}
+    .swatch .swatch-element{float:left;-webkit-transform:translateZ(0);-webkit-font-smoothing:antialiased;margin:0px 0px 0 0;position:relative;}
+
+
+    .bg--black {
+      background-color: rgb(0, 0, 0);
+    }
+    .bg--red {
+      background-color: rgb(149, 1, 10) ;
+    }
+    .bg--brown {
+      background-color: rgb(133, 73, 10) ;
+    }
+      .collection-info .swatch-wrap.swatch {
+        display: flex;
+        justify-content: center;
+        margin: 10px auto;
+    }
+    .p_crousel2 .pr_heading h6 {
+      min-height: 53px;
+  }
+      {% unless collection.handle == 'tees' or  collection.handle == 'hats' or  collection.handle == 'vergara-collection' %}
+      .product-color.swatch-wrap.swatch {
+        display: none;
+    }
+      {% endunless %}
+</style>
+
+{% schema %}
+{
+  "name": "gift-collection-banner",
+
+
+    "settings": [
+
+ {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+
+ {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "text"
+    }
+
+
+
+  ] ,
+
+  "presets": [
+    {
+      "name": "gift-collection-banner"
+    }
+  ]
+}
+{% endschema %}

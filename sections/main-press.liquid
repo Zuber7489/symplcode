@@ -1,0 +1,85 @@
+<div class="Press_wrap" data-aos="fade-up"
+     data-aos-duration="3000">
+  <div class="container">
+    <div class="press_head">
+     <h1>{{section.settings.heading}}</h1>
+     {{section.settings.text}}
+    </div>
+    <div class="Press_blocksContainer">
+      
+          {% for block in section.blocks %}
+      <a href="{{block.settings.link}}" class="Block_root" target="_blank" rel="noopener noreferrer">
+        <div>
+         <div class="Block_img">
+            <img src="{{ block.settings.image | img_url: 'master'}}"   class="lazyloaded" >
+          </div>
+            <h2>{{block.settings.heading}}</h2>
+        </div>
+        <div class="Block_readMore">Read More <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M502.6 278.6l-128 128c-12.51 12.51-32.76 12.49-45.25 0c-12.5-12.5-12.5-32.75 0-45.25L402.8 288H32C14.31 288 0 273.7 0 255.1S14.31 224 32 224h370.8l-73.38-73.38c-12.5-12.5-12.5-32.75 0-45.25s32.75-12.5 45.25 0l128 128C515.1 245.9 515.1 266.1 502.6 278.6z"/></svg></div>
+      </a>
+       {% endfor %}
+ 
+    
+    </div>
+  
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Main Press",
+ 
+  "blocks": [
+ 
+    {
+      "type": "text",
+      "name": "text",
+      "settings": [
+ 
+   {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    } ,
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+ {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    }
+ 
+         
+      ]
+    }
+  
+    
+     
+  ], 
+  "settings": [
+
+ 
+ {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading"
+    },
+{
+      "type": "richtext",
+      "id": "text",
+      "label": "text"
+    }
+ 
+    
+  ],
+  "presets": [
+    {
+      "name": "Main Press"
+    }
+  ]
+}
+{% endschema %}

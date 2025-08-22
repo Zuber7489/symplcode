@@ -1,0 +1,94 @@
+<div class="{% if section.settings.full_width_section == true %}{% else %}container{% endif %}">
+  <div class="vi-container">
+    <div class="vi-wrapper">
+      <div class="vi-left" style="padding-top: calc(({{ section.settings.image.aspect_ratio }} * 100%)/4) ;">
+        <video class="video-main" playsinline="" loop="" autoplay="" no-controls muted >
+                    <source src="{{section.settings.video_link}}" type="video/mp4">
+        </video>
+      </div>
+
+      <div class="vi-right" style="padding-top: calc(({{ section.settings.image.aspect_ratio }} * 100%)/4) ;">
+        <img src="{{ section.settings.image | img_url: 'master' }}" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .vi-left {
+      width: {{section.settings.video_width}}%;
+  }
+  .vi-left, .vi-right {
+    padding-top:  37.5%;
+  }
+  {% if section.settings.video_position == 'right' %}
+    .vi-wrapper {
+      flex-direction: column;
+  }
+  {% endif %}
+
+  @media (max-width: 768px){
+    .vi-wrapper {
+        flex-direction: column;
+        row-gap: 0px;
+    }
+    .vi-left, .vi-right {
+        width: 100%;
+        padding-top: 75%;
+    }
+  }
+</style>
+
+{% schema %}
+  {
+    "name": "Video Image",
+    "settings": [
+      {
+      "type": "checkbox",
+      "id": "full_width_section",
+      "label": "Full width section",
+      "default": false
+    },
+      {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "url",
+      "id": "video_link",
+      "label": "Video Link"
+    },
+    {
+      "type": "select",
+      "id": "video_position",
+      "label": "Video Position Desktop",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "video_width",
+      "label": "Video Width Desktop",
+      "min": 30,
+      "max": 70,
+      "step": 5,
+      "default": 50,
+      "unit": "%"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Video Image"
+    }
+  ]
+  }
+{% endschema %}

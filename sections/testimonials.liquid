@@ -1,0 +1,197 @@
+<!-- sections/testimonials.liquid -->
+<div class="testimonials-section">
+  <div class="container">
+    <!-- Desktop/Tablet View -->
+    <div class="testimonials-grid">
+      {% for block in section.blocks %}
+        {% if block.type == 'testimonial' %}
+          <div class="testimonial-item" {{ block.shopify_attributes }}>
+            <div class="testimonial-stars">
+              <span class="star">★</span>
+              <span class="star">★</span>
+              <span class="star">★</span>
+              <span class="star">★</span>
+              <span class="star">★</span>
+            </div>
+            <div class="testimonial-content">
+              <p class="testimonial-text">{{ block.settings.quote }}</p>
+            </div>
+            <div class="testimonial-author">
+              {{ block.settings.author }}
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+    
+    <!-- Mobile View (Single Testimonial) -->
+    <div class="testimonial-mobile">
+      <div class="testimonial-stars">
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+        <span class="star">★</span>
+      </div>
+      <div class="testimonial-content">
+        <p class="testimonial-text">{{ section.settings.mobile_quote }}</p>
+      </div>
+      <div class="testimonial-author">
+        {{ section.settings.mobile_author }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .testimonials-section {
+    padding: 60px 40px;
+    background-color: #ffffff;
+  }
+  
+  .container {
+    /* max-width: 1200px; */
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+  
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+  
+  .testimonial-item {
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+  }
+  
+  .testimonial-stars {
+    margin-bottom: 15px;
+    color: #000000;
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+  
+  .testimonial-content {
+    flex-grow: 1;
+    margin-bottom: 15px;
+  }
+  
+  .testimonial-text {
+    font-size: 16px;
+    line-height: 1.5;
+    color: #333333;
+    margin: 0;
+    font-weight: 400;
+  }
+  
+  .testimonial-author {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666666;
+  }
+  
+  /* Mobile View Styles */
+  .testimonial-mobile {
+    display: none;
+    padding: 15px 0;
+  }
+  
+  @media screen and (max-width: 991px) {
+    .testimonials-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media screen and (max-width: 767px) {
+    .testimonials-section {
+      padding: 40px 0;
+    }
+    
+    .testimonials-grid {
+      display: none;
+    }
+    
+    .testimonial-mobile {
+      display: block;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Testimonials",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Mobile Testimonial"
+    },
+    {
+      "type": "textarea",
+      "id": "mobile_quote",
+      "label": "Mobile Quote",
+      "default": "I love Away! From the thoughtfully created products to the customer service team that seems to go above and beyond, everything is exactly how I'd want it to be."
+    },
+    {
+      "type": "text",
+      "id": "mobile_author",
+      "label": "Mobile Author",
+      "default": "Shanna C."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "I love Away! From the thoughtfully created products to the customer service team that seems to go above and beyond, everything is exactly how I'd want it to be."
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Author",
+          "default": "Shanna C."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Testimonials",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I love Away! From the thoughtfully created products to the customer service team that seems to go above and beyond, everything is exactly how I'd want it to be.",
+            "author": "Shanna C."
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "I've taken my [luggage] to Paris, San Francisco, New Mexico, Indonesia... I have never traveled more at ease. If there was a rating higher than 10, I'd give it.",
+            "author": "Alexander F."
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "The best brand in my collection and always my first choice when traveling.",
+            "author": "William R."
+          }
+        }
+      ],
+      "settings": {
+        "mobile_quote": "I love Away! From the thoughtfully created products to the customer service team that seems to go above and beyond, everything is exactly how I'd want it to be.",
+        "mobile_author": "Shanna C."
+      }
+    }
+  ]
+}
+{% endschema %}

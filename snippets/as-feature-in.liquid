@@ -1,0 +1,124 @@
+<div class="as-featured-in-section">
+  <div class="container">
+    <h3 class="featured-title">As featured in</h3>
+    
+    <div class="logo-marquee-container">
+      <div class="logo-marquee">
+        <div class="logo-track">
+          {% assign logos = "gq.png,thehundreds.png,acquirenew.png,hypebeast.png,gq.png,thehundreds.png" | split: "," %}
+          {% for logo in logos %}
+            <div class="logo-item">
+              <img
+                src="{{ logo | asset_url }}"
+                alt="Brand logo"
+                class="logo-image"
+                loading="lazy"
+              >
+            </div>
+          {% endfor %}
+        </div>
+        
+        <!-- Clone for seamless looping -->
+        <div class="logo-track">
+          {% for logo in logos %}
+            <div class="logo-item">
+              <img
+                src="{{ logo | asset_url }}"
+                alt="Brand logo"
+                class="logo-image"
+                loading="lazy"
+              >
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .as-featured-in-section {
+    background-color: #A3C2C6;
+    padding: 40px 0;
+    overflow: hidden;
+    width: 100%;
+    margin-bottom: 60px;
+  }
+  .as-featured-in-section .container {
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+  }
+  .featured-title {
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    color: #000;
+    margin: 0 0 30px;
+    
+    letter-spacing: 1px;
+  }
+  .logo-marquee-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  .logo-marquee {
+    display: flex;
+    width: 100%;
+    overflow: hidden;
+  }
+  .logo-track {
+    display: flex;
+    animation: marquee 30s linear infinite;
+    will-change: transform;
+  }
+  .logo-item {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 40px;
+  }
+  .logo-image {
+    max-height: 27px;
+    width: auto;
+    object-fit: contain;
+  }
+  .logo-marquee:hover .logo-track {
+    animation-play-state: paused;
+  }
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+  }
+  @media (max-width: 767px) {
+    .as-featured-in-section { padding: 30px 0; }
+    .featured-title { font-size: 18px; margin-bottom: 20px; }
+    .logo-item { padding: 0 25px; }
+    .logo-image { max-height: 25px; }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const logoTracks = document.querySelectorAll('.logo-track');
+
+    logoTracks.forEach(track => {
+      track.style.animationDuration = '30s';
+    });
+
+    function handleVisibility() {
+      const marquee = document.querySelector('.logo-marquee-container');
+      if (!marquee) return;
+      const rect = marquee.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      logoTracks.forEach(track => {
+        track.style.animationPlayState = isVisible ? 'running' : 'paused';
+      });
+    }
+
+    window.addEventListener('scroll', handleVisibility);
+    handleVisibility();
+  });
+</script>
