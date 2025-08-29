@@ -73,15 +73,15 @@
                     </div>
                     
                     <div class="cart-item-pricing">
-                        <div class="price-container">
-                          {% if item.variant.compare_at_price > item.variant.price %}
-                            <div class="original-price">{{ item.variant.compare_at_price | money }}</div>
-                            <div class="sale-price">{{ item.price | money }}</div>
-                            <div class="savings">(Save {{ item.variant.compare_at_price | minus: item.price | money }})</div>
-                          {% else %}
-                            <div class="regular-price">{{ item.price | money }}</div>
-                          {% endif %}
-                        </div>
+                      <div class="price-container">
+                        {% if item.variant.compare_at_price > item.variant.price %}
+                          <div class="original-price">{{ item.variant.compare_at_price | money }}</div>
+                          <div class="sale-price">{{ item.price | money }}</div>
+                          <div class="savings">(Save {{ item.variant.compare_at_price | minus: item.price | money }})</div>
+                        {% else %}
+                          <div class="regular-price">{{ item.price | money }}</div>
+                        {% endif %}
+                      </div>
                     </div>
                     
                     <button class="cart-item-remove remove-cart" data-item-key="{{ item.key }}" aria-label="Remove item">
