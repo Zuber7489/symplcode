@@ -1124,6 +1124,9 @@ function refreshCartContent(retryCount) {
       } else {
         $(".shipping-cost").html("$5.00");
       }
+      
+      // Trigger completion event
+      $(document).trigger('cart:refresh-complete');
     },
     error: function() {
       // Retry on error (up to 3 times)
@@ -1192,9 +1195,11 @@ $(document).ready(function () {
       data: "quantity=" + newVal + "&line=" + line,
       success: function() {
         // Trigger cart refresh event
+        $(document).one('cart:refresh-complete', function() {
+          // Remove loading class only after cart refresh is complete
+          $button.parents(".r-prod-row").removeClass("is-loading");
+        });
         $(document).trigger('cart:refresh');
-        // Remove loading class
-        $button.parents(".r-prod-row").removeClass("is-loading");
       },
       error: function() {
         // Remove loading class on error
@@ -1217,10 +1222,12 @@ $(document).ready(function () {
       dataType: "json",
       data: "quantity=0&line=" + line,
       success: function() {
-        // Trigger cart refresh event
+        // Trigger cart refresh event and remove loading class after refresh
+        $(document).one('cart:refresh-complete', function() {
+          // Remove loading class only after cart refresh is complete
+          $button.parents(".r-prod-row").removeClass("is-loading");
+        });
         $(document).trigger('cart:refresh');
-        // Remove loading class using stored reference
-        $button.parents(".r-prod-row").removeClass("is-loading");
       },
       error: function() {
         // Remove loading class on error using stored reference
