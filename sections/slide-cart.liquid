@@ -101,7 +101,7 @@
             <div class="bundle-products-container">
               <div class="bundle-products-scroll" id="bundle-products-scroll">
                 <!-- Sample bundle products - replace with your actual products -->
-                {% assign bundle_products = collections['bundle-products'].products | default: collections.all.products | limit: 5 %}
+                {% assign bundle_products = collections['bundle-products'].products | default: collections.all.products | limit: 6 %}
                 {% for product in bundle_products %}
                   <div class="bundle-product" data-product-id="{{ product.id }}">
                     <div class="bundle-product-gray-box">
@@ -693,10 +693,37 @@
   font-family: inherit;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  position: relative;
 }
 
 .add-to-bag-btn:hover {
   background: #026068;
+}
+
+.add-to-bag-btn.is-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.add-to-bag-btn.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 50%;
+  left: 50%;
+  margin-left: -6px;
+  margin-top: -6px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Checkout Section */
@@ -1145,6 +1172,61 @@ function formatMoney(cents) {
   return "$" + dollars.toFixed(2);
 }
 
+// Shopify error handling functions
+var Shopify = Shopify || {};
+
+Shopify.onError = function (XMLHttpRequest, textStatus) {
+  // Remove loading state on error
+  $('.add_to_cart_button, #AddToCart, #AddToCart1, #AddToCart2, .add-to-bag-btn').removeAttr("disabled").removeClass("is-loading");
+  
+  console.log("errorerror");
+  // Shopify returns a description of the error in XMLHttpRequest.responseText.
+  // It is JSON.
+  // Example: {"description":"The product 'Amelia - Small' is already sold out.","status":500,"message":"Cart Error"}
+  var data = eval("(" + XMLHttpRequest.responseText + ")");
+  if (!!data.message) {
+    alert(data.message + "(" + data.status + "): " + data.description);
+  } else {
+    alert("Error : " + Shopify.fullMessagesFromErrors(data).join("; ") + ".");
+  }
+
+  $(".addtocart").removeAttr("disabled");
+};
+
+Shopify.fullMessagesFromErrors = function (errors) {
+  var fullMessages = [];
+  jQuery.each(errors, function (attribute, messages) {
+    jQuery.each(messages, function (index, message) {
+      fullMessages.push(attribute + " " + message);
+    });
+  });
+  return fullMessages;
+};
+
+// Function to add item to cart via AJAX
+function addItemToCart(variantId, quantity = 1) {
+  $.ajax({
+    type: "POST",
+    url: "/cart/add.js",
+    dataType: "json",
+    data: {
+      id: variantId,
+      quantity: quantity
+    },
+    success: function(data) {
+      // Refresh cart content after successful addition
+      refreshCartContent();
+      
+      // Show success message or animation if needed
+      console.log("Item added to cart successfully");
+    },
+    error: function(XMLHttpRequest, textStatus) {
+      // Handle error using Shopify's error handler
+      Shopify.onError(XMLHttpRequest, textStatus);
+    }
+  });
+}
+
 $(document).ready(function () {
   // Simple cart state management - let cart.js handle the rest
   // Ensure cart is closed on page load
@@ -1244,6 +1326,7 @@ class BundleSlideNavigation {
     // Call setupBundleDragAndTouch directly
     setTimeout(() => {
       this.setupBundleDragAndTouch();
+      this.setupVariantSelection();
     }, 300);
   }
 
@@ -1579,6 +1662,36 @@ class BundleSlideNavigation {
       }
     }
   }
+  
+  // Setup variant selection for bundle products
+  setupVariantSelection() {
+    const bundleContainer = document.getElementById('bundle-products-scroll');
+    if (!bundleContainer) return;
+    
+    // Handle variant dot clicks
+    bundleContainer.addEventListener('click', function(e) {
+      const variantDot = e.target.closest('.variant-dot');
+      if (variantDot) {
+        e.preventDefault();
+        const productId = variantDot.closest('.bundle-product').dataset.productId;
+        const variantId = variantDot.dataset.variantId;
+        
+        // Update selected variant dot
+        const productContainer = variantDot.closest('.bundle-product');
+        const variantDots = productContainer.querySelectorAll('.variant-dot');
+        variantDots.forEach(dot => {
+          dot.classList.remove('selected');
+        });
+        variantDot.classList.add('selected');
+        
+        // Update the Add to Bag button with the selected variant ID
+        const addToBagBtn = productContainer.querySelector('.add-to-bag-btn');
+        if (addToBagBtn) {
+          addToBagBtn.dataset.variantId = variantId;
+        }
+      }
+    });
+  }
 }
 
 // Initialize bundle slide navigation
@@ -1600,6 +1713,25 @@ $(document).ready(function() {
     setTimeout(() => {
       new BundleSlideNavigation();
     }, 300);
+  });
+  
+  // Add to Bag button handler for bundle products
+  $(document).on('click', '.add-to-bag-btn', function(e) {
+    e.preventDefault();
+    var $button = $(this);
+    var variantId = $button.data('variant-id');
+    var quantity = 1; // Default quantity
+    
+    // Add loading state
+    $button.prop("disabled", true).addClass("is-loading");
+    
+    // Add item to cart via AJAX
+    addItemToCart(variantId, quantity);
+    
+    // Remove loading state after a short delay
+    setTimeout(function() {
+      $button.prop("disabled", false).removeClass("is-loading");
+    }, 1000);
   });
 });
 </script>
