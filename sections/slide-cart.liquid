@@ -101,7 +101,7 @@
             <div class="bundle-products-container">
               <div class="bundle-products-scroll" id="bundle-products-scroll">
                 <!-- Sample bundle products - replace with your actual products -->
-                {% assign bundle_products = collections['bundle-products'].products | default: collections.all.products | limit: 6 %}
+                {% assign bundle_products = collections['bundle-products'].products | default: collections.all.products | limit: 5 %}
                 {% for product in bundle_products %}
                   <div class="bundle-product" data-product-id="{{ product.id }}">
                     <div class="bundle-product-gray-box">
@@ -925,7 +925,7 @@
   }
   
   .bundle-save-section {
-    padding: 20px 0;
+    padding: 20px 16px;
   }
   
   .checkout-section {
@@ -960,7 +960,7 @@
   }
   
   .bundle-save-section {
-    padding: 16px 0;
+    padding: 16px;
   }
   
   .checkout-section {
@@ -1235,6 +1235,371 @@ $(document).ready(function () {
         alert("Error removing cart item");
       }
     });
+  });
+});
+
+// Add the BundleSlideNavigation class
+class BundleSlideNavigation {
+  constructor() {
+    // Call setupBundleDragAndTouch directly
+    setTimeout(() => {
+      this.setupBundleDragAndTouch();
+    }, 300);
+  }
+
+  setupBundleDragAndTouch() {
+    const bundleContainer = document.getElementById('bundle-products-scroll');
+    if (!bundleContainer) {
+      console.log('Bundle container not found');
+      return;
+    }
+
+    console.log('Setting up bundle drag and touch');
+
+    let currentIndex = 0;
+    let cardWidth;
+    let totalCards;
+    let visibleCards;
+    let isDragging = false;
+    let startPos = 0;
+    let currentTranslate = 0;
+    let prevTranslate = 0;
+    let animationID = 0;
+    let clickPrevented = false;
+    let lastDeltaX = 0;
+    let hasDragged = false;
+    let dragStartTime = 0;
+    let dragThreshold = 10;
+
+    // Calculate dimensions
+    function calculateDimensions() {
+      const bundleProducts = bundleContainer.querySelectorAll('.bundle-product');
+      console.log('Bundle products found:', bundleProducts.length);
+      if (bundleProducts.length === 0) return;
+      
+      totalCards = bundleProducts.length;
+      const firstCard = bundleProducts[0];
+      const style = window.getComputedStyle(firstCard);
+      const marginLeft = parseInt(style.marginLeft) || 0;
+      const marginRight = parseInt(style.marginRight) || 0;
+      
+      cardWidth = firstCard.offsetWidth + marginLeft + marginRight;
+      console.log('Card width:', cardWidth, 'Total cards:', totalCards);
+      
+      const containerWidth = bundleContainer.parentElement.offsetWidth;
+      visibleCards = Math.floor(containerWidth / cardWidth);
+      visibleCards = Math.max(1, visibleCards);
+      console.log('Container width:', containerWidth, 'Visible cards:', visibleCards);
+    }
+
+    // Initialize
+    calculateDimensions();
+    updateBundlePosition();
+
+    // Handle window resize
+    window.addEventListener('resize', function() {
+      calculateDimensions();
+      if (currentIndex > totalCards - visibleCards) {
+        currentIndex = Math.max(0, totalCards - visibleCards);
+      }
+      updateBundlePosition();
+    });
+
+    // Update bundle position
+    function updateBundlePosition() {
+      if (isNaN(cardWidth) || cardWidth <= 0) {
+        calculateDimensions();
+        if (isNaN(cardWidth) || cardWidth <= 0) return;
+      }
+      const translateX = -currentIndex * cardWidth;
+      console.log('Updating position:', translateX, 'Current index:', currentIndex);
+      bundleContainer.style.transform = `translateX(${translateX}px)`;
+    }
+
+    // Check if target is interactive
+    function isInteractiveTarget(target) {
+      return target.closest('.variant-dot') || 
+             target.closest('.add-to-bag-btn') || 
+             target.closest('button') ||
+             target.closest('input') ||
+             target.closest('select');
+    }
+
+    // Prevent link clicks during drag
+    bundleContainer.addEventListener('click', function(e) {
+      if (hasDragged) {
+        e.preventDefault();
+        e.stopPropagation();
+        hasDragged = false;
+      }
+    });
+
+    // Mouse drag support
+    let mouseStartTime = 0;
+    let mouseStartX = 0;
+    let mouseLastX = 0;
+    let mouseLastTime = 0;
+
+    bundleContainer.addEventListener('mousedown', function(e) {
+      if (isInteractiveTarget(e.target)) {
+        console.log('Mouse down on interactive element, not starting drag');
+        return;
+      }
+
+      console.log('Mouse down on bundle container');
+      if (e.button !== 0) return;
+      e.preventDefault();
+      isDragging = true;
+      clickPrevented = false;
+      hasDragged = false;
+      dragStartTime = Date.now();
+      mouseStartX = startPos = e.clientX;
+      mouseLastX = e.clientX;
+      mouseStartTime = mouseLastTime = Date.now();
+      prevTranslate = -currentIndex * cardWidth;
+      bundleContainer.classList.add('no-transition');
+      bundleContainer.parentElement.classList.add('grabbing');
+      cancelAnimationFrame(animationID);
+      animationID = requestAnimationFrame(animation);
+    });
+
+    window.addEventListener('mousemove', function(e) {
+      if (!isDragging) return;
+      const currentPosition = e.clientX;
+      const diff = currentPosition - mouseStartX;
+      lastDeltaX = diff;
+      currentTranslate = prevTranslate + diff;
+      mouseLastX = currentPosition;
+      mouseLastTime = Date.now();
+      
+      const maxTranslate = 0;
+      const minTranslate = -(totalCards - visibleCards) * cardWidth;
+      if (currentTranslate > maxTranslate) {
+        currentTranslate = maxTranslate + diff * 0.3;
+      } else if (currentTranslate < minTranslate) {
+        currentTranslate = minTranslate + diff * 0.3;
+      }
+      
+      if (Math.abs(diff) > dragThreshold) {
+        clickPrevented = true;
+        hasDragged = true;
+      }
+    });
+
+    function mouseDragEnd(e) {
+      if (!isDragging) return;
+      
+      const dragDuration = Date.now() - dragStartTime;
+      const movedBy = mouseLastX - mouseStartX;
+      
+      if (dragDuration < 200 && Math.abs(movedBy) < dragThreshold) {
+        console.log('Short interaction, not a drag');
+        isDragging = false;
+        bundleContainer.classList.remove('no-transition');
+        bundleContainer.parentElement.classList.remove('grabbing');
+        cancelAnimationFrame(animationID);
+        return;
+      }
+      
+      console.log('Mouse drag end');
+      isDragging = false;
+      bundleContainer.classList.remove('no-transition');
+      bundleContainer.parentElement.classList.remove('grabbing');
+      
+      const timeElapsed = (mouseLastTime - mouseStartTime) || 1;
+      const velocity = movedBy / timeElapsed;
+      let targetIndex = currentIndex;
+      
+      const flickVelocity = 0.5;
+      if (cardWidth > 0) {
+        if (Math.abs(velocity) > flickVelocity) {
+          if (velocity < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
+          }
+        } else if (Math.abs(movedBy) > cardWidth * 0.15) {
+          if (movedBy < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
+          }
+        } else {
+          targetIndex = currentIndex;
+        }
+      }
+      
+      targetIndex = Math.max(0, Math.min(totalCards - visibleCards, targetIndex));
+      currentIndex = targetIndex;
+      updateBundlePosition();
+      
+      cancelAnimationFrame(animationID);
+      setTimeout(() => {
+        clickPrevented = false;
+      }, 550);
+    }
+
+    window.addEventListener('mouseup', mouseDragEnd);
+    bundleContainer.addEventListener('mouseleave', mouseDragEnd);
+
+    // Touch swipe support for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchCurrentX = 0;
+    let touchStartTime = 0;
+    let touchPrevTranslate = 0;
+    let touchIsDragging = false;
+    let touchHasDragged = false;
+    let touchDirection = null;
+
+    bundleContainer.addEventListener('touchstart', function(e) {
+      if (isInteractiveTarget(e.target)) {
+        console.log('Touch start on interactive element, not starting drag');
+        return;
+      }
+
+      console.log('Touch start on bundle container');
+      if (e.touches.length !== 1) return;
+      touchIsDragging = true;
+      touchHasDragged = false;
+      touchDirection = null;
+      dragStartTime = Date.now();
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchCurrentX = e.touches[0].clientX;
+      touchStartTime = Date.now();
+      touchPrevTranslate = -currentIndex * cardWidth;
+      bundleContainer.classList.add('no-transition');
+      bundleContainer.parentElement.classList.add('grabbing');
+    }, { passive: true });
+
+    bundleContainer.addEventListener('touchmove', function(e) {
+      if (!touchIsDragging || e.touches.length !== 1) return;
+
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+
+      if (touchDirection === null) {
+        const deltaX = Math.abs(currentX - touchStartX);
+        const deltaY = Math.abs(currentY - touchStartY);
+
+        if (deltaX > 5 || deltaY > 5) {
+          if (deltaX > deltaY) {
+            touchDirection = 'horizontal';
+          } else {
+            touchDirection = 'vertical';
+          }
+        }
+      }
+
+      if (touchDirection === 'horizontal') {
+        e.preventDefault();
+        touchCurrentX = currentX;
+        const diff = touchCurrentX - touchStartX;
+        currentTranslate = touchPrevTranslate + diff;
+        
+        const maxTranslate = 0;
+        const minTranslate = -(totalCards - visibleCards) * cardWidth;
+        if (currentTranslate > maxTranslate) {
+          currentTranslate = maxTranslate + diff * 0.3;
+        } else if (currentTranslate < minTranslate) {
+          currentTranslate = minTranslate + diff * 0.3;
+        }
+        
+        bundleContainer.style.transform = `translateX(${currentTranslate}px)`;
+        
+        if (Math.abs(diff) > dragThreshold) {
+          touchHasDragged = true;
+          hasDragged = true;
+        }
+      }
+    }, { passive: false });
+
+    bundleContainer.addEventListener('touchend', function(e) {
+      if (!touchIsDragging) return;
+
+      const wasHorizontal = touchDirection === 'horizontal';
+      
+      touchIsDragging = false;
+      touchDirection = null;
+
+      if (!wasHorizontal) {
+        return;
+      }
+      
+      const dragDuration = Date.now() - dragStartTime;
+      const movedBy = touchCurrentX - touchStartX;
+      
+      if (dragDuration < 200 && Math.abs(movedBy) < dragThreshold) {
+        console.log('Short touch interaction, not a drag');
+        bundleContainer.classList.remove('no-transition');
+        bundleContainer.parentElement.classList.remove('grabbing');
+        return;
+      }
+      
+      console.log('Touch end on bundle container');
+      bundleContainer.classList.remove('no-transition');
+      bundleContainer.parentElement.classList.remove('grabbing');
+      
+      const timeElapsed = (Date.now() - touchStartTime) || 1;
+      const velocity = movedBy / timeElapsed;
+      let targetIndex = currentIndex;
+      const flickVelocity = 0.5;
+      
+      if (cardWidth > 0) {
+        if (Math.abs(velocity) > flickVelocity) {
+          if (velocity < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
+          }
+        } else if (Math.abs(movedBy) > cardWidth * 0.15) {
+          if (movedBy < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
+          }
+        }
+      }
+      
+      targetIndex = Math.max(0, Math.min(totalCards - visibleCards, targetIndex));
+      currentIndex = targetIndex;
+      updateBundlePosition();
+      
+      setTimeout(() => {
+        hasDragged = false;
+      }, 550);
+    });
+
+    // Animation function
+    function animation() {
+      if (isDragging) {
+        bundleContainer.style.transform = `translateX(${currentTranslate}px)`;
+        animationID = requestAnimationFrame(animation);
+      }
+    }
+  }
+}
+
+// Initialize bundle slide navigation
+$(document).ready(function() {
+  // Initialize on page load
+  setTimeout(() => {
+    new BundleSlideNavigation();
+  }, 500);
+  
+  // Initialize on cart open
+  $(document).on('click', '.cart-close, .cart-icon, .cart-overlay', function() {
+    setTimeout(() => {
+      new BundleSlideNavigation();
+    }, 300);
+  });
+  
+  // Initialize after cart refresh
+  $(document).on('cart:refresh-complete', function() {
+    setTimeout(() => {
+      new BundleSlideNavigation();
+    }, 300);
   });
 });
 </script>
