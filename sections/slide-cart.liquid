@@ -64,8 +64,7 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                         </svg>
                       </button>
-                      <span class="quantity-display">{{ item.quantity }}</span>
-                      <input type="hidden" class="form-control" value="{{ item.quantity }}">
+                      <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1" readonly>
                       <button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -439,6 +438,24 @@
 .quantity-btn svg {
   width: 16px;
   height: 16px;
+}
+
+.quantity-input {
+  width: 40px;
+  text-align: center;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  outline: none;
+  -moz-appearance: textfield; /* Hide spinner in Firefox */
+}
+
+.quantity-input::-webkit-inner-spin-button,
+.quantity-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .quantity-display {
@@ -972,35 +989,151 @@
 </style>
 
 <script>
+// Function to refresh cart content
+function refreshCartContent() {
+  $.ajax({
+    type: "GET",
+    url: "/cart.js",
+    dataType: "json",
+    success: function(cartData) {
+      // Update cart item count in header
+      $(".count").html(cartData.item_count);
+      $(".hcart").html(cartData.item_count);
+      $(".cart-btn").html(
+        "<span class='fa fa-shopping-bag'></span><span>" + cartData.item_count + "</span>"
+      );
+      
+      // Show/hide cart icon based on item count
+      if (cartData.item_count == 0) {
+        $(".hcart").hide();
+        $(".r-side-cart").removeClass("active");
+        $("body").removeClass("g-cart-open");
+      } else {
+        $(".hcart").show();
+      }
+      
+      // Update free shipping progress
+      var freeShippingThreshold = 5000;
+      var remainingAmount = freeShippingThreshold - cartData.total_price;
+      var progressPercentage = (cartData.total_price * 100) / freeShippingThreshold;
+      if (progressPercentage > 100) progressPercentage = 100;
+      
+      if (remainingAmount > 0) {
+        $(".free-shipping-progress-text").html(
+          "Almost there! Add " + formatMoney(remainingAmount) + " more for free shipping"
+        );
+      } else {
+        $(".free-shipping-progress-text").html(
+          '<span class="free-shipping-achieved">🎉 You qualify for free shipping!</span>'
+        );
+      }
+      
+      $(".progress-bar").css("width", progressPercentage + "%");
+      
+      // Update cart title with item count
+      $(".cart-title").html("Your bag (" + cartData.item_count + ")");
+      
+      // Update total amount
+      $(".total-amount").html(formatMoney(cartData.total_price));
+      
+      // Update shipping cost
+      if (cartData.total_price >= 5000) {
+        $(".shipping-cost").html("Free");
+      } else {
+        $(".shipping-cost").html("$5.00");
+      }
+    }
+  });
+}
+
+// Format money helper function
+function formatMoney(cents) {
+  var dollars = cents / 100;
+  return "$" + dollars.toFixed(2);
+}
+
 $(document).ready(function () {
+  // Simple cart state management - let cart.js handle the rest
   // Ensure cart is closed on page load
   $('.r-side-cart').removeClass('active');
   $('body').removeClass('g-cart-open');
   
-  // Cart interaction bindings - only open when explicitly triggered
-  $(".cart-icon").click(function (e) {
-    e.preventDefault();
-    $(".r-side-cart").addClass("active");
-    $("body").addClass("g-cart-open");
-  });
-
-  $(".cart-link").click(function (e) {
-    e.preventDefault();
-    $(".r-side-cart").addClass("active");
-    $("body").addClass("g-cart-open");
-  });
-  
-  // Cart close functionality
-  $(".cart-close").click(function () {
-    $(".r-side-cart").removeClass("active");
-    $("body").removeClass("g-cart-open");
-  });
-
   // Overlay click to close
   $(".cart-overlay").click(function () {
     $(".r-side-cart").removeClass("active");
     $("body").removeClass("g-cart-open");
+  });
+  
+  // Listen for cart refresh events
+  $(document).on('cart:refresh', function() {
+    refreshCartContent();
+  });
+  
+  // Quantity adjustment handlers
+  $(document).on('click', '.qty__adjust', function(e) {
+    e.preventDefault();
+    var $button = $(this);
+    var $qtyContainer = $button.parent(".r-prod-qty");
+    var oldValue = $qtyContainer.find("input").val();
+    var line = $button.parents(".r-prod-row").attr("data-line");
 
+    if ($button.hasClass("qty__adjust--plus")) {
+      var newVal = parseFloat(oldValue) + 1;
+    } else {
+      // Don't allow decrementing below zero
+      if (oldValue > 1) {
+        var newVal = parseFloat(oldValue) - 1;
+      } else {
+        newVal = 1;
+      }
+    }
+
+    $qtyContainer.find("input").val(newVal);
+    $button.parents(".r-prod-row").addClass("is-loading");
+
+    $.ajax({
+      type: "POST",
+      url: "/cart/change.js",
+      dataType: "json",
+      data: "quantity=" + newVal + "&line=" + line,
+      success: function() {
+        // Trigger cart refresh event
+        $(document).trigger('cart:refresh');
+        // Remove loading class
+        $button.parents(".r-prod-row").removeClass("is-loading");
+      },
+      error: function() {
+        // Remove loading class on error
+        $button.parents(".r-prod-row").removeClass("is-loading");
+        alert("Error updating cart item");
+      }
+    });
+  });
+
+  // Remove cart item handler
+  $(document).on('click', '.remove-cart', function(e) {
+    e.preventDefault();
+    var line = $(this).parents(".r-prod-row").attr("data-line");
+    $(this).parents(".r-prod-row").addClass("is-loading");
+
+    $.ajax({
+      type: "POST",
+      url: "/cart/change.js",
+      dataType: "json",
+      data: "quantity=0&line=" + line,
+      success: function() {
+        // Trigger cart refresh event
+        $(document).trigger('cart:refresh');
+        // Remove loading class
+        $(this).parents(".r-prod-row").removeClass("is-loading");
+      },
+      error: function() {
+        // Remove loading class on error
+        $(this).parents(".r-prod-row").removeClass("is-loading");
+        alert("Error removing cart item");
+      }
+    });
+  });
 });
 </script>
 
