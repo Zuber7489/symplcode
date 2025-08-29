@@ -979,8 +979,8 @@ $(document).ready(function () {
   $('.r-side-cart').removeClass('active');
   $('body').removeClass('g-cart-open');
   
-  // Enhanced Cart Functionality with Bundle Navigation
-  class EnhancedCartManager {
+  // Simple Cart Manager that works with default Shopify functionality
+  class CartManager {
     constructor() {
       this.init();
       this.initBundleNavigation();
@@ -988,43 +988,103 @@ $(document).ready(function () {
 
     init() {
       this.bindCartEvents();
-      this.updateQuantityDisplays();
     }
 
     bindCartEvents() {
-      // Quantity adjustment with new UI
-      $(document).on('click', '.quantity-btn', (e) => {
+      // Remove any existing event handlers to prevent conflicts
+      $(document).off('click', '.qty__adjust');
+      $(document).off('click', '.remove-cart');
+      $(document).off('click', '.quantity-btn');
+      $(document).off('click', '.cart-item-remove');
+      
+      // Use the cart.js style handlers for quantity adjustment
+      // The HTML uses .qty__adjust classes, so we handle those
+      $(document).on('click', '.qty__adjust', (e) => {
         e.preventDefault();
         const $button = $(e.currentTarget);
-        const $quantityContainer = $button.closest('.cart-item-quantity');
-        const $quantityDisplay = $quantityContainer.find('.quantity-display');
-        const $hiddenInput = $quantityContainer.find('input[type="hidden"]');
-        const $cartItem = $button.closest('.cart-item');
+        const $qtyContainer = $button.closest('.r-prod-qty');
+        const $input = $qtyContainer.find('input[type="hidden"], input.form-control');
+        const $display = $qtyContainer.find('.quantity-display');
+        const $cartItem = $button.closest('.r-prod-row');
         
-        let currentQty = parseInt($quantityDisplay.text()) || 1;
+        let currentQty = parseInt($input.val()) || 1;
         let newQty = currentQty;
         
-        if ($button.hasClass('plus')) {
+        if ($button.hasClass('qty__adjust--plus')) {
           newQty = currentQty + 1;
-        } else if ($button.hasClass('minus') && currentQty > 1) {
+        } else if ($button.hasClass('qty__adjust--minus') && currentQty > 1) {
           newQty = currentQty - 1;
         }
         
         if (newQty !== currentQty) {
-          $quantityDisplay.text(newQty);
-          $hiddenInput.val(newQty);
+          // Update both input and display
+          $input.val(newQty);
+          $display.text(newQty);
           
+          // Get line number and make AJAX call
           const line = $cartItem.attr('data-line');
-          this.updateCartQuantity(line, newQty, $cartItem);
+          $cartItem.addClass('is-loading');
+          
+          $.ajax({
+            type: 'POST',
+            url: '/cart/change.js',
+            dataType: 'json',
+            data: 'quantity=' + newQty + '&line=' + line,
+            success: function(data) {
+              $cartItem.removeClass('is-loading');
+              // Use the existing Shopify success handler if available
+              if (typeof Shopify !== 'undefined' && Shopify.onSuccess) {
+                Shopify.onSuccess();
+              } else {
+                window.location.reload();
+              }
+            },
+            error: function(xhr) {
+              $cartItem.removeClass('is-loading');
+              // Reset values on error
+              $input.val(currentQty);
+              $display.text(currentQty);
+              
+              if (typeof Shopify !== 'undefined' && Shopify.onError) {
+                Shopify.onError(xhr);
+              } else {
+                alert('Error updating cart. Please try again.');
+              }
+            }
+          });
         }
       });
-
-      // Remove item functionality
-      $(document).on('click', '.cart-item-remove', (e) => {
+      
+      // Handle remove cart items
+      $(document).on('click', '.remove-cart', (e) => {
         e.preventDefault();
-        const $cartItem = $(e.currentTarget).closest('.cart-item');
+        const $cartItem = $(e.currentTarget).closest('.r-prod-row');
         const line = $cartItem.attr('data-line');
-        this.removeCartItem(line, $cartItem);
+        
+        $cartItem.addClass('is-loading');
+        
+        $.ajax({
+          type: 'POST',
+          url: '/cart/change.js',
+          dataType: 'json',
+          data: 'quantity=0&line=' + line,
+          success: function(data) {
+            $cartItem.removeClass('is-loading');
+            if (typeof Shopify !== 'undefined' && Shopify.onSuccess) {
+              Shopify.onSuccess();
+            } else {
+              window.location.reload();
+            }
+          },
+          error: function(xhr) {
+            $cartItem.removeClass('is-loading');
+            if (typeof Shopify !== 'undefined' && Shopify.onError) {
+              Shopify.onError(xhr);
+            } else {
+              alert('Error removing item. Please try again.');
+            }
+          }
+        });
       });
 
       // Bundle product add to cart
@@ -1060,40 +1120,6 @@ $(document).ready(function () {
       });
     }
 
-    updateCartQuantity(line, quantity, $cartItem) {
-      $cartItem.addClass('is-loading');
-      
-      $.ajax({
-        type: 'POST',
-        url: '/cart/change.js',
-        dataType: 'json',
-        data: `quantity=${quantity}&line=${line}`,
-        success: (data) => {
-          this.onCartUpdateSuccess(data, $cartItem);
-        },
-        error: (xhr) => {
-          this.onCartUpdateError(xhr, $cartItem);
-        }
-      });
-    }
-
-    removeCartItem(line, $cartItem) {
-      $cartItem.addClass('is-loading');
-      
-      $.ajax({
-        type: 'POST',
-        url: '/cart/change.js',
-        dataType: 'json',
-        data: `quantity=0&line=${line}`,
-        success: (data) => {
-          this.onCartUpdateSuccess(data, $cartItem, true);
-        },
-        error: (xhr) => {
-          this.onCartUpdateError(xhr, $cartItem);
-        }
-      });
-    }
-
     addBundleItemToCart(variantId, $button) {
       const originalText = $button.text();
       $button.text('Adding...').prop('disabled', true);
@@ -1103,113 +1129,31 @@ $(document).ready(function () {
         url: '/cart/add.js',
         dataType: 'json',
         data: {
-          'items': [{
-            'id': variantId,
-            'quantity': 1
-          }]
+          'id': variantId,
+          'quantity': 1
         },
-        success: (data) => {
+        success: function(data) {
           $button.text('Added!').css('background', '#059669');
           setTimeout(() => {
             $button.text(originalText).css('background', '').prop('disabled', false);
           }, 2000);
-          // Use the existing Shopify success handler to maintain consistency
-          Shopify.onSuccess();
+          
+          if (typeof Shopify !== 'undefined' && Shopify.onSuccess) {
+            Shopify.onSuccess();
+          } else {
+            window.location.reload();
+          }
         },
-        error: (xhr) => {
+        error: function(xhr) {
           $button.text('Error').css('background', '#dc2626');
           setTimeout(() => {
             $button.text(originalText).css('background', '').prop('disabled', false);
           }, 2000);
-          console.error('Add to cart error:', xhr.responseText);
-        }
-      });
-    }
-
-    onCartUpdateSuccess(cartData, $cartItem, isRemove = false) {
-      $cartItem.removeClass('is-loading');
-      
-      if (isRemove) {
-        $cartItem.fadeOut(300, function() {
-          $(this).remove();
-        });
-      }
-      
-      // Use the existing Shopify success handler for consistency
-      Shopify.onSuccess();
-    }
-
-    onCartUpdateError(xhr, $cartItem) {
-      $cartItem.removeClass('is-loading');
-      
-      try {
-        const data = JSON.parse(xhr.responseText);
-        if (data.message) {
-          alert(`${data.message} (${data.status}): ${data.description}`);
-        } else {
-          alert('Error updating cart. Please try again.');
-        }
-      } catch (e) {
-        alert('Error updating cart. Please try again.');
-      }
-    }
-
-    refreshCart() {
-      $.ajax({
-        type: 'GET',
-        url: '/cart.js',
-        dataType: 'json',
-        success: (cart) => {
-          // Update cart count immediately
-          $('.count, .hcart').html(cart.item_count);
-          $('.cart-title').text(`Your bag (${cart.item_count})`);
           
-          if (cart.item_count === 0) {
-            $('.hcart').hide();
+          if (typeof Shopify !== 'undefined' && Shopify.onError) {
+            Shopify.onError(xhr);
           } else {
-            $('.hcart').show();
-          }
-          
-          // Refresh cart content
-          $.ajax({
-            type: 'GET',
-            url: window.location.pathname,
-            success: (data) => {
-              const $newCartContent = $(data).find('.custom-cart-content');
-              if ($newCartContent.length) {
-                $('.custom-cart-content').html($newCartContent.html());
-                this.updateQuantityDisplays();
-              }
-            }
-          });
-        }
-      });
-    }
-
-    updateQuantityDisplays() {
-      $('.cart-item').each(function() {
-        const $item = $(this);
-        const $input = $item.find('input[type="hidden"]');
-        const $display = $item.find('.quantity-display');
-        if ($input.length && $display.length) {
-          $display.text($input.val());
-        }
-      });
-    }
-
-    updateCartCount() {
-      $.ajax({
-        type: 'GET',
-        url: '/cart.js',
-        dataType: 'json',
-        success: (cart) => {
-          $('.count, .hcart').html(cart.item_count);
-          $('.cart-title').text(`Your bag (${cart.item_count})`);
-          
-          if (cart.item_count === 0) {
-            $('.hcart').hide();
-          } else {
-            $('.hcart').show();
+            alert('Error adding item to cart.');
           }
         }
       });
@@ -1385,97 +1329,51 @@ $(document).ready(function () {
       window.addEventListener('mouseup', mouseDragEnd);
       bundleContainer.addEventListener('mouseleave', mouseDragEnd);
 
-      // Touch swipe support
+      // Touch swipe support - simplified
       let touchStartX = 0;
-      let touchStartY = 0;
       let touchCurrentX = 0;
-      let touchStartTime = 0;
       let touchIsDragging = false;
-      let touchDirection = null;
 
       bundleContainer.addEventListener('touchstart', function(e) {
         if (isInteractiveTarget(e.target)) return;
         if (e.touches.length !== 1) return;
         
         touchIsDragging = true;
-        touchDirection = null;
         touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
         touchCurrentX = e.touches[0].clientX;
-        touchStartTime = Date.now();
         prevTranslate = -currentIndex * cardWidth;
         bundleContainer.classList.add('no-transition');
-        bundleContainer.parentElement.classList.add('grabbing');
       }, { passive: true });
 
       bundleContainer.addEventListener('touchmove', function(e) {
         if (!touchIsDragging || e.touches.length !== 1) return;
-
-        const currentX = e.touches[0].clientX;
-        const currentY = e.touches[0].clientY;
-
-        if (touchDirection === null) {
-          const deltaX = Math.abs(currentX - touchStartX);
-          const deltaY = Math.abs(currentY - touchStartY);
-
-          if (deltaX > 5 || deltaY > 5) {
-            touchDirection = deltaX > deltaY ? 'horizontal' : 'vertical';
-          }
-        }
-
-        if (touchDirection === 'horizontal') {
-          e.preventDefault();
-          touchCurrentX = currentX;
-          const diff = touchCurrentX - touchStartX;
-          currentTranslate = prevTranslate + diff;
-          
-          const maxTranslate = 0;
-          const minTranslate = -(totalCards - visibleCards) * cardWidth;
-          if (currentTranslate > maxTranslate) {
-            currentTranslate = maxTranslate + diff * 0.3;
-          } else if (currentTranslate < minTranslate) {
-            currentTranslate = minTranslate + diff * 0.3;
-          }
-          
-          bundleContainer.style.transform = `translateX(${currentTranslate}px)`;
-          
-          if (Math.abs(diff) > dragThreshold) {
-            hasDragged = true;
-          }
+        
+        e.preventDefault();
+        touchCurrentX = e.touches[0].clientX;
+        const diff = touchCurrentX - touchStartX;
+        currentTranslate = prevTranslate + diff;
+        
+        bundleContainer.style.transform = `translateX(${currentTranslate}px)`;
+        
+        if (Math.abs(diff) > dragThreshold) {
+          hasDragged = true;
         }
       }, { passive: false });
 
       bundleContainer.addEventListener('touchend', function(e) {
         if (!touchIsDragging) return;
-
-        const wasHorizontal = touchDirection === 'horizontal';
-        touchIsDragging = false;
-        touchDirection = null;
-
-        if (!wasHorizontal) return;
         
+        touchIsDragging = false;
         bundleContainer.classList.remove('no-transition');
-        bundleContainer.parentElement.classList.remove('grabbing');
         
         const movedBy = touchCurrentX - touchStartX;
-        const timeElapsed = (Date.now() - touchStartTime) || 1;
-        const velocity = movedBy / timeElapsed;
         let targetIndex = currentIndex;
-        const flickVelocity = 0.5;
         
-        if (cardWidth > 0) {
-          if (Math.abs(velocity) > flickVelocity) {
-            if (velocity < 0) {
-              targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
-            } else {
-              targetIndex = Math.max(0, currentIndex - 2);
-            }
-          } else if (Math.abs(movedBy) > cardWidth * 0.15) {
-            if (movedBy < 0) {
-              targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
-            } else {
-              targetIndex = Math.max(0, currentIndex - 2);
-            }
+        if (Math.abs(movedBy) > cardWidth * 0.15) {
+          if (movedBy < 0) {
+            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
+          } else {
+            targetIndex = Math.max(0, currentIndex - 2);
           }
         }
         
@@ -1498,160 +1396,18 @@ $(document).ready(function () {
     }
   }
 
-  // Initialize Enhanced Cart Manager
-  window.enhancedCartManager = new EnhancedCartManager();
+  // Initialize Cart Manager
+  window.cartManager = new CartManager();
   
   // Ensure cart starts closed
   $('.custom-cart-container').removeClass('open active');
   $('body').removeClass('g-cart-open');
 
-  // Preserve original cart functionality
-  function addItem(form_id) {
-    $.ajax({
-      type: "POST",
-      url: "/cart/add.js",
-      dataType: "json",
-      data: $("#" + form_id).serialize(),
-      success: Shopify.onSuccess,
-      error: Shopify.onError,
-    });
-  }
-
-  // Original add to cart button handlers
-  $("#AddToCart").click(function (e) {
-    e.preventDefault();
-    $(this).prop("disabled", true);
-    var id = $(this).parents("form").attr("id");
-    addItem(id);
-  });
-
-  $("#AddToCart2").click(function (e) {
-    e.preventDefault();
-    $(this).prop("disabled", true);
-    var id = $(this).parents("form").attr("id");
-    addItem(id);
-  });
-
-  $("#AddToCart1").click(function (e) {
-    e.preventDefault();
-    if (!$("#custom").val()) {
-      alert("Bitte Text einfügen");
-    } else {
-      $(this).prop("disabled", true);
-      var id = $(this).parents("form").attr("id");
-      addItem(id);
-    }
-  });
-
-  $(".add_to_cart_button").each(function () {
-    $(this).click(function (e) {
-      e.preventDefault();
-      var id = $(this).parents("form").attr("id");
-      addItem(id);
-    });
-  });
-
-  $(".m-radio").change(function () {
-    var id = $(this)
-      .parent(".c-radio")
-      .parent(".r-select-size")
-      .parents("form")
-      .attr("id");
-    addItem(id);
-  });
-
-  // Original Shopify success/error handlers
-  Shopify.onSuccess = function () {
-    var elem = $("#AddToCart");
-    elem.removeAttr("disabled");
-    var quantity = parseInt(jQuery('[name="quantity"]').val(), 10) || 1;
-    $.ajax({
-      type: "GET",
-      url: "/cart",
-      dataType: "html",
-      success: function (data) {
-        sucss(data);
-      },
-    });
-  };
-
-  Shopify.onError = function (XMLHttpRequest, textStatus) {
-    var data = eval("(" + XMLHttpRequest.responseText + ")");
-    if (!!data.message) {
-      alert(data.message + "(" + data.status + "): " + data.description);
-    } else {
-      alert("Error : " + Shopify.fullMessagesFromErrors(data).join("; ") + ".");
-    }
-    $(".addtocart").removeAttr("disabled");
-  };
-
-  Shopify.fullMessagesFromErrors = function (errors) {
-    var fullMessages = [];
-    jQuery.each(errors, function (attribute, messages) {
-      jQuery.each(messages, function (index, message) {
-        fullMessages.push(attribute + " " + message);
-      });
-    });
-    return fullMessages;
-  };
-
-  // Original success function
-  function sucss(data) {
-    var $list = $(data);
-    $list = $("<div>").append($list);
-    var cartcount = $list.find(".count").html();
-    
-    $(".count").html(cartcount);
-    $(".jjkao").hide();
-
-    $.ajax({
-      type: "GET",
-      url: "/cart",
-      dataType: "json",
-      success: function (dataa) {
-        if (dataa.item_count == "1") {
-          if (dataa.items[0].variant_id == "39583139627196") {
-            $.ajax({
-              type: "POST",
-              url: "/cart/clear.js",
-              success: Shopify.onSuccess,
-              dataType: "json",
-            });
-          }
-        }
-      },
-    });
-
-    if (cartcount == "0") {
-      $(".hcart").hide();
-    } else {
-      $(".hcart").show();
-    }
-    $(".hcart").html(cartcount);
-    $(".cart-btn").html(
-      "<span class='fa fa-shopping-bag'></span><span>" + cartcount + "</span>"
-    );
-    var abcc = $list.find(".r-side-cart").html();
-
-    $(".r-side-cart").html(abcc);
-    
-    // Only open cart when items are actually added, not on page load
-    if (cartcount && cartcount !== "0") {
-      $("body").addClass("g-cart-open");
-      $(".r-side-cart").addClass("active");
-      
-      // Open the new cart design
-      if (window.enhancedCartManager) {
-        window.enhancedCartManager.openCart();
-      }
-    }
-  }
-
   // Cart interaction bindings - only open when explicitly triggered
   $(".cart-icon").click(function (e) {
     e.preventDefault();
-    if (window.enhancedCartManager) {
-      window.enhancedCartManager.openCart();
+    if (window.cartManager) {
+      window.cartManager.openCart();
     } else {
       $(".r-side-cart").addClass("active");
       $("body").addClass("g-cart-open");
@@ -1660,8 +1416,8 @@ $(document).ready(function () {
 
   $(".cart-link").click(function (e) {
     e.preventDefault();
-    if (window.enhancedCartManager) {
-      window.enhancedCartManager.openCart();
+    if (window.cartManager) {
+      window.cartManager.openCart();
     } else {
       $(".r-side-cart").addClass("active");
       $("body").addClass("g-cart-open");
@@ -1670,262 +1426,3 @@ $(document).ready(function () {
 });
 </script>
 
-<script>
-  //     main add to cart ajax
-  $(document).ready(function () {
-    function addItem(form_id) {
-      $.ajax({
-        type: "POST",
-        url: "/cart/add.js",
-        dataType: "json",
-        data: $("#" + form_id).serialize(),
-        success: Shopify.onSuccess,
-        error: Shopify.onError,
-      });
-    }
-    $("#AddToCart").click(function (e) {
-      e.preventDefault();
-
-      $(this).prop("disabled", true);
-      var id = $(this).parents("form").attr("id");
-      // console.log(id);
-      addItem(id);
-    });
-
-    $("#AddToCart2").click(function (e) {
-      e.preventDefault();
-
-      $(this).prop("disabled", true);
-      var id = $(this).parents("form").attr("id");
-      alert(id);
-      addItem(id);
-    });
-
-    $("#AddToCart1").click(function (e) {
-      e.preventDefault();
-      if (!$("#custom").val()) {
-        alert("Bitte Text einfügen");
-      } else {
-        $(this).prop("disabled", true);
-        var id = $(this).parents("form").attr("id");
-        // console.log(id);
-        addItem(id);
-      }
-    });
-    $(".add_to_cart_button").each(function () {
-      $(this).click(function (e) {
-        e.preventDefault();
-
-        var id = $(this).parents("form").attr("id");
-
-        addItem(id);
-      });
-    });
-    $(".m-radio").change(function () {
-      var id = $(this)
-        .parent(".c-radio")
-        .parent(".r-select-size")
-        .parents("form")
-        .attr("id");
-
-      addItem(id);
-    });
-
-    Shopify.onSuccess = function () {
-      var elem = $("#AddToCart");
-      elem.removeAttr("disabled");
-      var quantity = parseInt(jQuery('[name="quantity"]').val(), 10) || 1;
-      $.ajax({
-        type: "GET",
-        url: "/cart",
-        dataType: "html",
-        success: function (data) {
-          sucss(data);
-        },
-      });
-    };
-    Shopify.onError = function (XMLHttpRequest, textStatus) {
-      console.log("errorerror");
-      // Shopify returns a description of the error in XMLHttpRequest.responseText.
-      // It is JSON.
-      // Example: {"description":"The product 'Amelia - Small' is already sold out.","status":500,"message":"Cart Error"}
-      var data = eval("(" + XMLHttpRequest.responseText + ")");
-      if (!!data.message) {
-        alert(data.message + "(" + data.status + "): " + data.description);
-      } else {
-        alert("Error : " + Shopify.fullMessagesFromErrors(data).join("; ") + ".");
-      }
-
-      $(".addtocart").removeAttr("disabled");
-    };
-
-    Shopify.fullMessagesFromErrors = function (errors) {
-      var fullMessages = [];
-      jQuery.each(errors, function (attribute, messages) {
-        jQuery.each(messages, function (index, message) {
-          fullMessages.push(attribute + " " + message);
-        });
-      });
-      return fullMessages;
-    };
-  });
-
-  //     sucess functio of ajax add to cart
-  function sucss(data) {
-    var $list = $(data);
-    $list = $("<div>").append($list);
-    var cartcount = $list.find(".count").html();
-    console.log($list);
-    $(".count").html(cartcount);
-    console.log(cartcount);
-
-    $(".jjkao").hide();
-
-    $.ajax({
-      type: "GET",
-      url: "/cart",
-      dataType: "json",
-      success: function (dataa) {
-        console.log(dataa);
-        if (dataa.item_count == "1") {
-          if (dataa.items[0].variant_id == "39583139627196") {
-            $.ajax({
-              type: "POST",
-              url: "/cart/clear.js",
-              success: Shopify.onSuccess,
-              dataType: "json",
-            });
-          }
-        }
-
-        //                for(var i=0; i<dataa.items.length; i++) {
-        //                  console.log(dataa.items[i].variant_id);
-
-        //            if(dataa.items[i].variant_id=='40900530012319') {
-
-        //            	  var variant = dataa.items[i].variant_id;
-        //            }
-        //                }
-      },
-    });
-
-    if (cartcount == "0") {
-      $(".hcart").hide();
-    } else {
-      $(".hcart").show();
-    }
-    $(".hcart").html(cartcount);
-    $(".cart-btn").html(
-      "<span class='fa fa-shopping-bag'></span><span>" + cartcount + "</span>"
-    );
-    var abcc = $list.find(".r-side-cart").html();
-
-    $(".r-side-cart").html(abcc);
-    $("body").addClass("g-cart-open");
-    $(".r-side-cart").addClass("active");
-
-    $(".cart-icon").click(function () {
-      $(".r-side-cart").addClass("active");
-    });
-
-    $(".r-side-cart-head .cart-icon").click(function () {
-      $(".r-side-cart").removeClass("active");
-    });
-    $(".cart-link").click(function () {
-      $(".r-side-cart").addClass("active");
-      $("body").addClass("g-cart-open");
-    });
-    $(".r-prod-qty .qty__adjust").on("click", function () {
-      var $button = $(this);
-      var oldValue = $button.parent(".r-prod-qty").find("input").val();
-
-      if ($button.hasClass("qty__adjust--plus")) {
-        var newVal = parseFloat(oldValue) + 1;
-      } else {
-        // Don't allow decrementing below zero
-        if (oldValue > 1) {
-          var newVal = parseFloat(oldValue) - 1;
-        } else {
-          newVal = 1;
-        }
-      }
-
-      $button.parent().find("input").val(newVal);
-    });
-
-    $(".m-radio").change(function () {
-      var id = $(this)
-        .parent(".c-radio")
-        .parent(".r-select-size")
-        .parents("form")
-        .attr("id");
-
-      addItem(id);
-    });
-
-    $(".r-prod-qty .qty__adjust").on("click", function (e) {
-      e.preventDefault();
-      var qty = $(this).parent(".r-prod-qty").find("input").val();
-      var line = $(this).parents(".r-prod-row").attr("data-line");
-      $(this).parents(".r-prod-row").addClass("is-loading");
-
-      $.ajax({
-        type: "POST",
-        url: "/cart/change.js",
-        dataType: "json",
-        data: "quantity=" + qty + "&line=" + line,
-        success: Shopify.onSuccess,
-        error: Shopify.onError,
-      });
-    });
-    $(".remove-cart").on("click", function (e) {
-      e.preventDefault();
-
-      var line = $(this).parents(".r-prod-row").attr("data-line");
-      $(this).parents(".r-prod-row").addClass("is-loading");
-
-      $.ajax({
-        type: "POST",
-        url: "/cart/change.js",
-        dataType: "json",
-        data: "quantity=" + 0 + "&line=" + line,
-        success: Shopify.onSuccess,
-        error: Shopify.onError,
-      });
-    });
-  }
-
-  $(document).ready(function () {
-    $(".r-prod-qty .qty__adjust").on("click", function (e) {
-      e.preventDefault();
-      var qty = $(this).parent(".r-prod-qty").find("input").val();
-      var line = $(this).parents(".r-prod-row").attr("data-line");
-      $(this).parents(".r-prod-row").addClass("is-loading");
-
-      $.ajax({
-        type: "POST",
-        url: "/cart/change.js",
-        dataType: "json",
-        data: "quantity=" + qty + "&line=" + line,
-        success: Shopify.onSuccess,
-        error: Shopify.onError,
-      });
-    });
-
-    $(".remove-cart").on("click", function (e) {
-      e.preventDefault();
-
-      var line = $(this).parents(".r-prod-row").attr("data-line");
-      $(this).parents(".r-prod-row").addClass("is-loading");
-
-      $.ajax({
-        type: "POST",
-        url: "/cart/change.js",
-        dataType: "json",
-        data: "quantity=" + 0 + "&line=" + line,
-        success: Shopify.onSuccess,
-        error: Shopify.onError,
-      });
-    });
-  });
-</script>

@@ -150,17 +150,29 @@ function sucss(data) {
   $(".r-side-cart").html(abcc);
   $("body").addClass("g-cart-open");
   $(".r-side-cart").addClass("active");
+  $(".custom-cart-container").addClass("active open"); // Also update custom cart for consistency
 
   $(".cart-icon").click(function () {
     $(".r-side-cart").addClass("active");
+    $(".custom-cart-container").addClass("active open");
   });
 
   $(".r-side-cart-head .cart-icon").click(function () {
     $(".r-side-cart").removeClass("active");
+    $(".custom-cart-container").removeClass("active open");
+    $("body").removeClass("g-cart-open");
+  });
+  
+  // Also handle cart-close class from slide-cart
+  $(".cart-close").click(function () {
+    $(".r-side-cart").removeClass("active");
+    $(".custom-cart-container").removeClass("active open");
+    $("body").removeClass("g-cart-open");
   });
   $(".cart-link").click(function () {
     $(".r-side-cart").addClass("active");
     $("body").addClass("g-cart-open");
+    $(".custom-cart-container").addClass("active open");
   });
   $(".r-prod-qty .qty__adjust").on("click", function () {
     var $button = $(this);

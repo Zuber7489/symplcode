@@ -753,7 +753,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
           {% endfor %}
         </select>
     
-        <button type="submit" name="add" id="MobileAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
+        <button type="submit" name="add" id="AddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
           <span id="AddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
         </button>
         
@@ -2774,7 +2774,7 @@ let globalTouchManager = {
       initImageGallery();
       initVariantSelector();
       initDesktopNavigableCellNavigation();
-      initAddToCart();
+      // initAddToCart(); // Removed - letting cart.js handle add to cart functionality
       initBundleCarousel();
       initFunctionsCarousel();
       initRelatedProductsCarousel();
@@ -3847,7 +3847,7 @@ let globalTouchManager = {
     if (priceElement) priceElement.textContent = currentVariant.formatted_price;
   }); 
   
-  const addToCartButton = document.getElementById("MobileAddToCart");
+  const addToCartButton = document.getElementById("AddToCart");
   const addToCartText = document.getElementById("AddToCartText");
   
   if (addToCartButton && addToCartText) {
