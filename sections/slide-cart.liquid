@@ -991,7 +991,6 @@
 <script>
 // Function to refresh cart content
 function refreshCartContent() {
-  // First get the cart data via AJAX
   $.ajax({
     type: "GET",
     url: "/cart.js",
@@ -1007,6 +1006,8 @@ function refreshCartContent() {
       // Show/hide cart icon based on item count
       if (cartData.item_count == 0) {
         $(".hcart").hide();
+        $(".r-side-cart").removeClass("active");
+        $("body").removeClass("g-cart-open");
         
         // Clear cart items list and show empty cart message
         $("#cart-items-list").html("");
@@ -1020,30 +1021,72 @@ function refreshCartContent() {
         $(".empty-cart").hide();
         $(".Cart_Drawer__Content").show();
         
-        // Now get the complete cart HTML to ensure everything is in sync
-        $.ajax({
-          type: "GET",
-          url: "/cart?view=drawer",
-          cache: false,
-          success: function(html) {
-            // Try to extract cart items from the drawer view
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = html;
-            var cartItemsList = tempDiv.querySelector('#cart-items-list');
-            
-            if (cartItemsList) {
-              // If we found cart items in the drawer view, use them
-              $("#cart-items-list").html(cartItemsList.innerHTML);
-            } else {
-              // Otherwise, manually build cart items from cartData
-              updateCartItemsFromData(cartData);
-            }
-          },
-          error: function() {
-            // On error, fall back to manually building cart items
-            updateCartItemsFromData(cartData);
+        // Update cart items directly from the cart.js data
+        var cartItemsHTML = '';
+        
+        for (var i = 0; i < cartData.items.length; i++) {
+          var item = cartData.items[i];
+          var lineIndex = i + 1;
+          var variantTitle = '';
+          
+          if (item.variant_title && item.variant_title !== 'Default Title') {
+            variantTitle = '<p class="cart-item-variant">' + item.variant_title + '</p>';
           }
-        });
+          
+          // Determine if there's a compare at price
+          var priceHTML = '';
+          if (item.original_price > item.final_price) {
+            var savings = item.original_price - item.final_price;
+            priceHTML = '<div class="price-container">' +
+                         '<div class="original-price">' + formatMoney(item.original_price) + '</div>' +
+                         '<div class="sale-price">' + formatMoney(item.final_price) + '</div>' +
+                         '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
+                       '</div>';
+          } else {
+            priceHTML = '<div class="price-container">' +
+                         '<div class="regular-price">' + formatMoney(item.final_price) + '</div>' +
+                       '</div>';
+          }
+          
+          cartItemsHTML += '<div class="cart-item r-prod-row" data-item-key="' + item.key + '" data-variant-id="' + item.variant_id + '" data-line="' + lineIndex + '">' +
+                           '<div class="cart-item-image">' +
+                             '<a href="' + item.url + '">' +
+                               '<img src="' + item.image + '" alt="' + item.product_title + '" loading="lazy">' +
+                             '</a>' +
+                           '</div>' +
+                           '<div class="cart-item-details">' +
+                             '<h3 class="cart-item-title">' + item.product_title + '</h3>' +
+                             variantTitle +
+                           '</div>' +
+                           '<div class="cart-item-actions">' +
+                             '<div class="cart-item-quantity r-prod-qty">' +
+                               '<button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">' +
+                                 '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>' +
+                                 '</svg>' +
+                               '</button>' +
+                               '<input type="number" class="quantity-input" value="' + item.quantity + '" min="1" readonly>' +
+                               '<button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">' +
+                                 '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>' +
+                                 '</svg>' +
+                               '</button>' +
+                             '</div>' +
+                             '<div class="cart-item-pricing">' +
+                               priceHTML +
+                             '</div>' +
+                             '<button class="cart-item-remove remove-cart" data-item-key="' + item.key + '" aria-label="Remove item">' +
+                               '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                 '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
+                               '</svg>' +
+                             '</button>' +
+                           '</div>' +
+                           '<div class="spinner"></div>' +
+                         '</div>';
+        }
+        
+        // Update the cart items HTML
+        $("#cart-items-list").html(cartItemsHTML);
         
         // Show checkout section
         $(".checkout-section").show();
@@ -1083,65 +1126,6 @@ function refreshCartContent() {
   });
 }
 
-// Function to update cart items from cartData
-function updateCartItemsFromData(cartData) {
-  var cartItemsHTML = '';
-  
-  for (var i = 0; i < cartData.items.length; i++) {
-    var item = cartData.items[i];
-    var lineIndex = i + 1;
-    var variantTitle = '';
-    
-    if (item.variant_title && item.variant_title !== 'Default Title') {
-      variantTitle = '<p class="cart-item-variant">' + item.variant_title + '</p>';
-    }
-    
-    // Determine if there's a compare at price (not available in cart.js API, so we use final_price for both)
-    var priceHTML = '<div class="price-container">' +
-                     '<div class="regular-price">' + formatMoney(item.final_price) + '</div>' +
-                   '</div>';
-    
-    cartItemsHTML += '<div class="cart-item r-prod-row" data-item-key="' + item.key + '" data-variant-id="' + item.variant_id + '" data-line="' + lineIndex + '">' +
-                     '<div class="cart-item-image">' +
-                       '<a href="' + item.url + '">' +
-                         '<img src="' + item.image + '" alt="' + item.product_title + '" loading="lazy">' +
-                       '</a>' +
-                     '</div>' +
-                     '<div class="cart-item-details">' +
-                       '<h3 class="cart-item-title">' + item.product_title + '</h3>' +
-                       variantTitle +
-                     '</div>' +
-                     '<div class="cart-item-actions">' +
-                       '<div class="cart-item-quantity r-prod-qty">' +
-                         '<button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">' +
-                           '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>' +
-                           '</svg>' +
-                         '</button>' +
-                         '<input type="number" class="quantity-input" value="' + item.quantity + '" min="1" readonly>' +
-                         '<button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">' +
-                           '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>' +
-                           '</svg>' +
-                         '</button>' +
-                       '</div>' +
-                       '<div class="cart-item-pricing">' +
-                         priceHTML +
-                       '</div>' +
-                       '<button class="cart-item-remove remove-cart" data-item-key="' + item.key + '" aria-label="Remove item">' +
-                         '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                           '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
-                         '</svg>' +
-                       '</button>' +
-                     '</div>' +
-                     '<div class="spinner"></div>' +
-                   '</div>';
-  }
-  
-  // Update the cart items HTML
-  $("#cart-items-list").html(cartItemsHTML);
-}
-
 // Format money helper function
 function formatMoney(cents) {
   var dollars = cents / 100;
@@ -1160,17 +1144,11 @@ $(document).ready(function () {
     $("body").removeClass("g-cart-open");
   });
   
-  // Close button click
-  $(".cart-close").click(function() {
-    $(".r-side-cart").removeClass("active");
-    $("body").removeClass("g-cart-open");
-  });
-  
   // Listen for cart refresh events
   $(document).on('cart:refresh', function() {
     refreshCartContent();
   });
-
+  
   // Quantity adjustment handlers
   $(document).on('click', '.qty__adjust', function(e) {
     e.preventDefault();
