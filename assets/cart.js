@@ -60,34 +60,57 @@ $(document).ready(function () {
     var elem = $("#AddToCart");
     elem.removeAttr("disabled").removeClass("is-loading");
     var quantity = parseInt(jQuery('[name="quantity"]').val(), 10) || 1;
-    // Refresh cart content directly without fetching from /cart page
-    $.ajax({
-      type: "GET",
-      url: "/cart.js",
-      dataType: "json",
-      success: function(cartData) {
-        // Update cart count
-        $(".count").html(cartData.item_count);
-        $(".hcart").html(cartData.item_count);
-        $(".cart-btn").html(
-          "<span class='fa fa-shopping-bag'></span><span>" + cartData.item_count + "</span>"
-        );
-        
-        // Show/hide cart icon based on item count
-        if (cartData.item_count == "0") {
-          $(".hcart").hide();
-        } else {
-          $(".hcart").show();
-        }
-        
-        // Open cart drawer
-        $("body").addClass("g-cart-open");
-        $(".r-side-cart").addClass("active");
-        
-        // Trigger cart refresh event for slide-cart.liquid to update the cart contents
-        $(document).trigger('cart:refresh');
-      }
-    });
+    
+    // Function to refresh cart with retry mechanism
+    function refreshCartWithRetry(retryCount) {
+      retryCount = retryCount || 0;
+      
+      // Add a small delay to ensure server-side cart update is complete
+      setTimeout(function() {
+        $.ajax({
+          type: "GET",
+          url: "/cart.js?_=" + new Date().getTime(), // Add cache-busting parameter
+          dataType: "json",
+          success: function(cartData) {
+            // Check if cart actually has items (retry logic)
+            if (cartData.item_count > 0 || retryCount >= 3) {
+              // Update cart count
+              $(".count").html(cartData.item_count);
+              $(".hcart").html(cartData.item_count);
+              $(".cart-btn").html(
+                "<span class='fa fa-shopping-bag'></span><span>" + cartData.item_count + "</span>"
+              );
+              
+              // Show/hide cart icon based on item count
+              if (cartData.item_count == "0") {
+                $(".hcart").hide();
+              } else {
+                $(".hcart").show();
+              }
+              
+              // Open cart drawer
+              $("body").addClass("g-cart-open");
+              $(".r-side-cart").addClass("active");
+              
+              // Trigger cart refresh event for slide-cart.liquid to update the cart contents
+              $(document).trigger('cart:refresh');
+            } else if (retryCount < 3) {
+              // Retry if cart is still empty
+              refreshCartWithRetry(retryCount + 1);
+            }
+          },
+          error: function() {
+            if (retryCount < 3) {
+              // Retry on error
+              refreshCartWithRetry(retryCount + 1);
+            }
+          }
+        });
+      }, 300); // 300ms delay to ensure server-side update
+    }
+    
+    // Start the refresh process
+    refreshCartWithRetry();
   };
   
   Shopify.onError = function (XMLHttpRequest, textStatus) {

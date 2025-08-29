@@ -989,11 +989,13 @@
 </style>
 
 <script>
-// Function to refresh cart content
-function refreshCartContent() {
+// Function to refresh cart content with retry mechanism
+function refreshCartContent(retryCount) {
+  retryCount = retryCount || 0;
+  
   $.ajax({
     type: "GET",
-    url: "/cart.js",
+    url: "/cart.js?_=" + new Date().getTime(), // Add cache-busting parameter
     dataType: "json",
     success: function(cartData) {
       // Update cart item count in header
@@ -1122,6 +1124,14 @@ function refreshCartContent() {
       } else {
         $(".shipping-cost").html("$5.00");
       }
+    },
+    error: function() {
+      // Retry on error (up to 3 times)
+      if (retryCount < 3) {
+        setTimeout(function() {
+          refreshCartContent(retryCount + 1);
+        }, 500);
+      }
     }
   });
 }
@@ -1138,6 +1148,9 @@ $(document).ready(function () {
   $('.r-side-cart').removeClass('active');
   $('body').removeClass('g-cart-open');
   
+  // Initialize cart content on page load to ensure it's up to date
+  refreshCartContent();
+  
   // Overlay click to close
   $(".cart-overlay").click(function () {
     $(".r-side-cart").removeClass("active");
@@ -1146,6 +1159,7 @@ $(document).ready(function () {
   
   // Listen for cart refresh events
   $(document).on('cart:refresh', function() {
+    console.log("Cart refresh event triggered");
     refreshCartContent();
   });
   
