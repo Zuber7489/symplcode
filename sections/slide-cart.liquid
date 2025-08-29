@@ -1,7 +1,7 @@
-<div id="custom-cart" class="custom-cart-container r-side-cart">
-  <div class="custom-cart-overlay"></div>
+<div id="custom-cart" class="r-side-cart">
+  <div class="cart-overlay"></div>
   
-  <div class="custom-cart-content">
+  <div class="cart-content">
     <!-- Free Shipping Progress Bar -->
     <div class="free-shipping-progress">
       <div class="progress-text">
@@ -204,7 +204,7 @@
 </div>
 
 <style>
-.custom-cart-container {
+.r-side-cart {
   position: fixed;
   top: 0;
   right: 0;
@@ -217,13 +217,12 @@
   visibility: hidden;
 }
 
-.custom-cart-container.open,
-.custom-cart-container.active {
+.r-side-cart.active {
   transform: translateX(0);
   visibility: visible;
 }
 
-.custom-cart-overlay {
+.cart-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -233,7 +232,7 @@
   backdrop-filter: blur(4px);
 }
 
-.custom-cart-content {
+.cart-content {
   position: absolute;
   top: 0;
   right: 0;
@@ -975,454 +974,33 @@
 <script>
 $(document).ready(function () {
   // Ensure cart is closed on page load
-  $('.custom-cart-container').removeClass('open active');
   $('.r-side-cart').removeClass('active');
   $('body').removeClass('g-cart-open');
   
-  // Simple Cart Manager that works with default Shopify functionality
-  class CartManager {
-    constructor() {
-      this.init();
-      this.initBundleNavigation();
-    }
-
-    init() {
-      this.bindCartEvents();
-    }
-
-    bindCartEvents() {
-      // Remove any existing event handlers to prevent conflicts
-      $(document).off('click', '.qty__adjust');
-      $(document).off('click', '.remove-cart');
-      $(document).off('click', '.quantity-btn');
-      $(document).off('click', '.cart-item-remove');
-      
-      // Use the cart.js style handlers for quantity adjustment
-      // The HTML uses .qty__adjust classes, so we handle those
-      $(document).on('click', '.qty__adjust', (e) => {
-        e.preventDefault();
-        const $button = $(e.currentTarget);
-        const $qtyContainer = $button.closest('.r-prod-qty');
-        const $input = $qtyContainer.find('input[type="hidden"], input.form-control');
-        const $display = $qtyContainer.find('.quantity-display');
-        const $cartItem = $button.closest('.r-prod-row');
-        
-        let currentQty = parseInt($input.val()) || 1;
-        let newQty = currentQty;
-        
-        if ($button.hasClass('qty__adjust--plus')) {
-          newQty = currentQty + 1;
-        } else if ($button.hasClass('qty__adjust--minus') && currentQty > 1) {
-          newQty = currentQty - 1;
-        }
-        
-        if (newQty !== currentQty) {
-          // Update both input and display
-          $input.val(newQty);
-          $display.text(newQty);
-          
-          // Get line number and make AJAX call
-          const line = $cartItem.attr('data-line');
-          $cartItem.addClass('is-loading');
-          
-          $.ajax({
-            type: 'POST',
-            url: '/cart/change.js',
-            dataType: 'json',
-            data: 'quantity=' + newQty + '&line=' + line,
-            success: function(data) {
-              $cartItem.removeClass('is-loading');
-              // Use the existing Shopify success handler if available
-              if (typeof Shopify !== 'undefined' && Shopify.onSuccess) {
-                Shopify.onSuccess();
-              } else {
-                window.location.reload();
-              }
-            },
-            error: function(xhr) {
-              $cartItem.removeClass('is-loading');
-              // Reset values on error
-              $input.val(currentQty);
-              $display.text(currentQty);
-              
-              if (typeof Shopify !== 'undefined' && Shopify.onError) {
-                Shopify.onError(xhr);
-              } else {
-                alert('Error updating cart. Please try again.');
-              }
-            }
-          });
-        }
-      });
-      
-      // Handle remove cart items
-      $(document).on('click', '.remove-cart', (e) => {
-        e.preventDefault();
-        const $cartItem = $(e.currentTarget).closest('.r-prod-row');
-        const line = $cartItem.attr('data-line');
-        
-        $cartItem.addClass('is-loading');
-        
-        $.ajax({
-          type: 'POST',
-          url: '/cart/change.js',
-          dataType: 'json',
-          data: 'quantity=0&line=' + line,
-          success: function(data) {
-            $cartItem.removeClass('is-loading');
-            if (typeof Shopify !== 'undefined' && Shopify.onSuccess) {
-              Shopify.onSuccess();
-            } else {
-              window.location.reload();
-            }
-          },
-          error: function(xhr) {
-            $cartItem.removeClass('is-loading');
-            if (typeof Shopify !== 'undefined' && Shopify.onError) {
-              Shopify.onError(xhr);
-            } else {
-              alert('Error removing item. Please try again.');
-            }
-          }
-        });
-      });
-
-      // Bundle product add to cart
-      $(document).on('click', '.add-to-bag-btn', (e) => {
-        e.preventDefault();
-        const $button = $(e.currentTarget);
-        const variantId = $button.attr('data-variant-id');
-        if (variantId) {
-          this.addBundleItemToCart(variantId, $button);
-        }
-      });
-
-      // Variant selection in bundle
-      $(document).on('click', '.variant-dot', (e) => {
-        const $dot = $(e.currentTarget);
-        const $product = $dot.closest('.bundle-product');
-        const variantId = $dot.attr('data-variant-id');
-        
-        $product.find('.variant-dot').removeClass('selected');
-        $dot.addClass('selected');
-        
-        $product.find('.add-to-bag-btn').attr('data-variant-id', variantId);
-      });
-
-      // Cart close functionality
-      $(document).on('click', '.cart-close', () => {
-        this.closeCart();
-      });
-
-      // Overlay click to close
-      $(document).on('click', '.custom-cart-overlay', () => {
-        this.closeCart();
-      });
-    }
-
-    addBundleItemToCart(variantId, $button) {
-      const originalText = $button.text();
-      $button.text('Adding...').prop('disabled', true);
-      
-      $.ajax({
-        type: 'POST',
-        url: '/cart/add.js',
-        dataType: 'json',
-        data: {
-          'id': variantId,
-          'quantity': 1
-        },
-        success: function(data) {
-          $button.text('Added!').css('background', '#059669');
-          setTimeout(() => {
-            $button.text(originalText).css('background', '').prop('disabled', false);
-          }, 2000);
-          
-          if (typeof Shopify !== 'undefined' && Shopify.onSuccess) {
-            Shopify.onSuccess();
-          } else {
-            window.location.reload();
-          }
-        },
-        error: function(xhr) {
-          $button.text('Error').css('background', '#dc2626');
-          setTimeout(() => {
-            $button.text(originalText).css('background', '').prop('disabled', false);
-          }, 2000);
-          
-          if (typeof Shopify !== 'undefined' && Shopify.onError) {
-            Shopify.onError(xhr);
-          } else {
-            alert('Error adding item to cart.');
-          }
-        }
-      });
-    }
-
-    openCart() {
-      $('.custom-cart-container').addClass('active open');
-      $('body').addClass('g-cart-open');
-    }
-
-    closeCart() {
-      $('.custom-cart-container').removeClass('active open');
-      $('body').removeClass('g-cart-open');
-    }
-
-    // Bundle slide navigation functionality
-    initBundleNavigation() {
-      const bundleContainer = document.getElementById('bundle-products-scroll');
-      if (!bundleContainer) return;
-
-      let currentIndex = 0;
-      let cardWidth;
-      let totalCards;
-      let visibleCards;
-      let isDragging = false;
-      let startPos = 0;
-      let currentTranslate = 0;
-      let prevTranslate = 0;
-      let animationID = 0;
-      let hasDragged = false;
-      let dragThreshold = 10;
-
-      const calculateDimensions = () => {
-        const bundleProducts = bundleContainer.querySelectorAll('.bundle-product');
-        if (bundleProducts.length === 0) return;
-        
-        totalCards = bundleProducts.length;
-        const firstCard = bundleProducts[0];
-        const style = window.getComputedStyle(firstCard);
-        const marginLeft = parseInt(style.marginLeft) || 0;
-        const marginRight = parseInt(style.marginRight) || 0;
-        
-        cardWidth = firstCard.offsetWidth + marginLeft + marginRight;
-        
-        const containerWidth = bundleContainer.parentElement.offsetWidth;
-        visibleCards = Math.floor(containerWidth / cardWidth);
-        visibleCards = Math.max(1, visibleCards);
-      };
-
-      const updateBundlePosition = () => {
-        if (isNaN(cardWidth) || cardWidth <= 0) {
-          calculateDimensions();
-          if (isNaN(cardWidth) || cardWidth <= 0) return;
-        }
-        const translateX = -currentIndex * cardWidth;
-        bundleContainer.style.transform = `translateX(${translateX}px)`;
-      };
-
-      const isInteractiveTarget = (target) => {
-        return target.closest('.variant-dot') || 
-               target.closest('.add-to-bag-btn') || 
-               target.closest('button') ||
-               target.closest('input') ||
-               target.closest('select');
-      };
-
-      // Initialize
-      calculateDimensions();
-      updateBundlePosition();
-
-      // Handle window resize
-      $(window).on('resize', () => {
-        calculateDimensions();
-        if (currentIndex > totalCards - visibleCards) {
-          currentIndex = Math.max(0, totalCards - visibleCards);
-        }
-        updateBundlePosition();
-      });
-
-      // Prevent link clicks during drag
-      bundleContainer.addEventListener('click', function(e) {
-        if (hasDragged) {
-          e.preventDefault();
-          e.stopPropagation();
-          hasDragged = false;
-        }
-      });
-
-      // Mouse drag support
-      let mouseStartX = 0;
-      let mouseLastX = 0;
-      let mouseStartTime = 0;
-      let mouseLastTime = 0;
-
-      bundleContainer.addEventListener('mousedown', function(e) {
-        if (isInteractiveTarget(e.target)) return;
-        if (e.button !== 0) return;
-        
-        e.preventDefault();
-        isDragging = true;
-        hasDragged = false;
-        mouseStartX = startPos = e.clientX;
-        mouseLastX = e.clientX;
-        mouseStartTime = mouseLastTime = Date.now();
-        prevTranslate = -currentIndex * cardWidth;
-        bundleContainer.classList.add('no-transition');
-        bundleContainer.parentElement.classList.add('grabbing');
-        cancelAnimationFrame(animationID);
-        animationID = requestAnimationFrame(animation);
-      });
-
-      window.addEventListener('mousemove', function(e) {
-        if (!isDragging) return;
-        
-        const currentPosition = e.clientX;
-        const diff = currentPosition - mouseStartX;
-        currentTranslate = prevTranslate + diff;
-        mouseLastX = currentPosition;
-        mouseLastTime = Date.now();
-        
-        const maxTranslate = 0;
-        const minTranslate = -(totalCards - visibleCards) * cardWidth;
-        if (currentTranslate > maxTranslate) {
-          currentTranslate = maxTranslate + diff * 0.3;
-        } else if (currentTranslate < minTranslate) {
-          currentTranslate = minTranslate + diff * 0.3;
-        }
-        
-        if (Math.abs(diff) > dragThreshold) {
-          hasDragged = true;
-        }
-      });
-
-      const mouseDragEnd = (e) => {
-        if (!isDragging) return;
-        
-        isDragging = false;
-        bundleContainer.classList.remove('no-transition');
-        bundleContainer.parentElement.classList.remove('grabbing');
-        
-        const movedBy = mouseLastX - mouseStartX;
-        const timeElapsed = (mouseLastTime - mouseStartTime) || 1;
-        const velocity = movedBy / timeElapsed;
-        let targetIndex = currentIndex;
-        
-        const flickVelocity = 0.5;
-        if (cardWidth > 0) {
-          if (Math.abs(velocity) > flickVelocity) {
-            if (velocity < 0) {
-              targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
-            } else {
-              targetIndex = Math.max(0, currentIndex - 2);
-            }
-          } else if (Math.abs(movedBy) > cardWidth * 0.15) {
-            if (movedBy < 0) {
-              targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
-            } else {
-              targetIndex = Math.max(0, currentIndex - 2);
-            }
-          }
-        }
-        
-        targetIndex = Math.max(0, Math.min(totalCards - visibleCards, targetIndex));
-        currentIndex = targetIndex;
-        updateBundlePosition();
-        
-        cancelAnimationFrame(animationID);
-        setTimeout(() => {
-          hasDragged = false;
-        }, 550);
-      };
-
-      window.addEventListener('mouseup', mouseDragEnd);
-      bundleContainer.addEventListener('mouseleave', mouseDragEnd);
-
-      // Touch swipe support - simplified
-      let touchStartX = 0;
-      let touchCurrentX = 0;
-      let touchIsDragging = false;
-
-      bundleContainer.addEventListener('touchstart', function(e) {
-        if (isInteractiveTarget(e.target)) return;
-        if (e.touches.length !== 1) return;
-        
-        touchIsDragging = true;
-        touchStartX = e.touches[0].clientX;
-        touchCurrentX = e.touches[0].clientX;
-        prevTranslate = -currentIndex * cardWidth;
-        bundleContainer.classList.add('no-transition');
-      }, { passive: true });
-
-      bundleContainer.addEventListener('touchmove', function(e) {
-        if (!touchIsDragging || e.touches.length !== 1) return;
-        
-        e.preventDefault();
-        touchCurrentX = e.touches[0].clientX;
-        const diff = touchCurrentX - touchStartX;
-        currentTranslate = prevTranslate + diff;
-        
-        bundleContainer.style.transform = `translateX(${currentTranslate}px)`;
-        
-        if (Math.abs(diff) > dragThreshold) {
-          hasDragged = true;
-        }
-      }, { passive: false });
-
-      bundleContainer.addEventListener('touchend', function(e) {
-        if (!touchIsDragging) return;
-        
-        touchIsDragging = false;
-        bundleContainer.classList.remove('no-transition');
-        
-        const movedBy = touchCurrentX - touchStartX;
-        let targetIndex = currentIndex;
-        
-        if (Math.abs(movedBy) > cardWidth * 0.15) {
-          if (movedBy < 0) {
-            targetIndex = Math.min(totalCards - visibleCards, currentIndex + 2);
-          } else {
-            targetIndex = Math.max(0, currentIndex - 2);
-          }
-        }
-        
-        targetIndex = Math.max(0, Math.min(totalCards - visibleCards, targetIndex));
-        currentIndex = targetIndex;
-        updateBundlePosition();
-        
-        setTimeout(() => {
-          hasDragged = false;
-        }, 550);
-      });
-
-      // Animation function
-      const animation = () => {
-        if (isDragging) {
-          bundleContainer.style.transform = `translateX(${currentTranslate}px)`;
-          animationID = requestAnimationFrame(animation);
-        }
-      };
-    }
-  }
-
-  // Initialize Cart Manager
-  window.cartManager = new CartManager();
-  
-  // Ensure cart starts closed
-  $('.custom-cart-container').removeClass('open active');
-  $('body').removeClass('g-cart-open');
-
   // Cart interaction bindings - only open when explicitly triggered
   $(".cart-icon").click(function (e) {
     e.preventDefault();
-    if (window.cartManager) {
-      window.cartManager.openCart();
-    } else {
-      $(".r-side-cart").addClass("active");
-      $("body").addClass("g-cart-open");
-    }
+    $(".r-side-cart").addClass("active");
+    $("body").addClass("g-cart-open");
   });
 
   $(".cart-link").click(function (e) {
     e.preventDefault();
-    if (window.cartManager) {
-      window.cartManager.openCart();
-    } else {
-      $(".r-side-cart").addClass("active");
-      $("body").addClass("g-cart-open");
-    }
+    $(".r-side-cart").addClass("active");
+    $("body").addClass("g-cart-open");
   });
+  
+  // Cart close functionality
+  $(".cart-close").click(function () {
+    $(".r-side-cart").removeClass("active");
+    $("body").removeClass("g-cart-open");
+  });
+
+  // Overlay click to close
+  $(".cart-overlay").click(function () {
+    $(".r-side-cart").removeClass("active");
+    $("body").removeClass("g-cart-open");
+
 });
 </script>
 
