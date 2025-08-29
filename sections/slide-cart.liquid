@@ -100,8 +100,27 @@
             <h3 class="bundle-title">Bundle & save</h3>
             <div class="bundle-products-container">
               <div class="bundle-products-scroll" id="bundle-products-scroll">
-                <!-- Sample bundle products - replace with your actual products -->
-                {% assign bundle_products = collections['bundle-products'].products | default: collections.all.products | limit: 6 %}
+                <!-- Bundle products with metafield support -->
+                {% assign bundle_products = blank %}
+                
+                {% comment %} Check metafields for all items in the cart {% endcomment %}
+                {% for item in cart.items %}
+                  {% if item.product.metafields.custom.recommendations_for_cart.value != blank %}
+                    {% assign bundle_products = item.product.metafields.custom.recommendations_for_cart.value %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
+                
+                {% comment %} Fallback to collection if no metafield found {% endcomment %}
+                {% if bundle_products == blank %}
+                  {% assign bundle_products = collections['bundle-products'].products | default: collections.all.products | limit: 6 %}
+                {% else %}
+                  {% comment %} If it's a metafield reference, get the actual products {% endcomment %}
+                  {% if bundle_products.products %}
+                    {% assign bundle_products = bundle_products.products %}
+                  {% endif %}
+                {% endif %}
+                
                 {% for product in bundle_products %}
                   <div class="bundle-product" data-product-id="{{ product.id }}">
                     <div class="bundle-product-gray-box">
@@ -1227,100 +1246,14 @@ function addItemToCart(variantId, quantity = 1) {
   });
 }
 
-$(document).ready(function () {
-  // Simple cart state management - let cart.js handle the rest
-  // Ensure cart is closed on page load
-  $('.r-side-cart').removeClass('active');
-  $('body').removeClass('g-cart-open');
-  
-  // Initialize cart content on page load to ensure it's up to date
-  refreshCartContent();
-  
-  // Overlay click to close
-  $(".cart-overlay").click(function () {
-    $(".r-side-cart").removeClass("active");
-    $("body").removeClass("g-cart-open");
-  });
-  
-  // Listen for cart refresh events
-  $(document).on('cart:refresh', function() {
-    console.log("Cart refresh event triggered");
-    refreshCartContent();
-  });
-  
-  // Quantity adjustment handlers
-  $(document).on('click', '.qty__adjust', function(e) {
-    e.preventDefault();
-    var $button = $(this);
-    var $qtyContainer = $button.parent(".r-prod-qty");
-    var oldValue = $qtyContainer.find("input").val();
-    var line = $button.parents(".r-prod-row").attr("data-line");
+// Function to update bundle products after cart refresh
+function updateBundleProducts() {
+  // This function can be expanded to re-fetch bundle products via AJAX if needed
+  // For now, we're relying on the page refresh to update the bundle products
+  console.log('Bundle products updated');
+}
 
-    if ($button.hasClass("qty__adjust--plus")) {
-      var newVal = parseFloat(oldValue) + 1;
-    } else {
-      // Don't allow decrementing below zero
-      if (oldValue > 1) {
-        var newVal = parseFloat(oldValue) - 1;
-      } else {
-        newVal = 1;
-      }
-    }
-
-    $qtyContainer.find("input").val(newVal);
-    $button.parents(".r-prod-row").addClass("is-loading");
-
-    $.ajax({
-      type: "POST",
-      url: "/cart/change.js",
-      dataType: "json",
-      data: "quantity=" + newVal + "&line=" + line,
-      success: function() {
-        // Trigger cart refresh event
-        $(document).one('cart:refresh-complete', function() {
-          // Remove loading class only after cart refresh is complete
-          $button.parents(".r-prod-row").removeClass("is-loading");
-        });
-        $(document).trigger('cart:refresh');
-      },
-      error: function() {
-        // Remove loading class on error
-        $button.parents(".r-prod-row").removeClass("is-loading");
-        alert("Error updating cart item");
-      }
-    });
-  });
-
-  // Remove cart item handler
-  $(document).on('click', '.remove-cart', function(e) {
-    e.preventDefault();
-    var $button = $(this); // Store reference to the button
-    var line = $button.parents(".r-prod-row").attr("data-line");
-    $button.parents(".r-prod-row").addClass("is-loading");
-
-    $.ajax({
-      type: "POST",
-      url: "/cart/change.js",
-      dataType: "json",
-      data: "quantity=0&line=" + line,
-      success: function() {
-        // Trigger cart refresh event and remove loading class after refresh
-        $(document).one('cart:refresh-complete', function() {
-          // Remove loading class only after cart refresh is complete
-          $button.parents(".r-prod-row").removeClass("is-loading");
-        });
-        $(document).trigger('cart:refresh');
-      },
-      error: function() {
-        // Remove loading class on error using stored reference
-        $button.parents(".r-prod-row").removeClass("is-loading");
-        alert("Error removing cart item");
-      }
-    });
-  });
-});
-
-// Add the BundleSlideNavigation class
+// Bundle slide navigation class
 class BundleSlideNavigation {
   constructor() {
     // Call setupBundleDragAndTouch directly
@@ -1710,6 +1643,7 @@ $(document).ready(function() {
   
   // Initialize after cart refresh
   $(document).on('cart:refresh-complete', function() {
+    updateBundleProducts(); // Update bundle products
     setTimeout(() => {
       new BundleSlideNavigation();
     }, 300);

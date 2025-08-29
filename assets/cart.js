@@ -94,6 +94,9 @@ $(document).ready(function () {
               
               // Trigger cart refresh event for slide-cart.liquid to update the cart contents
               $(document).trigger('cart:refresh');
+              
+              // Trigger cart refresh complete event
+              $(document).trigger('cart:refresh-complete');
             } else if (retryCount < 3) {
               // Retry if cart is still empty
               refreshCartWithRetry(retryCount + 1);
