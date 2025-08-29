@@ -1083,54 +1083,54 @@ function refreshCartContent(retryCount) {
           
           // Determine if there's a compare at price
           var priceHTML = '';
-          if (item.original_price > item.final_price) {
-            var savings = item.original_price - item.final_price;
+          if (item.original_line_price > item.final_line_price) {
+            var savings = item.original_line_price - item.final_line_price;
             priceHTML = '<div class="price-container">' +
-                         '<div class="original-price">' + formatMoney(item.original_price) + '</div>' +
-                         '<div class="sale-price">' + formatMoney(item.final_price) + '</div>' +
+                         '<div class="original-price">' + formatMoney(item.original_line_price) + '</div>' +
+                         '<div class="sale-price">' + formatMoney(item.final_line_price) + '</div>' +
                          '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
                        '</div>';
           } else {
             priceHTML = '<div class="price-container">' +
-                         '<div class="regular-price">' + formatMoney(item.final_price) + '</div>' +
+                         '<div class="regular-price">' + formatMoney(item.final_line_price) + '</div>' +
                        '</div>';
           }
           
           cartItemsHTML += '<div class="cart-item r-prod-row" data-item-key="' + item.key + '" data-variant-id="' + item.variant_id + '" data-line="' + lineIndex + '">' +
-                           '<div class="cart-item-image">' +
-                             '<a href="' + item.url + '">' +
-                               '<img src="' + item.image + '" alt="' + item.product_title + '" loading="lazy">' +
-                             '</a>' +
-                           '</div>' +
-                           '<div class="cart-item-details">' +
-                             '<h3 class="cart-item-title">' + item.product_title + '</h3>' +
-                             variantTitle +
-                           '</div>' +
-                           '<div class="cart-item-actions">' +
-                             '<div class="cart-item-quantity r-prod-qty">' +
-                               '<button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">' +
-                                 '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>' +
-                                 '</svg>' +
-                               '</button>' +
-                               '<input type="number" class="quantity-input" value="' + item.quantity + '" min="1" readonly>' +
-                               '<button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">' +
-                                 '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>' +
+                             '<div class="cart-item-image">' +
+                               '<a href="' + item.url + '">' +
+                                 '<img src="' + item.image + '" alt="' + item.product_title + '" loading="lazy">' +
+                               '</a>' +
+                             '</div>' +
+                             '<div class="cart-item-details">' +
+                               '<h3 class="cart-item-title">' + item.product_title + '</h3>' +
+                               variantTitle +
+                             '</div>' +
+                             '<div class="cart-item-actions">' +
+                               '<div class="cart-item-quantity r-prod-qty">' +
+                                 '<button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">' +
+                                   '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>' +
+                                   '</svg>' +
+                                 '</button>' +
+                                 '<input type="number" class="quantity-input" value="' + item.quantity + '" min="1" readonly>' +
+                                 '<button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">' +
+                                   '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>' +
+                                   '</svg>' +
+                                 '</button>' +
+                               '</div>' +
+                               '<div class="cart-item-pricing">' +
+                                 priceHTML +
+                               '</div>' +
+                               '<button class="cart-item-remove remove-cart" data-item-key="' + item.key + '" aria-label="Remove item">' +
+                                 '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
                                  '</svg>' +
                                '</button>' +
                              '</div>' +
-                             '<div class="cart-item-pricing">' +
-                               priceHTML +
-                             '</div>' +
-                             '<button class="cart-item-remove remove-cart" data-item-key="' + item.key + '" aria-label="Remove item">' +
-                               '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                 '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
-                               '</svg>' +
-                             '</button>' +
-                           '</div>' +
-                           '<div class="spinner"></div>' +
-                         '</div>';
+                             '<div class="spinner"></div>' +
+                           '</div>';
         }
         
         // Update the cart items HTML
@@ -1187,43 +1187,91 @@ function refreshCartContent(retryCount) {
 
 // Format money helper function
 function formatMoney(cents) {
+  // Convert to number if it's a string
+  if (typeof cents === 'string') {
+    cents = parseFloat(cents);
+  }
+  
+  // Handle invalid input
+  if (isNaN(cents)) {
+    return "$0.00";
+  }
+  
+  // Convert cents to dollars and format
   var dollars = cents / 100;
   return "$" + dollars.toFixed(2);
 }
 
-// Shopify error handling functions
-var Shopify = Shopify || {};
-
-Shopify.onError = function (XMLHttpRequest, textStatus) {
-  // Remove loading state on error
-  $('.add_to_cart_button, #AddToCart, #AddToCart1, #AddToCart2, .add-to-bag-btn').removeAttr("disabled").removeClass("is-loading");
+// Function to update item quantity in cart
+function updateCartItemQuantity(itemKey, quantity) {
+  // Add loading state to the item row
+  var $itemRow = $('.cart-item[data-item-key="' + itemKey + '"]');
+  $itemRow.addClass('is-loading');
   
-  console.log("errorerror");
-  // Shopify returns a description of the error in XMLHttpRequest.responseText.
-  // It is JSON.
-  // Example: {"description":"The product 'Amelia - Small' is already sold out.","status":500,"message":"Cart Error"}
-  var data = eval("(" + XMLHttpRequest.responseText + ")");
-  if (!!data.message) {
-    alert(data.message + "(" + data.status + "): " + data.description);
-  } else {
-    alert("Error : " + Shopify.fullMessagesFromErrors(data).join("; ") + ".");
-  }
-
-  $(".addtocart").removeAttr("disabled");
-};
-
-Shopify.fullMessagesFromErrors = function (errors) {
-  var fullMessages = [];
-  jQuery.each(errors, function (attribute, messages) {
-    jQuery.each(messages, function (index, message) {
-      fullMessages.push(attribute + " " + message);
-    });
+  $.ajax({
+    type: "POST",
+    url: "/cart/change.js",
+    dataType: "json",
+    data: {
+      id: itemKey,
+      quantity: quantity
+    },
+    success: function(data) {
+      // Refresh cart content after successful update
+      refreshCartContent();
+    },
+    error: function(XMLHttpRequest, textStatus) {
+      // Handle error using Shopify's error handler
+      Shopify.onError(XMLHttpRequest, textStatus);
+      // Remove loading state on error
+      $itemRow.removeClass('is-loading');
+      
+      // Refresh cart content to ensure UI consistency
+      setTimeout(function() {
+        refreshCartContent();
+      }, 500);
+    }
   });
-  return fullMessages;
-};
+}
+
+// Function to remove item from cart
+function removeItemFromCart(itemKey) {
+  // Add loading state to the item row
+  var $itemRow = $('.cart-item[data-item-key="' + itemKey + '"]');
+  $itemRow.addClass('is-loading');
+  
+  $.ajax({
+    type: "POST",
+    url: "/cart/change.js",
+    dataType: "json",
+    data: {
+      id: itemKey,
+      quantity: 0
+    },
+    success: function(data) {
+      // Refresh cart content after successful removal
+      refreshCartContent();
+    },
+    error: function(XMLHttpRequest, textStatus) {
+      // Handle error using Shopify's error handler
+      Shopify.onError(XMLHttpRequest, textStatus);
+      // Remove loading state on error
+      $itemRow.removeClass('is-loading');
+      
+      // Refresh cart content to ensure UI consistency
+      setTimeout(function() {
+        refreshCartContent();
+      }, 500);
+    }
+  });
+}
 
 // Function to add item to cart via AJAX
 function addItemToCart(variantId, quantity = 1) {
+  // Show loading state on all add to bag buttons
+  var $button = $('.add-to-bag-btn[data-variant-id="' + variantId + '"]');
+  $button.prop("disabled", true).addClass("is-loading");
+  
   $.ajax({
     type: "POST",
     url: "/cart/add.js",
@@ -1236,15 +1284,70 @@ function addItemToCart(variantId, quantity = 1) {
       // Refresh cart content after successful addition
       refreshCartContent();
       
-      // Show success message or animation if needed
+      // Show success message
       console.log("Item added to cart successfully");
+      
+      // Remove loading state from specific button
+      $button.prop("disabled", false).removeClass("is-loading");
     },
     error: function(XMLHttpRequest, textStatus) {
       // Handle error using Shopify's error handler
       Shopify.onError(XMLHttpRequest, textStatus);
+      
+      // Remove loading state from specific button
+      $button.prop("disabled", false).removeClass("is-loading");
+    },
+    complete: function() {
+      // Ensure loading state is removed even if there's an unexpected issue
+      setTimeout(function() {
+        $button.prop("disabled", false).removeClass("is-loading");
+      }, 500);
     }
   });
 }
+
+// Shopify error handling functions
+var Shopify = Shopify || {};
+
+Shopify.onError = function (XMLHttpRequest, textStatus) {
+  // Remove loading state on error
+  $('.add_to_cart_button, #AddToCart, #AddToCart1, #AddToCart2, .add-to-bag-btn, .quantity-btn, .cart-item-remove').removeAttr("disabled").removeClass("is-loading");
+  
+  console.log("Cart operation error:", textStatus);
+  console.log("XMLHttpRequest:", XMLHttpRequest);
+  
+  // Shopify returns a description of the error in XMLHttpRequest.responseText.
+  // It is JSON.
+  // Example: {"description":"The product 'Amelia - Small' is already sold out.","status":500,"message":"Cart Error"}
+  try {
+    var data = JSON.parse(XMLHttpRequest.responseText);
+    if (!!data.message) {
+      alert(data.message + " (" + data.status + "): " + data.description);
+    } else {
+      alert("Error: " + Shopify.fullMessagesFromErrors(data).join("; ") + ".");
+    }
+  } catch (e) {
+    alert("An error occurred while processing your request. Please try again.");
+  }
+
+  // Re-enable any disabled cart elements
+  $(".addtocart").removeAttr("disabled");
+  
+  // Force remove loading state from all add-to-bag buttons
+  setTimeout(function() {
+    $('.add-to-bag-btn').prop("disabled", false).removeClass("is-loading");
+  }, 300);
+};
+
+Shopify.fullMessagesFromErrors = function (errors) {
+  var fullMessages = [];
+  jQuery.each(errors, function (attribute, messages) {
+    jQuery.each(messages, function (index, message) {
+      fullMessages.push(attribute + " " + message);
+    });
+  });
+  return fullMessages;
+};
 
 // Function to update bundle products after cart refresh
 function updateBundleProducts() {
@@ -1627,6 +1730,48 @@ class BundleSlideNavigation {
   }
 }
 
+// Function to apply discount code
+function applyDiscountCode(code) {
+  if (!code) {
+    alert("Please enter a discount code");
+    return;
+  }
+  
+  // Add loading state to the apply button
+  $('#apply-discount').prop("disabled", true).addClass("is-loading");
+  
+  $.ajax({
+    type: "POST",
+    url: "/discount/" + code,
+    dataType: "json",
+    success: function(data) {
+      // Refresh cart content to show updated prices
+      refreshCartContent();
+      
+      // Show success message
+      alert("Discount code applied successfully!");
+      
+      // Clear the discount code input
+      $('#discount-code').val('');
+      
+      // Remove loading state
+      $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+    },
+    error: function(XMLHttpRequest, textStatus) {
+      // Handle error
+      try {
+        var data = JSON.parse(XMLHttpRequest.responseText);
+        alert("Error applying discount: " + data.description);
+      } catch (e) {
+        alert("Error applying discount code. Please try again.");
+      }
+      
+      // Remove loading state
+      $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+    }
+  });
+}
+
 // Initialize bundle slide navigation
 $(document).ready(function() {
   // Initialize on page load
@@ -1647,25 +1792,123 @@ $(document).ready(function() {
     setTimeout(() => {
       new BundleSlideNavigation();
     }, 300);
+    
+    // Clear any stuck loading states
+    $('.add-to-bag-btn').prop("disabled", false).removeClass("is-loading");
   });
+  
+  // Refresh cart content when cart:refresh event is triggered
+  $(document).on('cart:refresh', function() {
+    refreshCartContent();
+  });
+  
+  // Safety check for stuck loading states - runs every 5 seconds
+  setInterval(function() {
+    $('.add-to-bag-btn.is-loading').each(function() {
+      var $button = $(this);
+      var loadingStartTime = $button.data('loading-start-time');
+      var currentTime = new Date().getTime();
+      
+      // If button has been loading for more than 5 seconds, remove loading state
+      if (!loadingStartTime || (currentTime - loadingStartTime > 5000)) {
+        $button.prop("disabled", false).removeClass("is-loading");
+      }
+    });
+  }, 5000);
   
   // Add to Bag button handler for bundle products
   $(document).on('click', '.add-to-bag-btn', function(e) {
     e.preventDefault();
+    console.log('Add to bag button clicked');
     var $button = $(this);
     var variantId = $button.data('variant-id');
     var quantity = 1; // Default quantity
     
-    // Add loading state
-    $button.prop("disabled", true).addClass("is-loading");
+    console.log('Adding item to cart:', variantId, quantity);
+    
+    // Add loading state ONLY to this button and store loading start time
+    $button.prop("disabled", true)
+           .addClass("is-loading")
+           .data('loading-start-time', new Date().getTime());
     
     // Add item to cart via AJAX
     addItemToCart(variantId, quantity);
     
-    // Remove loading state after a short delay
+    // Safety measure: Remove loading state after a timeout
     setTimeout(function() {
       $button.prop("disabled", false).removeClass("is-loading");
-    }, 1000);
+    }, 3000); // 3 seconds timeout as a fallback
+  });
+  
+  // Quantity increase button handler
+  $(document).on('click', '.quantity-btn.plus', function(e) {
+    e.preventDefault();
+    console.log('Quantity plus button clicked');
+    var $button = $(this);
+    var $itemRow = $button.closest('.cart-item');
+    var itemKey = $itemRow.data('item-key');
+    var currentQuantity = parseInt($button.siblings('.quantity-input').val());
+    var newQuantity = currentQuantity + 1;
+    
+    console.log('Updating quantity for item:', itemKey, 'from', currentQuantity, 'to', newQuantity);
+    
+    // Update quantity input immediately for better UX
+    $button.siblings('.quantity-input').val(newQuantity);
+    
+    // Update item quantity in cart
+    updateCartItemQuantity(itemKey, newQuantity);
+  });
+  
+  // Quantity decrease button handler
+  $(document).on('click', '.quantity-btn.minus', function(e) {
+    e.preventDefault();
+    console.log('Quantity minus button clicked');
+    var $button = $(this);
+    var $itemRow = $button.closest('.cart-item');
+    var itemKey = $itemRow.data('item-key');
+    var currentQuantity = parseInt($button.siblings('.quantity-input').val());
+    var newQuantity = Math.max(1, currentQuantity - 1); // Minimum quantity of 1
+    
+    console.log('Updating quantity for item:', itemKey, 'from', currentQuantity, 'to', newQuantity);
+    
+    // Update quantity input immediately for better UX
+    $button.siblings('.quantity-input').val(newQuantity);
+    
+    // If quantity is 0, remove the item, otherwise update quantity
+    if (newQuantity === 0) {
+      removeItemFromCart(itemKey);
+    } else {
+      updateCartItemQuantity(itemKey, newQuantity);
+    }
+  });
+  
+  // Remove item button handler
+  $(document).on('click', '.cart-item-remove', function(e) {
+    e.preventDefault();
+    console.log('Remove item button clicked');
+    var $button = $(this);
+    var itemKey = $button.data('item-key');
+    
+    console.log('Removing item:', itemKey);
+    
+    // Remove item from cart
+    removeItemFromCart(itemKey);
+  });
+  
+  // Apply discount code handler
+  $(document).on('click', '#apply-discount', function(e) {
+    e.preventDefault();
+    var code = $('#discount-code').val().trim();
+    applyDiscountCode(code);
+  });
+  
+  // Allow applying discount with Enter key
+  $(document).on('keypress', '#discount-code', function(e) {
+    if (e.which === 13) { // Enter key
+      e.preventDefault();
+      var code = $(this).val().trim();
+      applyDiscountCode(code);
+    }
   });
 });
 </script>
