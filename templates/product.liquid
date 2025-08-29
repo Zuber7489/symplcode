@@ -650,7 +650,8 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
                   {{ display_option.selected_value | default: display_option.values.first }}
                 </div>
               </div>
-              <div class="fabric-options" style="display: flex; gap: 19px; flex-wrap: wrap;">
+                          <div class="fabric-and-reviews-container" style="display: flex; align-items: flex-start; gap: 20px;">
+              <div class="fabric-options" style="display: flex; gap: 19px; flex-wrap: nowrap; align-items: center;">
                 {% for value in display_option.values %}
                   {% assign fabric_variant = null %}
                   {% if size_option and size_option.selected_value %}
@@ -686,7 +687,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
                   <div class="fabric-option{% if display_option.selected_value == value or forloop.first and display_option.selected_value == blank %} active{% endif %}"
                         data-value="{{ value | escape }}"
                         data-variant-id="{{ fabric_variant.id }}"
-                        style="width: 75px; height: 75px; border-radius: 8px; cursor: pointer; border: 3px solid lightgray; overflow: hidden; transition: all 0.3s ease; position: relative;">
+                        style="width: 75px; height: 75px; border-radius: 8px; cursor: pointer; border: 3px solid lightgray; overflow: hidden; transition: all 0.3s ease; position: relative; flex-shrink: 0;">
                     {% if fabric_variant.featured_image %}
                       <img src="{{ fabric_variant.featured_image | img_url: '100x100', crop: 'center' }}"
                             alt="{{ value }}"
@@ -699,6 +700,14 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
                   </div>
                 {% endfor %}
               </div>
+              
+              <!-- Reviews positioned to the right of product thumbnails -->
+              <div class="desktop-reviews-next-to-thumbnails" style="display: flex; align-items: center; gap: 8px; color: #2f6f6f; flex-shrink: 0;">
+                <div class="reviewadjust" style="font-size: 14px; color: #444; cursor: pointer;" onclick="scrollToReviews()">
+                  {% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', concierge_install: true, product: product %}
+                </div>
+              </div>
+            </div>
             </div>
 
             <div class="mobile-reviews" style="display: flex; flex-direction: column; align-items: flex-end; min-width: 130px; display:none;">
@@ -715,11 +724,11 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
 
     
       {% if has_fabric_options or has_color_options %}
-        <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; position:relative; top: 26px;" id="variantPrice">
+        <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; position:relative; top: 26px; white-space: nowrap;" id="variantPrice">
           {{ current_variant.price | money }}
         </div>
       {% else %}
-        <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; margin-left: 20px;" id="variantPrice">
+        <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; margin-left: 20px; white-space: nowrap;" id="variantPrice">
           {{ current_variant.price | money }}
         </div>
       {% endif %}
@@ -727,13 +736,8 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
       
       
 
-    <div class="lower-compare-reviews-section" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px; margin-bottom: 16px;">
+    <div class="lower-compare-reviews-section" style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 16px; margin-top: 10px;">
       {% render 'compare-bags-buttons' %}
-      <div class="review-fix" style="display: flex; align-items: center; gap: 8px; color: #2f6f6f;">
-        <div class="reviewadjust" style="font-size: 14px; color: #444; cursor: pointer;" onclick="scrollToReviews()">
-          {% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', concierge_install: true, product: product %}
-        </div>
-      </div>
     </div>
     
     
@@ -753,12 +757,12 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
           {% endfor %}
         </select>
     
-        <button type="submit" name="add" id="AddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
+        <button type="submit" name="add" id="MobileAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
           <span id="AddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
         </button>
         
-
-        
+        {% comment %} Custom text below Add to Bag button {% endcomment %}
+        {% render 'custom-text-below-add-to-bag', product: product, current_variant: current_variant %}
 
         <div class="apple-pay-button-container" style="margin-top: 10px;">
           {{ form | payment_button }}
@@ -811,7 +815,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     </div>
     
         
-    <div style="margin-top: 32px; color: #333;" id="dynamicFeatureHighlights">
+    <div style="margin-top: 42px; color: #333;" id="dynamicFeatureHighlights">
       <h3 class="featurehighlightshide" style="font-size: 18px; font-weight: 500; margin-bottom: 16px;">Feature highlights:</h3>
       <div class="featurehighlightshide" style="display: flex; gap: 67px;">
         <ul style="flex: 1 1 300px; list-style: none; padding: 0; margin: 0;" id="featureHighlightsLeft">
@@ -851,7 +855,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     <div class="accordion-contain" style="margin-top:15px">
     <div class="mobile-feature-highlights-accordion" style="display:none; ">
       <div class="accordion-item" style="border-bottom: 1px solid #eee; margin-bottom: 0;">
-        <div class="accordion-header" style="padding: 15px 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleMobileFeatureHighlights()">
+        <div class="accordion-header" style="padding: 15px 0; margin-top:30px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleMobileFeatureHighlights()">
           <h3 style="font-size: 15px; font-weight: 400; margin: 0;  color: #000;">Feature Highlights:</h3>
           <span class="accordion-icon" id="mobile-featurehighlights-icon" style="transition: transform 0.3s ease; transform: rotate(0deg); color:black">
             <svg width="20" height="20" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1959,7 +1963,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     
     .testimonial-section {
     padding: 40px 20px !important;
-              margin-top: 70px;
+         
     }
     #modalZoomControls {
       top: 70px !important; /* Adjust for mobile if needed */
@@ -2774,7 +2778,7 @@ let globalTouchManager = {
       initImageGallery();
       initVariantSelector();
       initDesktopNavigableCellNavigation();
-      // initAddToCart(); // Removed - letting cart.js handle add to cart functionality
+      initAddToCart();
       initBundleCarousel();
       initFunctionsCarousel();
       initRelatedProductsCarousel();
@@ -3847,7 +3851,7 @@ let globalTouchManager = {
     if (priceElement) priceElement.textContent = currentVariant.formatted_price;
   }); 
   
-  const addToCartButton = document.getElementById("AddToCart");
+  const addToCartButton = document.getElementById("MobileAddToCart");
   const addToCartText = document.getElementById("AddToCartText");
   
   if (addToCartButton && addToCartText) {
@@ -5338,6 +5342,29 @@ let globalTouchManager = {
       .iconshide {
         display: none !important;
       }
+      /* Custom Text Below Add to Bag */
+      .custom-text-below-add-to-bag-container {
+        margin-top: 12px !important;
+        margin-bottom: 8px !important;
+        text-align: center !important;
+        min-height: 0 !important;
+        transition: all 0.3s ease !important;
+      }
+      
+      .custom-text-below-add-to-bag {
+        margin: 0 !important;
+        transition: all 0.3s ease !important;
+      }
+      
+
+      
+      .custom-text-below-add-to-bag .custom-text-content {
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.3px !important;
+  
+      }
+      
       /* Feature Highlights */
       #dynamicFeatureHighlights h3.featurehighlightshide {
         font-weight: 500 !important;
@@ -5470,7 +5497,8 @@ let globalTouchManager = {
       /* Review gray box section */
       .testimonial-section {
         padding-top: 50px !important;
-        padding-bottom: 50px !important;
+        padding-bottom: 130px !important;
+    
       }
       .testimonial-section h3 {
         font-weight: 550 !important;
@@ -5626,11 +5654,26 @@ let globalTouchManager = {
         <button type="submit" name="add" id="MobileAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; margin-bottom: 0; margin-top:3px; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
           <span id="MobileAddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
         </button>
+        
+        {% comment %} Custom text below Add to Bag button (mobile) {% endcomment %}
+        {% render 'custom-text-below-add-to-bag', product: product, current_variant: current_variant %}
       </form>
     </div>
     
     <style>
     @media (max-width: 900px) {
+      /* Custom Text Below Add to Bag - Mobile Styles */
+      .custom-text-below-add-to-bag-container {
+        margin-top: 0px !important;
+        margin-bottom: 0px !important;
+      }
+      
+      .custom-text-below-add-to-bag .custom-text-content {
+        font-size: 13px !important;
+      }
+      
+
+      
       .mobile-sticky-add-to-cart {
         display: none; /* Initially hidden, shown by JavaScript when needed */
         position: fixed;
@@ -5699,6 +5742,37 @@ let globalTouchManager = {
       }
       document.addEventListener('variant:change', syncMobileAddToCartState);
       syncMobileAddToCartState();
+      
+      // Update custom text below Add to Bag when variant changes
+      document.addEventListener('variant:change', function(e) {
+        if (e.detail && e.detail.variant) {
+          updateCustomTextBelowAddToBag(e.detail.variant);
+        }
+      });
+      
+      // Function to update custom text based on variant
+      function updateCustomTextBelowAddToBag(variant) {
+        // Get all custom text elements (both desktop and mobile)
+        var customTextElements = document.querySelectorAll('.custom-text-below-add-to-bag');
+        
+        customTextElements.forEach(function(element) {
+          var variantId = element.getAttribute('data-variant-id');
+          
+          if (variantId == variant.id || (variantId == 'product-level' && !hasVariantSpecificText(variant))) {
+            // Show text for current variant or product-level fallback
+            element.style.display = 'block';
+          } else {
+            // Hide text for other variants
+            element.style.display = 'none';
+          }
+        });
+      }
+      
+      // Helper function to check if variant has specific text
+      function hasVariantSpecificText(variant) {
+        var variantElements = document.querySelectorAll('.custom-text-below-add-to-bag[data-variant-id="' + variant.id + '"]');
+        return variantElements.length > 0;
+      }
       
       // Sticky cart scroll functionality
       function initStickyCart() {
@@ -5795,9 +5869,19 @@ let globalTouchManager = {
     <style>
     @media (min-width: 901px) {
       .mobile-only-reviews { display: none !important; }
+      
+      /* Desktop reviews next to thumbnails */
+      .desktop-reviews-next-to-thumbnails {
+        display: flex !important;
+      }
     }
     @media (max-width: 900px) {
       .mobile-only-reviews { display: block !important; }
+      
+      /* Hide desktop reviews on mobile */
+      .desktop-reviews-next-to-thumbnails {
+        display: none !important;
+      }
       
       /* Hide the lower Compare Button and Reviews section on mobile */
       .lower-compare-reviews-section {

@@ -1,30 +1,31 @@
 //     main add to cart ajax
 $(document).ready(function () {
   function addItem(form_id) {
+    var $form = $("#" + form_id);
+    var $button = $form.find('#AddToCart, #AddToCart1, #AddToCart2, .add_to_cart_button');
+    
+    // Add loading state
+    $button.prop("disabled", true).addClass("is-loading");
+    
     $.ajax({
       type: "POST",
       url: "/cart/add.js",
       dataType: "json",
-      data: $("#" + form_id).serialize(),
+      data: $form.serialize(),
       success: Shopify.onSuccess,
       error: Shopify.onError,
     });
   }
+  
   $("#AddToCart").click(function (e) {
     e.preventDefault();
-
-    $(this).prop("disabled", true);
     var id = $(this).parents("form").attr("id");
-    // console.log(id);
     addItem(id);
   });
 
   $("#AddToCart2").click(function (e) {
     e.preventDefault();
-
-    $(this).prop("disabled", true);
     var id = $(this).parents("form").attr("id");
-    //alert(id);
     addItem(id);
   });
 
@@ -33,34 +34,31 @@ $(document).ready(function () {
     if (!$("#custom").val()) {
       alert("Bitte Text einfügen");
     } else {
-      $(this).prop("disabled", true);
       var id = $(this).parents("form").attr("id");
-      // console.log(id);
       addItem(id);
     }
   });
+  
   $(".add_to_cart_button").each(function () {
     $(this).click(function (e) {
       e.preventDefault();
-
       var id = $(this).parents("form").attr("id");
-
       addItem(id);
     });
   });
+  
   $(".m-radio").change(function () {
     var id = $(this)
       .parent(".c-radio")
       .parent(".r-select-size")
       .parents("form")
       .attr("id");
-
     addItem(id);
   });
 
   Shopify.onSuccess = function () {
     var elem = $("#AddToCart");
-    elem.removeAttr("disabled");
+    elem.removeAttr("disabled").removeClass("is-loading");
     var quantity = parseInt(jQuery('[name="quantity"]').val(), 10) || 1;
     // Refresh cart content directly without fetching from /cart page
     $.ajax({
@@ -86,12 +84,16 @@ $(document).ready(function () {
         $("body").addClass("g-cart-open");
         $(".r-side-cart").addClass("active");
         
-        // Trigger cart refresh event for slide-cart.liquid
+        // Trigger cart refresh event for slide-cart.liquid to update the cart contents
         $(document).trigger('cart:refresh');
       }
     });
   };
+  
   Shopify.onError = function (XMLHttpRequest, textStatus) {
+    // Remove loading state on error
+    $('.add_to_cart_button, #AddToCart, #AddToCart1, #AddToCart2').removeAttr("disabled").removeClass("is-loading");
+    
     console.log("errorerror");
     // Shopify returns a description of the error in XMLHttpRequest.responseText.
     // It is JSON.
@@ -123,6 +125,3 @@ function sucss(data) {
   // Keeping for backward compatibility
   console.log("Cart updated successfully");
 }
-
-// Remove cart item handler (moved inside sucss function to avoid duplication)
-// This handler is now integrated with the main cart functionality above
