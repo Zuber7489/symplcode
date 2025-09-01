@@ -138,7 +138,7 @@
                         </div>
                       {% endfor %}
                     </div>
-                           <div class="bundle-product-material">{{ product.metafields.custom.fabric | default: product.metafields.custom.material | default: product.vendor }}</div>
+                           <div class="bundle-product-material">{{ product.metafields.custom.fabric | default: product.metafields.custom.material | default: "" }}</div>
                     <button class="add-to-bag-btn" data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-product-id="{{ product.id }}">Add to Bag</button>
                   </div>
                 {% endfor %}
