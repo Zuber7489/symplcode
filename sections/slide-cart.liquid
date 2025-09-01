@@ -167,7 +167,10 @@
           {% assign total_savings = total_savings | plus: item_savings %}
         {% endif %}
       {% endfor %}
-      {% assign total_savings = total_savings | plus: cart.total_discount %}
+      {% comment %}Only add total_discount if it's not already included in the line item calculations{% endcomment %}
+      {% if cart.total_discount > 0 %}
+        {% assign total_savings = total_savings | plus: cart.total_discount %}
+      {% endif %}
       <div class="savings-row" id="savings-display" {% if total_savings <= 0 %}style="display: none;"{% endif %}>
         <span class="savings-label">Savings</span>
         <span class="savings-amount" id="savings-amount">{{ total_savings | money }}</span>
@@ -1044,8 +1047,9 @@
 
 <script>
 // Function to refresh cart content with retry mechanism
-function refreshCartContent(retryCount) {
+function refreshCartContent(retryCount, skipSavingsUpdate) {
   retryCount = retryCount || 0;
+  skipSavingsUpdate = skipSavingsUpdate || false;
   
   $.ajax({
     type: "GET",
@@ -1173,24 +1177,29 @@ function refreshCartContent(retryCount) {
       $(".total-amount").html(formatMoney(cartData.total_price));
       
       // Calculate and display total savings
-      var totalSavings = 0;
-      for (var i = 0; i < cartData.items.length; i++) {
-        var item = cartData.items[i];
-        if (item.original_line_price > item.final_line_price) {
-          totalSavings += (item.original_line_price - item.final_line_price);
+      if (!skipSavingsUpdate) {
+        var totalSavings = 0;
+        for (var i = 0; i < cartData.items.length; i++) {
+          var item = cartData.items[i];
+          if (item.original_line_price > item.final_line_price) {
+            totalSavings += (item.original_line_price - item.final_line_price);
+          }
         }
-      }
-      
-      // Also add cart-level discounts to savings
-      if (cartData.total_discount) {
-        totalSavings += cartData.total_discount;
-      }
-      
-      if (totalSavings > 0) {
-        $("#savings-display").show();
-        $("#savings-amount").html(formatMoney(totalSavings));
-      } else {
-        $("#savings-display").hide();
+        
+        // Also add cart-level discounts to savings
+        if (cartData.total_discount) {
+          totalSavings += cartData.total_discount;
+        }
+        
+        // Don't double-count savings already included in line item discounts
+        // This prevents showing double savings when there are multiple items
+        
+        if (totalSavings > 0) {
+          $("#savings-display").show();
+          $("#savings-amount").html(formatMoney(totalSavings));
+        } else {
+          $("#savings-display").hide();
+        }
       }
       
       // Update shipping cost
@@ -1826,6 +1835,8 @@ $(document).ready(function() {
   // Initialize on page load
   setTimeout(() => {
     new BundleSlideNavigation();
+    // Refresh cart content on page load but skip savings update to avoid overriding the liquid template
+    refreshCartContent(0, true);
   }, 500);
   
   // Initialize on cart open
