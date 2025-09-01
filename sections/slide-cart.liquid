@@ -127,9 +127,10 @@
                       <div class="bundle-product-image">
                         <img src="{{ product.featured_image | img_url: 'medium' }}" alt="{{ product.title }}">
                       </div>
+                      <h4 class="bundle-product-title">{{ product.title }}</h4>
+                      <div class="bundle-product-material">{{ product.metafields.custom.material | default: product.vendor }}</div>
+                      <p class="bundle-product-price">{{ product.price | money }}</p>
                     </div>
-                    <h4 class="bundle-product-title">{{ product.title }}</h4>
-                    <div class="bundle-product-material">{{ product.metafields.custom.material | default: product.vendor }}</div>
                     <div class="bundle-product-variants">
                       {% for variant in product.variants limit: 2 %}
                         <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}">
@@ -137,7 +138,6 @@
                         </div>
                       {% endfor %}
                     </div>
-                    <p class="bundle-product-price">{{ product.price | money }}</p>
                     <button class="add-to-bag-btn" data-variant-id="{{ product.selected_or_first_available_variant.id }}">Add to Bag</button>
                   </div>
                 {% endfor %}
@@ -601,7 +601,7 @@
 
 .bundle-products-scroll {
   display: flex;
-  gap: 9px;
+  gap: 12px;
   padding: 8px 0;
   margin-left: 0;
   transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1); 
@@ -634,11 +634,11 @@
 
 .bundle-product-image {
   width: 100%;
-  height: 120px;
+  height: 100px;
   border-radius: 0;
   overflow: hidden;
   background: transparent;
-  margin-bottom: 0;
+  margin-bottom: 8px;
 }
 
 .bundle-product-image img {
@@ -651,18 +651,18 @@
   font-size: 14px;
   font-weight: 500;
   color: #111827;
-  margin: 0;
+  margin: 0 0 4px 0;
   line-height: 1.3;
   font-family: inherit;
-  padding: 19px 8px 4px 8px;
+  padding: 0;
 }
 
 .bundle-product-price {
   font-size: 14px;
   color: #111827;
   font-weight: 500;
-  margin: 0;
-  padding: 0 8px 8px 8px;
+  margin: 6px 0 0 0;
+  padding: 0;
 }
 
 .bundle-product-gray-box {
@@ -670,15 +670,18 @@
   border-radius: 8px;
   margin-bottom: 8px;
   overflow: hidden;
-  padding-top: 18px;
-  padding-bottom: 9px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .bundle-product-variants {
   display: flex;
   justify-content: center;
   gap: 4px;
-  margin-bottom: 4px;
+  margin: 8px 0;
 }
 
 .variant-dot {
@@ -704,7 +707,7 @@
   font-size: 12px;
   color: #D97706;
   font-weight: 500;
-  margin: 0 0 8px 0;
+  margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
