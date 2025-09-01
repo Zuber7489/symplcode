@@ -130,7 +130,7 @@
                       <h4 class="bundle-product-title">{{ product.title }}</h4>
                       <p class="bundle-product-price">{{ product.price | money }}</p>
                     </div>
-                    <div class="bundle-product-material">{{ product.metafields.custom.material | default: product.vendor }}</div>
+             
                     <div class="bundle-product-variants">
                       {% for variant in product.variants limit: 2 %}
                         <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}">
@@ -138,6 +138,7 @@
                         </div>
                       {% endfor %}
                     </div>
+                           <div class="bundle-product-material">{{ product.metafields.custom.material | default: product.vendor }}</div>
                     <button class="add-to-bag-btn" data-variant-id="{{ product.selected_or_first_available_variant.id }}">Add to Bag</button>
                   </div>
                 {% endfor %}
