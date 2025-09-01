@@ -128,9 +128,9 @@
                         <img src="{{ product.featured_image | img_url: 'medium' }}" alt="{{ product.title }}">
                       </div>
                       <h4 class="bundle-product-title">{{ product.title }}</h4>
-                      <div class="bundle-product-material">{{ product.metafields.custom.material | default: product.vendor }}</div>
                       <p class="bundle-product-price">{{ product.price | money }}</p>
                     </div>
+                    <div class="bundle-product-material">{{ product.metafields.custom.material | default: product.vendor }}</div>
                     <div class="bundle-product-variants">
                       {% for variant in product.variants limit: 2 %}
                         <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}">
