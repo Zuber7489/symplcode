@@ -133,17 +133,16 @@
              
                     <div class="bundle-product-variants">
                       {% for variant in product.variants limit: 4 %}
-                        <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ product.id }}" data-variant-index="{{ forloop.index0 }}">
-                          <div class="dot" style="background-color: {{ variant.options[0] | handleize }};"></div>
+                        <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ product.id }}" data-variant-index="{{ forloop.index0 }}" data-fabric="{{ variant.option1 }}">
+                          <div class="dot" style="background-color: {{ variant.option1 | handleize }};"></div>
                         </div>
                       {% endfor %}
                     </div>
-                           <div class="bundle-product-material">{{ product.metafields.custom.fabric | default: product.metafields.custom.material | default: "" }}</div>
+                    <div class="bundle-product-material">{{ product.variants.first.option1 }}</div>
                     <button class="add-to-bag-btn" data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-product-id="{{ product.id }}">Add to Bag</button>
                   </div>
                 {% endfor %}
                 
-                <!-- Store variant data for JavaScript -->
                 <script>
                   {% for product in bundle_products %}
                     window.bundleProductVariants_{{ product.id }} = [
@@ -152,6 +151,7 @@
                           id: {{ variant.id }},
                           title: {{ variant.title | json }},
                           price: {{ variant.price }},
+                          fabric: {{ variant.option1 | json }},
                           featured_image: {
                             url: "{{ variant.featured_image | img_url: 'medium' }}",
                             alt: "{{ variant.title }}"
@@ -1823,6 +1823,13 @@ class BundleSlideNavigation {
         const addToBagBtn = productContainer.querySelector('.add-to-bag-btn');
         if (addToBagBtn) {
           addToBagBtn.dataset.variantId = variantId;
+        }
+        
+        // Update the fabric name
+        const materialElement = productContainer.querySelector('.bundle-product-material');
+        if (materialElement) {
+          const fabric = variantDot.dataset.fabric || '';
+          materialElement.textContent = fabric;
         }
         
         // Update product image based on selected variant
