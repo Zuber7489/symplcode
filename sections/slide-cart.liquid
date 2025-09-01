@@ -11,7 +11,7 @@
             {% if remaining_amount > 0 %}
               Almost there! Add {{ remaining_amount | money }} more for free shipping
             {% else %}
-              <span class="free-shipping-achieved">You got free shipping</span>
+              <span class="free-shipping-achieved">You got free shipping!</span>
             {% endif %}
           </span>
       </div>
@@ -1164,7 +1164,7 @@ function refreshCartContent(retryCount, skipSavingsUpdate) {
         );
       } else {
         $(".free-shipping-progress-text").html(
-          '<span class="free-shipping-achieved">You got free shipping</span>'
+          '<span class="free-shipping-achieved">You got free shipping!</span>'
         );
       }
       
