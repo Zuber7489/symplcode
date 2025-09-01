@@ -162,7 +162,7 @@
       
       <div class="savings-row" id="savings-display" style="display: none;">
         <span class="savings-label">Savings</span>
-        <span class="savings-amount" id="savings-amount">-$0.00</span>
+        <span class="savings-amount" id="savings-amount">0.00</span>
       </div>
       
       <div class="shipping-info">
@@ -1168,7 +1168,13 @@ function refreshCartContent(retryCount) {
       if (cartData.total_price >= 5000) {
         $(".shipping-cost").html("Free");
       } else {
-        $(".shipping-cost").html("$5.00");
+        // Use appropriate currency symbol
+        var currencyCode = (typeof Shopify !== 'undefined' && Shopify.currency && Shopify.currency.active) ? Shopify.currency.active : 'USD';
+        if (currencyCode === 'INR') {
+          $(".shipping-cost").html("Rs. 5.00");
+        } else {
+          $(".shipping-cost").html("$5.00");
+        }
       }
       
       // Trigger completion event
@@ -1194,12 +1200,26 @@ function formatMoney(cents) {
   
   // Handle invalid input
   if (isNaN(cents)) {
-    return "$0.00";
+    // Use Shopify's currency code if available, otherwise default to USD
+    var currencyCode = (typeof Shopify !== 'undefined' && Shopify.currency && Shopify.currency.active) ? Shopify.currency.active : 'USD';
+    if (currencyCode === 'INR') {
+      return "Rs. 0.00";
+    } else {
+      return "$0.00";
+    }
   }
   
   // Convert cents to dollars and format
   var dollars = cents / 100;
-  return "$" + dollars.toFixed(2);
+  var currencyCode = (typeof Shopify !== 'undefined' && Shopify.currency && Shopify.currency.active) ? Shopify.currency.active : 'USD';
+  
+  if (currencyCode === 'INR') {
+    // For Indian Rupees, use Rs. symbol
+    return "Rs. " + dollars.toFixed(2);
+  } else {
+    // Default to USD
+    return "$" + dollars.toFixed(2);
+  }
 }
 
 // Function to update item quantity in cart
