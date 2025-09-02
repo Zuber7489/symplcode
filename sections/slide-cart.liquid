@@ -125,10 +125,10 @@
                   <div class="bundle-product" data-product-id="{{ product.id }}">
                     <div class="bundle-product-gray-box">
                       <div class="bundle-product-image">
-                        <img src="{{ product.featured_image | img_url: 'medium' }}" alt="{{ product.title }}">
+                        <img src="{{ product.variants.first.featured_image | default: product.featured_image | img_url: 'medium' }}" alt="{{ product.title }}">
                       </div>
                       <h4 class="bundle-product-title">{{ product.title }}</h4>
-                      <p class="bundle-product-price">{{ product.price | money }}</p>
+                      <p class="bundle-product-price">{{ product.variants.first.price | money }}</p>
                     </div>
              
                     <div class="bundle-product-variants">
@@ -1888,11 +1888,55 @@ function applyDiscountCode(code) {
   });
 }
 
+// Function to initialize bundle product images with selected variants
+function initializeBundleProductImages() {
+  $('.bundle-product').each(function() {
+    var $product = $(this);
+    var productId = $product.data('product-id');
+    var $selectedDot = $product.find('.variant-dot.selected');
+    
+    if ($selectedDot.length > 0) {
+      var variantIndex = $selectedDot.data('variant-index');
+      var variantData = window[`bundleProductVariants_${productId}`];
+      
+      if (variantData && variantData[variantIndex]) {
+        var variant = variantData[variantIndex];
+        var $productImage = $product.find('.bundle-product-image img');
+        var $productPrice = $product.find('.bundle-product-price');
+        var $materialElement = $product.find('.bundle-product-material');
+        var $addToBagBtn = $product.find('.add-to-bag-btn');
+        
+        // Update image
+        if (variant.featured_image && variant.featured_image.url && $productImage.length > 0) {
+          $productImage.attr('src', variant.featured_image.url);
+          $productImage.attr('alt', variant.title);
+        }
+        
+        // Update price
+        if (variant.price && $productPrice.length > 0) {
+          $productPrice.text(formatMoney(variant.price));
+        }
+        
+        // Update material
+        if (variant.fabric && $materialElement.length > 0) {
+          $materialElement.text(variant.fabric);
+        }
+        
+        // Update add to bag button variant ID
+        if ($addToBagBtn.length > 0) {
+          $addToBagBtn.attr('data-variant-id', variant.id);
+        }
+      }
+    }
+  });
+}
+
 // Initialize bundle slide navigation
 $(document).ready(function() {
   // Initialize on page load
   setTimeout(() => {
     new BundleSlideNavigation();
+    initializeBundleProductImages();
     // Refresh cart content on page load but skip savings update to avoid overriding the liquid template
     refreshCartContent(0, true);
   }, 500);
@@ -1901,6 +1945,7 @@ $(document).ready(function() {
   $(document).on('click', '.cart-close, .cart-icon, .cart-overlay', function() {
     setTimeout(() => {
       new BundleSlideNavigation();
+      initializeBundleProductImages();
     }, 300);
   });
   
@@ -1909,6 +1954,7 @@ $(document).ready(function() {
     updateBundleProducts(); // Update bundle products
     setTimeout(() => {
       new BundleSlideNavigation();
+      initializeBundleProductImages();
     }, 300);
     
     // Clear any stuck loading states
