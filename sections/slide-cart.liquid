@@ -1839,15 +1839,9 @@ class BundleSlideNavigation {
         if (productImage) {
           // Get variant data from window object (would be populated by AJAX)
           const variantData = window[`bundleProductVariants_${productId}`];
-          console.log('Variant data for product', productId, ':', variantData);
-          console.log('Selected variant index:', variantIndex);
-          
           if (variantData && variantData[variantIndex]) {
             const variant = variantData[variantIndex];
-            console.log('Selected variant:', variant);
-            
             if (variant.featured_image && variant.featured_image.url) {
-              console.log('Updating image to:', variant.featured_image.url);
               // Add a small delay to ensure smooth transition
               productImage.style.opacity = '0.5';
               setTimeout(() => {
@@ -1855,14 +1849,8 @@ class BundleSlideNavigation {
                 productImage.alt = variant.title;
                 productImage.style.opacity = '1';
               }, 100);
-            } else {
-              console.log('No featured image found for variant');
             }
-          } else {
-            console.log('Variant data not found or invalid index');
           }
-        } else {
-          console.log('Product image element not found');
         }
               
         // Update product price based on selected variant
