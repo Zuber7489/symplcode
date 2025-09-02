@@ -75,11 +75,14 @@
                     <div class="cart-item-pricing">
                       <div class="price-container">
                         {% if item.variant.compare_at_price > item.variant.price %}
-                          <div class="original-price">{{ item.variant.compare_at_price | money }}</div>
-                          <div class="sale-price">{{ item.price | money }}</div>
+                          <div class="main-price">{{ item.price | money }}</div>
+                          <div class="price-details">
+                            <span class="original-price">{{ item.variant.compare_at_price | money }}</span>
+                            <span class="sale-price">{{ item.price | money }}</span>
+                          </div>
                           <div class="savings">(Save {{ item.variant.compare_at_price | minus: item.price | money }})</div>
                         {% else %}
-                          <div class="regular-price">{{ item.price | money }}</div>
+                          <div class="main-price">{{ item.price | money }}</div>
                         {% endif %}
                       </div>
                     </div>
@@ -527,27 +530,35 @@
   align-items: flex-end;
 }
 
-.regular-price {
+.main-price {
   font-size: 16px;
-  font-weight: 500;
+ 
   color: #111827;
+  margin-bottom: 4px;
+}
+
+.price-details {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 2px;
 }
 
 .original-price {
-  font-size: 14px;
+  font-size: 12px;
   color: #9ca3af;
   text-decoration: line-through;
 }
 
 .sale-price {
-  font-size: 16px;
+  font-size: 12px;
   font-weight: 500;
-  color: #059669;
+  color: #037e85;
 }
 
 .savings {
-  font-size: 12px;
-  color: #059669;
+  font-size: 11px;
+  color: #037e85;
   font-weight: 500;
 }
 
@@ -1802,8 +1813,11 @@ function updateBundleProducts() {
           if (item.original_price && item.original_price > item.final_price) {
             var savings = item.original_price - item.final_price;
             priceHTML = '<div class="price-container">' +
-                         '<div class="original-price">' + formatMoney(item.original_price) + '</div>' +
-                         '<div class="sale-price">' + formatMoney(item.final_price) + '</div>' +
+                         '<div class="main-price">' + formatMoney(item.final_price) + '</div>' +
+                         '<div class="price-details">' +
+                           '<span class="original-price">' + formatMoney(item.original_price) + '</span>' +
+                           '<span class="sale-price">' + formatMoney(item.final_price) + '</span>' +
+                         '</div>' +
                          '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
                        '</div>';
           } else if (item.original_line_price && item.original_line_price > item.final_line_price) {
@@ -1812,13 +1826,16 @@ function updateBundleProducts() {
             var itemFinalPrice = item.final_line_price / item.quantity;
             var savings = itemOriginalPrice - itemFinalPrice;
             priceHTML = '<div class="price-container">' +
-                         '<div class="original-price">' + formatMoney(itemOriginalPrice) + '</div>' +
-                         '<div class="sale-price">' + formatMoney(itemFinalPrice) + '</div>' +
+                         '<div class="main-price">' + formatMoney(itemFinalPrice) + '</div>' +
+                         '<div class="price-details">' +
+                           '<span class="original-price">' + formatMoney(itemOriginalPrice) + '</span>' +
+                           '<span class="sale-price">' + formatMoney(itemFinalPrice) + '</span>' +
+                         '</div>' +
                          '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
                        '</div>';
           } else {
             priceHTML = '<div class="price-container">' +
-                         '<div class="regular-price">' + formatMoney(item.price) + '</div>' +
+                         '<div class="main-price">' + formatMoney(item.price) + '</div>' +
                        '</div>';
           }
           
