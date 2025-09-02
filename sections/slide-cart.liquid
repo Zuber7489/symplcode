@@ -1787,14 +1787,10 @@ function updateBundleProducts() {
         
         // Update cart items with proper price display
         var cartItemsHTML = '';
-        console.log('Cart data from API:', cartData);
-        
         for (var i = 0; i < cartData.items.length; i++) {
           var item = cartData.items[i];
           var lineIndex = i + 1;
           var variantTitle = '';
-          
-          console.log('Processing item:', item.product_title, item);
           
           if (item.variant_title && item.variant_title !== 'Default Title') {
             variantTitle = '<p class="cart-item-variant">' + item.variant_title + '</p>';
@@ -1802,20 +1798,8 @@ function updateBundleProducts() {
           
           // Proper price display logic
           var priceHTML = '';
-          
-          // Debug logging to see what price data is available
-          console.log('Item price data:', {
-            price: item.price,
-            original_price: item.original_price,
-            final_price: item.final_price,
-            original_line_price: item.original_line_price,
-            final_line_price: item.final_line_price,
-            variant: item.variant
-          });
-          
-          // Check multiple possible price structures from cart.js API
+          // In cart.js API, compare_at_price is directly on the item, not item.variant
           if (item.original_price && item.original_price > item.final_price) {
-            // Method 1: Using original_price and final_price
             var savings = item.original_price - item.final_price;
             priceHTML = '<div class="price-container">' +
                          '<div class="original-price">' + formatMoney(item.original_price) + '</div>' +
@@ -1823,7 +1807,7 @@ function updateBundleProducts() {
                          '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
                        '</div>';
           } else if (item.original_line_price && item.original_line_price > item.final_line_price) {
-            // Method 2: Using line prices divided by quantity
+            // Alternative: use line prices for quantity-based calculations
             var itemOriginalPrice = item.original_line_price / item.quantity;
             var itemFinalPrice = item.final_line_price / item.quantity;
             var savings = itemOriginalPrice - itemFinalPrice;
@@ -1832,16 +1816,7 @@ function updateBundleProducts() {
                          '<div class="sale-price">' + formatMoney(itemFinalPrice) + '</div>' +
                          '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
                        '</div>';
-          } else if (item.compare_at_price && item.compare_at_price > item.price) {
-            // Method 3: Direct compare_at_price (some cart APIs use this)
-            var savings = item.compare_at_price - item.price;
-            priceHTML = '<div class="price-container">' +
-                         '<div class="original-price">' + formatMoney(item.compare_at_price) + '</div>' +
-                         '<div class="sale-price">' + formatMoney(item.price) + '</div>' +
-                         '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
-                       '</div>';
           } else {
-            // No discount, show regular price
             priceHTML = '<div class="price-container">' +
                          '<div class="regular-price">' + formatMoney(item.price) + '</div>' +
                        '</div>';
