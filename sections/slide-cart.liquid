@@ -1384,9 +1384,6 @@ function addItemToCart(variantId, quantity = 1) {
       // Refresh cart content after successful addition
       refreshCartContent();
       
-      // Show success message
-      console.log("Item added to cart successfully");
-      
       // Remove loading state from specific button
       $button.prop("disabled", false).removeClass("is-loading");
     },
@@ -1412,9 +1409,6 @@ var Shopify = Shopify || {};
 Shopify.onError = function (XMLHttpRequest, textStatus) {
   // Remove loading state on error
   $('.add_to_cart_button, #AddToCart, #AddToCart1, #AddToCart2, .add-to-bag-btn, .quantity-btn, .cart-item-remove').removeAttr("disabled").removeClass("is-loading");
-  
-  console.log("Cart operation error:", textStatus);
-  console.log("XMLHttpRequest:", XMLHttpRequest);
   
   // Shopify returns a description of the error in XMLHttpRequest.responseText.
   // It is JSON.
@@ -1453,7 +1447,6 @@ Shopify.fullMessagesFromErrors = function (errors) {
 function updateBundleProducts() {
   // This function can be expanded to re-fetch bundle products via AJAX if needed
   // For now, we're relying on the page refresh to update the bundle products
-  console.log('Bundle products updated');
 }
 
 // Bundle slide navigation class
@@ -1469,11 +1462,8 @@ class BundleSlideNavigation {
   setupBundleDragAndTouch() {
     const bundleContainer = document.getElementById('bundle-products-scroll');
     if (!bundleContainer) {
-      console.log('Bundle container not found');
       return;
     }
-
-    console.log('Setting up bundle drag and touch');
 
     let currentIndex = 0;
     let cardWidth;
@@ -1493,7 +1483,6 @@ class BundleSlideNavigation {
     // Calculate dimensions
     function calculateDimensions() {
       const bundleProducts = bundleContainer.querySelectorAll('.bundle-product');
-      console.log('Bundle products found:', bundleProducts.length);
       if (bundleProducts.length === 0) return;
       
       totalCards = bundleProducts.length;
@@ -1503,12 +1492,10 @@ class BundleSlideNavigation {
       const marginRight = parseInt(style.marginRight) || 0;
       
       cardWidth = firstCard.offsetWidth + marginLeft + marginRight;
-      console.log('Card width:', cardWidth, 'Total cards:', totalCards);
       
       const containerWidth = bundleContainer.parentElement.offsetWidth;
       visibleCards = Math.floor(containerWidth / cardWidth);
       visibleCards = Math.max(1, visibleCards);
-      console.log('Container width:', containerWidth, 'Visible cards:', visibleCards);
     }
 
     // Initialize
@@ -1531,7 +1518,6 @@ class BundleSlideNavigation {
         if (isNaN(cardWidth) || cardWidth <= 0) return;
       }
       const translateX = -currentIndex * cardWidth;
-      console.log('Updating position:', translateX, 'Current index:', currentIndex);
       bundleContainer.style.transform = `translateX(${translateX}px)`;
     }
 
@@ -1561,11 +1547,8 @@ class BundleSlideNavigation {
 
     bundleContainer.addEventListener('mousedown', function(e) {
       if (isInteractiveTarget(e.target)) {
-        console.log('Mouse down on interactive element, not starting drag');
         return;
       }
-
-      console.log('Mouse down on bundle container');
       if (e.button !== 0) return;
       e.preventDefault();
       isDragging = true;
@@ -1612,7 +1595,6 @@ class BundleSlideNavigation {
       const movedBy = mouseLastX - mouseStartX;
       
       if (dragDuration < 200 && Math.abs(movedBy) < dragThreshold) {
-        console.log('Short interaction, not a drag');
         isDragging = false;
         bundleContainer.classList.remove('no-transition');
         bundleContainer.parentElement.classList.remove('grabbing');
@@ -1620,7 +1602,6 @@ class BundleSlideNavigation {
         return;
       }
       
-      console.log('Mouse drag end');
       isDragging = false;
       bundleContainer.classList.remove('no-transition');
       bundleContainer.parentElement.classList.remove('grabbing');
@@ -1673,11 +1654,8 @@ class BundleSlideNavigation {
 
     bundleContainer.addEventListener('touchstart', function(e) {
       if (isInteractiveTarget(e.target)) {
-        console.log('Touch start on interactive element, not starting drag');
         return;
       }
-
-      console.log('Touch start on bundle container');
       if (e.touches.length !== 1) return;
       touchIsDragging = true;
       touchHasDragged = false;
@@ -1750,13 +1728,11 @@ class BundleSlideNavigation {
       const movedBy = touchCurrentX - touchStartX;
       
       if (dragDuration < 200 && Math.abs(movedBy) < dragThreshold) {
-        console.log('Short touch interaction, not a drag');
         bundleContainer.classList.remove('no-transition');
         bundleContainer.parentElement.classList.remove('grabbing');
         return;
       }
       
-      console.log('Touch end on bundle container');
       bundleContainer.classList.remove('no-transition');
       bundleContainer.parentElement.classList.remove('grabbing');
       
@@ -1961,12 +1937,9 @@ $(document).ready(function() {
   // Add to Bag button handler for bundle products
   $(document).on('click', '.add-to-bag-btn', function(e) {
     e.preventDefault();
-    console.log('Add to bag button clicked');
     var $button = $(this);
     var variantId = $button.data('variant-id');
     var quantity = 1; // Default quantity
-    
-    console.log('Adding item to cart:', variantId, quantity);
     
     // Add loading state ONLY to this button and store loading start time
     $button.prop("disabled", true)
@@ -1985,14 +1958,11 @@ $(document).ready(function() {
   // Quantity increase button handler
   $(document).on('click', '.quantity-btn.plus', function(e) {
     e.preventDefault();
-    console.log('Quantity plus button clicked');
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
     var itemKey = $itemRow.data('item-key');
     var currentQuantity = parseInt($button.siblings('.quantity-input').val());
     var newQuantity = currentQuantity + 1;
-    
-    console.log('Updating quantity for item:', itemKey, 'from', currentQuantity, 'to', newQuantity);
     
     // Update quantity input immediately for better UX
     $button.siblings('.quantity-input').val(newQuantity);
@@ -2004,14 +1974,11 @@ $(document).ready(function() {
   // Quantity decrease button handler
   $(document).on('click', '.quantity-btn.minus', function(e) {
     e.preventDefault();
-    console.log('Quantity minus button clicked');
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
     var itemKey = $itemRow.data('item-key');
     var currentQuantity = parseInt($button.siblings('.quantity-input').val());
     var newQuantity = Math.max(1, currentQuantity - 1); // Minimum quantity of 1
-    
-    console.log('Updating quantity for item:', itemKey, 'from', currentQuantity, 'to', newQuantity);
     
     // Update quantity input immediately for better UX
     $button.siblings('.quantity-input').val(newQuantity);
@@ -2027,11 +1994,8 @@ $(document).ready(function() {
   // Remove item button handler
   $(document).on('click', '.cart-item-remove', function(e) {
     e.preventDefault();
-    console.log('Remove item button clicked');
     var $button = $(this);
     var itemKey = $button.data('item-key');
-    
-    console.log('Removing item:', itemKey);
     
     // Remove item from cart
     removeItemFromCart(itemKey);
