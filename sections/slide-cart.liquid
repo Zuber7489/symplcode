@@ -57,7 +57,8 @@
                     {% endunless %}
                   </div>
                   
-                  <div class="cart-item-actions">
+                  {% if item.variant.compare_at_price > item.variant.price %}
+                  <div class="cart-item-actions cart-item-actions-with-sale" id="cart-actions-sale-{{ forloop.index }}">
                     <div class="cart-item-quantity r-prod-qty">
                       <button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,16 +75,12 @@
                     
                     <div class="cart-item-pricing">
                       <div class="price-container">
-                        {% if item.variant.compare_at_price > item.variant.price %}
-                          <div class="main-price">{{ item.price | money }}</div>
-                          <div class="price-details">
-                            <span class="original-price">{{ item.variant.compare_at_price | money }}</span>
-                            <span class="sale-price">{{ item.price | money }}</span>
-                          </div>
-                          <div class="savings">(Save {{ item.variant.compare_at_price | minus: item.price | money }})</div>
-                        {% else %}
-                          <div class="main-price">{{ item.price | money }}</div>
-                        {% endif %}
+                        <div class="main-price">{{ item.price | money }}</div>
+                        <div class="price-details">
+                          <span class="original-price">{{ item.variant.compare_at_price | money }}</span>
+                          <span class="sale-price">{{ item.price | money }}</span>
+                        </div>
+                        <div class="savings">(Save {{ item.variant.compare_at_price | minus: item.price | money }})</div>
                       </div>
                     </div>
                     
@@ -93,6 +90,35 @@
                       </svg>
                     </button>
                   </div>
+                  {% else %}
+                  <div class="cart-item-actions cart-item-actions-regular" id="cart-actions-regular-{{ forloop.index }}">
+                    <div class="cart-item-quantity r-prod-qty">
+                      <button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
+                        </svg>
+                      </button>
+                      <input type="number" class="quantity-input" value="{{ item.quantity }}" min="1" readonly>
+                      <button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    <div class="cart-item-pricing">
+                      <div class="price-container">
+                        <div class="main-price">{{ item.price | money }}</div>
+                      </div>
+                    </div>
+                    
+                    <button class="cart-item-remove remove-cart" data-item-key="{{ item.key }}" aria-label="Remove item">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </button>
+                  </div>
+                  {% endif %}
                   <div class="spinner"></div>
                 </div>
               {% endfor %}
@@ -465,6 +491,16 @@
   align-items: center;
   gap: 0px;
   background: transparent;
+}
+
+/* Cut price wale items ke liye */
+.cart-item-actions-with-sale .cart-item-quantity {
+  margin-right: 10px;
+}
+
+/* Regular price wale items ke liye */
+.cart-item-actions-regular .cart-item-quantity {
+  margin-right: 48px;
 }
 
 .quantity-btn {
@@ -2070,9 +2106,14 @@ function updateBundleProducts() {
           
           // Proper price display logic
           var priceHTML = '';
+          var actionsClass = '';
+          var actionsId = '';
+          
           // In cart.js API, compare_at_price is directly on the item, not item.variant
           if (item.original_price && item.original_price > item.final_price) {
             var savings = item.original_price - item.final_price;
+            actionsClass = 'cart-item-actions-with-sale';
+            actionsId = 'cart-actions-sale-' + lineIndex;
             priceHTML = '<div class="price-container">' +
                          '<div class="main-price">' + formatMoney(item.final_price) + '</div>' +
                          '<div class="price-details">' +
@@ -2086,6 +2127,8 @@ function updateBundleProducts() {
             var itemOriginalPrice = item.original_line_price / item.quantity;
             var itemFinalPrice = item.final_line_price / item.quantity;
             var savings = itemOriginalPrice - itemFinalPrice;
+            actionsClass = 'cart-item-actions-with-sale';
+            actionsId = 'cart-actions-sale-' + lineIndex;
             priceHTML = '<div class="price-container">' +
                          '<div class="main-price">' + formatMoney(itemFinalPrice) + '</div>' +
                          '<div class="price-details">' +
@@ -2095,6 +2138,8 @@ function updateBundleProducts() {
                          '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
                        '</div>';
           } else {
+            actionsClass = 'cart-item-actions-regular';
+            actionsId = 'cart-actions-regular-' + lineIndex;
             priceHTML = '<div class="price-container">' +
                          '<div class="main-price">' + formatMoney(item.price) + '</div>' +
                        '</div>';
@@ -2110,7 +2155,7 @@ function updateBundleProducts() {
                                '<h3 class="cart-item-title">' + item.product_title + '</h3>' +
                                variantTitle +
                              '</div>' +
-                             '<div class="cart-item-actions">' +
+                             '<div class="cart-item-actions ' + actionsClass + '" id="' + actionsId + '">' +
                                '<div class="cart-item-quantity r-prod-qty">' +
                                  '<button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">' +
                                    '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
