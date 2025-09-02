@@ -135,7 +135,7 @@
                       {% endfor %}
                     </div>
                     <div class="bundle-product-material">{{ product.variants.first.option1 }}</div>
-                    <button class="add-to-bag-btn" data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-product-id="{{ product.id }}">Add to Bag</button>
+                    <button class="add-to-bag-btn bundle-cart-btn" data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-product-id="{{ product.id }}" data-source="bundle-cart">Add to Bag</button>
                   </div>
                   {% endfor %}
                 {% endif %}
@@ -748,7 +748,7 @@
   text-align: center;
 }
 
-.add-to-bag-btn {
+.add-to-bag-btn, .bundle-cart-btn {
   width: 100%;
   background: #037e85;
   color: #ffffff;
@@ -766,16 +766,16 @@
   position: relative;
 }
 
-.add-to-bag-btn:hover {
+.add-to-bag-btn:hover, .bundle-cart-btn:hover {
   background: #026068;
 }
 
-.add-to-bag-btn.is-loading {
+.add-to-bag-btn.is-loading, .bundle-cart-btn.is-loading {
   opacity: 0.7;
   pointer-events: none;
 }
 
-.add-to-bag-btn.is-loading::after {
+.add-to-bag-btn.is-loading::after, .bundle-cart-btn.is-loading::after {
   content: "";
   position: absolute;
   width: 12px;
@@ -1087,188 +1087,13 @@
 </style>
 
 <script>
-// Function to refresh cart content with retry mechanism
-function refreshCartContent(retryCount, skipSavingsUpdate) {
-  retryCount = retryCount || 0;
-  skipSavingsUpdate = skipSavingsUpdate || false;
-  
-  $.ajax({
-    type: "GET",
-    url: "/cart.js?_=" + new Date().getTime(), // Add cache-busting parameter
-    dataType: "json",
-    success: function(cartData) {
-      // Update cart item count in header
-      $(".count").html(cartData.item_count);
-      $(".hcart").html(cartData.item_count);
-      $(".cart-btn").html(
-        "<span class='fa fa-shopping-bag'></span><span>" + cartData.item_count + "</span>"
-      );
-      
-      // Show/hide cart icon based on item count
-      if (cartData.item_count == 0) {
-        $(".hcart").hide();
-        $(".r-side-cart").removeClass("active");
-        $("body").removeClass("g-cart-open");
-        
-        // Clear cart items list and show empty cart message
-        $("#cart-items-list").html("");
-        $(".Cart_Drawer__Content").hide();
-        $(".empty-cart").show();
-        
-        // Hide checkout section
-        $(".checkout-section").hide();
-      } else {
-        $(".hcart").show();
-        $(".empty-cart").hide();
-        $(".Cart_Drawer__Content").show();
-        
-        // Update cart items directly from the cart.js data
-        var cartItemsHTML = '';
-        
-        for (var i = 0; i < cartData.items.length; i++) {
-          var item = cartData.items[i];
-          var lineIndex = i + 1;
-          var variantTitle = '';
-          
-          if (item.variant_title && item.variant_title !== 'Default Title') {
-            variantTitle = '<p class="cart-item-variant">' + item.variant_title + '</p>';
-          }
-          
-          // Determine if there's a compare at price
-          var priceHTML = '';
-          if (item.original_line_price > item.final_line_price) {
-            var savings = item.original_line_price - item.final_line_price;
-            priceHTML = '<div class="price-container">' +
-                         '<div class="original-price">' + formatMoney(item.original_line_price) + '</div>' +
-                         '<div class="sale-price">' + formatMoney(item.final_line_price) + '</div>' +
-                         '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
-                       '</div>';
-          } else {
-            priceHTML = '<div class="price-container">' +
-                         '<div class="regular-price">' + formatMoney(item.final_line_price) + '</div>' +
-                       '</div>';
-          }
-          
-          cartItemsHTML += '<div class="cart-item r-prod-row" data-item-key="' + item.key + '" data-variant-id="' + item.variant_id + '" data-line="' + lineIndex + '">' +
-                             '<div class="cart-item-image">' +
-                               '<a href="' + item.url + '">' +
-                                 '<img src="' + item.image + '" alt="' + item.product_title + '" loading="lazy">' +
-                               '</a>' +
-                             '</div>' +
-                             '<div class="cart-item-details">' +
-                               '<h3 class="cart-item-title">' + item.product_title + '</h3>' +
-                               variantTitle +
-                             '</div>' +
-                             '<div class="cart-item-actions">' +
-                               '<div class="cart-item-quantity r-prod-qty">' +
-                                 '<button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">' +
-                                   '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>' +
-                                   '</svg>' +
-                                 '</button>' +
-                                 '<input type="number" class="quantity-input" value="' + item.quantity + '" min="1" readonly>' +
-                                 '<button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">' +
-                                   '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>' +
-                                   '</svg>' +
-                                 '</button>' +
-                               '</div>' +
-                               '<div class="cart-item-pricing">' +
-                                 priceHTML +
-                               '</div>' +
-                               '<button class="cart-item-remove remove-cart" data-item-key="' + item.key + '" aria-label="Remove item">' +
-                                 '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
-                                 '</svg>' +
-                               '</button>' +
-                             '</div>' +
-                             '<div class="spinner"></div>' +
-                           '</div>';
-        }
-        
-        // Update the cart items HTML
-        $("#cart-items-list").html(cartItemsHTML);
-        
-        // Show checkout section
-        $(".checkout-section").show();
-      }
-      
-      // Update free shipping progress
-      var freeShippingThreshold = 5000;
-      var remainingAmount = freeShippingThreshold - cartData.total_price;
-      var progressPercentage = (cartData.total_price * 100) / freeShippingThreshold;
-      if (progressPercentage > 100) progressPercentage = 100;
-      
-      if (remainingAmount > 0) {
-        $(".free-shipping-progress-text").html(
-          "Almost there! Add " + formatMoney(remainingAmount) + " more for free shipping"
-        );
-      } else {
-        $(".free-shipping-progress-text").html(
-          '<span class="free-shipping-achieved">You got free shipping!</span>'
-        );
-      }
-      
-      $(".progress-bar").css("width", progressPercentage + "%");
-      
-      // Update cart title with item count
-      $(".cart-title").html("Your bag (" + cartData.item_count + ")");
-      
-      // Update total amount
-      $(".total-amount").html(formatMoney(cartData.total_price));
-      
-      // Calculate and display total savings
-      if (!skipSavingsUpdate) {
-        var totalSavings = 0;
-        for (var i = 0; i < cartData.items.length; i++) {
-          var item = cartData.items[i];
-          if (item.original_line_price > item.final_line_price) {
-            totalSavings += (item.original_line_price - item.final_line_price);
-          }
-        }
-        
-        // Also add cart-level discounts to savings
-        if (cartData.total_discount) {
-          totalSavings += cartData.total_discount;
-        }
-        
-        // Don't double-count savings already included in line item discounts
-        // This prevents showing double savings when there are multiple items
-        
-        if (totalSavings > 0) {
-          $("#savings-display").show();
-          $("#savings-amount").html(formatMoney(totalSavings));
-        } else {
-          $("#savings-display").hide();
-        }
-      }
-      
-      // Update shipping cost
-      if (cartData.total_price >= 5000) {
-        $(".shipping-cost").html("Free");
-      } else {
-        // Use appropriate currency symbol
-        var currencyCode = (typeof Shopify !== 'undefined' && Shopify.currency && Shopify.currency.active) ? Shopify.currency.active : 'USD';
-        if (currencyCode === 'INR') {
-          $(".shipping-cost").html("Rs. 5.00");
-        } else {
-          $(".shipping-cost").html("$5.00");
-        }
-      }
-      
-      // Trigger completion event
-      $(document).trigger('cart:refresh-complete');
-    },
-    error: function() {
-      // Retry on error (up to 3 times)
-      if (retryCount < 3) {
-        setTimeout(function() {
-          refreshCartContent(retryCount + 1);
-        }, 500);
-      }
-    }
-  });
-}
+// Listen for cart refresh events from cart.js
+$(document).on('cart:refresh', function() {
+  updateBundleProducts();
+});
+
+
+
 
 // Format money helper function
 function formatMoney(cents) {
@@ -1301,152 +1126,9 @@ function formatMoney(cents) {
   }
 }
 
-// Function to update item quantity in cart
-function updateCartItemQuantity(itemKey, quantity) {
-  // Add loading state to the item row
-  var $itemRow = $('.cart-item[data-item-key="' + itemKey + '"]');
-  $itemRow.addClass('is-loading');
-  
-  $.ajax({
-    type: "POST",
-    url: "/cart/change.js",
-    dataType: "json",
-    data: {
-      id: itemKey,
-      quantity: quantity
-    },
-    success: function(data) {
-      // Refresh cart content after successful update
-      refreshCartContent();
-    },
-    error: function(XMLHttpRequest, textStatus) {
-      // Handle error using Shopify's error handler
-      Shopify.onError(XMLHttpRequest, textStatus);
-      // Remove loading state on error
-      $itemRow.removeClass('is-loading');
-      
-      // Refresh cart content to ensure UI consistency
-      setTimeout(function() {
-        refreshCartContent();
-      }, 500);
-    }
-  });
-}
 
-// Function to remove item from cart
-function removeItemFromCart(itemKey) {
-  // Add loading state to the item row
-  var $itemRow = $('.cart-item[data-item-key="' + itemKey + '"]');
-  $itemRow.addClass('is-loading');
-  
-  $.ajax({
-    type: "POST",
-    url: "/cart/change.js",
-    dataType: "json",
-    data: {
-      id: itemKey,
-      quantity: 0
-    },
-    success: function(data) {
-      // Refresh cart content after successful removal
-      refreshCartContent();
-    },
-    error: function(XMLHttpRequest, textStatus) {
-      // Handle error using Shopify's error handler
-      Shopify.onError(XMLHttpRequest, textStatus);
-      // Remove loading state on error
-      $itemRow.removeClass('is-loading');
-      
-      // Refresh cart content to ensure UI consistency
-      setTimeout(function() {
-        refreshCartContent();
-      }, 500);
-    }
-  });
-}
 
-// Function to add item to cart via AJAX
-function addItemToCart(variantId, quantity = 1) {
-  // Show loading state on all add to bag buttons
-  var $button = $('.add-to-bag-btn[data-variant-id="' + variantId + '"]');
-  $button.prop("disabled", true).addClass("is-loading");
-  
-  $.ajax({
-    type: "POST",
-    url: "/cart/add.js",
-    dataType: "json",
-    data: {
-      id: variantId,
-      quantity: quantity
-    },
-    success: function(data) {
-      // Refresh cart content after successful addition
-      refreshCartContent();
-      
-      // Remove loading state from specific button
-      $button.prop("disabled", false).removeClass("is-loading");
-    },
-    error: function(XMLHttpRequest, textStatus) {
-      // Handle error using Shopify's error handler
-      Shopify.onError(XMLHttpRequest, textStatus);
-      
-      // Remove loading state from specific button
-      $button.prop("disabled", false).removeClass("is-loading");
-    },
-    complete: function() {
-      // Ensure loading state is removed even if there's an unexpected issue
-      setTimeout(function() {
-        $button.prop("disabled", false).removeClass("is-loading");
-      }, 500);
-    }
-  });
-}
 
-// Shopify error handling functions
-var Shopify = Shopify || {};
-
-Shopify.onError = function (XMLHttpRequest, textStatus) {
-  // Remove loading state on error
-  $('.add_to_cart_button, #AddToCart, #AddToCart1, #AddToCart2, .add-to-bag-btn, .quantity-btn, .cart-item-remove').removeAttr("disabled").removeClass("is-loading");
-  
-  // Shopify returns a description of the error in XMLHttpRequest.responseText.
-  // It is JSON.
-  // Example: {"description":"The product 'Amelia - Small' is already sold out.","status":500,"message":"Cart Error"}
-  try {
-    var data = JSON.parse(XMLHttpRequest.responseText);
-    if (!!data.message) {
-      alert(data.message + " (" + data.status + "): " + data.description);
-    } else {
-      alert("Error: " + Shopify.fullMessagesFromErrors(data).join("; ") + ".");
-    }
-  } catch (e) {
-    alert("An error occurred while processing your request. Please try again.");
-  }
-
-  // Re-enable any disabled cart elements
-  $(".addtocart").removeAttr("disabled");
-  
-  // Force remove loading state from all add-to-bag buttons
-  setTimeout(function() {
-    $('.add-to-bag-btn').prop("disabled", false).removeClass("is-loading");
-  }, 300);
-};
-
-Shopify.fullMessagesFromErrors = function (errors) {
-  var fullMessages = [];
-  jQuery.each(errors, function (attribute, messages) {
-    jQuery.each(messages, function (index, message) {
-      fullMessages.push(attribute + " " + message);
-    });
-  });
-  return fullMessages;
-};
-
-// Function to update bundle products after cart refresh
-function updateBundleProducts() {
-  // This function can be expanded to re-fetch bundle products via AJAX if needed
-  // For now, we're relying on the page refresh to update the bundle products
-}
 
 // Bundle slide navigation class
 class BundleSlideNavigation {
@@ -1523,7 +1205,7 @@ class BundleSlideNavigation {
     // Check if target is interactive
     function isInteractiveTarget(target) {
       return target.closest('.variant-dot') || 
-             target.closest('.add-to-bag-btn') || 
+             target.closest('.bundle-cart-btn') || 
              target.closest('button') ||
              target.closest('input') ||
              target.closest('select');
@@ -1797,7 +1479,7 @@ class BundleSlideNavigation {
         variantDot.classList.add('selected');
         
         // Update the Add to Bag button with the selected variant ID
-        const addToBagBtn = productContainer.querySelector('.add-to-bag-btn');
+        const addToBagBtn = productContainer.querySelector('.bundle-cart-btn');
         if (addToBagBtn) {
           addToBagBtn.dataset.variantId = variantId;
         }
@@ -1861,7 +1543,7 @@ function applyDiscountCode(code) {
     dataType: "json",
     success: function(data) {
       // Refresh cart content to show updated prices
-      refreshCartContent();
+      updateBundleProducts();
       
       // Show success message
       alert("Discount code applied successfully!");
@@ -1903,7 +1585,7 @@ function initializeBundleProductImages() {
         var $productImage = $product.find('.bundle-product-image img');
         var $productPrice = $product.find('.bundle-product-price');
         var $materialElement = $product.find('.bundle-product-material');
-        var $addToBagBtn = $product.find('.add-to-bag-btn');
+        var $addToBagBtn = $product.find('.bundle-cart-btn');
         
         // Update image
         if (variant.featured_image && variant.featured_image.url && $productImage.length > 0) {
@@ -1936,9 +1618,8 @@ $(document).ready(function() {
   setTimeout(() => {
     new BundleSlideNavigation();
     initializeBundleProductImages();
-    // Refresh cart content on page load but skip savings update to avoid overriding the liquid template
-    refreshCartContent(0, true);
-  }, 500);
+    updateBundleProducts();
+  }, 100);
   
   // Initialize on cart open
   $(document).on('click', '.cart-close, .cart-icon, .cart-overlay', function() {
@@ -1950,24 +1631,15 @@ $(document).ready(function() {
   
   // Initialize after cart refresh
   $(document).on('cart:refresh-complete', function() {
-    updateBundleProducts(); // Update bundle products
-    setTimeout(() => {
-      new BundleSlideNavigation();
-      initializeBundleProductImages();
-    }, 300);
-    
-    // Clear any stuck loading states
-    $('.add-to-bag-btn').prop("disabled", false).removeClass("is-loading");
+    // Clear any stuck loading states immediately
+    $('.bundle-cart-btn').prop("disabled", false).removeClass("is-loading");
   });
   
-  // Refresh cart content when cart:refresh event is triggered
-  $(document).on('cart:refresh', function() {
-    refreshCartContent();
-  });
+
   
   // Safety check for stuck loading states - runs every 5 seconds
   setInterval(function() {
-    $('.add-to-bag-btn.is-loading').each(function() {
+    $('.bundle-cart-btn.is-loading').each(function() {
       var $button = $(this);
       var loadingStartTime = $button.data('loading-start-time');
       var currentTime = new Date().getTime();
@@ -1979,25 +1651,49 @@ $(document).ready(function() {
     });
   }, 5000);
   
-  // Add to Bag button handler for bundle products
-  $(document).on('click', '.add-to-bag-btn', function(e) {
+  // Add to Bag button handler for bundle products (only in cart)
+  $(document).on('click', '.bundle-cart-btn', function(e) {
     e.preventDefault();
+    e.stopPropagation(); // Prevent event bubbling
+    e.stopImmediatePropagation(); // Prevent other handlers from running
+    
     var $button = $(this);
     var variantId = $button.data('variant-id');
     var quantity = 1; // Default quantity
+    
+    console.log('Bundle button clicked:', variantId);
+    
+    // Prevent double-clicking or if cart operation is in progress
+    if ($button.hasClass('is-loading') || $button.prop('disabled') || isCartOperationInProgress) {
+      console.log('Button click ignored - already processing');
+      return false;
+    }
+    
+    // Validate variant ID
+    if (!variantId) {
+      console.log('No variant ID found');
+      alert('Product variant not found');
+      return false;
+    }
     
     // Add loading state ONLY to this button and store loading start time
     $button.prop("disabled", true)
            .addClass("is-loading")
            .data('loading-start-time', new Date().getTime());
     
+    console.log('Calling addBundleItemToCart...');
+    
     // Add item to cart via AJAX
-    addItemToCart(variantId, quantity);
+    addBundleItemToCart(variantId, quantity);
     
     // Safety measure: Remove loading state after a timeout
     setTimeout(function() {
-      $button.prop("disabled", false).removeClass("is-loading");
-    }, 3000); // 3 seconds timeout as a fallback
+      if ($button.hasClass('is-loading')) {
+        console.log('Timeout: Removing loading state from button');
+        $button.prop("disabled", false).removeClass("is-loading");
+        isCartOperationInProgress = false; // Reset flag on timeout
+      }
+    }, 5000); // 5 seconds timeout as a fallback
   });
   
   // Quantity increase button handler
@@ -2062,5 +1758,247 @@ $(document).ready(function() {
     }
   });
 });
+
+// Function to update bundle products after cart changes
+function updateBundleProducts() {
+  $.ajax({
+    type: "GET",
+    url: "/cart.js",
+    dataType: "json",
+    cache: false,
+    success: function(cartData) {
+      // Update cart count immediately
+      $(".count").html(cartData.item_count);
+      $(".hcart").html(cartData.item_count);
+      $('.cart-title').text('Your bag (' + cartData.item_count + ')');
+      
+      if (cartData.item_count == 0) {
+        $(".hcart").hide();
+        $(".r-side-cart").removeClass("active");
+        $("body").removeClass("g-cart-open");
+        $("#cart-items-list").html("");
+        $(".Cart_Drawer__Content").hide();
+        $(".empty-cart").show();
+        $(".checkout-section").hide();
+      } else {
+        $(".hcart").show();
+        $(".empty-cart").hide();
+        $(".Cart_Drawer__Content").show();
+        
+        // Update cart items with proper price display
+        var cartItemsHTML = '';
+        for (var i = 0; i < cartData.items.length; i++) {
+          var item = cartData.items[i];
+          var lineIndex = i + 1;
+          var variantTitle = '';
+          
+          if (item.variant_title && item.variant_title !== 'Default Title') {
+            variantTitle = '<p class="cart-item-variant">' + item.variant_title + '</p>';
+          }
+          
+          // Proper price display logic
+          var priceHTML = '';
+          if (item.variant && item.variant.compare_at_price && item.variant.compare_at_price > item.price) {
+            var savings = item.variant.compare_at_price - item.price;
+            priceHTML = '<div class="price-container">' +
+                         '<div class="original-price">' + formatMoney(item.variant.compare_at_price) + '</div>' +
+                         '<div class="sale-price">' + formatMoney(item.price) + '</div>' +
+                         '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
+                       '</div>';
+          } else {
+            priceHTML = '<div class="price-container">' +
+                         '<div class="regular-price">' + formatMoney(item.price) + '</div>' +
+                       '</div>';
+          }
+          
+          cartItemsHTML += '<div class="cart-item r-prod-row" data-item-key="' + item.key + '" data-variant-id="' + item.variant_id + '" data-line="' + lineIndex + '">' +
+                             '<div class="cart-item-image">' +
+                               '<a href="' + item.url + '">' +
+                                 '<img src="' + item.image + '" alt="' + item.product_title + '" loading="lazy">' +
+                               '</a>' +
+                             '</div>' +
+                             '<div class="cart-item-details">' +
+                               '<h3 class="cart-item-title">' + item.product_title + '</h3>' +
+                               variantTitle +
+                             '</div>' +
+                             '<div class="cart-item-actions">' +
+                               '<div class="cart-item-quantity r-prod-qty">' +
+                                 '<button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">' +
+                                   '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>' +
+                                   '</svg>' +
+                                 '</button>' +
+                                 '<input type="number" class="quantity-input" value="' + item.quantity + '" min="1" readonly>' +
+                                 '<button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">' +
+                                   '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>' +
+                                   '</svg>' +
+                                 '</button>' +
+                               '</div>' +
+                               '<div class="cart-item-pricing">' +
+                                 priceHTML +
+                               '</div>' +
+                               '<button class="cart-item-remove remove-cart" data-item-key="' + item.key + '" aria-label="Remove item">' +
+                                 '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
+                                 '</svg>' +
+                               '</button>' +
+                             '</div>' +
+                             '<div class="spinner"></div>' +
+                           '</div>';
+        }
+        
+        // Update cart items HTML
+        $("#cart-items-list").html(cartItemsHTML);
+        
+        // Update bundle and checkout sections
+        $.ajax({
+          type: "GET",
+          url: window.location.pathname + "?section_id=slide-cart&t=" + Date.now(),
+          cache: false,
+          success: function(html) {
+            var $newContent = $(html);
+            var $bundleSection = $newContent.find('.bundle-save-section');
+            var $checkoutSection = $newContent.find('.checkout-section');
+            
+            if ($bundleSection.length > 0) {
+              $('.bundle-save-section').replaceWith($bundleSection);
+            }
+            
+            if ($checkoutSection.length > 0) {
+              $('.checkout-section').replaceWith($checkoutSection);
+            }
+            
+            // Re-initialize bundle functionality
+            new BundleSlideNavigation();
+            initializeBundleProductImages();
+          }
+        });
+        
+        $(".checkout-section").show();
+      }
+    }
+  });
+}
+
+// Global flag to prevent multiple simultaneous cart operations
+var isCartOperationInProgress = false;
+var cartOperationTimeout = null;
+
+// Function to add item to cart from bundle section
+function addBundleItemToCart(variantId, quantity) {
+  // Clear any existing timeout
+  if (cartOperationTimeout) {
+    clearTimeout(cartOperationTimeout);
+  }
+  
+  // Prevent multiple simultaneous operations
+  if (isCartOperationInProgress) {
+    console.log('Cart operation already in progress, skipping...');
+    return;
+  }
+  
+  isCartOperationInProgress = true;
+  var $button = $('.bundle-cart-btn[data-variant-id="' + variantId + '"]');
+  
+  console.log('Adding bundle item to cart:', variantId, 'quantity:', quantity);
+  
+  // Use Shopify's cart/add.js directly
+  $.ajax({
+    type: "POST",
+    url: "/cart/add.js",
+    dataType: "json",
+    data: {
+      id: variantId,
+      quantity: quantity
+    },
+    success: function(item) {
+      console.log('Successfully added item to cart:', item);
+      
+      // Remove loading state from button
+      $button.prop("disabled", false).removeClass("is-loading");
+      
+      // Debounce cart refresh to prevent multiple rapid updates
+      cartOperationTimeout = setTimeout(function() {
+        // Reset the flag
+        isCartOperationInProgress = false;
+        
+        // Trigger cart refresh
+        $(document).trigger('cart:refresh');
+      }, 100); // 100ms delay to debounce
+    },
+    error: function(xhr) {
+      console.log('Error adding item to cart:', xhr);
+      
+      try {
+        var data = JSON.parse(xhr.responseText);
+        alert(data.message || 'Error adding item to cart');
+      } catch (e) {
+        alert('Error adding item to cart');
+      }
+      
+      // Remove loading state from button
+      $button.prop("disabled", false).removeClass("is-loading");
+      
+      // Reset the flag immediately on error
+      isCartOperationInProgress = false;
+    }
+  });
+}
+
+// Function to update cart item quantity
+function updateCartItemQuantity(itemKey, quantity) {
+  $.ajax({
+    type: "POST",
+    url: "/cart/change.js",
+    dataType: "json",
+    data: {
+      id: itemKey,
+      quantity: quantity
+    },
+    success: function(cart) {
+      // Trigger cart refresh
+      $(document).trigger('cart:refresh');
+    },
+    error: function(xhr) {
+      var data = JSON.parse(xhr.responseText);
+      alert(data.message || 'Error updating cart');
+      // Refresh to restore correct quantities
+      $(document).trigger('cart:refresh');
+    }
+  });
+}
+
+// Function to remove item from cart
+function removeItemFromCart(itemKey) {
+  $.ajax({
+    type: "POST",
+    url: "/cart/change.js",
+    dataType: "json",
+    data: {
+      id: itemKey,
+      quantity: 0
+    },
+    success: function(cart) {
+      // Trigger cart refresh
+      $(document).trigger('cart:refresh');
+    },
+    error: function(xhr) {
+      var data = JSON.parse(xhr.responseText);
+      alert(data.message || 'Error removing item');
+    }
+  });
+}
+
+// Function to apply discount code
+function applyDiscountCode(code) {
+  if (!code) {
+    alert('Please enter a discount code');
+    return;
+  }
+  
+  // Redirect to checkout with discount code
+  window.location.href = '/checkout?discount=' + encodeURIComponent(code);
+}
 </script>
 
