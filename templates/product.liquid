@@ -4604,6 +4604,10 @@ let globalTouchManager = {
           showNotification("Product added to cart!", false);
           // Trigger cart count update in header
           document.dispatchEvent(new CustomEvent('cart:refresh'));
+          
+          // Open cart drawer
+          document.body.classList.add("g-cart-open");
+          document.querySelector(".r-side-cart").classList.add("active");
         }
       })
               .catch(err => { showNotification("Error adding product.", true); })
