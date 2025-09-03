@@ -76,7 +76,6 @@
                           <div class="main-price">{{ item.price | money }}</div>
                           <div class="price-details">
                             <span class="original-price">{{ item.variant.compare_at_price | money }}</span>
-                            <span class="sale-price">{{ item.price | money }}</span>
                           </div>
                           <div class="savings">(Save {{ item.variant.compare_at_price | minus: item.price | money }})</div>
                         {% else %}
@@ -528,6 +527,14 @@
   align-items: flex-end;
 }
 
+.price-container:has(.price-details) {
+  margin-top: 21px;
+}
+
+.price-container:not(:has(.price-details)) {
+  margin-top: 0px;
+}
+
 .main-price {
   font-size: 16px;
  
@@ -539,7 +546,7 @@
   display: flex;
   gap: 6px;
   align-items: center;
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .original-price {
@@ -548,11 +555,7 @@
   text-decoration: line-through;
 }
 
-.sale-price {
-  font-size: 12px;
-  font-weight: 600;
-  color: black;
-}
+
 
 .savings {
   font-size: 11px;
@@ -2075,7 +2078,6 @@ function updateBundleProducts() {
                          '<div class="main-price">' + formatMoney(item.final_price) + '</div>' +
                          '<div class="price-details">' +
                            '<span class="original-price">' + formatMoney(item.original_price) + '</span>' +
-                           '<span class="sale-price">' + formatMoney(item.final_price) + '</span>' +
                          '</div>' +
                          '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
                        '</div>';
@@ -2088,7 +2090,6 @@ function updateBundleProducts() {
                          '<div class="main-price">' + formatMoney(itemFinalPrice) + '</div>' +
                          '<div class="price-details">' +
                            '<span class="original-price">' + formatMoney(itemOriginalPrice) + '</span>' +
-                           '<span class="sale-price">' + formatMoney(itemFinalPrice) + '</span>' +
                          '</div>' +
                          '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
                        '</div>';
