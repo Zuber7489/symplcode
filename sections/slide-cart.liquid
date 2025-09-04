@@ -72,12 +72,13 @@
                     
                     <div class="cart-item-pricing">
                       <div class="price-container">
-                        {% if item.variant.compare_at_price > item.variant.price %}
+                        {% assign original_price = item.variant.compare_at_price | default: item.original_price %}
+                        {% if original_price and original_price > item.price %}
                           <div class="main-price">{{ item.price | money }}</div>
                           <div class="price-details">
-                            <span class="original-price">{{ item.variant.compare_at_price | money }}</span>
+                            <span class="original-price">{{ original_price | money }}</span>
                           </div>
-                          <div class="savings">(Save {{ item.variant.compare_at_price | minus: item.price | money }})</div>
+                          <div class="savings">Save {{ original_price | minus: item.price | money }}</div>
                         {% else %}
                           <div class="main-price">{{ item.price | money }}</div>
                         {% endif %}
@@ -551,17 +552,24 @@
 }
 
 .original-price {
-  font-size: 12px;
+  font-size: 14px;
   color: #9ca3af;
   text-decoration: line-through;
+  font-weight: 600;
+  margin-right: 8px;
 }
 
 
 
 .savings {
-  font-size: 11px;
-  color: #037e85;
-  font-weight: 500;
+  font-size: 12px;
+  color: #ffffff;
+  font-weight: 700;
+  background: #dc2626;
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-top: 2px;
+  display: inline-block;
 }
 
 .bundle-tag {
@@ -1914,8 +1922,15 @@ $(document).ready(function() {
     updateBundleProducts();
   }, 100);
   
+  // Cart close functionality
+  $(document).on('click', '.cart-close, .cart-overlay', function(e) {
+    e.preventDefault();
+    $('.r-side-cart').removeClass('active');
+    $('body').removeClass('g-cart-open');
+  });
+  
   // Initialize on cart open
-  $(document).on('click', '.cart-close, .cart-icon, .cart-overlay', function() {
+  $(document).on('click', '.cart-icon', function() {
     setTimeout(() => {
       new BundleSlideNavigation();
       initializeBundleProductImages();
