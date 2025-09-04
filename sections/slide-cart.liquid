@@ -1365,7 +1365,24 @@
 <script>
 // Listen for cart refresh events from cart.js
 $(document).on('cart:refresh', function() {
-  updateBundleProducts();
+  console.log('Cart refresh event triggered');
+  // Add a small delay to ensure DOM is ready
+  setTimeout(function() {
+    updateBundleProducts();
+  }, 50);
+});
+
+// Listen for cart refresh complete events
+$(document).on('cart:refresh-complete', function() {
+  console.log('Cart refresh complete event triggered');
+  // Ensure cart content is visible after refresh
+  setTimeout(function() {
+    if ($('.r-side-cart').hasClass('active')) {
+      console.log('Cart is active, ensuring content visibility');
+      $('.Cart_Drawer__Content').show();
+      $('.empty-cart').hide();
+    }
+  }, 100);
 });
 
 
@@ -2037,137 +2054,83 @@ $(document).ready(function() {
 
 // Function to update bundle products after cart changes
 function updateBundleProducts() {
+  console.log('updateBundleProducts called - using server-side cart HTML');
+  
+  // Instead of generating HTML dynamically, fetch the complete cart from server
   $.ajax({
     type: "GET",
-    url: "/cart.js",
-    dataType: "json",
+    url: "/cart",
+    dataType: "html",
     cache: false,
-    success: function(cartData) {
-      // Update cart count immediately
-      $(".count").html(cartData.item_count);
-      $(".hcart").html(cartData.item_count);
-      $('.cart-title').text('Your bag (' + cartData.item_count + ')');
+    success: function(html) {
+      console.log('Cart HTML received from server');
       
-      if (cartData.item_count == 0) {
-        $(".hcart").hide();
-        $(".r-side-cart").removeClass("active");
-        $("body").removeClass("g-cart-open");
-        $("#cart-items-list").html("");
-        $(".Cart_Drawer__Content").hide();
-        $(".empty-cart").show();
-        $(".checkout-section").hide();
-      } else {
-        $(".hcart").show();
-        $(".empty-cart").hide();
-        $(".Cart_Drawer__Content").show();
+      var $cartHtml = $(html);
+      var $newCartSection = $cartHtml.find('.r-side-cart');
+      
+      if ($newCartSection.length > 0) {
+        // Get current cart state
+        var wasActive = $('.r-side-cart').hasClass('active');
+        var bodyHasCartOpen = $('body').hasClass('g-cart-open');
         
-        // Update cart items with proper price display
-        var cartItemsHTML = '';
-        for (var i = 0; i < cartData.items.length; i++) {
-          var item = cartData.items[i];
-          var lineIndex = i + 1;
-          var variantTitle = '';
-          
-          if (item.variant_title && item.variant_title !== 'Default Title') {
-            variantTitle = '<p class="cart-item-variant">' + item.variant_title + '</p>';
-          }
-          
-          // Proper price display logic
-          var priceHTML = '';
-          // In cart.js API, compare_at_price is directly on the item, not item.variant
-          if (item.original_price && item.original_price > item.final_price) {
-            var savings = item.original_price - item.final_price;
-            priceHTML = '<div class="price-container">' +
-                         '<div class="main-price">' + formatMoney(item.final_price) + '</div>' +
-                         '<div class="price-details">' +
-                           '<span class="original-price">' + formatMoney(item.original_price) + '</span>' +
-                         '</div>' +
-                         '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
-                       '</div>';
-          } else if (item.original_line_price && item.original_line_price > item.final_line_price) {
-            // Alternative: use line prices for quantity-based calculations
-            var itemOriginalPrice = item.original_line_price / item.quantity;
-            var itemFinalPrice = item.final_line_price / item.quantity;
-            var savings = itemOriginalPrice - itemFinalPrice;
-            priceHTML = '<div class="price-container">' +
-                         '<div class="main-price">' + formatMoney(itemFinalPrice) + '</div>' +
-                         '<div class="price-details">' +
-                           '<span class="original-price">' + formatMoney(itemOriginalPrice) + '</span>' +
-                         '</div>' +
-                         '<div class="savings">(Save ' + formatMoney(savings) + ')</div>' +
-                       '</div>';
-          } else {
-            priceHTML = '<div class="price-container">' +
-                         '<div class="main-price">' + formatMoney(item.price) + '</div>' +
-                       '</div>';
-          }
-          
-          cartItemsHTML += '<div class="cart-item r-prod-row" data-item-key="' + item.key + '" data-variant-id="' + item.variant_id + '" data-line="' + lineIndex + '">' +
-                             '<div class="cart-item-image">' +
-                               '<a href="' + item.url + '">' +
-                                 '<img src="' + item.image + '" alt="' + item.product_title + '" loading="lazy">' +
-                               '</a>' +
-                             '</div>' +
-                             '<div class="cart-item-details">' +
-                               '<h3 class="cart-item-title">' + item.product_title + '</h3>' +
-                               variantTitle +
-                             '</div>' +
-                             '<div class="cart-item-actions">' +
-                               '<div class="cart-item-quantity r-prod-qty">' +
-                                 '<button type="button" class="quantity-btn minus qty__adjust qty__adjust--minus" data-action="decrease" tabindex="0">' +
-                                   '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>' +
-                                   '</svg>' +
-                                 '</button>' +
-                                 '<input type="number" class="quantity-input" value="' + item.quantity + '" min="1" readonly>' +
-                                 '<button type="button" class="quantity-btn plus qty__adjust qty__adjust--plus" data-action="increase" aria-label="Increase item quantity by one" tabindex="0">' +
-                                   '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>' +
-                                   '</svg>' +
-                                 '</button>' +
-                               '</div>' +
-                               '<div class="cart-item-pricing">' +
-                                 priceHTML +
-                               '</div>' +
-                               '<button class="cart-item-remove remove-cart" data-item-key="' + item.key + '" aria-label="Remove item">' +
-                                 '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                                   '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>' +
-                                 '</svg>' +
-                               '</button>' +
-                             '</div>' +
-                             '<div class="spinner"></div>' +
-                           '</div>';
+        // Replace cart content with fresh server HTML
+        $('.r-side-cart').html($newCartSection.html());
+        
+        // Restore cart state
+        if (wasActive) {
+          $('.r-side-cart').addClass('active');
+        }
+        if (bodyHasCartOpen) {
+          $('body').addClass('g-cart-open');
         }
         
-        // Update cart items HTML
-        $("#cart-items-list").html(cartItemsHTML);
+        // Update cart counts from the fresh HTML
+        var cartCount = $cartHtml.find('.count').text() || '0';
+        $(".count").html(cartCount);
+        $("#cart-count").html(cartCount);
+        $(".hcart").html(cartCount);
         
-        // Update bundle and checkout sections
-        $.ajax({
-          type: "GET",
-          url: window.location.pathname + "?section_id=slide-cart&t=" + Date.now(),
-          cache: false,
-          success: function(html) {
-            var $newContent = $(html);
-            var $bundleSection = $newContent.find('.bundle-save-section');
-            var $checkoutSection = $newContent.find('.checkout-section');
-            
-            if ($bundleSection.length > 0) {
-              $('.bundle-save-section').replaceWith($bundleSection);
-            }
-            
-            if ($checkoutSection.length > 0) {
-              $('.checkout-section').replaceWith($checkoutSection);
-            }
-            
-            // Re-initialize bundle functionality
-            new BundleSlideNavigation();
-            initializeBundleProductImages();
-          }
-        });
+        if (cartCount == '0') {
+          console.log('Cart is empty');
+          $(".hcart").hide();
+        } else {
+          console.log('Cart has', cartCount, 'items');
+          $(".hcart").show();
+        }
         
-        $(".checkout-section").show();
+        console.log('Cart updated with server HTML successfully');
+        
+        // Re-initialize bundle functionality after cart update
+        setTimeout(function() {
+          new BundleSlideNavigation();
+          initializeBundleProductImages();
+          console.log('Bundle functionality re-initialized');
+        }, 100);
+        
+      } else {
+        console.error('No cart section found in server response');
       }
+    },
+    error: function(xhr, status, error) {
+      console.error('Error fetching cart HTML:', error);
+      // Fallback to JSON API if HTML fetch fails
+      $.ajax({
+        type: "GET",
+        url: "/cart.js",
+        dataType: "json",
+        success: function(cartData) {
+          // Update cart counts only
+          $(".count").html(cartData.item_count);
+          $("#cart-count").html(cartData.item_count);
+          $(".hcart").html(cartData.item_count);
+          
+          if (cartData.item_count > 0) {
+            $(".hcart").show();
+          } else {
+            $(".hcart").hide();
+          }
+        }
+      });
     }
   });
 }
@@ -2194,7 +2157,7 @@ function addBundleItemToCart(variantId, quantity) {
   
   console.log('Adding bundle item to cart:', variantId, 'quantity:', quantity);
   
-  // Use Shopify's cart/add.js directly
+  // Use Shopify's cart/add.js with proper success/error handling
   $.ajax({
     type: "POST",
     url: "/cart/add.js",
@@ -2209,30 +2172,38 @@ function addBundleItemToCart(variantId, quantity) {
       // Remove loading state from button
       $button.prop("disabled", false).removeClass("is-loading");
       
-      // Debounce cart refresh to prevent multiple rapid updates
-      cartOperationTimeout = setTimeout(function() {
-        // Reset the flag
-        isCartOperationInProgress = false;
-        
-        // Trigger cart refresh
+      // Reset the flag
+      isCartOperationInProgress = false;
+      
+      // Use Shopify.onSuccess which is now properly handled by cart.js
+      if (typeof Shopify !== 'undefined' && typeof Shopify.onSuccess === 'function') {
+        Shopify.onSuccess();
+      } else {
+        // Fallback: trigger cart refresh directly
         $(document).trigger('cart:refresh');
-      }, 100); // 100ms delay to debounce
+      }
     },
     error: function(xhr) {
       console.log('Error adding item to cart:', xhr);
-      
-      try {
-        var data = JSON.parse(xhr.responseText);
-        alert(data.message || 'Error adding item to cart');
-      } catch (e) {
-        alert('Error adding item to cart');
-      }
       
       // Remove loading state from button
       $button.prop("disabled", false).removeClass("is-loading");
       
       // Reset the flag immediately on error
       isCartOperationInProgress = false;
+      
+      // Use Shopify.onError which is now properly handled by cart.js
+      if (typeof Shopify !== 'undefined' && typeof Shopify.onError === 'function') {
+        Shopify.onError(xhr, 'error');
+      } else {
+        // Fallback error handling
+        try {
+          var data = JSON.parse(xhr.responseText);
+          alert(data.message || 'Error adding item to cart');
+        } catch (e) {
+          alert('Error adding item to cart');
+        }
+      }
     }
   });
 }
