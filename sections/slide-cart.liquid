@@ -74,13 +74,17 @@
                       <div class="price-container">
                         {% assign original_price = item.variant.compare_at_price | default: item.original_price %}
                         {% if original_price and original_price > item.price %}
-                          <div class="main-price">{{ item.price | money }}</div>
-                          <div class="price-details">
+                          <div class="original-price-top">{{ original_price | money }}</div>
+                          <div class="price-comparison">
                             <span class="original-price">{{ original_price | money }}</span>
+                            <span class="discounted-price">{{ item.price | money }}</span>
                           </div>
-                          <div class="savings">Save {{ original_price | minus: item.price | money }}</div>
+                          <div class="savings">(Save {{ original_price | minus: item.price | money }})</div>
+                          {% if item.properties['discount_code'] %}
+                            <div class="coupon-code">{{ item.properties['discount_code'] }}</div>
+                          {% endif %}
                         {% else %}
-                          <div class="main-price">{{ item.price | money }}</div>
+                          <div class="current-price">{{ item.price | money }}</div>
                         {% endif %}
                       </div>
                     </div>
@@ -527,6 +531,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  text-align: right;
 }
 
 .price-container:has(.price-details) {
@@ -537,39 +542,64 @@
   margin-top: 0px;
 }
 
-.main-price {
-  font-size: 16px;
- 
+.current-price {
+  font-size: 18px;
+  font-weight: 600;
   color: #111827;
   margin-bottom: 4px;
 }
 
-.price-details {
+.original-price-top {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.price-comparison {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
   margin-bottom: 4px;
+  justify-content: flex-end;
 }
 
 .original-price {
   font-size: 14px;
   color: #9ca3af;
   text-decoration: line-through;
-  font-weight: 600;
-  margin-right: 8px;
+  font-weight: 500;
 }
 
-
+.discounted-price {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 600;
+}
 
 .savings {
   font-size: 12px;
-  color: #ffffff;
-  font-weight: 700;
-  background: #dc2626;
-  padding: 3px 8px;
-  border-radius: 12px;
-  margin-top: 2px;
+  color: #0891b2;
+  font-weight: 600;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  margin-bottom: 2px;
   display: inline-block;
+}
+
+.coupon-code {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.coupon-code:before {
+  content: "🏷️";
+  font-size: 10px;
 }
 
 .bundle-tag {
