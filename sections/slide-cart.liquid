@@ -1034,6 +1034,41 @@
   box-shadow: none;
 }
 
+/* Apply discount button loading state */
+.apply-discount-btn.is-loading {
+  background: #9ca3af;
+  cursor: not-allowed;
+  position: relative;
+  color: transparent;
+}
+
+.apply-discount-btn.is-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Discount input field states */
+.discount-input.success {
+  border-color: #10b981 !important;
+  background-color: #f0fdf4 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+.discount-input.error {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
 /* Loading spinner for cart items */
 .r-prod-row.is-loading {
   opacity: 0.5;
@@ -2070,12 +2105,17 @@ function applyDiscountCode(code) {
             // Refresh cart content to show updated prices
             updateBundleProducts();
             
-            // Show success message
-            alert("Discount code applied successfully!");
-            $('#discount-code').val('');
+            // Show success visual feedback
+            $('#discount-code').removeClass('error').addClass('success').val('');
+            setTimeout(function() {
+              $('#discount-code').removeClass('success');
+            }, 3000);
           } else {
-            // Show error message for invalid code
-            alert("Invalid discount code. Please check and try again.");
+            // Show error visual feedback
+            $('#discount-code').removeClass('success').addClass('error');
+            setTimeout(function() {
+              $('#discount-code').removeClass('error');
+            }, 3000);
           }
           
           // Remove loading state
@@ -2083,7 +2123,10 @@ function applyDiscountCode(code) {
         },
         error: function(XMLHttpRequest, textStatus) {
           // Handle error - Shopify will return error for invalid codes
-          alert("Invalid discount code. Please check and try again.");
+          $('#discount-code').removeClass('success').addClass('error');
+          setTimeout(function() {
+            $('#discount-code').removeClass('error');
+          }, 3000);
           
           // Remove loading state
           $('#apply-discount').prop("disabled", false).removeClass("is-loading");
@@ -2103,16 +2146,21 @@ function applyDiscountCode(code) {
           // Refresh cart content
           updateBundleProducts();
           
-          // Show success message (we can't validate properly without original state)
-          alert("Discount code applied successfully!");
-          $('#discount-code').val('');
+          // Show success visual feedback (we can't validate properly without original state)
+          $('#discount-code').removeClass('error').addClass('success').val('');
+          setTimeout(function() {
+            $('#discount-code').removeClass('success');
+          }, 3000);
           
           // Remove loading state
           $('#apply-discount').prop("disabled", false).removeClass("is-loading");
         },
         error: function(XMLHttpRequest, textStatus) {
           // Handle error
-          alert("Invalid discount code. Please check and try again.");
+          $('#discount-code').removeClass('success').addClass('error');
+          setTimeout(function() {
+            $('#discount-code').removeClass('error');
+          }, 3000);
           
           // Remove loading state
           $('#apply-discount').prop("disabled", false).removeClass("is-loading");
