@@ -1994,61 +1994,128 @@ function applyDiscountCode(code) {
   // Add loading state to the apply button
   $('#apply-discount').prop("disabled", true).addClass("is-loading");
   
+  // Store original cart total before applying discount
+  var originalTotal = 0;
   $.ajax({
-    type: "POST",
-    url: "/cart/update.js",
+    type: "GET",
+    url: "/cart.js",
     dataType: "json",
-    data: {
-      'discount': code
-    },
-    success: function(data) {
-      // Check if discount was actually applied
-      var hasDiscount = false;
-      var totalDiscount = 0;
+    success: function(originalCart) {
+      originalTotal = originalCart.total_price;
       
-      // Check if cart has discount codes
-      if (data.discount_codes && data.discount_codes.length > 0) {
-        hasDiscount = true;
-        totalDiscount = data.total_discount || 0;
-      }
-      
-      // Check if any line items have discounts
-      if (data.items) {
-        for (var i = 0; i < data.items.length; i++) {
-          var item = data.items[i];
-          if (item.original_price && item.price && item.original_price > item.price) {
-            hasDiscount = true;
-            break;
+      // Now apply the discount
+      $.ajax({
+        type: "POST",
+        url: "/cart/update.js",
+        dataType: "json",
+        data: {
+          'discount': code
+        },
+        success: function(data) {
+          // Check if discount was actually applied by comparing totals
+          var newTotal = data.total_price;
+          var discountApplied = false;
+          
+          // Method 1: Check if total price decreased
+          if (newTotal < originalTotal) {
+            discountApplied = true;
           }
+          
+          // Method 2: Check if discount_codes array has the applied code
+          if (data.discount_codes && data.discount_codes.length > 0) {
+            for (var i = 0; i < data.discount_codes.length; i++) {
+              if (data.discount_codes[i].code === code) {
+                discountApplied = true;
+                break;
+              }
+            }
+          }
+          
+          // Method 3: Check if total_discount is greater than 0
+          if (data.total_discount && data.total_discount > 0) {
+            discountApplied = true;
+          }
+          
+          // Refresh cart content to show updated prices
+          updateBundleProducts();
+          
+          if (discountApplied) {
+            // Show success message only if discount was actually applied
+            alert("Discount code applied successfully!");
+            $('#discount-code').val('');
+          } else {
+            // Show error if no discount was applied
+            alert("Invalid discount code. Please check and try again.");
+          }
+          
+          // Remove loading state
+          $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+        },
+        error: function(XMLHttpRequest, textStatus) {
+          // Handle error
+          try {
+            var data = JSON.parse(XMLHttpRequest.responseText);
+            alert("Error applying discount: " + data.description);
+          } catch (e) {
+            alert("Error applying discount code. Please try again.");
+          }
+          
+          // Remove loading state
+          $('#apply-discount').prop("disabled", false).removeClass("is-loading");
         }
-      }
-      
-      // Refresh cart content to show updated prices
-      updateBundleProducts();
-      
-      if (hasDiscount && totalDiscount > 0) {
-        // Show success message only if discount was actually applied
-        alert("Discount code applied successfully!");
-        $('#discount-code').val('');
-      } else {
-        // Show error if no discount was applied
-        alert("Invalid discount code. Please check and try again.");
-      }
-      
-      // Remove loading state
-      $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+      });
     },
-    error: function(XMLHttpRequest, textStatus) {
-      // Handle error
-      try {
-        var data = JSON.parse(XMLHttpRequest.responseText);
-        alert("Error applying discount: " + data.description);
-      } catch (e) {
-        alert("Error applying discount code. Please try again.");
-      }
-      
-      // Remove loading state
-      $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+    error: function() {
+      // If we can't get original cart, just proceed with the discount application
+      $.ajax({
+        type: "POST",
+        url: "/cart/update.js",
+        dataType: "json",
+        data: {
+          'discount': code
+        },
+        success: function(data) {
+          // Check if discount was actually applied
+          var hasDiscount = false;
+          
+          // Check if cart has discount codes
+          if (data.discount_codes && data.discount_codes.length > 0) {
+            hasDiscount = true;
+          }
+          
+          // Check if total_discount is greater than 0
+          if (data.total_discount && data.total_discount > 0) {
+            hasDiscount = true;
+          }
+          
+          // Refresh cart content to show updated prices
+          updateBundleProducts();
+          
+          if (hasDiscount) {
+            // Show success message only if discount was actually applied
+            alert("Discount code applied successfully!");
+            $('#discount-code').val('');
+          } else {
+            // Show error if no discount was applied
+            alert("Invalid discount code. Please check and try again.");
+          }
+          
+          // Remove loading state
+          $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+        },
+        error: function(XMLHttpRequest, textStatus) {
+          // Handle error
+          try {
+            var data = JSON.parse(XMLHttpRequest.responseText);
+            alert("Error applying discount: " + data.description);
+          } catch (e) {
+            alert("Error applying discount code. Please try again.");
+          }
+          
+          // Remove loading state
+          $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+        }
+      });
     }
   });
 }
