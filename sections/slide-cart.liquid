@@ -120,19 +120,34 @@
                 <!-- Bundle products with metafield support -->
                 {% assign bundle_products = blank %}
                 
-                {% comment %} Check metafields for all items in the cart {% endcomment %}
+                {% comment %} Simple approach: Show products from each cart item separately {% endcomment %}
                 {% for item in cart.items %}
                   {% if item.product.metafields.custom.recommendations_for_cart.value != blank %}
-                    {% assign bundle_products = item.product.metafields.custom.recommendations_for_cart.value %}
-                    {% break %}
+                    {% assign current_bundle = item.product.metafields.custom.recommendations_for_cart.value %}
+                    
+                    {% comment %} If it's a metafield reference, get the actual products {% endcomment %}
+                    {% if current_bundle.products %}
+                      {% assign current_bundle = current_bundle.products %}
+                    {% endif %}
+                    
+                    {% comment %} For now, just use the first bundle we find {% endcomment %}
+                    {% if bundle_products == blank %}
+                      {% assign bundle_products = current_bundle %}
+                    {% endif %}
                   {% endif %}
                 {% endfor %}
                 
-                {% comment %} If it's a metafield reference, get the actual products {% endcomment %}
-                {% if bundle_products.products %}
-                  {% assign bundle_products = bundle_products.products %}
+                {% comment %} Debug info {% endcomment %}
+                <!-- Bundle products size: {{ bundle_products.size }} -->
+                
+                {% comment %} Fallback if no products found {% endcomment %}
+                {% if bundle_products == blank %}
+                  <!-- No metafield products found, trying fallback -->
+                  {% assign bundle_products = collections.all.products | limit: 6 %}
+                  <!-- Fallback products: {{ bundle_products.size }} -->
                 {% endif %}
                 
+                {% comment %} Show products from first cart item {% endcomment %}
                 {% if bundle_products != blank %}
                   {% for product in bundle_products %}
                     <div class="bundle-product" data-product-id="{{ product.id }}">
@@ -156,6 +171,40 @@
                   </div>
                   {% endfor %}
                 {% endif %}
+                
+                {% comment %} Show products from second cart item if different {% endcomment %}
+                {% for item in cart.items offset: 1 %}
+                  {% if item.product.metafields.custom.recommendations_for_cart.value != blank %}
+                    {% assign current_bundle = item.product.metafields.custom.recommendations_for_cart.value %}
+                    
+                    {% if current_bundle.products %}
+                      {% assign current_bundle = current_bundle.products %}
+                    {% endif %}
+                    
+                    {% for product in current_bundle %}
+                      <div class="bundle-product" data-product-id="{{ product.id }}">
+                      <div class="bundle-product-gray-box">
+                        <div class="bundle-product-image">
+                          <img src="{{ product.variants.first.featured_image | default: product.featured_image | img_url: 'medium' }}" alt="{{ product.title }}">
+                        </div>
+                        <h4 class="bundle-product-title">{{ product.title }}</h4>
+                        <p class="bundle-product-price">{{ product.variants.first.price | money }}</p>
+                      </div>
+               
+                      <div class="bundle-product-variants">
+                        {% for variant in product.variants limit: 4 %}
+                          <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ product.id }}" data-variant-index="{{ forloop.index0 }}" data-fabric="{{ variant.option1 }}">
+                            <div class="dot" style="background-color: {{ variant.option1 | handleize }};"></div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                      <div class="bundle-product-material">{{ product.variants.first.option1 }}</div>
+                      <button class="add-to-bag-btn bundle-cart-btn" data-variant-id="{{ product.selected_or_first_available_variant.id }}" data-product-id="{{ product.id }}" data-source="bundle-cart">Add to Bag</button>
+                    </div>
+                    {% endfor %}
+                    {% break %}
+                  {% endif %}
+                {% endfor %}
                 
                 {% if bundle_products != blank %}
                   <script>
