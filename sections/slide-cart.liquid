@@ -207,28 +207,25 @@
           <!-- Payment Methods -->
           <div class="payment-methods">
             <!-- Visa -->
-            <img src="https://www.svgrepo.com/show/328144/visa.svg" alt="Visa" class="payment-icon">
+            <img src="{{ 'visa-svgrepo-com.svg' | asset_url }}" alt="Visa" class="payment-icon">
             
             <!-- Mastercard -->
-            <img src="https://eu-images.contentstack.com/v3/assets/blt7dacf616844cf077/bltf6aad050401b5994/67993ca33300514aa65ee5b2/Mastercard-logo-2019.jpg?width=1280&auto=webp&quality=80&format=jpg&disable=upscale" alt="Mastercard" class="payment-icon">
+            <img src="{{ 'mastercard-svgrepo-com.svg' | asset_url }}" alt="Mastercard" class="payment-icon">
             
             <!-- PayPal -->
-            <img src="https://i.redd.it/2kuvgwjsn0ue1.png" alt="PayPal" class="payment-icon">
+            <img src="{{ 'paypal-svgrepo-com.svg' | asset_url }}" alt="PayPal" class="payment-icon">
             
             <!-- Apple Pay -->
-            <img src="https://www.iconarchive.com/download/i111261/fa-team/fontawesome-brands/FontAwesome-Brands-Cc-Apple-Pay.1024.png" alt="Apple Pay" class="payment-icon">
+            <img src="{{ 'apple-pay-svgrepo-com.svg' | asset_url }}" alt="Apple Pay" class="payment-icon">
             
             <!-- American Express -->
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSm73LvI1Hjl87YXRhaNgwI8G65OBi8KOtuEw&s" alt="American Express" class="payment-icon">
+            <img src="{{ 'amex-svgrepo-com.svg' | asset_url }}" alt="American Express" class="payment-icon">
             
             <!-- Shop Pay -->
-            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTp-2ZhkuBgV0xrrobgbq0QmQ_hFSS4JkLdWI5T5U3FtwRkeWFKz_fTIfs8aNHszviJw1Y&usqp=CAU" alt="Shop Pay" class="payment-icon">
+            <img src="{{ 'Shop pay.svg' | asset_url }}" alt="Shop Pay" class="payment-icon">
             
             <!-- Google Pay -->
-            <img src="https://img.freepik.com/premium-vector/black-google-pay-logotype-white-background-logo-mobile-payment-system-electronic-wallet-contactless-nfc-android-operating-system-gpay-editorial_661108-8063.jpg" alt="Google Pay" class="payment-icon">
-            
-            <!-- Venmo -->
-            <img src="https://static1.makeuseofimages.com/wordpress/wp-content/uploads/2024/10/venmo-logo-blue.jpg" alt="Venmo" class="payment-icon">
+            <img src="{{ 'google-pay-svgrepo-com.svg' | asset_url }}" alt="Google Pay" class="payment-icon">
           </div>
         </div>
         
@@ -944,13 +941,14 @@
 
 .payment-icon {
   height: 24px;
-  width: auto;
-  max-width: 48px;
+  width: 40px;
+  max-width: 40px;
   opacity: 0.8;
   transition: all 0.2s ease;
   filter: grayscale(20%);
   border-radius: 4px;
   object-fit: contain;
+  display: block;
 }
 
 .payment-icon:hover {
@@ -1160,7 +1158,8 @@
   
   .payment-icon {
     height: 20px;
-    max-width: 40px;
+    width: 32px;
+    max-width: 32px;
   }
   
   .checkout-btn {
@@ -1383,7 +1382,8 @@
   
   .payment-icon {
     height: 18px;
-    max-width: 36px;
+    width: 28px;
+    max-width: 28px;
   }
   
   .shipping-totals {
