@@ -1,0 +1,565 @@
+Discount Function API
+The Discount Function API provides a unified schema for creating function extensions. A single function processes one discount (either code-based or automatic), but can apply savings across three discount classes: product, order, and shipping.
+
+For example, one discount can simultaneously reduce both order total and delivery costs.
+
+Shopify Functions enable you to customize Shopify's backend logic. The Discount Function API integrates this logic into the checkout flow.
+
+Note
+You can activate a maximum of 25 discount functions on each store. All discount functions run concurrently, and have no knowledge of each other. The potential discount that a function outputs can be combined with the candidate from another discount, in alignment with the combination and stacking rules set on the discount node.
+
+Anchor to Use casesUse cases
+Exclusions, where the discount doesn't apply to some cart lines in the order.
+Tiered discounts on products, orders, and shipping when orders include qualifying item, subtotal, and delivery requirements.
+Discount to cartlines that contain specific properties, such as an engraving on a ring.
+Function target
+Cart
+Delivery
+Run target
+cart.lines.discounts.generate.run
+Input
+run function
+CartLinesDiscountsGenerateRunResult
+Shopify injects
+Checkout
+
+Function Target
+Compatibility with Shopify surfaces
+Supported
+ 
+(7)
+Partially supported
+ 
+(4)
+Unsupported
+ 
+(2)
+
+Fetch target
+Limited access
+
+Off
+
+Was this section helpful?
+
+Yes
+
+No
+Anchor to Getting startedGetting started
+Scaffolding the function using Shopify CLI automatically configures your TOML file. You can alter the default configuration to customize the way your function operates.
+
+Terminal
+Copy
+$
+shopify app generate extension --template discount
+
+Tutorial
+Build a discount function
+Was this section helpful?
+
+Yes
+
+No
+Anchor to TargetsTargets
+A target is an identifier in shopify.extension.toml that specifies where you're injecting code into Shopify Function APIs, or other parts of the Shopify platform. Each target is composed of three to four namespaces. The name begins with a broad Shopify context and ends with the behavior of the extensible element.
+
+Note
+You can't configure discount classes from a checkout UI extension. Discount classes are assigned based on their associated discount function targets: OrderDiscountCandidateTarget, ProductDiscountCandidateTarget, and DeliveryDiscountCandidateTarget.
+
+Anchor to Cart run targetCart run target
+cart.lines.discounts.generate.run
+
+The run target calculates and applies discounts to cart lines, orders, and shipping based on the provided cart context and discount configuration, including metafields.
+
+When your function is executed, Shopify provides the cart context as input to the run target, including details about cart lines, prices, quantities, buyer identity, and optionally fetch results from external providers. The target returns an ordered list of operations for calculating discounts.
+
+For example, you might use this to generate product and order discounts, and validate discounts.
+
+Anchor to InputInput
+OBJECT
+The Input object is the complete GraphQL schema that your function can query as an input to generate discounts. Your function only receives the fields that you request in the input query. To optimize performance, we highly recommend that you request only the fields that your function requires.
+
+Hide fields
+Anchor to cart
+cart
+•
+Cart!
+non-null
+The cart where the Function is running. A cart contains the merchandise that a customer intends to purchase and information about the customer, such as the customer's email address and phone number.
+
+Show fields
+Anchor to discount
+discount
+•
+Discount!
+non-null
+The discount node that owns the Shopify Function. Discounts are a way for merchants to promote sales and special offers, or as customer loyalty rewards. A single discount can be automatic or code-based, and can be applied to a cart lines, orders, and delivery.
+
+Show fields
+Anchor to fetchResult
+fetchResult
+•
+HttpResponse
+The result of the fetch target. Refer to network access for Shopify Functions. This input is only available in the cart.lines.discounts.generate.run and cart.delivery-options.discounts.generate.run extension targets.
+
+Show fields
+Anchor to localization
+localization
+•
+Localization!
+non-null
+The regional and language settings that determine how the Function handles currency, numbers, dates, and other locale-specific values during discount calculations. These settings are based on the store's configured localization practices.
+
+Show fields
+Anchor to presentmentCurrencyRate
+presentmentCurrencyRate
+•
+Decimal!
+non-null
+The exchange rate used to convert discounts between the shop's default currency and the currency that displays to the customer during checkout. For example, if a store operates in USD but a customer is viewing discounts in EUR, then the presentment currency rate handles this conversion for accurate pricing.
+
+Anchor to shop
+shop
+•
+Shop!
+non-null
+Information about the shop where the Function is running, including the shop's timezone setting and associated metafields.
+
+Show fields
+Anchor to triggeringDiscountCode
+triggeringDiscountCode
+•
+String
+The discount code entered by a customer, which caused the Discount Function) to run. This input is only available in the cart.lines.discounts.generate.run and cart.delivery-options.discounts.generate.run extension targets.
+
+Anchor to Cart run functionCart run function
+The function processes input schema data to calculate and allocate discounts across cart lines. The function handles both fixed and percentage-based discounts while respecting discount caps and generating any messages associated with the discount, such as error messages associated with validation.
+
+This return must follow the schema defined in the CartLinesDiscountsGenerateRunResult object.
+
+Anchor to CartLinesDiscountsGenerateRunResultCartLinesDiscountsGenerateRunResult
+OBJECT
+The CartLinesDiscountsGenerateRunResult object is the output of the function run target. The object contains the operations to generate, validate, and apply discounts to the cart.
+
+Hide fields
+Anchor to operations
+operations
+•
+[CartOperation!]!
+non-null
+The list of operations to apply discounts to the cart.
+
+Hide fields
+Anchor to enteredDiscountCodesAccept
+enteredDiscountCodesAccept
+•
+EnteredDiscountCodesAcceptOperation
+An operation that selects which entered discount codes to accept. Use this to validate discount codes from external systems.
+
+Show fields
+Anchor to orderDiscountsAdd
+orderDiscountsAdd
+•
+OrderDiscountsAddOperation
+An operation that applies order discounts to a cart that share a selection strategy.
+
+Show fields
+Anchor to productDiscountsAdd
+productDiscountsAdd
+•
+ProductDiscountsAddOperation
+An operation that applies product discounts to a cart that share a selection strategy.
+
+Show fields
+Anchor to Delivery run targetDelivery run target
+cart.delivery-options.discounts.generate.run
+
+The run target that's responsible for generating the discount on shipping costs using either Shopify data, hardcoded values, or fetch results from external providers. The target returns an ordered list of operations to be applied to the cart.
+
+The run target evaluates carts against discount rules, calculates applicable reductions, and returns the final discount. This target generates and returns a shipping discount to potentially apply to the cart.
+
+Anchor to InputInput
+OBJECT
+The Input object is the complete GraphQL schema that your function receives to generate discounts for a delivery option or delivery group. Your function only receives the fields that you request in the input query. To optimize performance, we highly recommend that you request only the fields that your function requires.
+
+Hide fields
+Anchor to cart
+cart
+•
+Cart!
+non-null
+The cart where the Function is running. A cart contains the merchandise that a customer intends to purchase and information about the customer, such as the customer's email address and phone number.
+
+Show fields
+Anchor to discount
+discount
+•
+Discount!
+non-null
+The discount node that owns the Shopify Function. Discounts are a way for merchants to promote sales and special offers, or as customer loyalty rewards. A single discount can be automatic or code-based, and can be applied to a cart lines, orders, and delivery.
+
+Show fields
+Anchor to fetchResult
+fetchResult
+•
+HttpResponse
+The result of the fetch target. Refer to network access for Shopify Functions. This input is only available in the cart.lines.discounts.generate.run and cart.delivery-options.discounts.generate.run extension targets.
+
+Show fields
+Anchor to localization
+localization
+•
+Localization!
+non-null
+The regional and language settings that determine how the Function handles currency, numbers, dates, and other locale-specific values during discount calculations. These settings are based on the store's configured localization practices.
+
+Show fields
+Anchor to presentmentCurrencyRate
+presentmentCurrencyRate
+•
+Decimal!
+non-null
+The exchange rate used to convert discounts between the shop's default currency and the currency that displays to the customer during checkout. For example, if a store operates in USD but a customer is viewing discounts in EUR, then the presentment currency rate handles this conversion for accurate pricing.
+
+Anchor to shop
+shop
+•
+Shop!
+non-null
+Information about the shop where the Function is running, including the shop's timezone setting and associated metafields.
+
+Show fields
+Anchor to triggeringDiscountCode
+triggeringDiscountCode
+•
+String
+The discount code entered by a customer, which caused the Discount Function) to run. This input is only available in the cart.lines.discounts.generate.run and cart.delivery-options.discounts.generate.run extension targets.
+
+Anchor to Delivery run functionDelivery run function
+The function processes input schema data to calculate and allocate shipping discounts across cart lines, handling both fixed and percentage-based discounts while respecting discount caps and displaying messages associated with the discount.
+
+This return must follow the schema defined in the CartDeliveryOptionsDiscountsGenerateRunResult object.
+
+Anchor to CartDeliveryOptionsDiscountsGenerateRunResultCartDeliveryOptionsDiscountsGenerateRunResult
+OBJECT
+The CartDeliveryOptionsDiscountsGenerateRunResult object is the output of the function run target. The object contains the operations to generate, validate, and apply shipping discounts to the cart.
+
+Hide fields
+Anchor to operations
+operations
+•
+[DeliveryOperation!]!
+non-null
+An ordered list of operations to generate delivery discounts, such as validating and applying discounts to the cart.
+
+Hide fields
+Anchor to deliveryDiscountsAdd
+deliveryDiscountsAdd
+•
+DeliveryDiscountsAddOperation
+Applies delivery discounts to a cart that share a method for determining which shipping and delivery discounts to apply when multiple discounts are eligible.
+
+Show fields
+Anchor to enteredDiscountCodesAccept
+enteredDiscountCodesAccept
+•
+EnteredDiscountCodesAcceptOperation
+An operation that selects which entered discount codes to accept. Use this to validate discount codes from external systems.
+
+Show fields
+Examples
+
+Apply a percentage-off shipping discount.
+
+cart.delivery-options.discounts.generate.run
+cart.lines.discounts.generate.run
+
+Hide content
+Input query
+Copy
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+query Input {
+  cart {
+    cost {
+      subtotalAmount {
+        amount
+      }
+    }
+    deliveryGroups {
+      deliveryOptions {
+        handle
+        cost {
+          amount
+        }
+      }
+    }
+  }
+  discount {
+    metafield(namespace: "$app:delivery-discounts", key: "configuration") {
+      jsonValue
+    }
+  }
+}
+Hide content
+Input object (response)
+JSON
+Copy
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+{
+            }
+          },
+          {
+            "handle": "express",
+            "cost": {
+              "amount": "20.00"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "discount": {
+    "metafield": {
+      "jsonValue": {
+        "tiers": [
+          {
+            "threshold": 50.0,
+            "percentage": 10.0
+          },
+          {
+            "threshold": 100.0,
+            "percentage": 15.0
+          }
+        ]
+      }
+    }
+  }
+}
+Function code
+Hide content
+Rust
+JavaScript
+
+Cost
+ 
+62.22k
+The cost of running the Function
+Copy
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+use super::schema;
+use shopify_function::prelude::*;
+use shopify_function::Result;
+
+#[derive(Deserialize, Default)]
+pub struct DiscountTier {
+    threshold: f64,
+    percentage: f64,
+}
+
+#[derive(Deserialize, Default)]
+pub struct Configuration {
+    tiers: Vec<DiscountTier>,
+}
+
+#[shopify_function]
+fn cart_delivery_options_discounts_generate_run(input: schema::cart_delivery_options_discounts_generate_run::Input) -> Result<schema::CartDeliveryOptionsDiscountsGenerateRunResult> {
+    // Parse configuration from metafield
+    let config: &Configuration = match input.discount().metafield() {
+        Some(metafield) => metafield.json_value(),
+        None => return Ok(schema::CartDeliveryOptionsDiscountsGenerateRunResult { operations: vec![] }),
+    };
+
+    // Get cart subtotal
+    let subtotal = input.cart().cost().subtotal_amount().amount().0;
+
+    // Find the highest applicable tier
+    let applicable_tier = config.tiers.iter()
+        .filter(|tier| subtotal >= tier.threshold)
+        .max_by(|a, b| a.threshold.partial_cmp(&b.threshold).unwrap_or(std::cmp::Ordering::Equal));
+
+    // If no tier applies, return empty operations
+    let Some(tier) = applicable_tier else {
+        return Ok(schema::CartDeliveryOptionsDiscountsGenerateRunResult { operations: vec![] });
+    };
+
+Show content
+Function run result
+JSON
+Copy
+Was this section helpful?
+
+Yes
+
+No
+Anchor to ValidationsValidations
+The following is a summary of validations that are run on function results. Violating any of the following checks will yield an error when the function runs:
+
+There can only be one of each operation (addDiscountCodeValidations, addDeliveryDiscounts, addOrderDiscounts, or addProductDiscounts) in a single function result.
+addDiscountCodeValidations.codes must only contain discount codes that are a subset of enteredDiscountCodes.
+The associatedDiscountCode.code field in the addProductDiscounts, addOrderDiscounts and addDeliveryDiscounts operations must only contain discount codes that are a subset of addDiscountCodeValidations.codes.
+Was this section helpful?
+
+Yes
+
+No
+Anchor to Migrate from deprecated Discount Function APIsMigrate from deprecated Discount Function APIs
+The following sections outline the changes to the Product Discount, Order Discount, and Shipping Discount Function APIs, and how you can migrate from Shopify Scripts to Discount Functions.
+
+Anchor to Product Discount Function API and Order Discount Function APIProduct Discount Function API and Order Discount Function API
+The Product Discount Function API and Order Discount Function API are now merged into the Discount Function API in the cart.lines.discounts.generate.run target. The target returns a CartLinesDiscountsGenerateRunResult object, which returns an operations field that includes fields that aren't present in the deprecated FunctionRunResult object. The following table outlines key changes:
+
+Anchor to Input queryInput query
+Product Discount Function API and Order Discount Function API	Discount Function API	Description	Available in run target	Available in fetch target
+discounts	operations	Lists of discount operations to be applied	Yes	No
+discountApplicationStrategy	ProductDiscountSelectionStrategy or OrderDiscountSelectionStrategy	Specifies which outputs to apply FIRST, MAXIMUM, or ALL (product discounts only)	No	Yes
+N/A	candidates	The list of product or order discount candidates to be applied.	Yes	No
+N/A	associatedDiscountCode	A list of valid discount codes that correspond to external discounts. This can only be used by Functions with network access.	No	Yes
+N/A	orderDiscountsAdd	A group of order discounts that share a selection strategy.	Yes	No
+N/A	productDiscountsAdd	A group of product discounts that share a selection strategy.	Yes	No
+Anchor to CartLinesDiscountsGenerateRunResult outputCartLinesDiscountsGenerateRunResult output
+Product Discount Function API and Order Discount Function API	Discount Function API	Description	Available in run target	Available in fetch target
+discounts	operations	Lists of discount operations to be applied	Yes	No
+discountApplicationStrategy	ProductDiscountSelectionStrategy or OrderDiscountSelectionStrategy	Specifies which outputs to apply FIRST, MAXIMUM, or ALL (product discounts only)	No	Yes
+N/A	candidates	The list of product or order discount candidates to be applied.	Yes	No
+N/A	associatedDiscountCode	A list of valid discount codes that correspond to external discounts. This can only be used by Functions with network access.	No	Yes
+N/A	orderDiscountsAdd	A group of order discounts that share a selection strategy.	Yes	No
+N/A	productDiscountsAdd	A group of product discounts that share a selection strategy.	Yes	No
+Anchor to Shipping Discount Function APIShipping Discount Function API
+The Shipping Discount Function API is now merged into the Discount Function API in the cart.delivery-options.discounts.generate.run target. The target returns a CartDeliveryOptionsDiscountsGenerateRunResult object, which includes fields that aren't present in the deprecated FunctionRunResult object. The following table outlines key changes:
+
+Anchor to Input queryInput query
+Shipping Discount Function API	Discount Function API	Description	Available in run target	Available in fetch target
+N/A	enteredDiscountCodes	The discounts entered at checkout by the buyer	No	Yes
+discountNode	discount	The discount associated to the Function that can be queried by the input query	Yes	Yes
+N/A	triggeringDiscountCode	The discount code that triggered the Function	Yes	Yes
+Anchor to CartDeliveryOptionsDiscountsGenerateRunResultCartDeliveryOptionsDiscountsGenerateRunResult
+Shipping Discount Function API	Discount Function API	Description	Available in run target	Available in fetch target
+discounts	operations	Lists of discount operations to be applied	Yes	No
+N/A	deliveryDiscountsAdd	A group of delivery discounts that share a selection strategy.	Yes	No
+N/A	enteredDiscountCodesAccept	A list of valid discount codes that correspond to external discounts.	No	Yes
+N/A	candidates	The list of delivery discount candidates to be applied.	Yes	No
+N/A	selectionStrategy	The strategy that's applied to the list of discounts.	Yes	No
+productVariant	cartLineIds	Target identifiers for the discount application	Yes	No
+Anchor to Migrate from line item scripts to discount functionsMigrate from line item scripts to discount functions
+If you want to migrate an existing line item script to Shopify Functions, then you can use the following mappings:
+
+Shopify Scripts method	Description	Shopify Functions target	Additional context
+change_line_price	Applies a discount to a cart line such as a loyalty discount on a product by specifying a new reduced price, and a message either set by the developer or the merchant in the Function's configuration.	Discount	Apply order discounts or product discounts by specifying the OrderDiscountCandidateValue or ProductDiscountCandidateValue (percentage or fixedAmount off), and an optional message.
+split	Splits a product into multiple lines so that you can apply discounts to partial quantities. For example, if a customer has five t-shirts in their cart, you can apply a discount to only two items while keeping the other three at full price	Discount	Use the optional quantity field in the ProductDiscountCandidateTarget object to limit the number of units the discount may be applied to.
+change_properties	Adds or changes a line item property	Not available	Refer to applyAttributeChange in the checkout UI extensions API to apply attribute changes.
+reject	Disallows a discounts code from being applied at checkout	Not available	Use a discount function that contains the necessary logic. For example, you can use conditions to exclude a discount from applying, such as preventing a discount code when cart value is below $50 or when specific products are in the cart.
+Anchor to Migrate from shipping scripts to discount functionsMigrate from shipping scripts to discount functions
+To migrate an existing shipping script to Shopify Functions, then you can use the following mapping:
+
+Shopify Scripts method	Description	Shopify Functions target
+apply_discount	Applies a discount to a shipping rate	Shipping discounts
+Was this section helpful?
+
+Yes
+
+No
+Anchor to Additional resourcesAdditional resources
+Explore comprehensive guides and references to help you build, deploy, and optimize your Shopify Functions.
+
+Anchor to Working with FunctionsWorking with Functions
+These guides cover essential concepts for building Shopify Functions effectively. Learn how functions process data, execute during checkout, and handle versioning, localization, and external APIs.
+
+
+Function anatomy
+Explore how functions process input data and generate operations.
+
+
+Execution order in checkout
+Learn when function APIs execute during the checkout process.
+
+
+Schema and versioning
+Understand schema versioning, release and upgrade requirements.
+
+
+API availability
+Check which Shopify plans support functions in custom apps.
