@@ -1616,7 +1616,6 @@
 <script>
 // Listen for cart refresh events from cart.js
 $(document).on('cart:refresh', function() {
-  console.log('Cart refresh event triggered');
   // Add a small delay to ensure DOM is ready
   setTimeout(function() {
     updateBundleProducts();
@@ -1625,11 +1624,9 @@ $(document).on('cart:refresh', function() {
 
 // Listen for cart refresh complete events
 $(document).on('cart:refresh-complete', function() {
-  console.log('Cart refresh complete event triggered');
   // Ensure cart content is visible after refresh
   setTimeout(function() {
     if ($('.r-side-cart').hasClass('active')) {
-      console.log('Cart is active, ensuring content visibility');
       $('.Cart_Drawer__Content').show();
       $('.empty-cart').hide();
     }
@@ -2040,11 +2037,8 @@ class BundleSlideNavigation {
         if (productImage) {
           // Get variant data from window object (would be populated by AJAX)
           const variantData = window[`bundleProductVariants_${productId}`];
-          console.log('Variant data for product', productId, ':', variantData);
-          console.log('Selected variant index:', variantIndex);
           if (variantData && variantData[variantIndex]) {
             const variant = variantData[variantIndex];
-            console.log('Selected variant:', variant);
             if (variant.featured_image && variant.featured_image.url) {
               // Add a small delay to ensure smooth transition
               productImage.style.opacity = '0.5';
@@ -2052,11 +2046,8 @@ class BundleSlideNavigation {
                 productImage.src = variant.featured_image.url;
                 productImage.alt = variant.title;
                 productImage.style.opacity = '1';
-                console.log('Updated image to:', variant.featured_image.url);
               }, 100);
             }
-          } else {
-            console.log('No variant data found for product', productId, 'at index', variantIndex);
           }
         }
               
@@ -2070,10 +2061,7 @@ class BundleSlideNavigation {
               // Format price using existing formatMoney function
               const newPrice = formatMoney(variant.price);
               productPrice.textContent = newPrice;
-              console.log('Updated price to:', newPrice);
             }
-          } else {
-            console.log('No variant data found for price update');
           }
         }
       }
@@ -2109,7 +2097,6 @@ function applyDiscountCode(code) {
           return dc.code === code && dc.applicable === true;
         });
         if (codeExistsAndApplicable) {
-          console.log('Discount applied - code exists and is applicable');
           discountApplied = true;
         }
       }
@@ -2121,25 +2108,19 @@ function applyDiscountCode(code) {
           return dc.code === code;
         });
         if (codeExists) {
-          console.log('Code exists in discount_codes:', code);
           // Check if it's applicable
           var codeData = newCart.discount_codes.find(function(dc) {
             return dc.code === code;
           });
           if (codeData && codeData.applicable === true) {
-            console.log('Code is applicable - discount applied');
             discountApplied = true;
           } else {
-            console.log('Code exists but not applicable - invalid code');
             discountApplied = false;
           }
         } else {
-          console.log('Code does not exist in discount_codes - invalid code');
           discountApplied = false;
         }
       }
-      
-      console.log('Final discount applied result:', discountApplied);
       
       if (discountApplied) {
         // Refresh cart content to show updated prices
@@ -2176,7 +2157,6 @@ function applyDiscountCode(code) {
 
 // Function to hide products that are already in the cart
 function hideProductsAlreadyInCart() {
-  console.log('Checking for products already in cart to hide from bundle section');
   
   // Get all cart item product IDs
   var cartProductIds = [];
@@ -2206,7 +2186,6 @@ function hideProductsAlreadyInCart() {
         if (variantData) {
           for (var i = 0; i < variantData.length; i++) {
             if (variantData[i].id == variantId) {
-              console.log('Hiding bundle product (variant match):', productId);
               $bundleProduct.fadeOut(300, function() {
                 $(this).remove();
               });
@@ -2217,8 +2196,6 @@ function hideProductsAlreadyInCart() {
       });
     }
   });
-  
-  console.log('Cart product IDs found:', cartProductIds);
   
   // Hide bundle products that match cart items
   $('.bundle-product').each(function() {
@@ -2334,19 +2311,15 @@ $(document).ready(function() {
     
     var $button = $(this);
     var variantId = $button.data('variant-id');
-    var quantity = 1; // Default quantity
-    
-    console.log('Bundle button clicked:', variantId);
+    var quantity = 1; // Default quantity;
     
     // Prevent double-clicking or if cart operation is in progress
     if ($button.hasClass('is-loading') || $button.prop('disabled') || isCartOperationInProgress) {
-      console.log('Button click ignored - already processing');
       return false;
     }
     
     // Validate variant ID
     if (!variantId) {
-      console.log('No variant ID found');
       alert('Product variant not found');
       return false;
     }
@@ -2356,15 +2329,12 @@ $(document).ready(function() {
            .addClass("is-loading")
            .data('loading-start-time', new Date().getTime());
     
-    console.log('Calling addBundleItemToCart...');
-    
     // Add item to cart via AJAX
     addBundleItemToCart(variantId, quantity);
     
     // Safety measure: Remove loading state after a timeout
     setTimeout(function() {
       if ($button.hasClass('is-loading')) {
-        console.log('Timeout: Removing loading state from button');
         $button.prop("disabled", false).removeClass("is-loading");
         isCartOperationInProgress = false; // Reset flag on timeout
       }
@@ -2436,7 +2406,6 @@ $(document).ready(function() {
 
 // Function to update bundle products after cart changes
 function updateBundleProducts() {
-  console.log('updateBundleProducts called - using server-side cart HTML');
   
   // Instead of generating HTML dynamically, fetch the complete cart from server
   $.ajax({
@@ -2445,7 +2414,6 @@ function updateBundleProducts() {
     dataType: "html",
     cache: false,
     success: function(html) {
-      console.log('Cart HTML received from server');
       
       var $cartHtml = $(html);
       var $newCartSection = $cartHtml.find('.r-side-cart');
@@ -2473,14 +2441,10 @@ function updateBundleProducts() {
         $(".hcart").html(cartCount);
         
         if (cartCount == '0') {
-          console.log('Cart is empty');
           $(".hcart").hide();
         } else {
-          console.log('Cart has', cartCount, 'items');
           $(".hcart").show();
         }
-        
-        console.log('Cart updated with server HTML successfully');
         
         // Re-initialize bundle functionality after cart update
         setTimeout(function() {
@@ -2502,8 +2466,6 @@ function updateBundleProducts() {
               applyDiscountCode(code);
             }
           });
-          
-          console.log('Bundle functionality and discount handlers re-initialized');
         }, 100);
         
       } else {
@@ -2547,14 +2509,11 @@ function addBundleItemToCart(variantId, quantity) {
   
   // Prevent multiple simultaneous operations
   if (isCartOperationInProgress) {
-    console.log('Cart operation already in progress, skipping...');
     return;
   }
   
   isCartOperationInProgress = true;
   var $button = $('.bundle-cart-btn[data-variant-id="' + variantId + '"]');
-  
-  console.log('Adding bundle item to cart:', variantId, 'quantity:', quantity);
   
   // Use Shopify's cart/add.js with proper success/error handling
   $.ajax({
@@ -2566,13 +2525,11 @@ function addBundleItemToCart(variantId, quantity) {
       quantity: quantity
     },
     success: function(item) {
-      console.log('Successfully added item to cart:', item);
       
       // Immediately hide the product from bundle section
       var productId = $button.data('product-id');
       var $productElement = $('.bundle-product[data-product-id="' + productId + '"]');
       if ($productElement.length > 0) {
-        console.log('Hiding product from bundle section:', productId);
         $productElement.fadeOut(300, function() {
           $(this).remove();
           
@@ -2598,7 +2555,6 @@ function addBundleItemToCart(variantId, quantity) {
       }
     },
     error: function(xhr) {
-      console.log('Error adding item to cart:', xhr);
       
       // Remove loading state from button
       $button.prop("disabled", false).removeClass("is-loading");
