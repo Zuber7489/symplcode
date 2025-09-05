@@ -9,7 +9,7 @@
             {% assign free_shipping_threshold = 5000 %}
             {% assign remaining_amount = free_shipping_threshold | minus: cart.total_price %}
             {% if remaining_amount > 0 %}
-              Almost there! Add {{ remaining_amount | money }} more for free shipping
+              Almost there! Add ${{ remaining_amount | divided_by: 100.0 | round: 2 }} more for free shipping
             {% else %}
               <span class="free-shipping-achieved">You got free shipping!</span>
             {% endif %}
@@ -1664,26 +1664,12 @@ function formatMoney(cents) {
   
   // Handle invalid input
   if (isNaN(cents)) {
-    // Use Shopify's currency code if available, otherwise default to USD
-    var currencyCode = (typeof Shopify !== 'undefined' && Shopify.currency && Shopify.currency.active) ? Shopify.currency.active : 'USD';
-    if (currencyCode === 'INR') {
-      return "Rs. 0.00";
-    } else {
-      return "$0.00";
-    }
+    return "$0.00";
   }
   
-  // Convert cents to dollars and format
+  // Convert cents to dollars and format - always use USD format
   var dollars = cents / 100;
-  var currencyCode = (typeof Shopify !== 'undefined' && Shopify.currency && Shopify.currency.active) ? Shopify.currency.active : 'USD';
-  
-  if (currencyCode === 'INR') {
-    // For Indian Rupees, use Rs. symbol
-    return "Rs. " + dollars.toFixed(2);
-  } else {
-    // Default to USD
-    return "$" + dollars.toFixed(2);
-  }
+  return "$" + dollars.toFixed(2);
 }
 
 
