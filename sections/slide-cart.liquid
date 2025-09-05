@@ -80,15 +80,6 @@
                             <span class="discounted-price">{{ item.price | money }}</span>
                           </div>
                           <div class="savings">(Save {{ original_price | minus: item.price | money }})</div>
-                          {% comment %} Debug: Log item properties to console {% endcomment %}
-                          {% if item.properties.size > 0 %}
-                            <script>
-                              console.log('Item properties for {{ item.product.title }}:');
-                              {% for property in item.properties %}
-                                console.log('{{ property[0] }}: {{ property[1] }}');
-                              {% endfor %}
-                            </script>
-                          {% endif %}
                           
                           {% comment %} Get coupon code from item discounts array {% endcomment %}
                           {% assign item_discount_code = '' %}
