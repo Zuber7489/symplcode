@@ -2029,143 +2029,85 @@ function applyDiscountCode(code) {
   // Add loading state to the apply button
   $('#apply-discount').prop("disabled", true).addClass("is-loading");
   
-  // Store original cart state for comparison
-  var originalTotal = 0;
-  var originalDiscountCodes = [];
-  
-  // First get the current cart state
+  // Apply discount code directly (faster approach)
   $.ajax({
-    type: "GET",
-    url: "/cart.js",
+    type: "POST",
+    url: "/cart/update.js",
     dataType: "json",
-    success: function(originalCart) {
-      originalTotal = originalCart.total_price;
-      originalDiscountCodes = originalCart.discount_codes || [];
-      
-      // Now apply the discount code
-      $.ajax({
-        type: "POST",
-        url: "/cart/update.js",
-        dataType: "json",
-        data: {
-          'discount': code
-        },
-        success: function(newCart) {
-          // Debug logging
-          console.log('Original cart total:', originalTotal);
-          console.log('New cart total:', newCart.total_price);
-          console.log('Original discount codes:', originalDiscountCodes);
-          console.log('New discount codes:', newCart.discount_codes);
-          console.log('Applied code:', code);
-          console.log('New cart total_discount:', newCart.total_discount);
-          console.log('Price difference:', newCart.total_price - originalTotal);
-          
-          // Check if discount was actually applied by comparing states
-          var discountApplied = false;
-          
-          // Method 1: Check if total price decreased
-          if (newCart.total_price < originalTotal) {
-            console.log('Discount applied - price decreased');
-            discountApplied = true;
-          }
-          
-          // Method 2: Check if discount code appears in discount_codes array AND is applicable
-          if (newCart.discount_codes && newCart.discount_codes.length > originalDiscountCodes.length) {
-            var newCodes = newCart.discount_codes.filter(function(dc) {
-              return !originalDiscountCodes.some(function(odc) {
-                return odc.code === dc.code;
-              });
-            });
-            if (newCodes.length > 0 && newCodes[0].code === code && newCodes[0].applicable === true) {
-              console.log('Discount applied - new applicable code found in discount_codes');
-              discountApplied = true;
-            }
-          }
-          
-          // Method 3: Check if the specific code exists AND is applicable in discount_codes
-          if (newCart.discount_codes) {
-            var codeExistsAndApplicable = newCart.discount_codes.some(function(dc) {
-              return dc.code === code && dc.applicable === true;
-            });
-            if (codeExistsAndApplicable) {
-              console.log('Discount applied - code exists and is applicable in discount_codes');
-              discountApplied = true;
-            }
-          }
-          
-          // Method 4: Check if total_discount increased (only if price also decreased)
-          if (newCart.total_discount && newCart.total_discount > 0 && newCart.total_price < originalTotal) {
-            console.log('Discount applied - total_discount > 0 and price decreased');
-            discountApplied = true;
-          }
-          
-          console.log('Final discount applied result:', discountApplied);
-          
-          if (discountApplied) {
-            // Refresh cart content to show updated prices
-            updateBundleProducts();
-            
-            // Show success visual feedback
-            $('#discount-code').removeClass('error').addClass('success').val('');
-            setTimeout(function() {
-              $('#discount-code').removeClass('success');
-            }, 3000);
-          } else {
-            // Show error visual feedback
-            $('#discount-code').removeClass('success').addClass('error');
-            setTimeout(function() {
-              $('#discount-code').removeClass('error');
-            }, 3000);
-          }
-          
-          // Remove loading state
-          $('#apply-discount').prop("disabled", false).removeClass("is-loading");
-        },
-        error: function(XMLHttpRequest, textStatus) {
-          // Handle error - Shopify will return error for invalid codes
-          $('#discount-code').removeClass('success').addClass('error');
-          setTimeout(function() {
-            $('#discount-code').removeClass('error');
-          }, 3000);
-          
-          // Remove loading state
-          $('#apply-discount').prop("disabled", false).removeClass("is-loading");
-        }
-      });
+    data: {
+      'discount': code
     },
-    error: function() {
-      // If we can't get original cart, just try to apply the discount
-      $.ajax({
-        type: "POST",
-        url: "/cart/update.js",
-        dataType: "json",
-        data: {
-          'discount': code
-        },
-        success: function(cartData) {
-          // Refresh cart content
-          updateBundleProducts();
-          
-          // Show success visual feedback (we can't validate properly without original state)
-          $('#discount-code').removeClass('error').addClass('success').val('');
-          setTimeout(function() {
-            $('#discount-code').removeClass('success');
-          }, 3000);
-          
-          // Remove loading state
-          $('#apply-discount').prop("disabled", false).removeClass("is-loading");
-        },
-        error: function(XMLHttpRequest, textStatus) {
-          // Handle error
-          $('#discount-code').removeClass('success').addClass('error');
-          setTimeout(function() {
-            $('#discount-code').removeClass('error');
-          }, 3000);
-          
-          // Remove loading state
-          $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+    success: function(newCart) {
+      // Check if discount was actually applied
+      var discountApplied = false;
+      
+      // Method 1: Check if the specific code exists AND is applicable
+      if (newCart.discount_codes) {
+        var codeExistsAndApplicable = newCart.discount_codes.some(function(dc) {
+          return dc.code === code && dc.applicable === true;
+        });
+        if (codeExistsAndApplicable) {
+          console.log('Discount applied - code exists and is applicable');
+          discountApplied = true;
         }
-      });
+      }
+      
+      // Method 2: Check if the specific code exists in discount_codes (even if not applicable)
+      // This helps identify if the code was recognized by Shopify
+      if (newCart.discount_codes) {
+        var codeExists = newCart.discount_codes.some(function(dc) {
+          return dc.code === code;
+        });
+        if (codeExists) {
+          console.log('Code exists in discount_codes:', code);
+          // Check if it's applicable
+          var codeData = newCart.discount_codes.find(function(dc) {
+            return dc.code === code;
+          });
+          if (codeData && codeData.applicable === true) {
+            console.log('Code is applicable - discount applied');
+            discountApplied = true;
+          } else {
+            console.log('Code exists but not applicable - invalid code');
+            discountApplied = false;
+          }
+        } else {
+          console.log('Code does not exist in discount_codes - invalid code');
+          discountApplied = false;
+        }
+      }
+      
+      console.log('Final discount applied result:', discountApplied);
+      
+      if (discountApplied) {
+        // Refresh cart content to show updated prices
+        updateBundleProducts();
+        
+        // Show success visual feedback
+        $('#discount-code').removeClass('error').addClass('success').val('');
+        setTimeout(function() {
+          $('#discount-code').removeClass('success');
+        }, 3000);
+      } else {
+        // Show error visual feedback
+        $('#discount-code').removeClass('success').addClass('error');
+        setTimeout(function() {
+          $('#discount-code').removeClass('error');
+        }, 3000);
+      }
+      
+      // Remove loading state
+      $('#apply-discount').prop("disabled", false).removeClass("is-loading");
+    },
+    error: function(XMLHttpRequest, textStatus) {
+      // Handle error - Shopify will return error for invalid codes
+      $('#discount-code').removeClass('success').addClass('error');
+      setTimeout(function() {
+        $('#discount-code').removeClass('error');
+      }, 3000);
+      
+      // Remove loading state
+      $('#apply-discount').prop("disabled", false).removeClass("is-loading");
     }
   });
 }
