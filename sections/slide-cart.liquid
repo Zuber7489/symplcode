@@ -163,8 +163,9 @@
                   {% endif %}
                 {% endfor %}
                 
-                {% comment %} Generate JavaScript data for all recommended products {% endcomment %}
+                {% comment %} Generate JavaScript data for all recommended products (avoiding duplicates) {% endcomment %}
                 <script>
+                  {% assign js_product_ids = '' %}
                   {% for item in cart.items %}
                     {% if item.product.metafields.custom.recommendations_for_cart.value != blank %}
                       {% assign item_recommendations = item.product.metafields.custom.recommendations_for_cart.value %}
@@ -175,20 +176,24 @@
                       {% endif %}
 
                       {% for recommended_product in item_recommendations %}
-                        window.bundleProductVariants_{{ recommended_product.id }} = [
-                          {% for variant in recommended_product.variants limit: 4 %}
-                            {
-                              id: {{ variant.id }},
-                              title: {{ variant.title | json }},
-                              price: {{ variant.price }},
-                              fabric: {{ variant.option1 | json }},
-                              featured_image: {
-                                url: "{{ variant.featured_image | default: recommended_product.featured_image | img_url: 'medium' }}",
-                                alt: "{{ variant.title | default: recommended_product.title }}"
-                              }
-                            }{% unless forloop.last %},{% endunless %}
-                          {% endfor %}
-                        ];
+                        {% assign js_product_id_check = ',' | append: recommended_product.id | append: ',' %}
+                        {% unless js_product_ids contains js_product_id_check %}
+                          {% assign js_product_ids = js_product_ids | append: ',' | append: recommended_product.id | append: ',' %}
+                          window.bundleProductVariants_{{ recommended_product.id }} = [
+                            {% for variant in recommended_product.variants limit: 4 %}
+                              {
+                                id: {{ variant.id }},
+                                title: {{ variant.title | json }},
+                                price: {{ variant.price }},
+                                fabric: {{ variant.option1 | json }},
+                                featured_image: {
+                                  url: "{{ variant.featured_image | default: recommended_product.featured_image | img_url: 'medium' }}",
+                                  alt: "{{ variant.title | default: recommended_product.title }}"
+                                }
+                              }{% unless forloop.last %},{% endunless %}
+                            {% endfor %}
+                          ];
+                        {% endunless %}
                       {% endfor %}
                     {% endif %}
                   {% endfor %}
@@ -2004,8 +2009,11 @@ class BundleSlideNavigation {
         if (productImage) {
           // Get variant data from window object (would be populated by AJAX)
           const variantData = window[`bundleProductVariants_${productId}`];
+          console.log('Variant data for product', productId, ':', variantData);
+          console.log('Selected variant index:', variantIndex);
           if (variantData && variantData[variantIndex]) {
             const variant = variantData[variantIndex];
+            console.log('Selected variant:', variant);
             if (variant.featured_image && variant.featured_image.url) {
               // Add a small delay to ensure smooth transition
               productImage.style.opacity = '0.5';
@@ -2013,8 +2021,11 @@ class BundleSlideNavigation {
                 productImage.src = variant.featured_image.url;
                 productImage.alt = variant.title;
                 productImage.style.opacity = '1';
+                console.log('Updated image to:', variant.featured_image.url);
               }, 100);
             }
+          } else {
+            console.log('No variant data found for product', productId, 'at index', variantIndex);
           }
         }
               
@@ -2026,8 +2037,12 @@ class BundleSlideNavigation {
             const variant = variantData[variantIndex];
             if (variant.price) {
               // Format price using existing formatMoney function
-              productPrice.textContent = formatMoney(variant.price);
+              const newPrice = formatMoney(variant.price);
+              productPrice.textContent = newPrice;
+              console.log('Updated price to:', newPrice);
             }
+          } else {
+            console.log('No variant data found for price update');
           }
         }
       }
