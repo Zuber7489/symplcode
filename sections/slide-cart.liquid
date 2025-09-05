@@ -1984,17 +1984,44 @@ function applyDiscountCode(code) {
   
   $.ajax({
     type: "POST",
-    url: "/discount/" + code,
+    url: "/cart/update.js",
     dataType: "json",
+    data: {
+      'discount': code
+    },
     success: function(data) {
+      // Check if discount was actually applied
+      var hasDiscount = false;
+      var totalDiscount = 0;
+      
+      // Check if cart has discount codes
+      if (data.discount_codes && data.discount_codes.length > 0) {
+        hasDiscount = true;
+        totalDiscount = data.total_discount || 0;
+      }
+      
+      // Check if any line items have discounts
+      if (data.items) {
+        for (var i = 0; i < data.items.length; i++) {
+          var item = data.items[i];
+          if (item.original_price && item.price && item.original_price > item.price) {
+            hasDiscount = true;
+            break;
+          }
+        }
+      }
+      
       // Refresh cart content to show updated prices
       updateBundleProducts();
       
-      // Show success message
-      alert("Discount code applied successfully!");
-      
-      // Clear the discount code input
-      $('#discount-code').val('');
+      if (hasDiscount && totalDiscount > 0) {
+        // Show success message only if discount was actually applied
+        alert("Discount code applied successfully!");
+        $('#discount-code').val('');
+      } else {
+        // Show error if no discount was applied
+        alert("Invalid discount code. Please check and try again.");
+      }
       
       // Remove loading state
       $('#apply-discount').prop("disabled", false).removeClass("is-loading");
@@ -2263,7 +2290,23 @@ function updateBundleProducts() {
         setTimeout(function() {
           new BundleSlideNavigation();
           initializeBundleProductImages();
-          console.log('Bundle functionality re-initialized');
+          
+          // Re-attach discount code event handlers
+          $(document).off('click', '#apply-discount').on('click', '#apply-discount', function(e) {
+            e.preventDefault();
+            var code = $('#discount-code').val().trim();
+            applyDiscountCode(code);
+          });
+          
+          $(document).off('keypress', '#discount-code').on('keypress', '#discount-code', function(e) {
+            if (e.which === 13) { // Enter key
+              e.preventDefault();
+              var code = $(this).val().trim();
+              applyDiscountCode(code);
+            }
+          });
+          
+          console.log('Bundle functionality and discount handlers re-initialized');
         }, 100);
         
       } else {
@@ -2411,15 +2454,6 @@ function removeItemFromCart(itemKey) {
   });
 }
 
-// Function to apply discount code
-function applyDiscountCode(code) {
-  if (!code) {
-    alert('Please enter a discount code');
-    return;
-  }
-  
-  // Redirect to checkout with discount code
-  window.location.href = '/checkout?discount=' + encodeURIComponent(code);
-}
+// Duplicate function removed - using the AJAX version above
 </script>
 
