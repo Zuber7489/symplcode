@@ -131,10 +131,20 @@
                       {% assign item_recommendations = item_recommendations.products %}
                     {% endif %}
 
-                    {% comment %} For each recommended product, check if we've already shown it {% endcomment %}
+                    {% comment %} For each recommended product, check if we've already shown it and if it's not already in cart {% endcomment %}
                     {% for recommended_product in item_recommendations %}
                       {% assign product_id_check = ',' | append: recommended_product.id | append: ',' %}
-                      {% unless shown_product_ids contains product_id_check %}
+                      {% assign product_in_cart = false %}
+                      
+                      {% comment %} Check if this product is already in the cart {% endcomment %}
+                      {% for cart_item in cart.items %}
+                        {% if cart_item.product.id == recommended_product.id %}
+                          {% assign product_in_cart = true %}
+                          {% break %}
+                        {% endif %}
+                      {% endfor %}
+                      
+                      {% unless shown_product_ids contains product_id_check or product_in_cart %}
                         {% comment %} Add this product ID to our tracking string {% endcomment %}
                         {% assign shown_product_ids = shown_product_ids | append: ',' | append: recommended_product.id | append: ',' %}
                         
@@ -177,7 +187,17 @@
 
                       {% for recommended_product in item_recommendations %}
                         {% assign js_product_id_check = ',' | append: recommended_product.id | append: ',' %}
-                        {% unless js_product_ids contains js_product_id_check %}
+                        {% assign js_product_in_cart = false %}
+                        
+                        {% comment %} Check if this product is already in the cart {% endcomment %}
+                        {% for cart_item in cart.items %}
+                          {% if cart_item.product.id == recommended_product.id %}
+                            {% assign js_product_in_cart = true %}
+                            {% break %}
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% unless js_product_ids contains js_product_id_check or js_product_in_cart %}
                           {% assign js_product_ids = js_product_ids | append: ',' | append: recommended_product.id | append: ',' %}
                           window.bundleProductVariants_{{ recommended_product.id }} = [
                             {% for variant in recommended_product.variants limit: 4 %}
@@ -2143,6 +2163,68 @@ function applyDiscountCode(code) {
   });
 }
 
+// Function to hide products that are already in the cart
+function hideProductsAlreadyInCart() {
+  console.log('Checking for products already in cart to hide from bundle section');
+  
+  // Get all cart item product IDs
+  var cartProductIds = [];
+  $('.cart-item').each(function() {
+    var $cartItem = $(this);
+    var productId = $cartItem.find('.cart-item-image a').attr('href');
+    if (productId) {
+      // Extract product ID from URL (e.g., /products/product-handle)
+      var matches = productId.match(/\/products\/([^\/\?]+)/);
+      if (matches && matches[1]) {
+        cartProductIds.push(matches[1]);
+      }
+    }
+  });
+  
+  // Alternative method: check by data attributes if available
+  $('.cart-item[data-variant-id]').each(function() {
+    var variantId = $(this).data('variant-id');
+    if (variantId) {
+      // Find the corresponding bundle product by checking if any variant matches
+      $('.bundle-product').each(function() {
+        var $bundleProduct = $(this);
+        var productId = $bundleProduct.data('product-id');
+        
+        // Check if this bundle product's variants include the cart variant
+        var variantData = window[`bundleProductVariants_${productId}`];
+        if (variantData) {
+          for (var i = 0; i < variantData.length; i++) {
+            if (variantData[i].id == variantId) {
+              console.log('Hiding bundle product (variant match):', productId);
+              $bundleProduct.fadeOut(300, function() {
+                $(this).remove();
+              });
+              return false; // Break out of the loop
+            }
+          }
+        }
+      });
+    }
+  });
+  
+  console.log('Cart product IDs found:', cartProductIds);
+  
+  // Hide bundle products that match cart items
+  $('.bundle-product').each(function() {
+    var $bundleProduct = $(this);
+    var bundleProductId = $bundleProduct.data('product-id');
+    
+    // Compare with cart items (this is a backup method)
+    $('.cart-item-image a').each(function() {
+      var cartProductUrl = $(this).attr('href');
+      if (cartProductUrl && cartProductUrl.includes('/products/')) {
+        // We'll need to compare by product ID when we have a reliable way to get it
+        // For now, the server-side filtering should handle most cases
+      }
+    });
+  });
+}
+
 // Function to initialize bundle product images with selected variants
 function initializeBundleProductImages() {
   $('.bundle-product').each(function() {
@@ -2207,6 +2289,7 @@ $(document).ready(function() {
     setTimeout(() => {
       new BundleSlideNavigation();
       initializeBundleProductImages();
+      hideProductsAlreadyInCart(); // Hide products that are already in cart
     }, 300);
   });
   
@@ -2392,6 +2475,7 @@ function updateBundleProducts() {
         setTimeout(function() {
           new BundleSlideNavigation();
           initializeBundleProductImages();
+          hideProductsAlreadyInCart(); // Hide products that are already in cart
           
           // Re-attach discount code event handlers
           $(document).off('click', '#apply-discount').on('click', '#apply-discount', function(e) {
@@ -2472,6 +2556,21 @@ function addBundleItemToCart(variantId, quantity) {
     },
     success: function(item) {
       console.log('Successfully added item to cart:', item);
+      
+      // Immediately hide the product from bundle section
+      var productId = $button.data('product-id');
+      var $productElement = $('.bundle-product[data-product-id="' + productId + '"]');
+      if ($productElement.length > 0) {
+        console.log('Hiding product from bundle section:', productId);
+        $productElement.fadeOut(300, function() {
+          $(this).remove();
+          
+          // Re-initialize bundle slide navigation after product removal
+          setTimeout(function() {
+            new BundleSlideNavigation();
+          }, 100);
+        });
+      }
       
       // Remove loading state from button
       $button.prop("disabled", false).removeClass("is-loading");
