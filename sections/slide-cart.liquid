@@ -51,7 +51,7 @@
                   
                   <!-- Column 2: Product Details -->
                   <div class="cart-item-details">
-                    <h3 class="cart-item-title">{{ item.product.title }}</h3>
+                    <h3 class="cart-item-title" style="font-weight:600 !important">{{ item.product.title }}</h3>
                     {% unless item.variant.title contains 'Default' %}
                       <p class="cart-item-variant">{{ item.variant.title }}</p>
                     {% endunless %}
