@@ -702,7 +702,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
               </div>
               
               <!-- Reviews positioned to the right of product thumbnails -->
-              <div class="desktop-reviews-next-to-thumbnails" style="display: flex; align-items: center; gap: 8px; color: #2f6f6f; flex-shrink: 0; position: absolute; right: 0; text-align: right;">
+              <div class="desktop-reviews-next-to-thumbnails{% unless has_size_options %} no-size-selection{% endunless %}" style="display: flex; align-items: center; gap: 8px; color: #2f6f6f; flex-shrink: 0; position: absolute; right: 0; text-align: right;">
                 <div class="reviewadjust" style="font-size: 14px; color: #444; cursor: pointer;" onclick="scrollToReviews()">
                   {% render 'judgeme_widgets', widget_type: 'judgeme_preview_badge', concierge_install: true, product: product %}
                 </div>
@@ -5877,6 +5877,11 @@ let globalTouchManager = {
       /* Desktop reviews next to thumbnails */
       .desktop-reviews-next-to-thumbnails {
         display: flex !important;
+      }
+      
+      /* Add top padding when no size selection is present */
+      .desktop-reviews-next-to-thumbnails.no-size-selection {
+        padding-top: 29px;
       }
     }
     @media (max-width: 900px) {
