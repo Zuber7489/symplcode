@@ -386,7 +386,7 @@
 }
 
 .progress-bar-container {
-  width: 99%;
+  width: 97%;
   height: 12px;
   background: #e5e7eb;
   border-radius: 6px;
@@ -1633,6 +1633,59 @@
 </style>
 
 <script>
+// Configure Shopify money formatting
+if (typeof Shopify === 'undefined') {
+  window.Shopify = {};
+}
+Shopify.money_format = "{{ shop.money_format | strip_html }}";
+
+// Add formatMoney function to Shopify object if not available
+if (typeof Shopify.formatMoney !== 'function') {
+  Shopify.formatMoney = function(cents, format) {
+    if (typeof cents === 'string') {
+      cents = cents.replace('.', '');
+    }
+    var value = '';
+    var placeholderRegex = /\{\{\s*(\w+)\s*\}\}/;
+    var formatString = (format || this.money_format);
+    
+    function formatWithDelimiters(number, precision, thousands, decimal) {
+      precision = precision || 2;
+      thousands = thousands || ',';
+      decimal = decimal || '.';
+      
+      if (isNaN(number) || number == null) {
+        return 0;
+      }
+      
+      number = (number / 100.0).toFixed(precision);
+      
+      var parts = number.split('.');
+      var dollarsAmount = parts[0].replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1' + thousands);
+      var centsAmount = parts[1] ? (decimal + parts[1]) : '';
+      
+      return dollarsAmount + centsAmount;
+    }
+    
+    switch (formatString.match(placeholderRegex)[1]) {
+      case 'amount':
+        value = formatWithDelimiters(cents, 2);
+        break;
+      case 'amount_no_decimals':
+        value = formatWithDelimiters(cents, 0);
+        break;
+      case 'amount_with_comma_separator':
+        value = formatWithDelimiters(cents, 2, '.', ',');
+        break;
+      case 'amount_no_decimals_with_comma_separator':
+        value = formatWithDelimiters(cents, 0, '.', ',');
+        break;
+    }
+    
+    return formatString.replace(placeholderRegex, value);
+  };
+}
+
 // Listen for cart refresh events from cart.js
 $(document).on('cart:refresh', function() {
   // Add a small delay to ensure DOM is ready
@@ -1655,7 +1708,7 @@ $(document).on('cart:refresh-complete', function() {
 
 
 
-// Format money helper function
+// Format money helper function using Shopify's money format
 function formatMoney(cents) {
   // Convert to number if it's a string
   if (typeof cents === 'string') {
@@ -1664,10 +1717,15 @@ function formatMoney(cents) {
   
   // Handle invalid input
   if (isNaN(cents)) {
-    return "$0.00";
+    cents = 0;
   }
   
-  // Convert cents to dollars and format - always use USD format
+  // Use Shopify's formatMoney function
+  if (typeof Shopify !== 'undefined' && typeof Shopify.formatMoney === 'function') {
+    return Shopify.formatMoney(cents, Shopify.money_format);
+  }
+  
+  // Ultimate fallback to USD format if Shopify is not available
   var dollars = cents / 100;
   return "$" + dollars.toFixed(2);
 }
