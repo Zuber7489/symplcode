@@ -6,7 +6,7 @@
     <div class="free-shipping-progress">
       <div class="progress-text">
           <span class="free-shipping-progress-text">
-            {% assign free_shipping_threshold = 5000 %}
+            {% assign free_shipping_threshold = 9900 %}
             {% assign remaining_amount = free_shipping_threshold | minus: cart.total_price %}
             {% if remaining_amount > 0 %}
               Almost there! Add ${{ remaining_amount | divided_by: 100.0 | round: 2 }} more for free shipping
