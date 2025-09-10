@@ -20,14 +20,14 @@
                 <img 
                   src="{{ item.desktop_image }}" 
                   class="hero-media-content hero-desktop-only" 
-                  alt="{{ item.heading | default: product.title }}"
+                  alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
                 <img 
                   src="{{ item.mobile_image }}" 
                   class="hero-media-content hero-mobile-only" 
-                  alt="{{ item.heading | default: product.title }}"
+                  alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
@@ -69,22 +69,28 @@
               {% endif %}
             </div>
 
+            {% unless section.settings.hide_text_content %}
             <div class="hero-container">
               <div class="hero-content" style="{% if item.mobile_padding_top != blank %}--mobile-padding-top: {{ item.mobile_padding_top }}px;{% endif %}">
                 <div class="hero-content-wrapper">
                   <div class="hero-text-content">
-                    <h1 class="hero-title">{{ item.heading | default: product.title }}</h1>
-                    <div class="hero-description">{{ item.text | default: product.description | truncate: 200 }}</div>
+                    {% if item.heading %}
+                      <h1 class="hero-title" style="font-weight:550 !important">{{ item.heading }}</h1>
+                    {% endif %}
+                    {% if item.text %}
+                      <div class="hero-description">{{ item.text }}</div>
+                    {% endif %}
 
-                    {% if item.btn_url %}
+                    {% if item.btn_url and item.btn_text %}
                       <div class="hero-cta-wrapper">
-                        <a href="{{ item.btn_url }}" class="hero-cta-button">{{ item.btn_text | default: 'Shop Now' }}</a>
+                        <a href="{{ item.btn_url }}" class="hero-cta-button">{{ item.btn_text }}</a>
                       </div>
                     {% endif %}
                   </div>
                 </div>
               </div>
             </div>
+            {% endunless %}
           </div>
         {% endfor %}
       {% endif %}
@@ -102,7 +108,7 @@
                   srcset="{{ block.settings.desktop_image | img_url: '1200x' }} 1200w, {{ block.settings.desktop_image | img_url: '1920x' }} 1920w"
                   sizes="100vw"
                   class="hero-media-content hero-desktop-only" 
-                  alt="{{ block.settings.heading }}"
+                  alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
                 <img 
@@ -110,7 +116,7 @@
                   srcset="{{ block.settings.mobile_image | img_url: '480x' }} 480w, {{ block.settings.mobile_image | img_url: '768x' }} 768w"
                   sizes="100vw"
                   class="hero-media-content hero-mobile-only" 
-                  alt="{{ block.settings.heading }}"
+                  alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
               {% elsif block.settings.content_type == 'video' %}
@@ -151,14 +157,19 @@
               {% endif %}
             </div>
 
+            {% unless section.settings.hide_text_content %}
             <div class="hero-container">
               <div class="hero-content" style="{% if block.settings.mobile_padding_top != blank %}--mobile-padding-top: {{ block.settings.mobile_padding_top }}px;{% endif %}">
                 <div class="hero-content-wrapper">
                   <div class="hero-text-content">
-                    <h1 class="hero-title">{{ block.settings.heading }}</h1>
-                    <div class="hero-description">{{ block.settings.text }}</div>
+                    {% if block.settings.heading %}
+                      <h1 class="hero-title">{{ block.settings.heading }}</h1>
+                    {% endif %}
+                    {% if block.settings.text %}
+                      <div class="hero-description">{{ block.settings.text }}</div>
+                    {% endif %}
 
-                    {% if block.settings.btn_url %}
+                    {% if block.settings.btn_url and block.settings.btn_text %}
                       <div class="hero-cta-wrapper">
                         <a href="{{ block.settings.btn_url }}" class="hero-cta-button">{{ block.settings.btn_text }}</a>
                       </div>
@@ -167,44 +178,43 @@
                 </div>
               </div>
             </div>
+            {% endunless %}
           </div>
         {% endif %}
       {% endfor %}
     {% endif %}
   </div>
-
-  <!-- Slider navigation -->
-  {% assign slide_count = 0 %}
-  {% if template.name == 'product' and product.metafields.custom.hero_content %}
-    {% assign slide_count = product.metafields.custom.hero_content.value.size %}
-  {% else %}
-    {% assign slide_count = section.blocks.size %}
-  {% endif %}
-  
-  {% if slide_count > 1 %}
-    <div class="hero-slider-nav">
-      <button class="hero-slider-prev" aria-label="Previous slide">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <button class="hero-slider-next" aria-label="Next slide">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>
-
-    <!-- Slider dots -->
-    <div class="hero-slider-dots">
-      {% for i in (1..slide_count) %}
-        <button class="hero-slider-dot {% if forloop.first %}active{% endif %}" data-slide="{{ forloop.index0 }}" aria-label="Go to slide {{ forloop.index }}">
-          <span class="dot-inner"></span>
-        </button>
-      {% endfor %}
-    </div>
-  {% endif %}
 </div>
+
+<!-- Navigation positioned outside hero block (similar to 5-star functions) -->
+{% assign slide_count = 0 %}
+{% if template.name == 'product' and product.metafields.custom.hero_content %}
+  {% assign slide_count = product.metafields.custom.hero_content.value.size %}
+{% else %}
+  {% assign slide_count = section.blocks.size %}
+{% endif %}
+
+{% if slide_count > 1 %}
+  <div class="hero-bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
+    <!-- Arrows and Line Navigation -->
+    <div class="hero-nav-arrows" style="display: flex; gap: 10px;">
+      <button class="hero-slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="hero-slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+    
+    <div class="hero-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
+      <div class="hero-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
+    </div>
+  </div>
+{% endif %}
 
 <style>
   /* Dynamic Hero Section Styles */
@@ -218,8 +228,8 @@
   .dynamic-hero-slider {
     position: relative;
     width: 100%;
-    height: 50vh;
-    min-height: 400px;
+    height: 100vh; /* Full viewport height for maximum tallness */
+    min-height: 800px;
   }
 
   .dynamic-hero-slide {
@@ -259,7 +269,7 @@
   .hero-media-content {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: fill;
     object-position: center;
   }
 
@@ -273,7 +283,7 @@
   .hero-video {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: fill;
     object-position: center;
   }
 
@@ -305,7 +315,7 @@
   .hero-title {
     margin-bottom: 15px;
     color: #ffffff;
-    font-weight: bold;
+    font-weight: 550; /* Updated font weight */
     font-size: 48px;
     line-height: 1.2;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -314,9 +324,10 @@
   .hero-description {
     margin-bottom: 20px;
     color: #ffffff;
-    font-size: 18px;
+    font-size: 22px; /* Updated font size */
     line-height: 1.5;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.5px; /* Added letter spacing */
   }
 
   .hero-cta-wrapper {
@@ -330,7 +341,7 @@
     transition: none;
     display: inline-block;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500; /* Updated font weight */
     letter-spacing: 0.5px;
     cursor: pointer;
     background-color: transparent;
@@ -362,41 +373,41 @@
     box-shadow: none;
   }
 
-  /* Slider Navigation - Hidden */
-  .hero-slider-nav {
-    display: none;
+  /* Hero Bottom Navigation - Positioned outside hero block */
+  .hero-bottom-nav {
+    justify-content: flex-start !important;
+    padding: 20px !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    background-color: #f8f8f8; /* Light gray background to match reviews section */
+    border-top: 1px solid #e5e5e5; /* Subtle border separator */
+    width: 100%;
   }
 
-  /* Slider Dots */
-  .hero-slider-dots {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 10px;
-    z-index: 3;
-  }
-
-  .hero-slider-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    background: transparent;
-    cursor: pointer;
+  .hero-nav-arrows button {
+    padding: 6px !important;
+    
     transition: all 0.3s ease;
-    padding: 0;
   }
 
-  .hero-slider-dot.active {
-    background: #fff;
-    border-color: #fff;
+  .hero-nav-arrows button:disabled {
+    opacity: 0.3 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
   }
 
-  .hero-slider-dot:hover {
-    border-color: #fff;
-    background: rgba(255, 255, 255, 0.3);
+  .hero-nav-arrows button:not(:disabled):hover {
+    opacity: 0.7;
+  }
+
+  .hero-nav-arrows svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .hero-slider-line {
+    max-width: 120px !important;
+    height: 2px ;
   }
 
   /* Text Alignment Variants */
@@ -415,22 +426,25 @@
   /* Mobile Styles */
   @media (max-width: 768px) {
     .dynamic-hero-slider {
-      height: 50vh;
-      min-height: 300px;
+      height: 80vh; /* Full viewport height on mobile too */
+      min-height: 700px;
     }
 
     .hero-title {
-      font-size: 28px !important;
+      font-size: 24px !important; /* Updated mobile font size */
+      font-weight: 550 !important; /* Updated mobile font weight */
       margin-bottom: 10px;
     }
 
     .hero-description {
-      font-size: 16px !important;
+      font-size: 16px !important; /* Updated mobile font size to 16px */
+      letter-spacing: 0.5px;
     }
 
     .hero-cta-button {
       padding: 10px 24px;
-      font-size: 14px;
+      font-size: 16px; /* Updated mobile font size to 16px */
+      font-weight: 500; /* Updated mobile font weight */
       min-width: 140px;
     }
 
@@ -439,13 +453,27 @@
       margin: 0 10px;
     }
 
-    .hero-slider-prev,
-    .hero-slider-next {
-      display: none;
+      /* Mobile navigation adjustments */
+  .hero-bottom-nav {
+    justify-content: flex-start !important;
+    margin-left: 0 !important;
+    padding: 15px 20px !important; /* Slightly reduced padding for mobile */
+  }
+
+    /* Hide arrows on mobile */
+    .hero-nav-arrows {
+      display: none !important;
     }
 
-    .hero-slider-dots {
-      bottom: 20px;
+    /* Left align progress line on mobile */
+    .hero-slider-line {
+      max-width: 100px !important;
+      margin-left: 0 !important;
+      height: 2px !important;
+    }
+
+    .hero-nav-arrows button:disabled {
+      opacity: 0.3 !important;
     }
   }
 
@@ -464,7 +492,7 @@
     }
 
     .hero-description {
-      font-size: 20px;
+      font-size: 22px; /* Keep updated font size */
     }
   }
 
@@ -483,15 +511,18 @@
     .hero-title {
       font-size: 24px !important;
       line-height: 1.3;
+      font-weight: 550 !important;
     }
 
     .hero-description {
-      font-size: 14px !important;
+      font-size: 16px !important; /* Updated to 16px for consistency */
+      letter-spacing: 0.5px;
     }
 
     .hero-cta-button {
       padding: 8px 20px;
-      font-size: 13px;
+      font-size: 16px; /* Updated to 16px for consistency */
+      font-weight: 500;
       min-width: 120px;
     }
   }
@@ -504,9 +535,9 @@
 
     const slider = heroSection.querySelector('.dynamic-hero-slider');
     const slides = heroSection.querySelectorAll('.dynamic-hero-slide');
-    const prevBtn = heroSection.querySelector('.hero-slider-prev');
-    const nextBtn = heroSection.querySelector('.hero-slider-next');
-    const dots = heroSection.querySelectorAll('.hero-slider-dot');
+    const prevBtn = document.querySelector('.hero-slider-prev');
+    const nextBtn = document.querySelector('.hero-slider-next');
+    const progressBar = document.querySelector('.hero-slider-progress');
     
     let currentSlide = 0;
     let autoSlideInterval;
@@ -531,9 +562,14 @@
       if (slides.length > 0) {
         slides[0].classList.add('active');
         slides[0].style.zIndex = '2';
-        if (dots.length > 0) dots[0].classList.add('active');
         currentSlide = 0;
       }
+      
+      // Update progress bar
+      updateProgressBar();
+      
+      // Update navigation state
+      updateNavigationState();
       
       // Start auto-slide if enabled and multiple slides
       if (autoSlide && slides.length > 1) {
@@ -543,21 +579,56 @@
 
     // Show slide
     function showSlide(index) {
-      // Remove active class from all slides and dots
+      // Remove active class from all slides
       slides.forEach(slide => {
         slide.classList.remove('active');
         slide.style.zIndex = '0';
       });
-      dots.forEach(dot => dot.classList.remove('active'));
       
-      // Add active class to current slide and dot
+      // Add active class to current slide
       if (slides[index]) {
         slides[index].classList.add('active');
         slides[index].style.zIndex = '2';
       }
-      if (dots[index]) dots[index].classList.add('active');
       
       currentSlide = index;
+      updateProgressBar();
+      updateNavigationState();
+    }
+
+    // Update progress bar
+    function updateProgressBar() {
+      if (progressBar && slides.length > 1) {
+        const progress = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = progress + '%';
+      }
+    }
+
+    // Update navigation arrows state (enable/disable)
+    function updateNavigationState() {
+      if (prevBtn && nextBtn) {
+        // Disable previous button on first slide
+        if (currentSlide === 0) {
+          prevBtn.disabled = true;
+          prevBtn.style.opacity = '0.3';
+          prevBtn.style.cursor = 'not-allowed';
+        } else {
+          prevBtn.disabled = false;
+          prevBtn.style.opacity = '1';
+          prevBtn.style.cursor = 'pointer';
+        }
+        
+        // Disable next button on last slide
+        if (currentSlide === slides.length - 1) {
+          nextBtn.disabled = true;
+          nextBtn.style.opacity = '0.3';
+          nextBtn.style.cursor = 'not-allowed';
+        } else {
+          nextBtn.disabled = false;
+          nextBtn.style.opacity = '1';
+          nextBtn.style.cursor = 'pointer';
+        }
+      }
     }
 
     // Next slide
@@ -689,16 +760,6 @@
       });
     }
 
-    // Dot navigation
-    dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => {
-        showSlide(index);
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
-      });
-    });
-
     // Pause auto-slide on hover
     slider.addEventListener('mouseenter', stopAutoSlide);
     slider.addEventListener('mouseleave', () => {
@@ -741,6 +802,17 @@
     },
     {
       "type": "header",
+      "content": "Content Display"
+    },
+    {
+      "type": "checkbox",
+      "id": "hide_text_content",
+      "label": "Hide Text Content",
+      "default": false,
+      "info": "When enabled, only images/videos will display without heading, text, or button"
+    },
+    {
+      "type": "header",
       "content": "Static Page Settings"
     },
     {
@@ -779,7 +851,7 @@
       "id": "auto_slide",
       "label": "Enable Auto-Slide",
       "default": true,
-      "info": "Automatically rotate through slides"
+      "info": "Automatically rotate through slides. When disabled, users must click arrows to navigate."
     },
     {
       "type": "range",
@@ -790,7 +862,7 @@
       "unit": "s",
       "label": "Auto-Slide Interval",
       "default": 5,
-      "info": "Time between slide transitions (in seconds)"
+      "info": "Time between slide transitions (in seconds). Only applies when auto-slide is enabled."
     }
   ],
   "blocks": [
