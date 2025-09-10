@@ -290,7 +290,7 @@
         
         <div class="shipping-totals">
           <div class="shipping-row">
-            <span class="shipping-label">Shipping</span>
+            <span class="shipping-label">Shipping :</span>
             <span class="shipping-cost">
                 {% if cart.total_price >= 5000 %}
                   Free
@@ -300,7 +300,7 @@
             </span>
           </div>
           <div class="total-row">
-            <span class="total-label">Total</span>
+            <span class="total-label">Total :</span>
             <span class="total-amount">{{ cart.total_price | money }}</span>
           </div>
         </div>
