@@ -243,10 +243,21 @@
   color: #333;
   margin: 8px 0 12px 0;
   order: 1;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 0;
+  position: relative;
   width: 100%;
   text-align: center;
+}
+
+.compare-modal-product[data-card-position="left"] .compare-modal-product-title::before {
+  display: block;
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  height: 1px;
+  background: #e0e0e0;
+  width: calc(200% + 22px);
 }
 
 .compare-modal-specs {
@@ -766,10 +777,23 @@ padding: 3px 18px;
 
   .compare-modal-product-title {
     font-size: 11px;
-    padding: 0 21px 8px 21px;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 0 21px 0 21px;
+    margin: 0 0 16px 0;
+    position: relative;
     width: calc(100% - 42px);
-  min-height:22px;
+    min-height: 22px;
+    border: none;
+  }
+  
+  .compare-modal-product[data-card-position="left"] .compare-modal-product-title::before {
+    display: block;
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: #e0e0e0;
+    width: calc(200% + 22px);
   }
   .compare-modal-specs {
 padding-right: 4% !important;
