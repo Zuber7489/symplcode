@@ -254,10 +254,7 @@
       {% if cart.total_discount > 0 %}
         {% assign total_savings = total_savings | plus: cart.total_discount %}
       {% endif %}
-      <div class="savings-row" id="savings-display" {% if total_savings <= 0 %}style="display: none;"{% endif %}>
-        <span class="savings-label">Savings</span>
-        <span class="savings-amount" id="savings-amount">{{ total_savings | money }}</span>
-      </div>
+ 
       
       <div class="shipping-info">
         <div class="shipping-text">
@@ -289,6 +286,10 @@
         </div>
         
         <div class="shipping-totals">
+          <div class="shipping-row" id="savings-display" {% if total_savings <= 0 %}style="display: none;"{% endif %}>
+        <span class="shipping-label">Savings</span>
+        <span class="shipping-cost" id="savings-amount">{{ total_savings | money }}</span>
+      </div>
           <div class="shipping-row">
             <span class="shipping-label">Shipping :</span>
             <span class="shipping-cost">
