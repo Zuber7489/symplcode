@@ -945,6 +945,11 @@ padding-left: 15% !important;
 
 /* Desktop vs Mobile Button Display Logic */
 @media (max-width: 900px) {
+  /* Hide fabric label on mobile */
+  .compare-modal-fabric > .compare-modal-category-label {
+    display: none;
+  }
+  
   .comparemobilebtn {
     display: block !important;
     margin-right: 0 !important;
