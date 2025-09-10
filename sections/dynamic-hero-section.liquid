@@ -262,15 +262,14 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    height: auto;
     overflow: hidden;
   }
 
   .hero-media-content {
     width: 100%;
-    height: 100%;
-    object-fit: fill;
-    object-position: center;
+    height: auto;
+    display: block;
   }
 
   .hero-video-container {
@@ -282,9 +281,8 @@
 
   .hero-video {
     width: 100%;
-    height: 100%;
-    object-fit: fill;
-    object-position: center;
+    height: auto;
+    display: block;
   }
 
   .hero-container {
@@ -783,6 +781,39 @@
 
     // Initialize immediately for faster loading
     initSlider();
+  });
+
+  // Function to maintain aspect ratio for hero media
+  function maintainHeroAspectRatio() {
+    document.querySelectorAll('.dynamic-hero-slide').forEach(slide => {
+      const mediaWrapper = slide.querySelector('.hero-media-wrapper');
+      const media = slide.querySelector('.hero-media-content, .hero-video');
+      
+      if (!media) return;
+      
+      // Use natural dimensions for images, videoWidth/Height for videos
+      const isVideo = media.tagName.toLowerCase() === 'video';
+      const naturalWidth = isVideo ? media.videoWidth : media.naturalWidth;
+      const naturalHeight = isVideo ? media.videoHeight : media.naturalHeight;
+      
+      if (naturalWidth && naturalHeight) {
+        const aspectRatio = naturalWidth / naturalHeight;
+        const containerWidth = mediaWrapper.offsetWidth;
+        mediaWrapper.style.height = (containerWidth / aspectRatio) + 'px';
+      }
+    });
+  }
+
+  // Run on load and window resize
+  window.addEventListener('load', maintainHeroAspectRatio);
+  window.addEventListener('resize', maintainHeroAspectRatio);
+  
+  // Also run when images/videos are loaded
+  document.querySelectorAll('.hero-media-content, .hero-video').forEach(media => {
+    media.addEventListener('load', maintainHeroAspectRatio);
+    if (media.tagName.toLowerCase() === 'video') {
+      media.addEventListener('loadedmetadata', maintainHeroAspectRatio);
+    }
   });
 </script>
 
