@@ -1,9 +1,64 @@
 {% comment %}
   Compare Bags Buttons Snippet
   This snippet contains both desktop and mobile compare bags buttons
+  Buttons are only shown when there are variants available for comparison
   
   Usage: {% render 'compare-bags-buttons' %}
 {% endcomment %}
+
+{% comment %}
+  Check if product has variants for comparison
+  We need at least 2 variants with different sizes OR different fabrics to show compare buttons
+{% endcomment %}
+
+{% assign has_variants_for_comparison = false %}
+{% assign unique_sizes = '' %}
+{% assign unique_fabrics = '' %}
+
+{% comment %}
+  First, collect all unique sizes and fabrics from variants
+{% endcomment %}
+{% for variant in product.variants %}
+  {% comment %}
+    Add size to unique sizes if not already present
+  {% endcomment %}
+  {% unless unique_sizes contains variant.option2 %}
+    {% if unique_sizes == '' %}
+      {% assign unique_sizes = variant.option2 %}
+    {% else %}
+      {% assign unique_sizes = unique_sizes | append: ',' | append: variant.option2 %}
+    {% endif %}
+  {% endunless %}
+  
+  {% comment %}
+    Add fabric to unique fabrics if not already present
+  {% endcomment %}
+  {% unless unique_fabrics contains variant.option1 %}
+    {% if unique_fabrics == '' %}
+      {% assign unique_fabrics = variant.option1 %}
+    {% else %}
+      {% assign unique_fabrics = unique_fabrics | append: ',' | append: variant.option1 %}
+    {% endif %}
+  {% endunless %}
+{% endfor %}
+
+{% comment %}
+  Count unique sizes and fabrics
+{% endcomment %}
+{% assign size_count = unique_sizes | split: ',' | size %}
+{% assign fabric_count = unique_fabrics | split: ',' | size %}
+
+{% comment %}
+  Only show compare buttons if we have multiple sizes OR multiple fabrics
+{% endcomment %}
+{% if size_count > 1 or fabric_count > 1 %}
+  {% assign has_variants_for_comparison = true %}
+{% endif %}
+
+{% comment %}
+  Only show compare buttons if we have variants for comparison
+{% endcomment %}
+{% if has_variants_for_comparison %}
 
 <!-- Desktop Compare Bags Button -->
 <button id="compareBtnDesktop" class="comparedesktopbtn" data-compare-button="true" style="border: 2px solid #2f7d7d; color: #2f7d7d; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 18px; cursor: pointer; margin: 0; position: relative; z-index: 100; pointer-events: auto;" onclick="openCompareBagsModalV2()">
@@ -13,4 +68,6 @@
 <!-- Mobile Compare Bags Button -->
 <button class="comparemobilebtn" id="compareBtnMobile" data-compare-button="true" style="border: 2px solid #2f7d7d; color: #2f7d7d; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 18px; cursor: pointer; margin-bottom: 6px; position: relative; z-index: 100;" onclick="openCompareBagsModalV2()">
   Compare bags
-</button> 
+</button>
+
+{% endif %} 
