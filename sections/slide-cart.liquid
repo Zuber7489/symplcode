@@ -77,12 +77,12 @@
                       <div class="price-container">
                         {% assign original_price = item.variant.compare_at_price | default: item.original_price %}
                         {% if original_price and original_price > item.price %}
-                          <div class="original-price-top">{{ original_price | money }}</div>
+                          <div class="original-price-top">{{ item.original_line_price | money }}</div>
                           <div class="price-comparison">
-                            <span class="original-price">{{ original_price | money }}</span>
-                            <span class="discounted-price">{{ item.price | money }}</span>
+                            <span class="original-price">{{ original_price | times: item.quantity | money }}</span>
+                            <span class="discounted-price">{{ item.line_price | money }}</span>
                           </div>
-                          <div class="savings">(Save {{ original_price | minus: item.price | money }})</div>
+                          <div class="savings">(Save {{ original_price | minus: item.price | times: item.quantity | money }})</div>
                           
                           {% comment %} Get coupon code from item discounts array {% endcomment %}
                           {% assign item_discount_code = '' %}
@@ -99,7 +99,7 @@
                             <div class="coupon-code">{{ item.properties['discount_code'] }}</div>
                           {% endif %}
                         {% else %}
-                          <div class="current-price">{{ item.price | money }}</div>
+                          <div class="current-price">{{ item.line_price | money }}</div>
                         {% endif %}
                       </div>
                     </div>
@@ -2655,14 +2655,14 @@ function updateCartItemQuantity(itemKey, quantity) {
       quantity: quantity
     },
     success: function(cart) {
-      // Trigger cart refresh
-      $(document).trigger('cart:refresh');
+      // Update cart HTML content to reflect new prices and quantities
+      updateBundleProducts();
     },
     error: function(xhr) {
       var data = JSON.parse(xhr.responseText);
       alert(data.message || 'Error updating cart');
       // Refresh to restore correct quantities
-      $(document).trigger('cart:refresh');
+      updateBundleProducts();
     }
   });
 }
@@ -2678,12 +2678,14 @@ function removeItemFromCart(itemKey) {
       quantity: 0
     },
     success: function(cart) {
-      // Trigger cart refresh
-      $(document).trigger('cart:refresh');
+      // Update cart HTML content to reflect item removal
+      updateBundleProducts();
     },
     error: function(xhr) {
       var data = JSON.parse(xhr.responseText);
       alert(data.message || 'Error removing item');
+      // Refresh cart on error to restore correct state
+      updateBundleProducts();
     }
   });
 }
