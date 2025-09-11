@@ -827,8 +827,16 @@
       const containerWidth = mediaWrapper.offsetWidth || viewportWidth;
       let calculatedHeight = containerWidth / aspectRatio;
       
-      // Ensure the height is at least the viewport height to prevent gaps
-      if (calculatedHeight < viewportHeight) {
+      // For videos, use a larger height (130% of viewport) while maintaining aspect ratio
+      // For images, maintain the original aspect ratio behavior
+      if (isVideo) {
+        // For videos, use a larger height (130% of viewport) to make them more prominent
+        calculatedHeight = viewportHeight * 1.3;
+        // Ensure width is adjusted to maintain aspect ratio
+        media.style.width = 'auto';
+        media.style.height = '100%';
+      } else if (calculatedHeight < viewportHeight) {
+        // For images, maintain original behavior
         calculatedHeight = viewportHeight;
       }
       
