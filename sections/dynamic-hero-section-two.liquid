@@ -1,37 +1,32 @@
-<!-- Hero Content #2 - Supports both Product Metafields and Theme Editor -->
-<script>
-  console.log('🔍 Hero Content #2 section loaded');
-  console.log('Template:', '{{ template.name }}');
-  console.log('Has hero_content_two:', {{ product.metafields.custom.hero_content_two | json }});
-</script>
+<!-- Dynamic Hero Section - Supports both Product Metafields and Theme Editor -->
 <div
-  class="dynamic-hero-section-two {% if section.settings.text_alignment %}hero-align-{{ section.settings.text_alignment }}{% else %}hero-align-center{% endif %}"
+  class="dynamic-hero-section {% if section.settings.text_alignment %}hero-align-{{ section.settings.text_alignment }}{% else %}hero-align-center{% endif %}"
   data-auto-slide="{{ section.settings.auto_slide }}"
   {% if section.settings.slide_interval != blank %}data-slide-interval="{{ section.settings.slide_interval | times: 1000 }}"{% endif %}
   data-template="{{ template.name }}"
   data-product-id="{{ product.id }}"
 >
-  <div class="dynamic-hero-slider-two">
+  <div class="dynamic-hero-slider">
     {% comment %} PRODUCT PAGE: Use metafields for dynamic content {% endcomment %}
-    {% if template.name == 'product' and product.metafields.custom.hero_content_two %}
-      {% assign hero_content = product.metafields.custom.hero_content_two.value %}
+    {% if template.name == 'product' and product.metafields.custom.hero_content %}
+      {% assign hero_content = product.metafields.custom.hero_content.value %}
       {% if hero_content %}
         <!-- Debug: Hero content found -->
         <!-- {{ hero_content | json }} -->
         {% for item in hero_content %}
-          <div class="dynamic-hero-slide-two" data-slide-index="{{ forloop.index0 }}">
+          <div class="dynamic-hero-slide" data-slide-index="{{ forloop.index0 }}">
             <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
                 <img 
                   src="{{ item.desktop_image }}" 
-                  class="hero-media-content-two hero-desktop-only" 
+                  class="hero-media-content hero-desktop-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
                 <img 
                   src="{{ item.mobile_image }}" 
-                  class="hero-media-content-two hero-mobile-only" 
+                  class="hero-media-content hero-mobile-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
@@ -102,17 +97,17 @@
     {% endif %}
 
     {% comment %} STATIC PAGES: Use theme editor blocks {% endcomment %}
-    {% if template.name != 'product' or product.metafields.custom.hero_content_two == blank %}
+    {% if template.name != 'product' or product.metafields.custom.hero_content == blank %}
       {% for block in section.blocks %}
         {% if block.type == 'slide' %}
-          <div class="dynamic-hero-slide-two" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
+          <div class="dynamic-hero-slide" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
             <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
               {% if block.settings.content_type == 'image' %}
                 <img 
                   src="{{ block.settings.desktop_image | img_url: '1920x' }}" 
                   srcset="{{ block.settings.desktop_image | img_url: '1200x' }} 1200w, {{ block.settings.desktop_image | img_url: '1920x' }} 1920w"
                   sizes="100vw"
-                  class="hero-media-content-two hero-desktop-only" 
+                  class="hero-media-content hero-desktop-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
@@ -120,7 +115,7 @@
                   src="{{ block.settings.mobile_image | img_url: '768x' }}" 
                   srcset="{{ block.settings.mobile_image | img_url: '480x' }} 480w, {{ block.settings.mobile_image | img_url: '768x' }} 768w"
                   sizes="100vw"
-                  class="hero-media-content-two hero-mobile-only" 
+                  class="hero-media-content hero-mobile-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
@@ -193,8 +188,8 @@
 
 <!-- Navigation positioned outside hero block (similar to 5-star functions) -->
 {% assign slide_count = 0 %}
-{% if template.name == 'product' and product.metafields.custom.hero_content_two %}
-  {% assign slide_count = product.metafields.custom.hero_content_two.value.size %}
+{% if template.name == 'product' and product.metafields.custom.hero_content %}
+  {% assign slide_count = product.metafields.custom.hero_content.value.size %}
 {% else %}
   {% assign slide_count = section.blocks.size %}
 {% endif %}
@@ -202,42 +197,42 @@
 {% if slide_count > 1 %}
   <div class="hero-bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
     <!-- Arrows and Line Navigation -->
-    <div class="hero-nav-arrows-two" style="display: flex; gap: 10px;">
-      <button class="hero-slider-prev-two" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
+    <div class="hero-nav-arrows" style="display: flex; gap: 10px;">
+      <button class="hero-slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button class="hero-slider-next-two" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
+      <button class="hero-slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </div>
     
-    <div class="hero-slider-line-two" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
-      <div class="hero-slider-progress-two" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
+    <div class="hero-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
+      <div class="hero-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
     </div>
   </div>
 {% endif %}
 
 <style>
-  /* Dynamic Hero Section Two Styles */
-  .dynamic-hero-section-two {
+  /* Dynamic Hero Section Styles */
+  .dynamic-hero-section {
     position: relative;
     width: 100%;
     overflow: hidden;
     background: #000;
   }
 
-  .dynamic-hero-slider-two {
+  .dynamic-hero-slider {
     position: relative;
     width: 100%;
     height: 100vh; /* Full viewport height for maximum tallness */
     min-height: 800px;
   }
 
-  .dynamic-hero-slide-two {
+  .dynamic-hero-slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -249,15 +244,15 @@
     align-items: center;
     justify-content: center;
     z-index: 0;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #000;
   }
 
-  .dynamic-hero-slide-two:first-child {
+  .dynamic-hero-slide:first-child {
     opacity: 1;
     z-index: 1;
   }
 
-  .dynamic-hero-slide-two.active {
+  .dynamic-hero-slide.active {
     opacity: 1;
     z-index: 2;
   }
@@ -267,14 +262,16 @@
     top: 0;
     left: 0;
     width: 100%;
-   
+    height: 100%;
     overflow: hidden;
   }
 
-  .hero-media-content-two {
+  .hero-media-content {
     width: 100%;
     height: 100%;
     display: block;
+    object-fit: cover;
+    object-position: center;
   }
 
   .hero-video-container {
@@ -286,8 +283,10 @@
 
   .hero-video {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
+    object-fit: cover;
+    object-position: center;
   }
 
   .hero-container {
@@ -387,28 +386,28 @@
     width: 100%;
   }
 
-  .hero-nav-arrows-two button {
+  .hero-nav-arrows button {
     padding: 6px !important;
     
     transition: all 0.3s ease;
   }
 
-  .hero-nav-arrows-two button:disabled {
+  .hero-nav-arrows button:disabled {
     opacity: 0.3 !important;
     cursor: not-allowed !important;
     pointer-events: none;
   }
 
-  .hero-nav-arrows-two button:not(:disabled):hover {
+  .hero-nav-arrows button:not(:disabled):hover {
     opacity: 0.7;
   }
 
-  .hero-nav-arrows-two svg {
+  .hero-nav-arrows svg {
     width: 24px !important;
     height: 24px !important;
   }
 
-  .hero-slider-line-two {
+  .hero-slider-line {
     max-width: 120px !important;
     height: 2px ;
   }
@@ -429,8 +428,8 @@
   /* Mobile Styles */
   @media (max-width: 768px) {
     .dynamic-hero-slider {
-      height: 80vh; /* Full viewport height on mobile too */
-      min-height: 700px;
+      height: auto;
+      min-height: 300px;
     }
 
     .hero-title {
@@ -464,12 +463,12 @@
   }
 
     /* Hide arrows on mobile */
-    .hero-nav-arrows-two {
+    .hero-nav-arrows {
       display: none !important;
     }
 
     /* Left align progress line on mobile */
-    .hero-slider-line-two {
+    .hero-slider-line {
       max-width: 100px !important;
       margin-left: 0 !important;
       height: 2px !important;
@@ -532,37 +531,15 @@
 </style>
 
 <script>
-  console.log('Hero Content #2 script starting...');
-  
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOMContentLoaded fired for Hero Content #2');
-    
-    // Wait a bit to ensure all elements are loaded
-    setTimeout(function() {
-      console.log('Timeout fired, looking for hero section two...');
-      
-      // Find the hero section two specifically
-      const heroSection = document.querySelector('.dynamic-hero-section-two');
-      
-      if (!heroSection) {
-        console.log('❌ Hero section two not found on page');
-        console.log('Available sections:', document.querySelectorAll('[class*="hero"]'));
-        return;
-      }
-      
-      console.log('✅ Hero section two found:', heroSection);
+    const heroSection = document.querySelector('.dynamic-hero-section');
+    if (!heroSection) return;
 
-    const slider = heroSection.querySelector('.dynamic-hero-slider-two');
-    const slides = heroSection.querySelectorAll('.dynamic-hero-slide-two');
-    const prevBtn = document.querySelector('.hero-slider-prev-two');
-    const nextBtn = document.querySelector('.hero-slider-next-two');
-    const progressBar = document.querySelector('.hero-slider-progress-two');
-    
-    console.log('Buttons found:', {
-      prevBtn: prevBtn,
-      nextBtn: nextBtn,
-      slides: slides.length
-    });
+    const slider = heroSection.querySelector('.dynamic-hero-slider');
+    const slides = heroSection.querySelectorAll('.dynamic-hero-slide');
+    const prevBtn = document.querySelector('.hero-slider-prev');
+    const nextBtn = document.querySelector('.hero-slider-next');
+    const progressBar = document.querySelector('.hero-slider-progress');
     
     let currentSlide = 0;
     let autoSlideInterval;
@@ -575,23 +552,28 @@
     let touchStartY = 0;
     let touchEndY = 0;
     let isSwiping = false;
-    const minSwipeDistance = 50;
+    const minSwipeDistance = 50; // Minimum distance for a swipe to be registered
     
     // Auto-slide pause variables
     let userInteractionTimeout;
-    const userInteractionDelay = 3000;
+    const userInteractionDelay = 3000; // 3 seconds delay after user interaction
 
     // Initialize slider immediately
     function initSlider() {
+      // Show first slide immediately
       if (slides.length > 0) {
         slides[0].classList.add('active');
         slides[0].style.zIndex = '2';
         currentSlide = 0;
       }
       
+      // Update progress bar
       updateProgressBar();
+      
+      // Update navigation state
       updateNavigationState();
       
+      // Start auto-slide if enabled and multiple slides
       if (autoSlide && slides.length > 1) {
         startAutoSlide();
       }
@@ -599,11 +581,13 @@
 
     // Show slide
     function showSlide(index) {
+      // Remove active class from all slides
       slides.forEach(slide => {
         slide.classList.remove('active');
         slide.style.zIndex = '0';
       });
       
+      // Add active class to current slide
       if (slides[index]) {
         slides[index].classList.add('active');
         slides[index].style.zIndex = '2';
@@ -622,9 +606,10 @@
       }
     }
 
-    // Update navigation arrows state
+    // Update navigation arrows state (enable/disable)
     function updateNavigationState() {
       if (prevBtn && nextBtn) {
+        // Disable previous button on first slide
         if (currentSlide === 0) {
           prevBtn.disabled = true;
           prevBtn.style.opacity = '0.3';
@@ -635,6 +620,7 @@
           prevBtn.style.cursor = 'pointer';
         }
         
+        // Disable next button on last slide
         if (currentSlide === slides.length - 1) {
           nextBtn.disabled = true;
           nextBtn.style.opacity = '0.3';
@@ -661,10 +647,12 @@
 
     // Start auto-slide
     function startAutoSlide() {
+      // Clear any existing timeout
       if (userInteractionTimeout) {
         clearTimeout(userInteractionTimeout);
         userInteractionTimeout = null;
       }
+      
       autoSlideInterval = setInterval(nextSlide, slideInterval);
     }
 
@@ -675,12 +663,16 @@
       }
     }
 
-    // Pause auto-slide temporarily
+    // Pause auto-slide temporarily after user interaction
     function pauseAutoSlideTemporarily() {
       stopAutoSlide();
+      
+      // Clear any existing timeout
       if (userInteractionTimeout) {
         clearTimeout(userInteractionTimeout);
       }
+      
+      // Resume auto-slide after delay
       userInteractionTimeout = setTimeout(() => {
         if (autoSlide && slides.length > 1) {
           startAutoSlide();
@@ -694,13 +686,18 @@
       const verticalDistance = Math.abs(touchEndY - touchStartY);
       const horizontalDistance = Math.abs(swipeDistance);
 
+      // Only register horizontal swipes if they're more horizontal than vertical
+      // and meet the minimum distance threshold
       if (horizontalDistance > verticalDistance && horizontalDistance > minSwipeDistance) {
         if (swipeDistance > 0) {
+          // Swipe right - go to previous slide
           prevSlide();
         } else {
+          // Swipe left - go to next slide
           nextSlide();
         }
         
+        // Pause auto-slide temporarily after user interaction
         if (autoSlide) {
           pauseAutoSlideTemporarily();
         }
@@ -713,6 +710,7 @@
       touchStartY = e.touches[0].clientY;
       isSwiping = false;
       
+      // Stop auto-slide during touch
       if (autoSlide) {
         stopAutoSlide();
       }
@@ -731,67 +729,70 @@
       if (isSwiping) {
         handleSwipe();
       } else {
+        // If no swipe was detected, resume auto-slide after delay
         if (autoSlide) {
           pauseAutoSlideTemporarily();
         }
       }
     }
 
-    // Add touch event listeners
+    // Add touch event listeners to slider
     if (slider) {
       slider.addEventListener('touchstart', handleTouchStart, { passive: true });
       slider.addEventListener('touchmove', handleTouchMove, { passive: true });
       slider.addEventListener('touchend', handleTouchEnd, { passive: true });
     }
 
-    // Event listeners for buttons
+    // Event listeners
     if (prevBtn) {
-      console.log('Adding click listener to prev button');
-      prevBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('Prev button clicked');
+      prevBtn.addEventListener('click', () => {
         prevSlide();
         if (autoSlide) {
           pauseAutoSlideTemporarily();
         }
       });
-    } else {
-      console.log('Prev button not found');
     }
 
     if (nextBtn) {
-      console.log('Adding click listener to next button');
-      nextBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        console.log('Next button clicked');
+      nextBtn.addEventListener('click', () => {
         nextSlide();
         if (autoSlide) {
           pauseAutoSlideTemporarily();
         }
       });
-    } else {
-      console.log('Next button not found');
     }
 
     // Pause auto-slide on hover
-    if (slider) {
-      slider.addEventListener('mouseenter', stopAutoSlide);
-      slider.addEventListener('mouseleave', () => {
-        if (autoSlide) startAutoSlide();
-      });
-    }
+    slider.addEventListener('mouseenter', stopAutoSlide);
+    slider.addEventListener('mouseleave', () => {
+      if (autoSlide) startAutoSlide();
+    });
 
-    // Initialize immediately
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        prevSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      } else if (e.key === 'ArrowRight') {
+        nextSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      }
+    });
+
+    // Initialize immediately for faster loading
     initSlider();
-    }, 100); // End setTimeout
   });
 
   // Function to maintain aspect ratio for hero media and adjust container height
   function maintainHeroAspectRatio() {
-    document.querySelectorAll('.dynamic-hero-slide-two').forEach(slide => {
-      const mediaWrapper = slide.querySelector('.hero-media-wrapper-two');
-      const media = slide.querySelector('.hero-media-content-two, .hero-video-two');
-      const heroSection = slide.closest('.dynamic-hero-section-two');
+    document.querySelectorAll('.dynamic-hero-slide').forEach(slide => {
+      const mediaWrapper = slide.querySelector('.hero-media-wrapper');
+      const media = slide.querySelector('.hero-media-content, .hero-video');
+      const heroSection = slide.closest('.dynamic-hero-section');
       
       if (!media) return;
       
@@ -809,11 +810,7 @@
       if (naturalWidth && naturalHeight) {
         const aspectRatio = naturalWidth / naturalHeight;
         const containerWidth = mediaWrapper.offsetWidth;
-        let calculatedHeight = containerWidth / aspectRatio;
-        
-        // Add a small buffer to the calculated height (10px or 2% of calculated height, whichever is larger)
-        const buffer = Math.max(10, calculatedHeight * 0.02);
-        calculatedHeight += buffer;
+        const calculatedHeight = containerWidth / aspectRatio;
         
         // Set the height on both the media wrapper and the slide
         mediaWrapper.style.height = calculatedHeight + 'px';
@@ -831,8 +828,8 @@
   window.addEventListener('load', maintainHeroAspectRatio);
   window.addEventListener('resize', maintainHeroAspectRatio);
   
-  // Also run when images/videos are loaded
-  document.querySelectorAll('.hero-media-content-two, .hero-video').forEach(media => {
+  // Also run when images/videos are loaded to ensure proper sizing
+  document.querySelectorAll('.hero-media-content, .hero-video').forEach(media => {
     media.addEventListener('load', maintainHeroAspectRatio);
     if (media.tagName.toLowerCase() === 'video') {
       media.addEventListener('loadedmetadata', maintainHeroAspectRatio);
@@ -842,7 +839,7 @@
 
 {% schema %}
 {
-  "name": "Hero Content #2",
+  "name": "Dynamic Hero Section",
   "tag": "section",
   "class": "dynamic-hero-section-wrapper",
   "settings": [
@@ -852,7 +849,7 @@
     },
     {
       "type": "paragraph",
-      "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content_two' as a JSON list."
+      "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content' as a JSON list."
     },
     {
       "type": "header",
@@ -1050,7 +1047,7 @@
   ],
   "presets": [
     {
-      "name": "Hero Content #2",
+      "name": "Dynamic Hero Section",
       "blocks": [
         {
           "type": "slide"
