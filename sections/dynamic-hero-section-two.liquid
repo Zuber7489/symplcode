@@ -557,7 +557,7 @@
     if (!heroSection) return;
 
     const slider = heroSection.querySelector('.dynamic-hero-slider');
-    const slides = heroSection.querySelectorAll('.dynamic-hero-slide');
+    const slides = document.querySelectorAll('.dynamic-hero-slide');
     const prevBtn = document.querySelector('.slider-arrow--prev');
     const nextBtn = document.querySelector('.slider-arrow--next');
     const progressBar = document.querySelector('.slider-progress-bar');
@@ -856,6 +856,25 @@
       media.addEventListener('loadedmetadata', updateHeroSectionHeight);
     }
   });
+  
+  // Initialize slides
+  function initializeSlides() {
+    const slides = document.querySelectorAll('.dynamic-hero-slide');
+    if (slides.length > 0) {
+      slides.forEach((slide, index) => {
+        if (index === 0) {
+          slide.classList.add('active');
+          slide.style.zIndex = '2';
+        } else {
+          slide.classList.remove('active');
+          slide.style.zIndex = '0';
+        }
+      });
+    }
+  }
+  
+  // Run initialization
+  initializeSlides();
 </script>
 
 {% schema %}
