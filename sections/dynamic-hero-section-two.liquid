@@ -195,23 +195,23 @@
 {% endif %}
 
 {% if slide_count > 1 %}
-  <div class="hero-bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
+  <div class="slider-navigation" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
     <!-- Arrows and Line Navigation -->
-    <div class="hero-nav-arrows" style="display: flex; gap: 10px;">
-      <button class="hero-slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
+    <div class="slider-arrows" style="display: flex; gap: 10px;">
+      <button class="slider-arrow slider-arrow--prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button class="hero-slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
+      <button class="slider-arrow slider-arrow--next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </div>
     
-    <div class="hero-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
-      <div class="hero-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
+    <div class="slider-progress-container" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
+      <div class="slider-progress-bar" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
     </div>
   </div>
 {% endif %}
@@ -375,41 +375,62 @@
     box-shadow: none;
   }
 
-  /* Hero Bottom Navigation - Positioned outside hero block */
-  .hero-bottom-nav {
+  /* Slider Navigation - Positioned outside hero block */
+  .slider-navigation {
     justify-content: flex-start !important;
     padding: 20px !important;
     margin-top: 0 !important;
     margin-left: 0 !important;
-    background-color: #f8f8f8; /* Light gray background to match reviews section */
-    border-top: 1px solid #e5e5e5; /* Subtle border separator */
+    background-color: #f8f8f8;
+    border-top: 1px solid #e5e5e5;
     width: 100%;
   }
 
-  .hero-nav-arrows button {
-    padding: 6px !important;
-    
-    transition: all 0.3s ease;
+  .slider-arrows {
+    display: flex;
+    gap: 10px;
   }
 
-  .hero-nav-arrows button:disabled {
+  .slider-arrow {
+    padding: 6px !important;
+    transition: all 0.3s ease;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slider-arrow:disabled {
     opacity: 0.3 !important;
     cursor: not-allowed !important;
     pointer-events: none;
   }
 
-  .hero-nav-arrows button:not(:disabled):hover {
+  .slider-arrow:not(:disabled):hover {
     opacity: 0.7;
   }
 
-  .hero-nav-arrows svg {
+  .slider-arrow svg {
     width: 24px !important;
     height: 24px !important;
   }
 
-  .hero-slider-line {
+  .slider-progress-container {
     max-width: 120px !important;
-    height: 2px ;
+    height: 2px;
+    flex: 1;
+    background-color: #e5e5e5;
+    border-radius: 2px;
+    position: relative;
+  }
+  
+  .slider-progress-bar {
+    height: 100%;
+    background-color: #000;
+    border-radius: 2px;
+    transition: width 0.3s ease;
   }
 
   /* Text Alignment Variants */
@@ -463,12 +484,12 @@
   }
 
     /* Hide arrows on mobile */
-    .hero-nav-arrows {
+    .slider-arrows {
       display: none !important;
     }
 
     /* Left align progress line on mobile */
-    .hero-slider-line {
+    .slider-progress-container {
       max-width: 100px !important;
       margin-left: 0 !important;
       height: 2px !important;
@@ -537,9 +558,9 @@
 
     const slider = heroSection.querySelector('.dynamic-hero-slider');
     const slides = heroSection.querySelectorAll('.dynamic-hero-slide');
-    const prevBtn = document.querySelector('.hero-slider-prev');
-    const nextBtn = document.querySelector('.hero-slider-next');
-    const progressBar = document.querySelector('.hero-slider-progress');
+    const prevBtn = document.querySelector('.slider-arrow--prev');
+    const nextBtn = document.querySelector('.slider-arrow--next');
+    const progressBar = document.querySelector('.slider-progress-bar');
     
     let currentSlide = 0;
     let autoSlideInterval;
@@ -559,7 +580,7 @@
     const userInteractionDelay = 3000; // 3 seconds delay after user interaction
 
     // Initialize slider immediately
-    function initSlider() {
+    function initializeHeroSlider() {
       // Show first slide immediately
       if (slides.length > 0) {
         slides[0].classList.add('active');
@@ -568,7 +589,7 @@
       }
       
       // Update progress bar
-      updateProgressBar();
+      updateSliderProgress();
       
       // Update navigation state
       updateNavigationState();
@@ -580,7 +601,7 @@
     }
 
     // Show slide
-    function showSlide(index) {
+    function displaySlide(index) {
       // Remove active class from all slides
       slides.forEach(slide => {
         slide.classList.remove('active');
@@ -594,12 +615,12 @@
       }
       
       currentSlide = index;
-      updateProgressBar();
-      updateNavigationState();
+      updateSliderProgress();
+      updateSliderNavigation();
     }
 
     // Update progress bar
-    function updateProgressBar() {
+    function updateSliderProgress() {
       if (progressBar && slides.length > 1) {
         const progress = ((currentSlide + 1) / slides.length) * 100;
         progressBar.style.width = progress + '%';
@@ -607,7 +628,7 @@
     }
 
     // Update navigation arrows state (enable/disable)
-    function updateNavigationState() {
+    function updateSliderNavigation() {
       if (prevBtn && nextBtn) {
         // Disable previous button on first slide
         if (currentSlide === 0) {
@@ -634,15 +655,15 @@
     }
 
     // Next slide
-    function nextSlide() {
+    function showNextSlide() {
       const next = (currentSlide + 1) % slides.length;
-      showSlide(next);
+      displaySlide(next);
     }
 
     // Previous slide
-    function prevSlide() {
+    function showPreviousSlide() {
       const prev = (currentSlide - 1 + slides.length) % slides.length;
-      showSlide(prev);
+      displaySlide(prev);
     }
 
     // Start auto-slide
@@ -653,7 +674,7 @@
         userInteractionTimeout = null;
       }
       
-      autoSlideInterval = setInterval(nextSlide, slideInterval);
+      autoSlideInterval = setInterval(showNextSlide, slideInterval);
     }
 
     // Stop auto-slide
@@ -681,7 +702,7 @@
     }
 
     // Handle swipe detection
-    function handleSwipe() {
+    function handleSwipeGesture() {
       const swipeDistance = touchEndX - touchStartX;
       const verticalDistance = Math.abs(touchEndY - touchStartY);
       const horizontalDistance = Math.abs(swipeDistance);
@@ -691,10 +712,10 @@
       if (horizontalDistance > verticalDistance && horizontalDistance > minSwipeDistance) {
         if (swipeDistance > 0) {
           // Swipe right - go to previous slide
-          prevSlide();
+          showPreviousSlide();
         } else {
           // Swipe left - go to next slide
-          nextSlide();
+          showNextSlide();
         }
         
         // Pause auto-slide temporarily after user interaction
@@ -705,7 +726,7 @@
     }
 
     // Touch event handlers
-    function handleTouchStart(e) {
+    function onTouchStart(e) {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
       isSwiping = false;
@@ -716,18 +737,18 @@
       }
     }
 
-    function handleTouchMove(e) {
+    function onTouchMove(e) {
       if (!isSwiping) {
         isSwiping = true;
       }
     }
 
-    function handleTouchEnd(e) {
+    function onTouchEnd(e) {
       touchEndX = e.changedTouches[0].clientX;
       touchEndY = e.changedTouches[0].clientY;
       
       if (isSwiping) {
-        handleSwipe();
+        handleSwipeGesture();
       } else {
         // If no swipe was detected, resume auto-slide after delay
         if (autoSlide) {
@@ -738,15 +759,15 @@
 
     // Add touch event listeners to slider
     if (slider) {
-      slider.addEventListener('touchstart', handleTouchStart, { passive: true });
-      slider.addEventListener('touchmove', handleTouchMove, { passive: true });
-      slider.addEventListener('touchend', handleTouchEnd, { passive: true });
+      slider.addEventListener('touchstart', onTouchStart, { passive: true });
+      slider.addEventListener('touchmove', onTouchMove, { passive: true });
+      slider.addEventListener('touchend', onTouchEnd, { passive: true });
     }
 
     // Event listeners
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
-        prevSlide();
+        showPreviousSlide();
         if (autoSlide) {
           pauseAutoSlideTemporarily();
         }
@@ -755,7 +776,7 @@
 
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
-        nextSlide();
+        showNextSlide();
         if (autoSlide) {
           pauseAutoSlideTemporarily();
         }
@@ -771,12 +792,12 @@
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') {
-        prevSlide();
+        showPreviousSlide();
         if (autoSlide) {
           pauseAutoSlideTemporarily();
         }
       } else if (e.key === 'ArrowRight') {
-        nextSlide();
+        showNextSlide();
         if (autoSlide) {
           pauseAutoSlideTemporarily();
         }
@@ -784,11 +805,11 @@
     });
 
     // Initialize immediately for faster loading
-    initSlider();
+    initializeHeroSlider();
   });
 
   // Function to maintain aspect ratio for hero media and adjust container height
-  function maintainHeroAspectRatio() {
+  function updateHeroSectionHeight() {
     document.querySelectorAll('.dynamic-hero-slide').forEach(slide => {
       const mediaWrapper = slide.querySelector('.hero-media-wrapper');
       const media = slide.querySelector('.hero-media-content, .hero-video');
@@ -825,14 +846,14 @@
   }
 
   // Run on load and window resize
-  window.addEventListener('load', maintainHeroAspectRatio);
-  window.addEventListener('resize', maintainHeroAspectRatio);
+  window.addEventListener('load', updateHeroSectionHeight);
+  window.addEventListener('resize', updateHeroSectionHeight);
   
   // Also run when images/videos are loaded to ensure proper sizing
   document.querySelectorAll('.hero-media-content, .hero-video').forEach(media => {
-    media.addEventListener('load', maintainHeroAspectRatio);
+    media.addEventListener('load', updateHeroSectionHeight);
     if (media.tagName.toLowerCase() === 'video') {
-      media.addEventListener('loadedmetadata', maintainHeroAspectRatio);
+      media.addEventListener('loadedmetadata', updateHeroSectionHeight);
     }
   });
 </script>
