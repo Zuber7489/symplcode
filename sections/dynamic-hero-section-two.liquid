@@ -24,14 +24,14 @@
               {% if item.content_type == 'image' %}
                 <img 
                   src="{{ item.desktop_image }}" 
-                  class="hero-media-content hero-desktop-only" 
+                  class="hero-media-content-two hero-desktop-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
                 <img 
                   src="{{ item.mobile_image }}" 
-                  class="hero-media-content hero-mobile-only" 
+                  class="hero-media-content-two hero-mobile-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
@@ -112,7 +112,7 @@
                   src="{{ block.settings.desktop_image | img_url: '1920x' }}" 
                   srcset="{{ block.settings.desktop_image | img_url: '1200x' }} 1200w, {{ block.settings.desktop_image | img_url: '1920x' }} 1920w"
                   sizes="100vw"
-                  class="hero-media-content hero-desktop-only" 
+                  class="hero-media-content-two hero-desktop-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
@@ -120,7 +120,7 @@
                   src="{{ block.settings.mobile_image | img_url: '768x' }}" 
                   srcset="{{ block.settings.mobile_image | img_url: '480x' }} 480w, {{ block.settings.mobile_image | img_url: '768x' }} 768w"
                   sizes="100vw"
-                  class="hero-media-content hero-mobile-only" 
+                  class="hero-media-content-two hero-mobile-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
@@ -271,9 +271,9 @@
     overflow: hidden;
   }
 
-  .hero-media-content {
+  .hero-media-content-two {
     width: 100%;
-    height: 92%;
+    height: 85%;
     display: block;
   }
 
@@ -790,7 +790,7 @@
   function maintainHeroAspectRatio() {
     document.querySelectorAll('.dynamic-hero-slide-two').forEach(slide => {
       const mediaWrapper = slide.querySelector('.hero-media-wrapper');
-      const media = slide.querySelector('.hero-media-content, .hero-video');
+      const media = slide.querySelector('.hero-media-content-two, .hero-video');
       const heroSection = slide.closest('.dynamic-hero-section-two');
       
       if (!media) return;
@@ -828,7 +828,7 @@
   window.addEventListener('resize', maintainHeroAspectRatio);
   
   // Also run when images/videos are loaded
-  document.querySelectorAll('.hero-media-content, .hero-video').forEach(media => {
+  document.querySelectorAll('.hero-media-content-two, .hero-video').forEach(media => {
     media.addEventListener('load', maintainHeroAspectRatio);
     if (media.tagName.toLowerCase() === 'video') {
       media.addEventListener('loadedmetadata', maintainHeroAspectRatio);
