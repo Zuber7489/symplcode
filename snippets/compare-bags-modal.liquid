@@ -1325,6 +1325,8 @@ const compareProductsData = {
     id: window.productMetafieldsData?.currentVariant?.id || {{ current_variant.id | default: product.id }},
     title: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.productTitle)) || "{{ product.title | escape | default: 'Product' }}",
     image: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.variantImage)) || window.productMetafieldsData?.currentVariant?.image || "{{ current_variant.featured_image | img_url: '300x300' | default: product.featured_image | img_url: '300x300' | default: '' }}",
+    sizePhoto: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.comparebag_size_photo)) || "{{ current_variant.metafields.custom.comparebag_size_photo | img_url: '300x300' | default: '' }}",
+    fabricPhoto: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.comparebag_fabric_photo)) || "{{ current_variant.metafields.custom.comparebag_fabric_photo | img_url: '300x300' | default: '' }}",
     price: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.customPrice)) || "{{ current_variant.price | money | default: product.price | money }}",
     url: "{{ product.url | default: '#' }}",
     isCurrentProduct: true,
@@ -1367,6 +1369,8 @@ const compareProductsData = {
     id: variant.id,
     title: parseRichText(decodeHtmlEntities(variant.metafields?.productTitle)) || "{{ product.title | escape }} " + variant.option1,
     image: parseRichText(decodeHtmlEntities(variant.metafields?.variantImage)) || variant.image || "{{ product.featured_image | img_url: '300x300' }}",
+    sizePhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_size_photo)) || "",
+    fabricPhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_fabric_photo)) || "",
     price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
     url: "{{ product.url }}?variant=" + variant.id,
     isCurrentProduct: variant.id == {{ current_variant.id | default: 'null' }},
@@ -1409,6 +1413,8 @@ const compareProductsData = {
     id: variant.id,
     title: parseRichText(decodeHtmlEntities(variant.metafields?.productTitle)) || "{{ product.title | escape }} " + variant.option2,
     image: parseRichText(decodeHtmlEntities(variant.metafields?.variantImage)) || variant.image || "{{ product.featured_image | img_url: '300x300' }}",
+    sizePhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_size_photo)) || "",
+    fabricPhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_fabric_photo)) || "",
     price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
     url: "{{ product.url }}?variant=" + variant.id,
     isCurrentProduct: variant.id == {{ current_variant.id | default: 'null' }},
@@ -1837,7 +1843,7 @@ function renderProducts(products, tab) {
         html += `
           <div class="compare-modal-product" data-card-position="${cardPosition}">
             <div class="compare-modal-img-wrap">
-              <img class="compare-modal-img" src="${prod.image}" alt="${prod.title}">
+              <img class="compare-modal-img" src="${prod.sizePhoto || prod.image}" alt="${prod.title}">
             </div>
             
             <h3 class="compare-modal-product-title">${prod.title}</h3>
@@ -1875,7 +1881,7 @@ function renderProducts(products, tab) {
         html += `
           <div class="compare-modal-product" data-card-position="${cardPosition}">
             <div class="compare-modal-img-wrap">
-              <img class="compare-modal-img" src="${prod.image}" alt="${prod.title}">
+              <img class="compare-modal-img" src="${prod.fabricPhoto || prod.image}" alt="${prod.title}">
             </div>
             
             ${prod.fabric && compareProductsData.labels.fabricLabel ? `<div class="compare-modal-fabric">
@@ -2008,6 +2014,8 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
     id: variantData.id,
     title: parseRichText(decodeHtmlEntities(variantData.metafields?.productTitle)) || variantData.title,
     image: parseRichText(decodeHtmlEntities(variantData.metafields?.variantImage)) || variantData.image,
+    sizePhoto: parseRichText(decodeHtmlEntities(variantData.metafields?.comparebag_size_photo)) || "",
+    fabricPhoto: parseRichText(decodeHtmlEntities(variantData.metafields?.comparebag_fabric_photo)) || "",
     price: parseRichText(decodeHtmlEntities(variantData.metafields?.customPrice)) || variantData.price,
     url: "{{ product.url }}?variant=" + variantData.id,
     isCurrentProduct: cardPosition === 'left', // Only left card is current product
@@ -2065,7 +2073,7 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
     // Update the card content - preserve labels for left card, only show sections with content
     cardElement.innerHTML = `
       <div class="compare-modal-img-wrap">
-        <img class="compare-modal-img" src="${productData.image}" alt="${productData.title}">
+        <img class="compare-modal-img" src="${productData.sizePhoto || productData.image}" alt="${productData.title}">
       </div>
       
       <h3 class="compare-modal-product-title">${productData.title}</h3>
@@ -2103,7 +2111,7 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
     // Update the card content - preserve labels for left card, only show sections with content
     cardElement.innerHTML = `
       <div class="compare-modal-img-wrap">
-        <img class="compare-modal-img" src="${productData.image}" alt="${productData.title}">
+        <img class="compare-modal-img" src="${productData.fabricPhoto || productData.image}" alt="${productData.title}">
       </div>
       
       ${productData.fabric && compareProductsData.labels.fabricLabel ? `<div class="compare-modal-fabric">

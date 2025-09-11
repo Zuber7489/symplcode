@@ -363,9 +363,10 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
           
           // New metafields for customization
           productTitle: {% if current_variant.metafields.custom.comparebag_product_title %}"{{ current_variant.metafields.custom.comparebag_product_title | escape }}"{% else %}null{% endif %},
-          variantImage: {% if current_variant.metafields.custom.comparebag_variant_image %}"{{ current_variant.metafields.custom.comparebag_variant_image | img_url: '300x300' }}"{% else %}null{% endif %},
+        
           customPrice: {% if current_variant.metafields.custom.comparebag_custom_price %}"{{ current_variant.metafields.custom.comparebag_custom_price | escape }}"{% else %}null{% endif %},
-          
+          comparebag_size_photo: {% if current_variant.metafields.custom.comparebag_size_photo %}"{{ current_variant.metafields.custom.comparebag_size_photo | img_url: '300x300' }}"{% else %}null{% endif %},
+          comparebag_fabric_photo: {% if current_variant.metafields.custom.comparebag_fabric_photo %}"{{ current_variant.metafields.custom.comparebag_fabric_photo | img_url: '300x300' }}"{% else %}null{% endif %},
           // 90-degree left labels
           specsLabel: {% if current_variant.metafields.custom.comparebag_specs_label %}"{{ current_variant.metafields.custom.comparebag_specs_label | escape }}"{% else %}null{% endif %},
           featuresLabel: {% if current_variant.metafields.custom.comparebag_features_label %}"{{ current_variant.metafields.custom.comparebag_features_label | escape }}"{% else %}null{% endif %},
@@ -405,6 +406,10 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
             productTitle: {% if variant.metafields.custom.comparebag_product_title %}"{{ variant.metafields.custom.comparebag_product_title | escape }}"{% else %}null{% endif %},
             variantImage: {% if variant.metafields.custom.comparebag_variant_image %}"{{ variant.metafields.custom.comparebag_variant_image | img_url: '300x300' }}"{% else %}null{% endif %},
             customPrice: {% if variant.metafields.custom.comparebag_custom_price %}"{{ variant.metafields.custom.comparebag_custom_price | escape }}"{% else %}null{% endif %},
+            
+            // Compare bag photos for different tabs
+            comparebag_size_photo: {% if variant.metafields.custom.comparebag_size_photo %}"{{ variant.metafields.custom.comparebag_size_photo | img_url: '300x300' }}"{% else %}null{% endif %},
+            comparebag_fabric_photo: {% if variant.metafields.custom.comparebag_fabric_photo %}"{{ variant.metafields.custom.comparebag_fabric_photo | img_url: '300x300' }}"{% else %}null{% endif %},
             
             // 90-degree left labels
             specsLabel: {% if variant.metafields.custom.comparebag_specs_label %}"{{ variant.metafields.custom.comparebag_specs_label | escape }}"{% else %}null{% endif %},
