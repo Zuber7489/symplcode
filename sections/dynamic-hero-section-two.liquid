@@ -789,8 +789,8 @@
   // Function to maintain aspect ratio for hero media and adjust container height
   function maintainHeroAspectRatio() {
     document.querySelectorAll('.dynamic-hero-slide-two').forEach(slide => {
-      const mediaWrapper = slide.querySelector('.hero-media-wrapper');
-      const media = slide.querySelector('.hero-media-content-two, .hero-video');
+      const mediaWrapper = slide.querySelector('.hero-media-wrapper-two');
+      const media = slide.querySelector('.hero-media-content-two, .hero-video-two');
       const heroSection = slide.closest('.dynamic-hero-section-two');
       
       if (!media) return;
@@ -809,7 +809,11 @@
       if (naturalWidth && naturalHeight) {
         const aspectRatio = naturalWidth / naturalHeight;
         const containerWidth = mediaWrapper.offsetWidth;
-        const calculatedHeight = containerWidth / aspectRatio;
+        let calculatedHeight = containerWidth / aspectRatio;
+        
+        // Add a small buffer to the calculated height (10px or 2% of calculated height, whichever is larger)
+        const buffer = Math.max(10, calculatedHeight * 0.02);
+        calculatedHeight += buffer;
         
         // Set the height on both the media wrapper and the slide
         mediaWrapper.style.height = calculatedHeight + 'px';
