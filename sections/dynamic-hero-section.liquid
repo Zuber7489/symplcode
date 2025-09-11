@@ -782,40 +782,55 @@
     initSlider();
   });
 
-  // Function to maintain aspect ratio for hero media and adjust container height
+  // Function to maintain aspect ratio for hero media and ensure full coverage
   function maintainHeroAspectRatio() {
     document.querySelectorAll('.dynamic-hero-slide').forEach(slide => {
       const mediaWrapper = slide.querySelector('.hero-media-wrapper');
       const media = slide.querySelector('.hero-media-content, .hero-video');
       const heroSection = slide.closest('.dynamic-hero-section');
       
-      if (!media) return;
+      if (!media || !mediaWrapper) return;
       
-      // Use natural dimensions for images, videoWidth/Height for videos
+      // Ensure media takes full width and height of its container
+      media.style.width = '100%';
+      media.style.height = '100%';
+      media.style.objectFit = 'cover';
+      media.style.objectPosition = 'center';
+      
+      // Set wrapper to full viewport width and calculate height based on image aspect ratio
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      // Get natural dimensions if available, otherwise use current dimensions
       const isVideo = media.tagName.toLowerCase() === 'video';
-      let naturalWidth = isVideo ? media.videoWidth : media.naturalWidth;
-      let naturalHeight = isVideo ? media.videoHeight : media.naturalHeight;
+      let mediaWidth = isVideo ? (media.videoWidth || media.offsetWidth) : (media.naturalWidth || media.offsetWidth);
+      let mediaHeight = isVideo ? (media.videoHeight || media.offsetHeight) : (media.naturalHeight || media.offsetHeight);
       
-      // If natural dimensions aren't available yet, use the current image dimensions
-      if ((!naturalWidth || !naturalHeight) && media.offsetWidth && media.offsetHeight) {
-        naturalWidth = media.offsetWidth;
-        naturalHeight = media.offsetHeight;
+      // If we still don't have dimensions, use a default aspect ratio (16:9)
+      if (!mediaWidth || !mediaHeight) {
+        mediaWidth = 16;
+        mediaHeight = 9;
       }
       
-      if (naturalWidth && naturalHeight) {
-        const aspectRatio = naturalWidth / naturalHeight;
-        const containerWidth = mediaWrapper.offsetWidth;
-        const calculatedHeight = containerWidth / aspectRatio;
-        
-        // Set the height on both the media wrapper and the slide
-        mediaWrapper.style.height = calculatedHeight + 'px';
-        slide.style.height = calculatedHeight + 'px';
-        
-        // Also update the hero section height if it exists
-        if (heroSection) {
-          heroSection.style.height = calculatedHeight + 'px';
+      const aspectRatio = mediaWidth / mediaHeight;
+      const containerWidth = mediaWrapper.offsetWidth || viewportWidth;
+      let calculatedHeight = containerWidth / aspectRatio;
+      
+      // Ensure the height is at least the viewport height to prevent gaps
+      if (calculatedHeight < viewportHeight) {
+        calculatedHeight = viewportHeight;
+      }
+      
+      // Apply the calculated height to all relevant elements
+      [mediaWrapper, slide, heroSection].forEach(el => {
+        if (el) {
+          el.style.height = `${calculatedHeight}px`;
+          el.style.overflow = 'hidden';
         }
-      }
+      });
+      
+      // Force a reflow to ensure styles are applied
+      void media.offsetHeight;
     });
   }
 
