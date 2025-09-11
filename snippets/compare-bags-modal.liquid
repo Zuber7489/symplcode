@@ -1654,34 +1654,40 @@ function generateSwatchOptions(product, tab, cardPosition = 'left', selectedVari
   }
   
   // Get the base variant for this card position
-  let baseVariant = currentVariant;
-  if (cardPosition === 'right') {
-    // For right card, we need to find the appropriate variant based on the tab
-    if (tab === 'size') {
-      // Find a variant with different size but same fabric
-      const currentSize = currentVariant?.option2 || currentVariant?.option1;
-      const currentFabric = currentVariant?.option1 || currentVariant?.option2;
-      baseVariant = allVariants.find(variant => {
-        const variantSize = variant.option2 || variant.option1;
-        const variantFabric = variant.option1 || variant.option2;
-        return variantSize !== currentSize && variantFabric === currentFabric;
-      }) || allVariants.find(variant => variant.id !== currentVariant?.id);
-    } else if (tab === 'fabric') {
-      // Find a variant with different fabric but same size
-      const currentSize = currentVariant?.option2 || currentVariant?.option1;
-      const currentFabric = currentVariant?.option1 || currentVariant?.option2;
-      baseVariant = allVariants.find(variant => {
-        const variantSize = variant.option2 || variant.option1;
-        const variantFabric = variant.option1 || variant.option2;
-        return variantFabric !== currentFabric && variantSize === currentSize;
-      }) || allVariants.find(variant => variant.id !== currentVariant?.id);
+  let baseVariant;
+  
+  // If selectedVariantId is provided, use that variant as the base for this specific card
+  if (selectedVariantId) {
+    baseVariant = allVariants.find(v => v.id == selectedVariantId) || currentVariant;
+  } else {
+    // Default behavior for initial load
+    baseVariant = currentVariant;
+    if (cardPosition === 'right') {
+      // For right card, we need to find the appropriate variant based on the tab
+      if (tab === 'size') {
+        // Find a variant with different size but same fabric
+        const currentSize = currentVariant?.option2 || currentVariant?.option1;
+        const currentFabric = currentVariant?.option1 || currentVariant?.option2;
+        baseVariant = allVariants.find(variant => {
+          const variantSize = variant.option2 || variant.option1;
+          const variantFabric = variant.option1 || variant.option2;
+          return variantSize !== currentSize && variantFabric === currentFabric;
+        }) || allVariants.find(variant => variant.id !== currentVariant?.id);
+      } else if (tab === 'fabric') {
+        // Find a variant with different fabric but same size
+        const currentSize = currentVariant?.option2 || currentVariant?.option1;
+        const currentFabric = currentVariant?.option1 || currentVariant?.option2;
+        baseVariant = allVariants.find(variant => {
+          const variantSize = variant.option2 || variant.option1;
+          const variantFabric = variant.option1 || variant.option2;
+          return variantFabric !== currentFabric && variantSize === currentSize;
+        }) || allVariants.find(variant => variant.id !== currentVariant?.id);
+      }
     }
   }
   
-  // For right card, update selectedVariant to use baseVariant if no specific variant is selected
-  if (cardPosition === 'right' && !selectedVariantId) {
-    selectedVariant = baseVariant;
-  }
+  // Set selectedVariant to baseVariant for this card
+  selectedVariant = baseVariant;
   
   // Determine which variants to show based on tab and card position
   let relevantVariants = [];
@@ -1734,33 +1740,23 @@ function generateSwatchOptions(product, tab, cardPosition = 'left', selectedVari
   // Generate swatch HTML
   let swatchHtml = '';
   
-  // Add base variant as first swatch
-  if (baseVariant) {
-    let baseOption;
-    if (tab === 'size') {
-      // For size tab, show the fabric option (the other option)
-      baseOption = baseVariant.option1 === (baseVariant.option2 || baseVariant.option1) ? 
-                   baseVariant.option2 : baseVariant.option1;
-    } else {
-      // For fabric tab, show the size option (the other option)
-      baseOption = baseVariant.option2 === (baseVariant.option1 || baseVariant.option2) ? 
-                   baseVariant.option1 : baseVariant.option2;
-    }
-    
-    const isSelected = selectedVariant && selectedVariant.id == baseVariant.id;
-    
-    swatchHtml += `
-      <div class="compare-modal-available-in-item ${isSelected ? 'selected' : ''}" data-variant-id="${baseVariant.id}" data-option="${baseOption}" data-card-position="${cardPosition}">
-        <div class="compare-modal-available-in-thumbnail">
-          <img src="${baseVariant.image || product.image}" alt="${baseOption}">
-        </div>
-        <div class="compare-modal-available-in-material">${baseOption}</div>
-      </div>
-    `;
-  }
+  // Combine all variants and maintain original order
+  const allSwatchVariants = [];
   
-  // Add other variants
-  relevantVariants.forEach(variant => {
+  // Add all variants from allVariants in their original order
+  allVariants.forEach(variant => {
+    // Check if this variant should be included (either base or relevant)
+    const isBaseVariant = baseVariant && variant.id === baseVariant.id;
+    const isRelevantVariant = relevantVariants.find(v => v.id === variant.id);
+    
+    if (isBaseVariant || isRelevantVariant) {
+      allSwatchVariants.push(variant);
+    }
+  });
+  
+  
+  // Generate HTML for all variants in order
+  allSwatchVariants.forEach(variant => {
     let option;
     if (tab === 'size') {
       // For size tab, show the fabric option (the other option)
