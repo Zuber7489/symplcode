@@ -267,7 +267,7 @@
 
   .hero-media-content {
     width: 100%;
-    height: auto;
+    
     display: block;
   }
 
@@ -782,47 +782,52 @@
     initSlider();
   });
 
-  // Function to set container height based on image natural dimensions
-  function setContainerHeightFromImage() {
+  // Function to maintain aspect ratio for hero media and adjust container height
+  function maintainHeroAspectRatio() {
     document.querySelectorAll('.dynamic-hero-slide').forEach(slide => {
-      const slider = slide.closest('.dynamic-hero-slider');
+      const mediaWrapper = slide.querySelector('.hero-media-wrapper');
       const media = slide.querySelector('.hero-media-content, .hero-video');
+      const heroSection = slide.closest('.dynamic-hero-section');
       
-      if (!slider || !media) return;
+      if (!media) return;
       
-      // Get natural dimensions
+      // Use natural dimensions for images, videoWidth/Height for videos
       const isVideo = media.tagName.toLowerCase() === 'video';
-      let naturalWidth, naturalHeight;
+      let naturalWidth = isVideo ? media.videoWidth : media.naturalWidth;
+      let naturalHeight = isVideo ? media.videoHeight : media.naturalHeight;
       
-      if (isVideo) {
-        naturalWidth = media.videoWidth;
-        naturalHeight = media.videoHeight;
-      } else {
-        naturalWidth = media.naturalWidth;
-        naturalHeight = media.naturalHeight;
+      // If natural dimensions aren't available yet, use the current image dimensions
+      if ((!naturalWidth || !naturalHeight) && media.offsetWidth && media.offsetHeight) {
+        naturalWidth = media.offsetWidth;
+        naturalHeight = media.offsetHeight;
       }
       
       if (naturalWidth && naturalHeight) {
-        // Calculate aspect ratio
         const aspectRatio = naturalWidth / naturalHeight;
-        const containerWidth = slider.offsetWidth;
+        const containerWidth = mediaWrapper.offsetWidth;
         const calculatedHeight = containerWidth / aspectRatio;
         
-        // Set slider height to match image aspect ratio
-        slider.style.height = calculatedHeight + 'px';
+        // Set the height on both the media wrapper and the slide
+        mediaWrapper.style.height = calculatedHeight + 'px';
+        slide.style.height = calculatedHeight + 'px';
+        
+        // Also update the hero section height if it exists
+        if (heroSection) {
+          heroSection.style.height = calculatedHeight + 'px';
+        }
       }
     });
   }
 
   // Run on load and window resize
-  window.addEventListener('load', setContainerHeightFromImage);
-  window.addEventListener('resize', setContainerHeightFromImage);
+  window.addEventListener('load', maintainHeroAspectRatio);
+  window.addEventListener('resize', maintainHeroAspectRatio);
   
   // Also run when images/videos are loaded to ensure proper sizing
   document.querySelectorAll('.hero-media-content, .hero-video').forEach(media => {
-    media.addEventListener('load', setContainerHeightFromImage);
+    media.addEventListener('load', maintainHeroAspectRatio);
     if (media.tagName.toLowerCase() === 'video') {
-      media.addEventListener('loadedmetadata', setContainerHeightFromImage);
+      media.addEventListener('loadedmetadata', maintainHeroAspectRatio);
     }
   });
 </script>
