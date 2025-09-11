@@ -923,6 +923,35 @@
   }
 }
 
+/* Loading states for quantity and remove buttons */
+.quantity-btn.is-loading,
+.cart-item-remove.is-loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.quantity-btn.is-loading::after,
+.cart-item-remove.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #6b7280;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+  z-index: 1;
+}
+
+.quantity-btn.is-loading svg,
+.cart-item-remove.is-loading svg {
+  opacity: 0;
+}
+
 /* Checkout Section */
 .checkout-section {
   background: #ffffff;
@@ -2416,11 +2445,19 @@ $(document).ready(function() {
     var currentQuantity = parseInt($button.siblings('.quantity-input').val());
     var newQuantity = currentQuantity + 1;
     
+    // Prevent multiple clicks during loading
+    if ($button.hasClass('is-loading') || $button.prop('disabled')) {
+      return false;
+    }
+    
+    // Add loading state to button
+    $button.prop('disabled', true).addClass('is-loading');
+    
     // Update quantity input immediately for better UX
     $button.siblings('.quantity-input').val(newQuantity);
     
     // Update item quantity in cart
-    updateCartItemQuantity(itemKey, newQuantity);
+    updateCartItemQuantity(itemKey, newQuantity, $button);
   });
   
   // Quantity decrease button handler
@@ -2432,14 +2469,22 @@ $(document).ready(function() {
     var currentQuantity = parseInt($button.siblings('.quantity-input').val());
     var newQuantity = Math.max(1, currentQuantity - 1); // Minimum quantity of 1
     
+    // Prevent multiple clicks during loading
+    if ($button.hasClass('is-loading') || $button.prop('disabled')) {
+      return false;
+    }
+    
+    // Add loading state to button
+    $button.prop('disabled', true).addClass('is-loading');
+    
     // Update quantity input immediately for better UX
     $button.siblings('.quantity-input').val(newQuantity);
     
     // If quantity is 0, remove the item, otherwise update quantity
     if (newQuantity === 0) {
-      removeItemFromCart(itemKey);
+      removeItemFromCart(itemKey, $button);
     } else {
-      updateCartItemQuantity(itemKey, newQuantity);
+      updateCartItemQuantity(itemKey, newQuantity, $button);
     }
   });
   
@@ -2449,8 +2494,16 @@ $(document).ready(function() {
     var $button = $(this);
     var itemKey = $button.data('item-key');
     
+    // Prevent multiple clicks during loading
+    if ($button.hasClass('is-loading') || $button.prop('disabled')) {
+      return false;
+    }
+    
+    // Add loading state to button
+    $button.prop('disabled', true).addClass('is-loading');
+    
     // Remove item from cart
-    removeItemFromCart(itemKey);
+    removeItemFromCart(itemKey, $button);
   });
   
   // Apply discount code handler
@@ -2645,7 +2698,7 @@ function addBundleItemToCart(variantId, quantity) {
 }
 
 // Function to update cart item quantity
-function updateCartItemQuantity(itemKey, quantity) {
+function updateCartItemQuantity(itemKey, quantity, $button) {
   $.ajax({
     type: "POST",
     url: "/cart/change.js",
@@ -2655,10 +2708,20 @@ function updateCartItemQuantity(itemKey, quantity) {
       quantity: quantity
     },
     success: function(cart) {
+      // Remove loading state from button
+      if ($button) {
+        $button.prop('disabled', false).removeClass('is-loading');
+      }
+      
       // Update cart HTML content to reflect new prices and quantities
       updateBundleProducts();
     },
     error: function(xhr) {
+      // Remove loading state from button
+      if ($button) {
+        $button.prop('disabled', false).removeClass('is-loading');
+      }
+      
       var data = JSON.parse(xhr.responseText);
       alert(data.message || 'Error updating cart');
       // Refresh to restore correct quantities
@@ -2668,7 +2731,7 @@ function updateCartItemQuantity(itemKey, quantity) {
 }
 
 // Function to remove item from cart
-function removeItemFromCart(itemKey) {
+function removeItemFromCart(itemKey, $button) {
   $.ajax({
     type: "POST",
     url: "/cart/change.js",
@@ -2678,10 +2741,20 @@ function removeItemFromCart(itemKey) {
       quantity: 0
     },
     success: function(cart) {
+      // Remove loading state from button
+      if ($button) {
+        $button.prop('disabled', false).removeClass('is-loading');
+      }
+      
       // Update cart HTML content to reflect item removal
       updateBundleProducts();
     },
     error: function(xhr) {
+      // Remove loading state from button
+      if ($button) {
+        $button.prop('disabled', false).removeClass('is-loading');
+      }
+      
       var data = JSON.parse(xhr.responseText);
       alert(data.message || 'Error removing item');
       // Refresh cart on error to restore correct state
