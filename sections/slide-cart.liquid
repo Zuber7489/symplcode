@@ -2441,7 +2441,7 @@ $(document).ready(function() {
     e.preventDefault();
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
-    var itemKey = $itemRow.data('item-key');
+    var lineNumber = $itemRow.data('line');
     var $quantityInput = $button.siblings('.quantity-input');
     var currentQuantity = parseInt($quantityInput.val());
     var newQuantity = currentQuantity + 1;
@@ -2461,7 +2461,7 @@ $(document).ready(function() {
     $quantityInput.val(newQuantity);
     
     // Update item quantity in cart
-    updateCartItemQuantity(itemKey, newQuantity, $button);
+    updateCartItemQuantity(lineNumber, newQuantity, $button);
   });
   
   // Quantity decrease button handler
@@ -2469,7 +2469,7 @@ $(document).ready(function() {
     e.preventDefault();
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
-    var itemKey = $itemRow.data('item-key');
+    var lineNumber = $itemRow.data('line');
     var $quantityInput = $button.siblings('.quantity-input');
     var currentQuantity = parseInt($quantityInput.val());
     var newQuantity = Math.max(1, currentQuantity - 1); // Minimum quantity of 1
@@ -2490,9 +2490,9 @@ $(document).ready(function() {
     
     // If quantity is 0, remove the item, otherwise update quantity
     if (newQuantity === 0) {
-      removeItemFromCart(itemKey, $button);
+      removeItemFromCart(lineNumber, $button);
     } else {
-      updateCartItemQuantity(itemKey, newQuantity, $button);
+      updateCartItemQuantity(lineNumber, newQuantity, $button);
     }
   });
   
@@ -2500,7 +2500,8 @@ $(document).ready(function() {
   $(document).on('click', '.cart-item-remove', function(e) {
     e.preventDefault();
     var $button = $(this);
-    var itemKey = $button.data('item-key');
+    var $itemRow = $button.closest('.cart-item');
+    var lineNumber = $itemRow.data('line');
     
     // Prevent multiple clicks during loading
     if ($button.hasClass('is-loading') || $button.prop('disabled')) {
@@ -2511,7 +2512,7 @@ $(document).ready(function() {
     $button.prop('disabled', true).addClass('is-loading');
     
     // Remove item from cart
-    removeItemFromCart(itemKey, $button);
+    removeItemFromCart(lineNumber, $button);
   });
   
   // Apply discount code handler
@@ -2699,7 +2700,7 @@ function addBundleItemToCart(variantId, quantity) {
 }
 
 // Function to update cart item quantity
-function updateCartItemQuantity(itemKey, quantity, $button) {
+function updateCartItemQuantity(lineNumber, quantity, $button) {
   var $itemRow = $button.closest('.cart-item');
   var unitPrice = parseFloat($itemRow.find('.cart-item-pricing').data('unit-price')) || 0;
   
@@ -2708,7 +2709,7 @@ function updateCartItemQuantity(itemKey, quantity, $button) {
     url: "/cart/change.js",
     dataType: "json",
     data: {
-      id: itemKey,
+      line: lineNumber,
       quantity: quantity
     },
     success: function(cart) {
@@ -2738,7 +2739,7 @@ function updateCartItemQuantity(itemKey, quantity, $button) {
 }
 
 // Function to remove item from cart
-function removeItemFromCart(itemKey, $button) {
+function removeItemFromCart(lineNumber, $button) {
   var $itemRow = $button.closest('.cart-item');
   
   // Optimistic UI: Hide item immediately
@@ -2749,7 +2750,7 @@ function removeItemFromCart(itemKey, $button) {
     url: "/cart/change.js",
     dataType: "json",
     data: {
-      id: itemKey,
+      line: lineNumber,
       quantity: 0
     },
     success: function(cart) {
@@ -2815,15 +2816,13 @@ function updateCartTotalsOnly(cart) {
 }
 
 function updateItemPriceOnly($itemRow, quantity, cart) {
-  // Find the specific item in cart data
-  var itemKey = $itemRow.data('item-key');
+  // Find the specific item in cart data using line number
+  var lineNumber = $itemRow.data('line');
   var cartItem = null;
   
-  for (var i = 0; i < cart.items.length; i++) {
-    if (cart.items[i].key === itemKey) {
-      cartItem = cart.items[i];
-      break;
-    }
+  // Line numbers are 1-indexed, array is 0-indexed
+  if (lineNumber && lineNumber <= cart.items.length) {
+    cartItem = cart.items[lineNumber - 1];
   }
   
   if (cartItem) {
