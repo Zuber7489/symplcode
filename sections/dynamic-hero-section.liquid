@@ -783,23 +783,39 @@
     initSlider();
   });
 
-  // Function to maintain aspect ratio for hero media
+  // Function to maintain aspect ratio for hero media and adjust container height
   function maintainHeroAspectRatio() {
     document.querySelectorAll('.dynamic-hero-slide').forEach(slide => {
       const mediaWrapper = slide.querySelector('.hero-media-wrapper');
       const media = slide.querySelector('.hero-media-content, .hero-video');
+      const heroSection = slide.closest('.dynamic-hero-section');
       
       if (!media) return;
       
       // Use natural dimensions for images, videoWidth/Height for videos
       const isVideo = media.tagName.toLowerCase() === 'video';
-      const naturalWidth = isVideo ? media.videoWidth : media.naturalWidth;
-      const naturalHeight = isVideo ? media.videoHeight : media.naturalHeight;
+      let naturalWidth = isVideo ? media.videoWidth : media.naturalWidth;
+      let naturalHeight = isVideo ? media.videoHeight : media.naturalHeight;
+      
+      // If natural dimensions aren't available yet, use the current image dimensions
+      if ((!naturalWidth || !naturalHeight) && media.offsetWidth && media.offsetHeight) {
+        naturalWidth = media.offsetWidth;
+        naturalHeight = media.offsetHeight;
+      }
       
       if (naturalWidth && naturalHeight) {
         const aspectRatio = naturalWidth / naturalHeight;
         const containerWidth = mediaWrapper.offsetWidth;
-        mediaWrapper.style.height = (containerWidth / aspectRatio) + 'px';
+        const calculatedHeight = containerWidth / aspectRatio;
+        
+        // Set the height on both the media wrapper and the slide
+        mediaWrapper.style.height = calculatedHeight + 'px';
+        slide.style.height = calculatedHeight + 'px';
+        
+        // Also update the hero section height if it exists
+        if (heroSection) {
+          heroSection.style.height = calculatedHeight + 'px';
+        }
       }
     });
   }
