@@ -11,7 +11,7 @@
   data-template="{{ template.name }}"
   data-product-id="{{ product.id }}"
 >
-  <div class="dynamic-hero-slider">
+  <div class="dynamic-hero-slider-two">
     {% comment %} PRODUCT PAGE: Use metafields for dynamic content {% endcomment %}
     {% if template.name == 'product' and product.metafields.custom.hero_content_two %}
       {% assign hero_content = product.metafields.custom.hero_content_two.value %}
@@ -19,7 +19,7 @@
         <!-- Debug: Hero content found -->
         <!-- {{ hero_content | json }} -->
         {% for item in hero_content %}
-          <div class="dynamic-hero-slide" data-slide-index="{{ forloop.index0 }}">
+          <div class="dynamic-hero-slide-two" data-slide-index="{{ forloop.index0 }}">
             <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
                 <img 
@@ -105,7 +105,7 @@
     {% if template.name != 'product' or product.metafields.custom.hero_content_two == blank %}
       {% for block in section.blocks %}
         {% if block.type == 'slide' %}
-          <div class="dynamic-hero-slide" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
+          <div class="dynamic-hero-slide-two" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
             <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
               {% if block.settings.content_type == 'image' %}
                 <img 
@@ -215,8 +215,8 @@
       </button>
     </div>
     
-    <div class="hero-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
-      <div class="hero-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
+    <div class="hero-slider-line-two" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
+      <div class="hero-slider-progress-two" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
     </div>
   </div>
 {% endif %}
@@ -230,14 +230,14 @@
     background: #000;
   }
 
-  .dynamic-hero-slider {
+  .dynamic-hero-slider-two {
     position: relative;
     width: 100%;
     height: 100vh; /* Full viewport height for maximum tallness */
     min-height: 800px;
   }
 
-  .dynamic-hero-slide {
+  .dynamic-hero-slide-two {
     position: absolute;
     top: 0;
     left: 0;
@@ -252,12 +252,12 @@
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   }
 
-  .dynamic-hero-slide:first-child {
+  .dynamic-hero-slide-two:first-child {
     opacity: 1;
     z-index: 1;
   }
 
-  .dynamic-hero-slide.active {
+  .dynamic-hero-slide-two.active {
     opacity: 1;
     z-index: 2;
   }
@@ -408,7 +408,7 @@
     height: 24px !important;
   }
 
-  .hero-slider-line {
+  .hero-slider-line-two {
     max-width: 120px !important;
     height: 2px ;
   }
@@ -469,7 +469,7 @@
     }
 
     /* Left align progress line on mobile */
-    .hero-slider-line {
+    .hero-slider-line-two {
       max-width: 100px !important;
       margin-left: 0 !important;
       height: 2px !important;
@@ -552,11 +552,11 @@
       
       console.log('✅ Hero section two found:', heroSection);
 
-    const slider = heroSection.querySelector('.dynamic-hero-slider');
-    const slides = heroSection.querySelectorAll('.dynamic-hero-slide');
+    const slider = heroSection.querySelector('.dynamic-hero-slider-two');
+    const slides = heroSection.querySelectorAll('.dynamic-hero-slide-two');
     const prevBtn = document.querySelector('.hero-slider-prev-two');
     const nextBtn = document.querySelector('.hero-slider-next-two');
-    const progressBar = document.querySelector('.hero-slider-progress');
+    const progressBar = document.querySelector('.hero-slider-progress-two');
     
     console.log('Buttons found:', {
       prevBtn: prevBtn,
@@ -788,7 +788,7 @@
 
   // Function to maintain aspect ratio for hero media and adjust container height
   function maintainHeroAspectRatio() {
-    document.querySelectorAll('.dynamic-hero-slide').forEach(slide => {
+    document.querySelectorAll('.dynamic-hero-slide-two').forEach(slide => {
       const mediaWrapper = slide.querySelector('.hero-media-wrapper');
       const media = slide.querySelector('.hero-media-content, .hero-video');
       const heroSection = slide.closest('.dynamic-hero-section-two');
