@@ -1722,7 +1722,7 @@ if (typeof Shopify.formatMoney !== 'function') {
 $(document).on('cart:refresh', function() {
   // Add a small delay to ensure DOM is ready
   setTimeout(function() {
-    updateBundleProducts();
+    updateBundleProductsWithHTML(); // Use full HTML refresh for product page additions
   }, 50);
 });
 
@@ -2553,6 +2553,65 @@ function updateBundleProducts() {
     },
     error: function(xhr, status, error) {
       console.error('Error fetching cart data:', error);
+    }
+  });
+}
+
+// Function for full HTML refresh (used for product page additions)
+function updateBundleProductsWithHTML() {
+  // Full HTML refresh to show new items added from product page
+  $.ajax({
+    type: "GET",
+    url: "/cart",
+    dataType: "html",
+    cache: false,
+    success: function(html) {
+      var $cartHtml = $(html);
+      var $newCartSection = $cartHtml.find('.r-side-cart');
+      
+      if ($newCartSection.length > 0) {
+        // Get current cart state
+        var wasActive = $('.r-side-cart').hasClass('active');
+        var bodyHasCartOpen = $('body').hasClass('g-cart-open');
+        
+        // Replace cart content with fresh server HTML
+        $('.r-side-cart').html($newCartSection.html());
+        
+        // Restore cart state
+        if (wasActive) {
+          $('.r-side-cart').addClass('active');
+        }
+        if (bodyHasCartOpen) {
+          $('body').addClass('g-cart-open');
+        }
+        
+        // Update cart counts from the fresh HTML
+        var cartCount = $cartHtml.find('.count').text() || '0';
+        $(".count").html(cartCount);
+        $("#cart-count").html(cartCount);
+        $(".hcart").html(cartCount);
+        
+        if (cartCount == '0') {
+          $(".hcart").hide();
+        } else {
+          $(".hcart").show();
+        }
+        
+        // Re-initialize bundle functionality after cart update
+        setTimeout(function() {
+          new BundleSlideNavigation();
+          initializeBundleProductImages();
+          hideProductsAlreadyInCart();
+        }, 50); // Reduced delay for faster initialization
+        
+      } else {
+        console.error('No cart section found in server response');
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('Error fetching cart HTML:', error);
+      // Fallback to fast JSON update
+      updateBundleProducts();
     }
   });
 }
