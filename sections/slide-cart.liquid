@@ -2442,7 +2442,8 @@ $(document).ready(function() {
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
     var itemKey = $itemRow.data('item-key');
-    var currentQuantity = parseInt($button.siblings('.quantity-input').val());
+    var $quantityInput = $button.siblings('.quantity-input');
+    var currentQuantity = parseInt($quantityInput.val());
     var newQuantity = currentQuantity + 1;
     
     // Prevent multiple clicks during loading
@@ -2450,11 +2451,14 @@ $(document).ready(function() {
       return false;
     }
     
+    // Store original quantity for error rollback
+    $quantityInput.data('original-quantity', currentQuantity);
+    
     // Add loading state to button
     $button.prop('disabled', true).addClass('is-loading');
     
     // Update quantity input immediately for better UX
-    $button.siblings('.quantity-input').val(newQuantity);
+    $quantityInput.val(newQuantity);
     
     // Update item quantity in cart
     updateCartItemQuantity(itemKey, newQuantity, $button);
@@ -2466,7 +2470,8 @@ $(document).ready(function() {
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
     var itemKey = $itemRow.data('item-key');
-    var currentQuantity = parseInt($button.siblings('.quantity-input').val());
+    var $quantityInput = $button.siblings('.quantity-input');
+    var currentQuantity = parseInt($quantityInput.val());
     var newQuantity = Math.max(1, currentQuantity - 1); // Minimum quantity of 1
     
     // Prevent multiple clicks during loading
@@ -2474,11 +2479,14 @@ $(document).ready(function() {
       return false;
     }
     
+    // Store original quantity for error rollback
+    $quantityInput.data('original-quantity', currentQuantity);
+    
     // Add loading state to button
     $button.prop('disabled', true).addClass('is-loading');
     
     // Update quantity input immediately for better UX
-    $button.siblings('.quantity-input').val(newQuantity);
+    $quantityInput.val(newQuantity);
     
     // If quantity is 0, remove the item, otherwise update quantity
     if (newQuantity === 0) {
@@ -2523,94 +2531,28 @@ $(document).ready(function() {
   });
 });
 
-// Function to update bundle products after cart changes
+// Function to update bundle products after cart changes (optimized for speed)
 function updateBundleProducts() {
-  
-  // Instead of generating HTML dynamically, fetch the complete cart from server
+  // Fast JSON-only update for better performance
   $.ajax({
     type: "GET",
-    url: "/cart",
-    dataType: "html",
+    url: "/cart.js",
+    dataType: "json",
     cache: false,
-    success: function(html) {
+    success: function(cartData) {
+      // Update cart counts and totals quickly
+      updateCartTotalsOnly(cartData);
+      updateCartHeader(cartData.item_count);
       
-      var $cartHtml = $(html);
-      var $newCartSection = $cartHtml.find('.r-side-cart');
-      
-      if ($newCartSection.length > 0) {
-        // Get current cart state
-        var wasActive = $('.r-side-cart').hasClass('active');
-        var bodyHasCartOpen = $('body').hasClass('g-cart-open');
-        
-        // Replace cart content with fresh server HTML
-        $('.r-side-cart').html($newCartSection.html());
-        
-        // Restore cart state
-        if (wasActive) {
-          $('.r-side-cart').addClass('active');
-        }
-        if (bodyHasCartOpen) {
-          $('body').addClass('g-cart-open');
-        }
-        
-        // Update cart counts from the fresh HTML
-        var cartCount = $cartHtml.find('.count').text() || '0';
-        $(".count").html(cartCount);
-        $("#cart-count").html(cartCount);
-        $(".hcart").html(cartCount);
-        
-        if (cartCount == '0') {
-          $(".hcart").hide();
-        } else {
-          $(".hcart").show();
-        }
-        
-        // Re-initialize bundle functionality after cart update
-        setTimeout(function() {
-          new BundleSlideNavigation();
-          initializeBundleProductImages();
-          hideProductsAlreadyInCart(); // Hide products that are already in cart
-          
-          // Re-attach discount code event handlers
-          $(document).off('click', '#apply-discount').on('click', '#apply-discount', function(e) {
-            e.preventDefault();
-            var code = $('#discount-code').val().trim();
-            applyDiscountCode(code);
-          });
-          
-          $(document).off('keypress', '#discount-code').on('keypress', '#discount-code', function(e) {
-            if (e.which === 13) { // Enter key
-              e.preventDefault();
-              var code = $(this).val().trim();
-              applyDiscountCode(code);
-            }
-          });
-        }, 100);
-        
+      // Show/hide cart elements based on item count
+      if (cartData.item_count > 0) {
+        $(".hcart").show();
       } else {
-        console.error('No cart section found in server response');
+        $(".hcart").hide();
       }
     },
     error: function(xhr, status, error) {
-      console.error('Error fetching cart HTML:', error);
-      // Fallback to JSON API if HTML fetch fails
-      $.ajax({
-        type: "GET",
-        url: "/cart.js",
-        dataType: "json",
-        success: function(cartData) {
-          // Update cart counts only
-          $(".count").html(cartData.item_count);
-          $("#cart-count").html(cartData.item_count);
-          $(".hcart").html(cartData.item_count);
-          
-          if (cartData.item_count > 0) {
-            $(".hcart").show();
-          } else {
-            $(".hcart").hide();
-          }
-        }
-      });
+      console.error('Error fetching cart data:', error);
     }
   });
 }
@@ -2699,6 +2641,9 @@ function addBundleItemToCart(variantId, quantity) {
 
 // Function to update cart item quantity
 function updateCartItemQuantity(itemKey, quantity, $button) {
+  var $itemRow = $button.closest('.cart-item');
+  var unitPrice = parseFloat($itemRow.find('.cart-item-pricing').data('unit-price')) || 0;
+  
   $.ajax({
     type: "POST",
     url: "/cart/change.js",
@@ -2713,8 +2658,9 @@ function updateCartItemQuantity(itemKey, quantity, $button) {
         $button.prop('disabled', false).removeClass('is-loading');
       }
       
-      // Update cart HTML content to reflect new prices and quantities
-      updateBundleProducts();
+      // Fast update: Update only the specific item's price and cart totals
+      updateCartTotalsOnly(cart);
+      updateItemPriceOnly($itemRow, quantity, cart);
     },
     error: function(xhr) {
       // Remove loading state from button
@@ -2722,16 +2668,23 @@ function updateCartItemQuantity(itemKey, quantity, $button) {
         $button.prop('disabled', false).removeClass('is-loading');
       }
       
+      // Restore original quantity on error
+      var originalQuantity = $button.siblings('.quantity-input').data('original-quantity') || 1;
+      $button.siblings('.quantity-input').val(originalQuantity);
+      
       var data = JSON.parse(xhr.responseText);
       alert(data.message || 'Error updating cart');
-      // Refresh to restore correct quantities
-      updateBundleProducts();
     }
   });
 }
 
 // Function to remove item from cart
 function removeItemFromCart(itemKey, $button) {
+  var $itemRow = $button.closest('.cart-item');
+  
+  // Optimistic UI: Hide item immediately
+  $itemRow.fadeOut(200);
+  
   $.ajax({
     type: "POST",
     url: "/cart/change.js",
@@ -2746,8 +2699,18 @@ function removeItemFromCart(itemKey, $button) {
         $button.prop('disabled', false).removeClass('is-loading');
       }
       
-      // Update cart HTML content to reflect item removal
-      updateBundleProducts();
+      // Fast update: Update only cart totals and remove item
+      $itemRow.remove();
+      updateCartTotalsOnly(cart);
+      updateCartHeader(cart.item_count);
+      
+      // Show empty cart if no items
+      if (cart.item_count === 0) {
+        $('.cart-items-list').hide();
+        $('.bundle-save-section').hide();
+        $('.checkout-section').hide();
+        $('.cart-items-container').append('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
+      }
     },
     error: function(xhr) {
       // Remove loading state from button
@@ -2755,12 +2718,76 @@ function removeItemFromCart(itemKey, $button) {
         $button.prop('disabled', false).removeClass('is-loading');
       }
       
+      // Restore item on error
+      $itemRow.fadeIn(200);
+      
       var data = JSON.parse(xhr.responseText);
       alert(data.message || 'Error removing item');
-      // Refresh cart on error to restore correct state
-      updateBundleProducts();
     }
   });
+}
+
+// Fast update helper functions
+function updateCartTotalsOnly(cart) {
+  // Update cart totals without full page refresh
+  $('.total-amount').text(formatMoney(cart.total_price));
+  
+  // Update cart count
+  $('.count').text(cart.item_count);
+  $('.hcart').text(cart.item_count);
+  $('.cart-btn').html('<span class="fa fa-shopping-bag"></span><span>' + cart.item_count + '</span>');
+  
+  // Update shipping
+  var shippingCost = cart.total_price >= 5000 ? 'Free' : '$5.00';
+  $('.shipping-cost').text(shippingCost);
+  
+  // Update free shipping progress
+  var freeShippingThreshold = 9900;
+  var remainingAmount = freeShippingThreshold - cart.total_price;
+  var progressPercentage = Math.min(100, (cart.total_price * 100) / freeShippingThreshold);
+  
+  if (remainingAmount > 0) {
+    $('.free-shipping-progress-text').html('Almost there! Add $' + (remainingAmount / 100).toFixed(2) + ' more for free shipping');
+  } else {
+    $('.free-shipping-progress-text').html('<span class="free-shipping-achieved">You got free shipping!</span>');
+  }
+  
+  $('.progress-bar').css('width', progressPercentage + '%');
+}
+
+function updateItemPriceOnly($itemRow, quantity, cart) {
+  // Find the specific item in cart data
+  var itemKey = $itemRow.data('item-key');
+  var cartItem = null;
+  
+  for (var i = 0; i < cart.items.length; i++) {
+    if (cart.items[i].key === itemKey) {
+      cartItem = cart.items[i];
+      break;
+    }
+  }
+  
+  if (cartItem) {
+    // Update line price
+    var $priceContainer = $itemRow.find('.cart-item-pricing');
+    var $currentPrice = $priceContainer.find('.current-price');
+    var $originalPriceTop = $priceContainer.find('.original-price-top');
+    var $discountedPrice = $priceContainer.find('.discounted-price');
+    
+    if ($currentPrice.length > 0) {
+      $currentPrice.text(formatMoney(cartItem.line_price));
+    }
+    if ($originalPriceTop.length > 0) {
+      $originalPriceTop.text(formatMoney(cartItem.original_line_price || cartItem.line_price));
+    }
+    if ($discountedPrice.length > 0) {
+      $discountedPrice.text(formatMoney(cartItem.line_price));
+    }
+  }
+}
+
+function updateCartHeader(itemCount) {
+  $('.cart-title').text('Your bag (' + itemCount + ')');
 }
 
 // Duplicate function removed - using the AJAX version above
