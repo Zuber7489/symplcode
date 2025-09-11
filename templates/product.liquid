@@ -1081,7 +1081,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
       <div class="slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;" id="functionsSliderProgress"></div>
     </div>
     </div>
-    </div>
     
 
     {% if product.metafields.custom.hero_content %}
@@ -1089,7 +1088,13 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         {% section 'dynamic-hero-section' %}
       </div>
     {% endif %}
-    
+
+    {% if product.metafields.custom.hero_content_two %}
+      <div style="margin-top: 40px;">
+        {% section 'dynamic-hero-section-two' %}
+      </div>
+    {% endif %}
+
     <style>
     .fabricrowflex{
       backrgound-color:red;
