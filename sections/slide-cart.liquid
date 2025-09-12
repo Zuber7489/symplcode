@@ -288,7 +288,7 @@
         <div class="shipping-totals">
           <div class="shipping-row" id="savings-display" {% if total_savings <= 0 %}style="display: none;"{% endif %}>
         <span class="shipping-label">Savings : </span>
-        <span class="shipping-cost" id="savings-amount">{{ total_savings | money }}</span>
+        <span class="saving-cost" id="savings-amount">{{ total_savings | money }}</span>
       </div>
           <div class="shipping-row">
             <span class="shipping-label">Shipping :</span>
@@ -1088,6 +1088,12 @@
 }
 
 .shipping-cost {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.saving-cost {
   font-size: 14px;
   font-weight: 500;
   color: #111827;
@@ -2218,8 +2224,9 @@ function applyDiscountCode(code) {
       }
       
       if (discountApplied) {
-        // Refresh cart content to show updated prices
-        updateBundleProducts();
+        // Refresh cart content to show updated prices and savings
+        updateTotalSavingsDisplay(newCart);
+        updateCartTotalsOnly(newCart);
         
         // Show success visual feedback
         $('#discount-code').removeClass('error').addClass('success').val('');
@@ -2797,9 +2804,12 @@ function updateCartTotalsOnly(cart) {
   $('.hcart').text(cart.item_count);
   $('.cart-btn').html('<span class="fa fa-shopping-bag"></span><span>' + cart.item_count + '</span>');
   
-  // Update shipping
+  // Update total savings using dedicated function
+  updateTotalSavingsDisplay(cart);
+  
+  // Update shipping (but not the savings amount)
   var shippingCost = cart.total_price >= 5000 ? 'Free' : '$5.00';
-  $('.shipping-cost').text(shippingCost);
+  $('.shipping-row').not('#savings-display').find('.shipping-cost').text(shippingCost);
   
   // Update free shipping progress
   var freeShippingThreshold = 9900;
@@ -2831,6 +2841,7 @@ function updateItemPriceOnly($itemRow, quantity, cart) {
     var $currentPrice = $priceContainer.find('.current-price');
     var $originalPriceTop = $priceContainer.find('.original-price-top');
     var $discountedPrice = $priceContainer.find('.discounted-price');
+    var $savings = $priceContainer.find('.savings');
     
     if ($currentPrice.length > 0) {
       $currentPrice.text(formatMoney(cartItem.line_price));
@@ -2841,11 +2852,48 @@ function updateItemPriceOnly($itemRow, quantity, cart) {
     if ($discountedPrice.length > 0) {
       $discountedPrice.text(formatMoney(cartItem.line_price));
     }
+    
+    // Update individual item savings
+    if ($savings.length > 0 && cartItem.original_price > cartItem.price) {
+      var itemSavings = (cartItem.original_price - cartItem.price) * cartItem.quantity;
+      $savings.text('(Save ' + formatMoney(itemSavings) + ')');
+    }
   }
+  
+  // Recalculate and update total savings in checkout section
+  updateTotalSavingsDisplay(cart);
 }
 
 function updateCartHeader(itemCount) {
   $('.cart-title').text('Your bag (' + itemCount + ')');
+}
+
+// Function to update total savings display in checkout section
+function updateTotalSavingsDisplay(cart) {
+  var totalSavings = 0;
+  
+  if (cart.items && cart.items.length > 0) {
+    for (var i = 0; i < cart.items.length; i++) {
+      var item = cart.items[i];
+      if (item.original_price > item.price) {
+        var itemSavings = (item.original_price - item.price) * item.quantity;
+        totalSavings += itemSavings;
+      }
+    }
+  }
+  
+  // Add cart-level discounts
+  if (cart.total_discount > 0) {
+    totalSavings += cart.total_discount;
+  }
+  
+  // Update savings display in checkout section
+  if (totalSavings > 0) {
+    $('#savings-display').show();
+    $('#savings-amount').text(formatMoney(totalSavings));
+  } else {
+    $('#savings-display').hide();
+  }
 }
 
 // Duplicate function removed - using the AJAX version above
