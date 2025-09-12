@@ -8,8 +8,8 @@
 >
   <div class="dynamic-hero-slider-two">
     {% comment %} PRODUCT PAGE: Use metafields for dynamic content {% endcomment %}
-    {% if template.name == 'product' and product.metafields.custom.hero_content %}
-      {% assign hero_content = product.metafields.custom.hero_content.value %}
+    {% if template.name == 'product' and product.metafields.custom.hero_content_two %}
+      {% assign hero_content = product.metafields.custom.hero_content_two.value %}
       {% if hero_content %}
         <!-- Debug: Hero content found -->
         <!-- {{ hero_content | json }} -->
@@ -97,7 +97,7 @@
     {% endif %}
 
     {% comment %} STATIC PAGES: Use theme editor blocks {% endcomment %}
-    {% if template.name != 'product' or product.metafields.custom.hero_content == blank %}
+    {% if template.name != 'product' or product.metafields.custom.hero_content_two == blank %}
       {% for block in section.blocks %}
         {% if block.type == 'slide' %}
           <div class="dynamic-hero-slide-two" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
@@ -188,8 +188,8 @@
 
 <!-- Navigation positioned outside hero block (similar to 5-star functions) -->
 {% assign slide_count = 0 %}
-{% if template.name == 'product' and product.metafields.custom.hero_content %}
-  {% assign slide_count = product.metafields.custom.hero_content.value.size %}
+{% if template.name == 'product' and product.metafields.custom.hero_content_two %}
+  {% assign slide_count = product.metafields.custom.hero_content_two.value.size %}
 {% else %}
   {% assign slide_count = section.blocks.size %}
 {% endif %}
@@ -849,7 +849,7 @@
     },
     {
       "type": "paragraph",
-      "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content' as a JSON list."
+      "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content_two' as a JSON list."
     },
     {
       "type": "header",
