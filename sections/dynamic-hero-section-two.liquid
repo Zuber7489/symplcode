@@ -1,40 +1,40 @@
-<!-- Dynamic Hero Section Two - Supports both Product Metafields and Theme Editor -->
+<!-- Dynamic Hero Section - Supports both Product Metafields and Theme Editor -->
 <div
-  class="dynamic-hero-section-two {% if section.settings.text_alignment %}hero-two-align-{{ section.settings.text_alignment }}{% else %}hero-two-align-center{% endif %}"
-  data-auto-slide-two="{{ section.settings.auto_slide }}"
-  {% if section.settings.slide_interval != blank %}data-slide-interval-two="{{ section.settings.slide_interval | times: 1000 }}"{% endif %}
-  data-template-two="{{ template.name }}"
-  data-product-id-two="{{ product.id }}"
+  class="dynamic-hero-section {% if section.settings.text_alignment %}hero-align-{{ section.settings.text_alignment }}{% else %}hero-align-center{% endif %}"
+  data-auto-slide="{{ section.settings.auto_slide }}"
+  {% if section.settings.slide_interval != blank %}data-slide-interval="{{ section.settings.slide_interval | times: 1000 }}"{% endif %}
+  data-template="{{ template.name }}"
+  data-product-id="{{ product.id }}"
 >
-  <div class="dynamic-hero-slider-two">
+  <div class="dynamic-hero-slider">
     {% comment %} PRODUCT PAGE: Use metafields for dynamic content {% endcomment %}
-    {% if template.name == 'product' and product.metafields.custom.hero_content_two %}
-      {% assign hero_content_two = product.metafields.custom.hero_content_two.value %}
-      {% if hero_content_two %}
-        <!-- Debug: Hero content two found -->
-        <!-- {{ hero_content_two | json }} -->
-        {% for item in hero_content_two %}
-          <div class="dynamic-hero-slide-two" data-slide-index-two="{{ forloop.index0 }}">
-            <div class="hero-two-media-wrapper {% if section.settings.fix %}hero-two-media-fixed{% endif %}">
+    {% if template.name == 'product' and product.metafields.custom.hero_content %}
+      {% assign hero_content = product.metafields.custom.hero_content.value %}
+      {% if hero_content %}
+        <!-- Debug: Hero content found -->
+        <!-- {{ hero_content | json }} -->
+        {% for item in hero_content %}
+          <div class="dynamic-hero-slide" data-slide-index="{{ forloop.index0 }}">
+            <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
                 <img 
                   src="{{ item.desktop_image }}" 
-                  class="hero-two-media-content hero-two-desktop-only" 
+                  class="hero-media-content hero-desktop-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
                 <img 
                   src="{{ item.mobile_image }}" 
-                  class="hero-two-media-content hero-two-mobile-only" 
+                  class="hero-media-content hero-mobile-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
               {% elsif item.content_type == 'video' %}
-                <div class="hero-two-video-container hero-two-desktop-only">
+                <div class="hero-video-container hero-desktop-only">
                   <video 
-                    class="hero-two-video" 
+                    class="hero-video" 
                     {% if item.autoplay %}autoplay{% endif %} 
                     {% if item.loop %}loop{% endif %} 
                     {% if item.muted %}muted{% endif %} 
@@ -48,9 +48,9 @@
                     {% endif %}
                   </video>
                 </div>
-                <div class="hero-two-video-container hero-two-mobile-only">
+                <div class="hero-video-container hero-mobile-only">
                   <video 
-                    class="hero-two-video" 
+                    class="hero-video" 
                     {% if item.autoplay %}autoplay{% endif %} 
                     {% if item.loop %}loop{% endif %} 
                     {% if item.muted %}muted{% endif %} 
@@ -70,20 +70,20 @@
             </div>
 
             {% unless section.settings.hide_text_content %}
-            <div class="hero-two-container">
-              <div class="hero-two-content" style="{% if item.mobile_padding_top != blank %}--mobile-padding-top-two: {{ item.mobile_padding_top }}px;{% endif %}">
-                <div class="hero-two-content-wrapper">
-                  <div class="hero-two-text-content">
+            <div class="hero-container">
+              <div class="hero-content" style="{% if item.mobile_padding_top != blank %}--mobile-padding-top: {{ item.mobile_padding_top }}px;{% endif %}">
+                <div class="hero-content-wrapper">
+                  <div class="hero-text-content">
                     {% if item.heading %}
-                      <h1 class="hero-two-title" style="font-weight:550 !important">{{ item.heading }}</h1>
+                      <h1 class="hero-title" style="font-weight:550 !important">{{ item.heading }}</h1>
                     {% endif %}
                     {% if item.text %}
-                      <div class="hero-two-description">{{ item.text }}</div>
+                      <div class="hero-description">{{ item.text }}</div>
                     {% endif %}
 
                     {% if item.btn_url and item.btn_text %}
-                      <div class="hero-two-cta-wrapper">
-                        <a href="{{ item.btn_url }}" class="hero-two-cta-button">{{ item.btn_text }}</a>
+                      <div class="hero-cta-wrapper">
+                        <a href="{{ item.btn_url }}" class="hero-cta-button">{{ item.btn_text }}</a>
                       </div>
                     {% endif %}
                   </div>
@@ -97,17 +97,17 @@
     {% endif %}
 
     {% comment %} STATIC PAGES: Use theme editor blocks {% endcomment %}
-    {% if template.name != 'product' or product.metafields.custom.hero_content_two == blank %}
+    {% if template.name != 'product' or product.metafields.custom.hero_content == blank %}
       {% for block in section.blocks %}
-        {% if block.type == 'slide_two' %}
-          <div class="dynamic-hero-slide-two" {{ block.shopify_attributes }} data-slide-index-two="{{ forloop.index0 }}">
-            <div class="hero-two-media-wrapper {% if section.settings.fix %}hero-two-media-fixed{% endif %}">
+        {% if block.type == 'slide' %}
+          <div class="dynamic-hero-slide" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
+            <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
               {% if block.settings.content_type == 'image' %}
                 <img 
                   src="{{ block.settings.desktop_image | img_url: '1920x' }}" 
                   srcset="{{ block.settings.desktop_image | img_url: '1200x' }} 1200w, {{ block.settings.desktop_image | img_url: '1920x' }} 1920w"
                   sizes="100vw"
-                  class="hero-two-media-content hero-two-desktop-only" 
+                  class="hero-media-content hero-desktop-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
@@ -115,14 +115,14 @@
                   src="{{ block.settings.mobile_image | img_url: '768x' }}" 
                   srcset="{{ block.settings.mobile_image | img_url: '480x' }} 480w, {{ block.settings.mobile_image | img_url: '768x' }} 768w"
                   sizes="100vw"
-                  class="hero-two-media-content hero-two-mobile-only" 
+                  class="hero-media-content hero-mobile-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
               {% elsif block.settings.content_type == 'video' %}
-                <div class="hero-two-video-container hero-two-desktop-only">
+                <div class="hero-video-container hero-desktop-only">
                   <video 
-                    class="hero-two-video" 
+                    class="hero-video" 
                     {% if block.settings.autoplay %}autoplay{% endif %} 
                     {% if block.settings.loop %}loop{% endif %} 
                     {% if block.settings.muted %}muted{% endif %} 
@@ -136,9 +136,9 @@
                     {% endif %}
                   </video>
                 </div>
-                <div class="hero-two-video-container hero-two-mobile-only">
+                <div class="hero-video-container hero-mobile-only">
                   <video 
-                    class="hero-two-video" 
+                    class="hero-video" 
                     {% if block.settings.autoplay %}autoplay{% endif %} 
                     {% if block.settings.loop %}loop{% endif %} 
                     {% if block.settings.muted %}muted{% endif %} 
@@ -158,20 +158,20 @@
             </div>
 
             {% unless section.settings.hide_text_content %}
-            <div class="hero-two-container">
-              <div class="hero-two-content" style="{% if block.settings.mobile_padding_top != blank %}--mobile-padding-top-two: {{ block.settings.mobile_padding_top }}px;{% endif %}">
-                <div class="hero-two-content-wrapper">
-                  <div class="hero-two-text-content">
+            <div class="hero-container">
+              <div class="hero-content" style="{% if block.settings.mobile_padding_top != blank %}--mobile-padding-top: {{ block.settings.mobile_padding_top }}px;{% endif %}">
+                <div class="hero-content-wrapper">
+                  <div class="hero-text-content">
                     {% if block.settings.heading %}
-                      <h1 class="hero-two-title">{{ block.settings.heading }}</h1>
+                      <h1 class="hero-title">{{ block.settings.heading }}</h1>
                     {% endif %}
                     {% if block.settings.text %}
-                      <div class="hero-two-description">{{ block.settings.text }}</div>
+                      <div class="hero-description">{{ block.settings.text }}</div>
                     {% endif %}
 
                     {% if block.settings.btn_url and block.settings.btn_text %}
-                      <div class="hero-two-cta-wrapper">
-                        <a href="{{ block.settings.btn_url }}" class="hero-two-cta-button">{{ block.settings.btn_text }}</a>
+                      <div class="hero-cta-wrapper">
+                        <a href="{{ block.settings.btn_url }}" class="hero-cta-button">{{ block.settings.btn_text }}</a>
                       </div>
                     {% endif %}
                   </div>
@@ -187,52 +187,52 @@
 </div>
 
 <!-- Navigation positioned outside hero block (similar to 5-star functions) -->
-{% assign slide_count_two = 0 %}
-{% if template.name == 'product' and product.metafields.custom.hero_content_two %}
-  {% assign slide_count_two = product.metafields.custom.hero_content_two.value.size %}
+{% assign slide_count = 0 %}
+{% if template.name == 'product' and product.metafields.custom.hero_content %}
+  {% assign slide_count = product.metafields.custom.hero_content.value.size %}
 {% else %}
-  {% assign slide_count_two = section.blocks.size %}
+  {% assign slide_count = section.blocks.size %}
 {% endif %}
 
-{% if slide_count_two > 1 %}
-  <div class="hero-two-bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
+{% if slide_count > 1 %}
+  <div class="hero-bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
     <!-- Arrows and Line Navigation -->
-    <div class="hero-two-nav-arrows" style="display: flex; gap: 10px;">
-      <button class="hero-two-slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
+    <div class="hero-nav-arrows" style="display: flex; gap: 10px;">
+      <button class="hero-slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button class="hero-two-slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
+      <button class="hero-slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </div>
     
-    <div class="hero-two-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
-      <div class="hero-two-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
+    <div class="hero-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
+      <div class="hero-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
     </div>
   </div>
 {% endif %}
 
 <style>
-  /* Dynamic Hero Section Two Styles */
-  .dynamic-hero-section-two {
+  /* Dynamic Hero Section Styles */
+  .dynamic-hero-section {
     position: relative;
     width: 100%;
     overflow: hidden;
     background: #000;
   }
 
-  .dynamic-hero-slider-two {
+  .dynamic-hero-slider {
     position: relative;
     width: 100%;
     height: 100vh; /* Full viewport height for maximum tallness */
     min-height: 800px;
   }
 
-  .dynamic-hero-slide-two {
+  .dynamic-hero-slide {
     position: absolute;
     top: 0;
     left: 0;
@@ -247,17 +247,17 @@
     background: #000;
   }
 
-  .dynamic-hero-slide-two:first-child {
+  .dynamic-hero-slide:first-child {
     opacity: 1;
     z-index: 1;
   }
 
-  .dynamic-hero-slide-two.active {
+  .dynamic-hero-slide.active {
     opacity: 1;
     z-index: 2;
   }
 
-  .hero-two-media-wrapper {
+  .hero-media-wrapper {
     position: absolute;
     top: 0;
     left: 0;
@@ -266,7 +266,7 @@
     overflow: hidden;
   }
 
-  .hero-two-media-content {
+  .hero-media-content {
     width: 100%;
     height: 100%;
     display: block;
@@ -274,14 +274,14 @@
     object-position: center;
   }
 
-  .hero-two-video-container {
+  .hero-video-container {
     position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
   }
 
-  .hero-two-video {
+  .hero-video {
     width: 100%;
     height: 100%;
     display: block;
@@ -289,7 +289,7 @@
     object-position: center;
   }
 
-  .hero-two-container {
+  .hero-container {
     position: relative;
     z-index: 2;
     width: 100%;
@@ -298,23 +298,23 @@
     padding: 0 20px;
   }
 
-  .hero-two-content {
+  .hero-content {
     text-align: center;
     color: #fff;
-    padding-top: var(--mobile-padding-top-two, 50px);
+    padding-top: var(--mobile-padding-top, 50px);
   }
 
-  .hero-two-content-wrapper {
+  .hero-content-wrapper {
     max-width: 800px;
     margin: 0 auto;
   }
 
-  .hero-two-text-content {
+  .hero-text-content {
     padding: 40px;
     border-radius: 8px;
   }
 
-  .hero-two-title {
+  .hero-title {
     margin-bottom: 15px;
     color: #ffffff;
     font-weight: 550; /* Updated font weight */
@@ -323,7 +323,7 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
-  .hero-two-description {
+  .hero-description {
     margin-bottom: 20px;
     color: #ffffff;
     font-size: 22px; /* Updated font size */
@@ -332,11 +332,11 @@
     letter-spacing: 0.5px; /* Added letter spacing */
   }
 
-  .hero-two-cta-wrapper {
+  .hero-cta-wrapper {
     margin-top: 30px;
   }
 
-  .hero-two-cta-button {
+  .hero-cta-button {
     border-radius: 50px;
     padding: 12px 32px;
     border: 0.8px solid #ffffff;
@@ -357,7 +357,7 @@
     z-index: 1;
   }
 
-  .hero-two-cta-button:hover {
+  .hero-cta-button:hover {
     border: 0.8px solid #ffffff;
     background-color: transparent;
     color: #ffffff;
@@ -366,17 +366,17 @@
     box-shadow: none;
   }
 
-  .hero-two-cta-button:active {
+  .hero-cta-button:active {
     transform: none;
   }
 
-  .hero-two-cta-button:focus {
+  .hero-cta-button:focus {
     outline: none;
     box-shadow: none;
   }
 
-  /* Hero Two Bottom Navigation - Positioned outside hero block */
-  .dynamic-hero-section-two .hero-two-bottom-nav {
+  /* Hero Bottom Navigation - Positioned outside hero block */
+  .hero-bottom-nav {
     justify-content: flex-start !important;
     padding: 20px !important;
     margin-top: 0 !important;
@@ -386,141 +386,142 @@
     width: 100%;
   }
 
-  .dynamic-hero-section-two .hero-two-nav-arrows button {
+  .hero-nav-arrows button {
     padding: 6px !important;
+    
     transition: all 0.3s ease;
   }
 
-  .dynamic-hero-section-two .hero-two-nav-arrows button:disabled {
+  .hero-nav-arrows button:disabled {
     opacity: 0.3 !important;
     cursor: not-allowed !important;
     pointer-events: none;
   }
 
-  .dynamic-hero-section-two .hero-two-nav-arrows button:not(:disabled):hover {
+  .hero-nav-arrows button:not(:disabled):hover {
     opacity: 0.7;
   }
 
-  .dynamic-hero-section-two .hero-two-nav-arrows svg {
+  .hero-nav-arrows svg {
     width: 24px !important;
     height: 24px !important;
   }
 
-  .dynamic-hero-section-two .hero-two-slider-line {
+  .hero-slider-line {
     max-width: 120px !important;
-    height: 2px;
+    height: 2px ;
   }
 
   /* Text Alignment Variants */
-  .hero-two-align-left .hero-two-content {
+  .hero-align-left .hero-content {
     text-align: left;
   }
 
-  .hero-two-align-center .hero-two-content {
+  .hero-align-center .hero-content {
     text-align: center;
   }
 
-  .hero-two-align-justify .hero-two-content {
+  .hero-align-justify .hero-content {
     text-align: justify;
   }
 
   /* Mobile Styles */
   @media (max-width: 768px) {
-    .dynamic-hero-slider-two {
+    .dynamic-hero-slider {
       height: auto;
       min-height: 300px;
     }
 
-    .hero-two-title {
+    .hero-title {
       font-size: 24px !important; /* Updated mobile font size */
       font-weight: 550 !important; /* Updated mobile font weight */
       margin-bottom: 10px;
     }
 
-    .hero-two-description {
+    .hero-description {
       font-size: 16px !important; /* Updated mobile font size to 16px */
       letter-spacing: 0.5px;
     }
 
-    .hero-two-cta-button {
+    .hero-cta-button {
       padding: 10px 24px;
       font-size: 16px; /* Updated mobile font size to 16px */
       font-weight: 500; /* Updated mobile font weight */
       min-width: 140px;
     }
 
-    .hero-two-text-content {
+    .hero-text-content {
       padding: 20px;
       margin: 0 10px;
     }
 
       /* Mobile navigation adjustments */
-  .dynamic-hero-section-two .hero-two-bottom-nav {
+  .hero-bottom-nav {
     justify-content: flex-start !important;
     margin-left: 0 !important;
     padding: 15px 20px !important; /* Slightly reduced padding for mobile */
   }
 
     /* Hide arrows on mobile */
-    .dynamic-hero-section-two .hero-two-nav-arrows {
+    .hero-nav-arrows {
       display: none !important;
     }
 
     /* Left align progress line on mobile */
-    .dynamic-hero-section-two .hero-two-slider-line {
+    .hero-slider-line {
       max-width: 100px !important;
       margin-left: 0 !important;
       height: 2px !important;
     }
 
-    .dynamic-hero-section-two .hero-two-nav-arrows button:disabled {
+    .hero-nav-arrows button:disabled {
       opacity: 0.3 !important;
     }
   }
 
   /* Hide mobile/desktop specific content */
-  .hero-two-mobile-only {
+  .hero-mobile-only {
     display: none;
   }
 
-  .hero-two-desktop-only {
+  .hero-desktop-only {
     display: block;
   }
 
   @media (min-width: 768px) {
-    .hero-two-title {
+    .hero-title {
       font-size: 56px;
     }
 
-    .hero-two-description {
+    .hero-description {
       font-size: 22px; /* Keep updated font size */
     }
   }
 
   @media (max-width: 768px) {
-    .hero-two-mobile-only {
+    .hero-mobile-only {
       display: block;
     }
 
-    .hero-two-desktop-only {
+    .hero-desktop-only {
       display: none;
     }
   }
 
   /* Extra small screens */
   @media (max-width: 480px) {
-    .hero-two-title {
+    .hero-title {
       font-size: 24px !important;
       line-height: 1.3;
       font-weight: 550 !important;
     }
 
-    .hero-two-description {
+    .hero-description {
       font-size: 16px !important; /* Updated to 16px for consistency */
       letter-spacing: 0.5px;
     }
 
-    .hero-two-cta-button {
+    .hero-cta-button {
       padding: 8px 20px;
       font-size: 16px; /* Updated to 16px for consistency */
       font-weight: 500;
@@ -530,361 +531,317 @@
 </style>
 
 <script>
-  // Wrap in IIFE to prevent conflicts with other hero sections
-  (function() {
-    'use strict';
+  document.addEventListener('DOMContentLoaded', function() {
+    const heroSection = document.querySelector('.dynamic-hero-section');
+    if (!heroSection) return;
+
+    const slider = heroSection.querySelector('.dynamic-hero-slider');
+    const slides = heroSection.querySelectorAll('.dynamic-hero-slide');
+    const prevBtn = document.querySelector('.hero-slider-prev');
+    const nextBtn = document.querySelector('.hero-slider-next');
+    const progressBar = document.querySelector('.hero-slider-progress');
     
-    // Unique namespace for hero section two
-    const HeroSectionTwo = {
-      init: function() {
-        this.heroSection = document.querySelector('.dynamic-hero-section-two');
-        if (!this.heroSection) return;
+    let currentSlide = 0;
+    let autoSlideInterval;
+    const autoSlide = heroSection.dataset.autoSlide === 'true';
+    const slideInterval = parseInt(heroSection.dataset.slideInterval) || 5000;
 
-        this.slider = this.heroSection.querySelector('.dynamic-hero-slider-two');
-        this.slides = this.heroSection.querySelectorAll('.dynamic-hero-slide-two');
-        this.prevBtn = document.querySelector('.hero-two-slider-prev');
-        this.nextBtn = document.querySelector('.hero-two-slider-next');
-        this.progressBar = document.querySelector('.hero-two-slider-progress');
-        
-        this.currentSlide = 0;
-        this.autoSlideInterval = null;
-        this.autoSlide = this.heroSection.dataset.autoSlideTwo === 'true';
-        this.slideInterval = parseInt(this.heroSection.dataset.slideIntervalTwo) || 5000;
+    // Touch/swipe variables
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let isSwiping = false;
+    const minSwipeDistance = 50; // Minimum distance for a swipe to be registered
+    
+    // Auto-slide pause variables
+    let userInteractionTimeout;
+    const userInteractionDelay = 3000; // 3 seconds delay after user interaction
 
-        // Touch/swipe variables
-        this.touchStartX = 0;
-        this.touchEndX = 0;
-        this.touchStartY = 0;
-        this.touchEndY = 0;
-        this.isSwiping = false;
-        this.minSwipeDistance = 50;
-        
-        // Auto-slide pause variables
-        this.userInteractionTimeout = null;
-        this.userInteractionDelay = 3000;
-
-        this.initializeSlider();
-        this.bindEvents();
-      },
-
-      initializeSlider: function() {
-        // Show first slide immediately
-        if (this.slides.length > 0) {
-          this.slides[0].classList.add('active');
-          this.slides[0].style.zIndex = '2';
-          this.currentSlide = 0;
-        }
-        
-        // Update progress bar
-        this.updateProgressBar();
-        
-        // Update navigation state
-        this.updateNavigationState();
-        
-        // Start auto-slide if enabled and multiple slides
-        if (this.autoSlide && this.slides.length > 1) {
-          this.startAutoSlide();
-        }
-      },
-
-      showSlide: function(index) {
-        // Remove active class from all slides
-        this.slides.forEach(slide => {
-          slide.classList.remove('active');
-          slide.style.zIndex = '0';
-        });
-        
-        // Add active class to current slide
-        if (this.slides[index]) {
-          this.slides[index].classList.add('active');
-          this.slides[index].style.zIndex = '2';
-        }
-        
-        this.currentSlide = index;
-        this.updateProgressBar();
-        this.updateNavigationState();
-      },
-
-      updateProgressBar: function() {
-        if (this.progressBar && this.slides.length > 1) {
-          const progress = ((this.currentSlide + 1) / this.slides.length) * 100;
-          this.progressBar.style.width = progress + '%';
-        }
-      },
-
-      updateNavigationState: function() {
-        if (this.prevBtn && this.nextBtn) {
-          // Disable previous button on first slide
-          if (this.currentSlide === 0) {
-            this.prevBtn.disabled = true;
-            this.prevBtn.style.opacity = '0.3';
-            this.prevBtn.style.cursor = 'not-allowed';
-          } else {
-            this.prevBtn.disabled = false;
-            this.prevBtn.style.opacity = '1';
-            this.prevBtn.style.cursor = 'pointer';
-          }
-          
-          // Disable next button on last slide
-          if (this.currentSlide === this.slides.length - 1) {
-            this.nextBtn.disabled = true;
-            this.nextBtn.style.opacity = '0.3';
-            this.nextBtn.style.cursor = 'not-allowed';
-          } else {
-            this.nextBtn.disabled = false;
-            this.nextBtn.style.opacity = '1';
-            this.nextBtn.style.cursor = 'pointer';
-          }
-        }
-      },
-
-      nextSlide: function() {
-        const next = (this.currentSlide + 1) % this.slides.length;
-        this.showSlide(next);
-      },
-
-      prevSlide: function() {
-        const prev = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
-        this.showSlide(prev);
-      },
-
-      startAutoSlide: function() {
-        // Clear any existing timeout
-        if (this.userInteractionTimeout) {
-          clearTimeout(this.userInteractionTimeout);
-          this.userInteractionTimeout = null;
-        }
-        
-        this.autoSlideInterval = setInterval(() => {
-          this.nextSlide();
-        }, this.slideInterval);
-      },
-
-      stopAutoSlide: function() {
-        if (this.autoSlideInterval) {
-          clearInterval(this.autoSlideInterval);
-        }
-      },
-
-      pauseAutoSlideTemporarily: function() {
-        this.stopAutoSlide();
-        
-        // Clear any existing timeout
-        if (this.userInteractionTimeout) {
-          clearTimeout(this.userInteractionTimeout);
-        }
-        
-        // Resume auto-slide after delay
-        this.userInteractionTimeout = setTimeout(() => {
-          if (this.autoSlide && this.slides.length > 1) {
-            this.startAutoSlide();
-          }
-        }, this.userInteractionDelay);
-      },
-
-      handleSwipe: function() {
-        const swipeDistance = this.touchEndX - this.touchStartX;
-        const verticalDistance = Math.abs(this.touchEndY - this.touchStartY);
-        const horizontalDistance = Math.abs(swipeDistance);
-
-        // Only register horizontal swipes if they're more horizontal than vertical
-        // and meet the minimum distance threshold
-        if (horizontalDistance > verticalDistance && horizontalDistance > this.minSwipeDistance) {
-          if (swipeDistance > 0) {
-            // Swipe right - go to previous slide
-            this.prevSlide();
-          } else {
-            // Swipe left - go to next slide
-            this.nextSlide();
-          }
-          
-          // Pause auto-slide temporarily after user interaction
-          if (this.autoSlide) {
-            this.pauseAutoSlideTemporarily();
-          }
-        }
-      },
-
-      handleTouchStart: function(e) {
-        this.touchStartX = e.touches[0].clientX;
-        this.touchStartY = e.touches[0].clientY;
-        this.isSwiping = false;
-        
-        // Stop auto-slide during touch
-        if (this.autoSlide) {
-          this.stopAutoSlide();
-        }
-      },
-
-      handleTouchMove: function(e) {
-        if (!this.isSwiping) {
-          this.isSwiping = true;
-        }
-      },
-
-      handleTouchEnd: function(e) {
-        this.touchEndX = e.changedTouches[0].clientX;
-        this.touchEndY = e.changedTouches[0].clientY;
-        
-        if (this.isSwiping) {
-          this.handleSwipe();
-        } else {
-          // If no swipe was detected, resume auto-slide after delay
-          if (this.autoSlide) {
-            this.pauseAutoSlideTemporarily();
-          }
-        }
-      },
-
-      handleKeydown: function(e) {
-        // Only handle keyboard events if this hero section is in view
-        const rect = this.heroSection.getBoundingClientRect();
-        const isInView = rect.top < window.innerHeight && rect.bottom > 0;
-        
-        if (!isInView) return;
-        
-        if (e.key === 'ArrowLeft') {
-          e.preventDefault();
-          this.prevSlide();
-          if (this.autoSlide) {
-            this.pauseAutoSlideTemporarily();
-          }
-        } else if (e.key === 'ArrowRight') {
-          e.preventDefault();
-          this.nextSlide();
-          if (this.autoSlide) {
-            this.pauseAutoSlideTemporarily();
-          }
-        }
-      },
-
-      bindEvents: function() {
-        const self = this;
-
-        // Touch event listeners
-        if (this.slider) {
-          this.slider.addEventListener('touchstart', function(e) {
-            self.handleTouchStart(e);
-          }, { passive: true });
-          
-          this.slider.addEventListener('touchmove', function(e) {
-            self.handleTouchMove(e);
-          }, { passive: true });
-          
-          this.slider.addEventListener('touchend', function(e) {
-            self.handleTouchEnd(e);
-          }, { passive: true });
-        }
-
-        // Button event listeners
-        if (this.prevBtn) {
-          this.prevBtn.addEventListener('click', function() {
-            self.prevSlide();
-            if (self.autoSlide) {
-              self.pauseAutoSlideTemporarily();
-            }
-          });
-        }
-
-        if (this.nextBtn) {
-          this.nextBtn.addEventListener('click', function() {
-            self.nextSlide();
-            if (self.autoSlide) {
-              self.pauseAutoSlideTemporarily();
-            }
-          });
-        }
-
-        // Hover event listeners
-        if (this.slider) {
-          this.slider.addEventListener('mouseenter', function() {
-            self.stopAutoSlide();
-          });
-          
-          this.slider.addEventListener('mouseleave', function() {
-            if (self.autoSlide) {
-              self.startAutoSlide();
-            }
-          });
-        }
-
-        // Keyboard navigation with scoped event handling
-        document.addEventListener('keydown', function(e) {
-          self.handleKeydown(e);
-        });
-      },
-
-      maintainAspectRatio: function() {
-        const self = this;
-        document.querySelectorAll('.dynamic-hero-slide-two').forEach(slide => {
-          const mediaWrapper = slide.querySelector('.hero-two-media-wrapper');
-          const media = slide.querySelector('.hero-two-media-content, .hero-two-video');
-          const heroSection = slide.closest('.dynamic-hero-section-two');
-          
-          if (!media) return;
-          
-          // Use natural dimensions for images, videoWidth/Height for videos
-          const isVideo = media.tagName.toLowerCase() === 'video';
-          let naturalWidth = isVideo ? media.videoWidth : media.naturalWidth;
-          let naturalHeight = isVideo ? media.videoHeight : media.naturalHeight;
-          
-          // If natural dimensions aren't available yet, use the current image dimensions
-          if ((!naturalWidth || !naturalHeight) && media.offsetWidth && media.offsetHeight) {
-            naturalWidth = media.offsetWidth;
-            naturalHeight = media.offsetHeight;
-          }
-          
-          if (naturalWidth && naturalHeight) {
-            const aspectRatio = naturalWidth / naturalHeight;
-            const containerWidth = mediaWrapper.offsetWidth;
-            const calculatedHeight = containerWidth / aspectRatio;
-            
-            // Set the height on both the media wrapper and the slide
-            mediaWrapper.style.height = calculatedHeight + 'px';
-            slide.style.height = calculatedHeight + 'px';
-            
-            // Also update the hero section height if it exists
-            if (heroSection) {
-              heroSection.style.height = calculatedHeight + 'px';
-            }
-          }
-        });
+    // Initialize slider immediately
+    function initSlider() {
+      // Show first slide immediately
+      if (slides.length > 0) {
+        slides[0].classList.add('active');
+        slides[0].style.zIndex = '2';
+        currentSlide = 0;
       }
-    };
-
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function() {
-        HeroSectionTwo.init();
-      });
-    } else {
-      HeroSectionTwo.init();
+      
+      // Update progress bar
+      updateProgressBar();
+      
+      // Update navigation state
+      updateNavigationState();
+      
+      // Start auto-slide if enabled and multiple slides
+      if (autoSlide && slides.length > 1) {
+        startAutoSlide();
+      }
     }
 
-    // Aspect ratio maintenance
-    const maintainAspectRatioTwo = function() {
-      HeroSectionTwo.maintainAspectRatio();
-    };
+    // Show slide
+    function showSlide(index) {
+      // Remove active class from all slides
+      slides.forEach(slide => {
+        slide.classList.remove('active');
+        slide.style.zIndex = '0';
+      });
+      
+      // Add active class to current slide
+      if (slides[index]) {
+        slides[index].classList.add('active');
+        slides[index].style.zIndex = '2';
+      }
+      
+      currentSlide = index;
+      updateProgressBar();
+      updateNavigationState();
+    }
 
-    // Run on load and window resize
-    window.addEventListener('load', maintainAspectRatioTwo);
-    window.addEventListener('resize', maintainAspectRatioTwo);
-    
-    // Also run when images/videos are loaded to ensure proper sizing
-    document.querySelectorAll('.hero-two-media-content, .hero-two-video').forEach(media => {
-      media.addEventListener('load', maintainAspectRatioTwo);
-      if (media.tagName.toLowerCase() === 'video') {
-        media.addEventListener('loadedmetadata', maintainAspectRatioTwo);
+    // Update progress bar
+    function updateProgressBar() {
+      if (progressBar && slides.length > 1) {
+        const progress = ((currentSlide + 1) / slides.length) * 100;
+        progressBar.style.width = progress + '%';
+      }
+    }
+
+    // Update navigation arrows state (enable/disable)
+    function updateNavigationState() {
+      if (prevBtn && nextBtn) {
+        // Disable previous button on first slide
+        if (currentSlide === 0) {
+          prevBtn.disabled = true;
+          prevBtn.style.opacity = '0.3';
+          prevBtn.style.cursor = 'not-allowed';
+        } else {
+          prevBtn.disabled = false;
+          prevBtn.style.opacity = '1';
+          prevBtn.style.cursor = 'pointer';
+        }
+        
+        // Disable next button on last slide
+        if (currentSlide === slides.length - 1) {
+          nextBtn.disabled = true;
+          nextBtn.style.opacity = '0.3';
+          nextBtn.style.cursor = 'not-allowed';
+        } else {
+          nextBtn.disabled = false;
+          nextBtn.style.opacity = '1';
+          nextBtn.style.cursor = 'pointer';
+        }
+      }
+    }
+
+    // Next slide
+    function nextSlide() {
+      const next = (currentSlide + 1) % slides.length;
+      showSlide(next);
+    }
+
+    // Previous slide
+    function prevSlide() {
+      const prev = (currentSlide - 1 + slides.length) % slides.length;
+      showSlide(prev);
+    }
+
+    // Start auto-slide
+    function startAutoSlide() {
+      // Clear any existing timeout
+      if (userInteractionTimeout) {
+        clearTimeout(userInteractionTimeout);
+        userInteractionTimeout = null;
+      }
+      
+      autoSlideInterval = setInterval(nextSlide, slideInterval);
+    }
+
+    // Stop auto-slide
+    function stopAutoSlide() {
+      if (autoSlideInterval) {
+        clearInterval(autoSlideInterval);
+      }
+    }
+
+    // Pause auto-slide temporarily after user interaction
+    function pauseAutoSlideTemporarily() {
+      stopAutoSlide();
+      
+      // Clear any existing timeout
+      if (userInteractionTimeout) {
+        clearTimeout(userInteractionTimeout);
+      }
+      
+      // Resume auto-slide after delay
+      userInteractionTimeout = setTimeout(() => {
+        if (autoSlide && slides.length > 1) {
+          startAutoSlide();
+        }
+      }, userInteractionDelay);
+    }
+
+    // Handle swipe detection
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+      const verticalDistance = Math.abs(touchEndY - touchStartY);
+      const horizontalDistance = Math.abs(swipeDistance);
+
+      // Only register horizontal swipes if they're more horizontal than vertical
+      // and meet the minimum distance threshold
+      if (horizontalDistance > verticalDistance && horizontalDistance > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          // Swipe right - go to previous slide
+          prevSlide();
+        } else {
+          // Swipe left - go to next slide
+          nextSlide();
+        }
+        
+        // Pause auto-slide temporarily after user interaction
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      }
+    }
+
+    // Touch event handlers
+    function handleTouchStart(e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      isSwiping = false;
+      
+      // Stop auto-slide during touch
+      if (autoSlide) {
+        stopAutoSlide();
+      }
+    }
+
+    function handleTouchMove(e) {
+      if (!isSwiping) {
+        isSwiping = true;
+      }
+    }
+
+    function handleTouchEnd(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      touchEndY = e.changedTouches[0].clientY;
+      
+      if (isSwiping) {
+        handleSwipe();
+      } else {
+        // If no swipe was detected, resume auto-slide after delay
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      }
+    }
+
+    // Add touch event listeners to slider
+    if (slider) {
+      slider.addEventListener('touchstart', handleTouchStart, { passive: true });
+      slider.addEventListener('touchmove', handleTouchMove, { passive: true });
+      slider.addEventListener('touchend', handleTouchEnd, { passive: true });
+    }
+
+    // Event listeners
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        prevSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        nextSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      });
+    }
+
+    // Pause auto-slide on hover
+    slider.addEventListener('mouseenter', stopAutoSlide);
+    slider.addEventListener('mouseleave', () => {
+      if (autoSlide) startAutoSlide();
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') {
+        prevSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
+      } else if (e.key === 'ArrowRight') {
+        nextSlide();
+        if (autoSlide) {
+          pauseAutoSlideTemporarily();
+        }
       }
     });
-  })();
+
+    // Initialize immediately for faster loading
+    initSlider();
+  });
+
+  // Function to maintain aspect ratio for hero media and adjust container height
+  function maintainHeroAspectRatio() {
+    document.querySelectorAll('.dynamic-hero-slide').forEach(slide => {
+      const mediaWrapper = slide.querySelector('.hero-media-wrapper');
+      const media = slide.querySelector('.hero-media-content, .hero-video');
+      const heroSection = slide.closest('.dynamic-hero-section');
+      
+      if (!media) return;
+      
+      // Use natural dimensions for images, videoWidth/Height for videos
+      const isVideo = media.tagName.toLowerCase() === 'video';
+      let naturalWidth = isVideo ? media.videoWidth : media.naturalWidth;
+      let naturalHeight = isVideo ? media.videoHeight : media.naturalHeight;
+      
+      // If natural dimensions aren't available yet, use the current image dimensions
+      if ((!naturalWidth || !naturalHeight) && media.offsetWidth && media.offsetHeight) {
+        naturalWidth = media.offsetWidth;
+        naturalHeight = media.offsetHeight;
+      }
+      
+      if (naturalWidth && naturalHeight) {
+        const aspectRatio = naturalWidth / naturalHeight;
+        const containerWidth = mediaWrapper.offsetWidth;
+        const calculatedHeight = containerWidth / aspectRatio;
+        
+        // Set the height on both the media wrapper and the slide
+        mediaWrapper.style.height = calculatedHeight + 'px';
+        slide.style.height = calculatedHeight + 'px';
+        
+        // Also update the hero section height if it exists
+        if (heroSection) {
+          heroSection.style.height = calculatedHeight + 'px';
+        }
+      }
+    });
+  }
+
+  // Run on load and window resize
+  window.addEventListener('load', maintainHeroAspectRatio);
+  window.addEventListener('resize', maintainHeroAspectRatio);
+  
+  // Also run when images/videos are loaded to ensure proper sizing
+  document.querySelectorAll('.hero-media-content, .hero-video').forEach(media => {
+    media.addEventListener('load', maintainHeroAspectRatio);
+    if (media.tagName.toLowerCase() === 'video') {
+      media.addEventListener('loadedmetadata', maintainHeroAspectRatio);
+    }
+  });
 </script>
 
 {% schema %}
 {
-  "name": "Hero Section Two",
+  "name": "Dynamic Hero Section",
   "tag": "section",
-  "class": "dynamic-hero-section-two-wrapper",
+  "class": "dynamic-hero-section-wrapper",
   "settings": [
     {
       "type": "header",
@@ -892,7 +849,7 @@
     },
     {
       "type": "paragraph",
-      "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content_two' as a JSON list."
+      "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content' as a JSON list."
     },
     {
       "type": "header",
@@ -961,8 +918,8 @@
   ],
   "blocks": [
     {
-      "type": "slide_two",
-      "name": "Slide Two",
+      "type": "slide",
+      "name": "Slide",
       "settings": [
         {
           "type": "select",
@@ -1090,10 +1047,10 @@
   ],
   "presets": [
     {
-      "name": "Hero Section Two",
+      "name": "Dynamic Hero Section",
       "blocks": [
         {
-          "type": "slide_two"
+          "type": "slide"
         }
       ]
     }
