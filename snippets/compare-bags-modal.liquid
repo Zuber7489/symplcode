@@ -957,6 +957,12 @@ margin-top: -9px;
   margin-bottom: 6px; 
   position: relative; 
   z-index: 100;
+  white-space: nowrap;
+  min-width: fit-content;
+  width: auto;
+  display: inline-block;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 .comparedesktopbtn {
@@ -971,6 +977,12 @@ margin-top: -9px;
   position: relative; 
   z-index: 100; 
   pointer-events: auto;
+  white-space: nowrap;
+  min-width: fit-content;
+  width: auto;
+  display: inline-block;
+  box-sizing: border-box;
+  text-align: center;
 }
 
 /* Desktop vs Mobile Button Display Logic */
@@ -985,6 +997,9 @@ margin-top: -9px;
     margin-right: 0 !important;
     font-size: 13px !important;
     padding: 4px 8px !important;
+    white-space: nowrap;
+    min-width: fit-content;
+    width: auto;
   }
   
   .comparedesktopbtn {
@@ -1026,32 +1041,6 @@ margin-top: -9px;
     display: none !important;
   }
 }
-.comparemobilebtn {
-  border: 2px solid #2f7d7d; 
-  color: #2f7d7d; 
-  background: transparent; 
-  padding: 6px 16px; 
-  border-radius: 20px; 
-  font-size: 18px; 
-  cursor: pointer; 
-  margin-bottom: 6px; 
-  position: relative; 
-  z-index: 100;
-}
-
-.comparedesktopbtn {
-  border: 2px solid #2f7d7d; 
-  color: #2f7d7d; 
-  background: transparent; 
-  padding: 6px 16px; 
-  border-radius: 20px; 
-  font-size: 18px; 
-  cursor: pointer; 
-  margin: 0; 
-  position: relative; 
-  z-index: 100; 
-  pointer-events: auto;
-}
 
 </style>
 
@@ -1060,7 +1049,7 @@ margin-top: -9px;
   <div class="compare-modal-content">
     <button class="compare-modal-close" id="compareModalClose">&times;</button>
     <div class="compare-modal-header">
-      <h2 class="compare-modal-title">Compare Bags</h2>
+      <h2 class="compare-modal-title" id="compareModalTitle">Compare Bags</h2>
     </div>
     <div class="compare-modal-tabs" id="compareModalTabs" style="display: none;">
       <button class="compare-modal-tab active" id="compareTabSize" data-tab="size">Size</button>
@@ -1485,6 +1474,13 @@ window.openCompareBagsModalV2 = function() {
   
   const content = modal.querySelector('.compare-modal-content');
   modal.style.display = 'flex';
+  
+  // Update modal title based on button text
+  const compareButton = document.querySelector('[data-compare-button="true"]');
+  const modalTitle = document.getElementById('compareModalTitle');
+  if (compareButton && modalTitle) {
+    modalTitle.textContent = compareButton.textContent.trim();
+  }
   
   // Determine which tabs to show
   const { showTabs, defaultTab, hasMultipleSizes, hasMultipleFabrics } = determineAvailableTabs();

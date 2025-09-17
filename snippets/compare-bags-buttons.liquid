@@ -1,10 +1,20 @@
 {% comment %}
   Compare Bags Buttons Snippet
   This snippet contains both desktop and mobile compare bags buttons
-  Buttons are only shown when there are variants available for comparison
+  Buttons are controlled by metafields and shown when there are variants available for comparison
   
   Usage: {% render 'compare-bags-buttons' %}
+  
+  Required Metafields:
+  - custom.show_compare_button (boolean) - Controls whether button appears
+  - custom.compare_button_text (string) - Custom button text
 {% endcomment %}
+
+{% comment %}
+  Get metafield values for button control
+{% endcomment %}
+{% assign show_compare_button = product.metafields.custom.show_compare_button %}
+{% assign compare_button_text = product.metafields.custom.compare_button_text | default: 'Compare bags' %}
 
 {% comment %}
   Check if product has variants for comparison
@@ -56,18 +66,20 @@
 {% endif %}
 
 {% comment %}
-  Only show compare buttons if we have variants for comparison
+  Show compare buttons only if:
+  1. Show Compare Button metafield is true (or not set, for backward compatibility)
+  2. Product has variants for comparison
 {% endcomment %}
-{% if has_variants_for_comparison %}
+{% if show_compare_button != false and has_variants_for_comparison %}
 
 <!-- Desktop Compare Bags Button -->
-<button id="compareBtnDesktop" class="comparedesktopbtn" data-compare-button="true" style="border: 2px solid #2f7d7d; color: #2f7d7d; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 18px; cursor: pointer; margin: 0; position: relative; z-index: 100; pointer-events: auto;" onclick="openCompareBagsModalV2()">
-  Compare bags
+<button id="compareBtnDesktop" class="comparedesktopbtn" data-compare-button="true" style="border: 2px solid #2f7d7d; color: #2f7d7d; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 18px; cursor: pointer; margin: 0; position: relative; z-index: 100; pointer-events: auto; white-space: nowrap;" onclick="openCompareBagsModalV2()">
+  {{ compare_button_text }}
 </button>
 
 <!-- Mobile Compare Bags Button -->
-<button class="comparemobilebtn" id="compareBtnMobile" data-compare-button="true" style="border: 2px solid #2f7d7d; color: #2f7d7d; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 18px; cursor: pointer; margin-bottom: 6px; position: relative; z-index: 100;" onclick="openCompareBagsModalV2()">
-  Compare bags
+<button class="comparemobilebtn" id="compareBtnMobile" data-compare-button="true" style="border: 2px solid #2f7d7d; color: #2f7d7d; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 18px; cursor: pointer; margin-bottom: 6px; position: relative; z-index: 100; white-space: nowrap;" onclick="openCompareBagsModalV2()">
+  {{ compare_button_text }}
 </button>
 
 {% endif %} 
