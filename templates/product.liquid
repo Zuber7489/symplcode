@@ -1,5 +1,4 @@
     <style>
-    /* Font loading with error handling and fallbacks */
     @font-face {
       font-family: 'Neue Haas Display';   
       src: url('{{ "NeueHaasDisplayBlack.ttf" | asset_url }}') format('truetype'); 
@@ -48,7 +47,6 @@
       font-display: swap;
     }
     
-    /* Video optimizations */
     
     <script>
     // Font loading optimization - silent error handling
@@ -116,7 +114,6 @@
       }
     }
     
-    /* Global font styles */
     body,
     h1, h2, h3, h4, h5, h6,
     p, span, div, button, input, select, textarea,
@@ -134,28 +131,23 @@
     .pricesizeadjust {
       font-family: 'Neue Haas Display', sans-serif !important;
     }
-        /* Ensure strong tags in specs have medium bold weight */
       .specs-content strong {
         font-weight: 550 !important;
         color: #000 !important;
       }
       
-      /* Ensure specs content matches other accordion sections */
       .specs-content,
       .specs-content *,
       .specs-dynamic-content,
       .specs-dynamic-content * {
         font-weight: 300 !important;
       }
-    /* Specific font weights */
     h1, h2, .product-title { font-weight: 700 !important; }
     h3, .bundleandsave { font-weight: 500 !important; }
     p, .functiondescriptionadjust { font-weight: 300 !important; }
     .product-tagline { font-weight: 300 !important; }
     
-    /* MOBILE-SPECIFIC STYLES */
     @media (max-width: 900px) {
-      /* Product Image: ONLY images edge-to-edge, keep spacing for other content */
       .product-gallery,
       .gallery-container,
       .mobile-single-image,
@@ -163,19 +155,16 @@
 margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !important; padding-right: 0 !important; width: 100% !important; max-width: 100% !important;
       }
       
-      /* Optimize mobile image loading */
       #mobileMainImage,
       #mobileMainVideo {
         will-change: transform !important;
-        transform: translateZ(0) !important; /* Force hardware acceleration */
+        transform: translateZ(0) !important;
       }
       
-      /* Smooth transitions for mobile */
       .mobile-thumb {
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
       }
       
-      /* Optimize thumbnail scrolling */
       .mobile-thumbnails {
         -webkit-overflow-scrolling: touch !important;
         scroll-behavior: smooth !important;
@@ -193,7 +182,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         max-width: 100% !important;
       }
       
-      /* Ensure image fills complete width */
 
       #mobileMainVideo {
         width: 100% !important;
@@ -205,9 +193,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         max-width: 100% !important;
         padding-left: 0 !important;
       }
-      /* Keep normal spacing for other content */
       .product-details,
-      /* .product-header, */
       .detailbox {
         margin-left: 0 !important;
         margin-right: 0 !important;
@@ -215,20 +201,17 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         padding-right: 15px !important;
       }
       
-      /* Product Title: Mobile responsive font size */
       .product-title,
       #dynamicProductTitle {
         font-size: 26px !important;
         margin-left: -1px !important;
       }
       
-      /* Accordion headers: Font size 18px */
       .accordion-header h3,
       .accordion-header .accordionadjust {
         font-size: 18px !important;
       }
       
-      /* Text in accordion dropdown: font size 14px, letter spacing 0.5px, color #000 */
       .accordion-content,
       .description-content,
       .mobilefeaturehighlighted,
@@ -243,7 +226,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
       
   
       
-      /* Bundle & save Header: Font size 24px, font weight 600, letter spacing 0.5px */
       .bundleandsave {
         font-size: 24px !important;
         font-weight: 600 !important;
@@ -251,7 +233,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         margin-left: -1px !important;
       }
       
-      /* 5-Star Function Header: Font size 24px, font weight 600, letter spacing 0.5px */
       .fivestarfunctionssizeadjust {
         font-size: 24px !important;
         font-weight: 600 !important;
@@ -260,7 +241,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         margin: 18px 14px !important;
       }
       
-      /* 5-Star Function Images: Responsive sizing for mobile */
       .function-media-container {
         width: 100% !important;
         max-width: 280px !important;
@@ -284,7 +264,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         flex: 0 0 280px !important;
       }
       
-      /* For very small screens */
       @media (max-width: 375px) {
         .function-media-container {
           max-width: 240px !important;
@@ -299,7 +278,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         }
       }
       
-      /* Review Header: Font size 22px, letter spacing 0.5px, color #000 */
       .testimonial-section h3 {
         font-size: 22px !important;
         letter-spacing: 0.5px !important;
@@ -307,7 +285,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         font-weight:normal  !important;
       }
       
-      /* Review Text (under the stars): Font size 16px, letter spacing 0.5px, color #000 */
       .testimonial-section p,
       .testimonial-text {
         font-size: 16px !important;
@@ -315,7 +292,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         color: #000 !important;
       }
       
-      /* We think you'll love these header: Font size 24px, font weight 600, letter spacing 0.5px */
       .related-products-section h2,
       .related-products-heading-mobile {
         font-size: 24px !important;
@@ -326,7 +302,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         margin-bottom: 18px !important;
       }
       
-      /* We think you'll love these - product price and product title: Font size 16px */
       .related-product-item h3,
       .related-price {
         font-size: 16px !important;
@@ -1111,8 +1086,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         .functions-section .function-item h3 {
       
       font-family: 'Neue Haas Display', sans-serif !important;
-          /* font-family: sans-serif !important; */
-        /* font-family: 'Arial', sans-serif !important; */
         font-size: 20px !important;
         font-weight: 400 !important;
         letter-spacing: 0.5px !important; 
@@ -1189,7 +1162,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         text-transform: none !important;
       }
       
-      /* Style options mobile adjustments */
       .style-selection {
         margin-bottom: 8px !important;
       
@@ -1204,7 +1176,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         color:#111 !important;
         font-weight:300 !important;
       }
-      /* 5-star functions: hide arrows, left-align indicator line */
       .functions-nav-arrows {
         display: none !important;
       }
@@ -1215,7 +1186,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
       }
     
     
-      /* What our community says heading font-family Arial */
       .reviews-section h2 {
         font-family: 'Neue Haas Display', sans-serif !important;
         text-transform: none !important;
@@ -1249,7 +1219,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
       #AddToCart, #MobileAddToCart{
         margin:20px 0;
       }
-      /* Force text-transform override for buttons on mobile */
       #AddToCart, #MobileAddToCart,
       #AddToCartText, #MobileAddToCartText,
       .add-to-cart-button, .add-to-cart-button span {
@@ -1257,7 +1226,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
       
       }
       
-      /* Apple Pay button styling */
       .apple-pay-button-container {
         width: 100% !important;
       }
@@ -1296,7 +1264,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         min-width: 129px !important;
       }
     
-      /* Mobile compare button visibility */
       .comparedesktopbtn {
         display: none !important;
       }
@@ -1306,7 +1273,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
             padding: 4px 8px !important;
       }
       .desktop-review-section {
-        /* display: none !important; */
                 padding-left: 0px !important;
           padding-right: 0px !important;
       }
@@ -1329,7 +1295,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         display: none !important;
       }
       
-      /* Compare button visibility */
       .comparedesktopbtn {
         display: block !important;
       }
@@ -1403,7 +1368,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         overflow: hidden !important;
       } */
       .functions-carousel-wrapper {
-        padding: 0 222px 0 0 !important; /* 0.5 * 400px + 22px gap = 222px */
+        padding: 0 222px 0 0 !important;
         margin: 0 !important;
         max-width: 1440px !important;
         overflow: visible !important;
@@ -1665,18 +1630,13 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     {% render 'compare-bags-modal' %}
     
     <style>
-    /* Styles remain largely the same, ensure .desktop-grid adapts if fewer than 6 items */
-    /* For example, if only one child */
-    .desktop-grid:has(> :nth-child(1):nth-last-child(1)) { /* If only one child */
-      grid-template-columns: 1fr; /* Make it span full width */
+    .desktop-grid:has(> :nth-child(1):nth-last-child(1)) {
+      grid-template-columns: 1fr;
     }
-    /* Other styles as before */
-    /* FIXED MOBILE RESPONSIVE STYLES */
     * {
     box-sizing: border-box;
     }
     
-    /* Mobile-first responsive design */
     @media (max-width: 900px) {
     .product-container {
     padding: 15px 0 !important;
@@ -1689,26 +1649,22 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     max-width: 100% !important;
     }
     
-    /* Hide desktop grid on mobile */
     .desktop-grid {
     display: none !important;
     }
     
-    /* Show mobile single image view - only when initialized */
     .mobile-single-image.mobile-initialized {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     }
     
-    /* Hybrid approach: Minimal placeholder with proper aspect ratio */
     .mobile-single-image:not(.mobile-initialized) .single-image-container {
     background: #f6f6f6;
     position: relative;
     transition: background 0.3s ease-out;
     }
     
-    /* Subtle loading indicator - only show when no media is visible */
     .mobile-single-image:not(.mobile-initialized) .single-image-container::after {
     content: '';
     position: absolute;
@@ -1724,17 +1680,14 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     z-index: 1;
     }
     
-    /* Hide loading spinner when media is loaded */
     .mobile-single-image.mobile-initialized .single-image-container::after {
     display: none;
     }
     
-    /* Hide loading spinner when video is visible */
     .mobile-single-image .single-image-container:has(#mobileMainVideo[style*="display: block"])::after {
     display: none !important;
     }
     
-    /* Alternative: Hide loading spinner when video container has video-visible class */
     .mobile-single-image.video-visible .single-image-container::after {
     display: none !important;
     }
@@ -1744,7 +1697,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
     
-    /* Smooth fade-in for loaded images */
     #mobileMainImage {
     opacity: 0;
     transition: opacity 0.3s ease-in;
@@ -1754,17 +1706,14 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     opacity: 1;
     }
     
-    /* Ensure video controls are above loading spinner */
     #mobileMainVideo {
     z-index: 2;
     }
     
-    /* Hide desktop-only elements */
     .desktop-only {
     display: none !important;
     }
     
-    /* Hide mobile gallery on desktop */
     @media (min-width: 901px) {
       .mobile-single-image {
         display: none !important;
@@ -1773,7 +1722,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     
 
     
-    /* Adjust product layout for mobile */
     .product-layout {
     grid-template-columns: 1fr !important;
     gap: 25px !important;
@@ -1785,7 +1733,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     width: 100% !important;
     height:100% !important;
     max-width: 100% !important;
-    /* padding: 20px !important; */
     }
     
     .bundle-section{
@@ -4209,6 +4156,10 @@ let globalTouchManager = {
     }
     
     function openImageModal(src) {
+      if ($('.r-side-cart').hasClass('active') || $('body').hasClass('g-cart-open')) {
+        $('.r-side-cart').removeClass('active'); $('body').removeClass('g-cart-open'); return;
+      }
+      
       currentModalMediaSet = currentColorImages;
       
       // Try exact match first
@@ -4253,6 +4204,10 @@ let globalTouchManager = {
     }
     
     function openVideoModal(videoElementOrSrc) {
+      if ($('.r-side-cart').hasClass('active') || $('body').hasClass('g-cart-open')) {
+        $('.r-side-cart').removeClass('active'); $('body').removeClass('g-cart-open'); return;
+      }
+      
       currentModalMediaSet = currentColorImages;
       let initialIndex = -1;
       let videoSrcToFind;
