@@ -892,10 +892,9 @@
           const naturalAspectRatio = media.naturalWidth / media.naturalHeight;
           const calculatedHeight = containerWidth / naturalAspectRatio;
           
-          // Set reasonable min/max constraints to prevent extreme heights
-          const minHeight = 600; // Increased from 500px
-          const maxHeight = Math.min(window.innerHeight * 0.9, 1000); // 90vh or 1000px max
-          const finalHeight = Math.max(minHeight, Math.min(calculatedHeight, maxHeight));
+          // Set only minimum constraint, no maximum to prevent issues
+          const minHeight = 600; // Minimum height only
+          const finalHeight = Math.max(minHeight, calculatedHeight);
           
           // Set the height on both the media wrapper and the slide
           mediaWrapper.style.height = finalHeight + 'px';
