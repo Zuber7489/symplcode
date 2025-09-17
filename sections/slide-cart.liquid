@@ -2448,13 +2448,19 @@ $(document).ready(function() {
     e.preventDefault();
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
-    var lineNumber = $itemRow.data('line');
     var $quantityInput = $button.siblings('.quantity-input');
     var currentQuantity = parseInt($quantityInput.val());
     var newQuantity = currentQuantity + 1;
     
     // Prevent multiple clicks during loading
     if ($button.hasClass('is-loading') || $button.prop('disabled')) {
+      return false;
+    }
+    
+    // Get current line number dynamically (in case items were removed)
+    var lineNumber = getCurrentLineNumber($itemRow);
+    if (!lineNumber) {
+      console.error('Could not determine line number for item');
       return false;
     }
     
@@ -2476,13 +2482,19 @@ $(document).ready(function() {
     e.preventDefault();
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
-    var lineNumber = $itemRow.data('line');
     var $quantityInput = $button.siblings('.quantity-input');
     var currentQuantity = parseInt($quantityInput.val());
     var newQuantity = Math.max(1, currentQuantity - 1); // Minimum quantity of 1
     
     // Prevent multiple clicks during loading
     if ($button.hasClass('is-loading') || $button.prop('disabled')) {
+      return false;
+    }
+    
+    // Get current line number dynamically (in case items were removed)
+    var lineNumber = getCurrentLineNumber($itemRow);
+    if (!lineNumber) {
+      console.error('Could not determine line number for item');
       return false;
     }
     
@@ -2508,10 +2520,16 @@ $(document).ready(function() {
     e.preventDefault();
     var $button = $(this);
     var $itemRow = $button.closest('.cart-item');
-    var lineNumber = $itemRow.data('line');
     
     // Prevent multiple clicks during loading
     if ($button.hasClass('is-loading') || $button.prop('disabled')) {
+      return false;
+    }
+    
+    // Get current line number dynamically
+    var lineNumber = getCurrentLineNumber($itemRow);
+    if (!lineNumber) {
+      console.error('Could not determine line number for item');
       return false;
     }
     
@@ -2607,6 +2625,9 @@ function updateBundleProductsWithHTML() {
         
         // Re-initialize bundle functionality after cart update
         setTimeout(function() {
+          // Refresh line numbers after full cart update
+          refreshCartLineNumbers();
+          
           new BundleSlideNavigation();
           initializeBundleProductImages();
           hideProductsAlreadyInCart();
@@ -2627,6 +2648,23 @@ function updateBundleProductsWithHTML() {
 // Global flag to prevent multiple simultaneous cart operations
 var isCartOperationInProgress = false;
 var cartOperationTimeout = null;
+
+// Function to get current line number dynamically (accounts for removed items)
+function getCurrentLineNumber($itemRow) {
+  // Find the index of this item in the cart items list
+  var $allItems = $('.cart-item');
+  var currentIndex = $allItems.index($itemRow);
+  
+  // Line numbers are 1-indexed in Shopify, so add 1
+  return currentIndex + 1;
+}
+
+// Function to refresh line numbers after cart updates
+function refreshCartLineNumbers() {
+  $('.cart-item').each(function(index) {
+    $(this).attr('data-line', index + 1);
+  });
+}
 
 // Function to add item to cart from bundle section
 function addBundleItemToCart(variantId, quantity) {
@@ -2711,6 +2749,15 @@ function updateCartItemQuantity(lineNumber, quantity, $button) {
   var $itemRow = $button.closest('.cart-item');
   var unitPrice = parseFloat($itemRow.find('.cart-item-pricing').data('unit-price')) || 0;
   
+  // Double-check line number is valid
+  if (!lineNumber || lineNumber < 1) {
+    console.error('Invalid line number:', lineNumber);
+    if ($button) {
+      $button.prop('disabled', false).removeClass('is-loading');
+    }
+    return;
+  }
+  
   $.ajax({
     type: "POST",
     url: "/cart/change.js",
@@ -2724,6 +2771,9 @@ function updateCartItemQuantity(lineNumber, quantity, $button) {
       if ($button) {
         $button.prop('disabled', false).removeClass('is-loading');
       }
+      
+      // Refresh line numbers after cart update
+      refreshCartLineNumbers();
       
       // Fast update: Update only the specific item's price and cart totals
       updateCartTotalsOnly(cart);
@@ -2749,6 +2799,16 @@ function updateCartItemQuantity(lineNumber, quantity, $button) {
 function removeItemFromCart(lineNumber, $button) {
   var $itemRow = $button.closest('.cart-item');
   
+  // Double-check line number is valid
+  if (!lineNumber || lineNumber < 1) {
+    console.error('Invalid line number for removal:', lineNumber);
+    if ($button) {
+      $button.prop('disabled', false).removeClass('is-loading');
+    }
+    $itemRow.fadeIn(200); // Show item again if error
+    return;
+  }
+  
   // Optimistic UI: Hide item immediately
   $itemRow.fadeOut(200);
   
@@ -2768,6 +2828,10 @@ function removeItemFromCart(lineNumber, $button) {
       
       // Fast update: Update only cart totals and remove item
       $itemRow.remove();
+      
+      // Refresh line numbers after item removal
+      refreshCartLineNumbers();
+      
       updateCartTotalsOnly(cart);
       updateCartHeader(cart.item_count);
       
@@ -2826,8 +2890,8 @@ function updateCartTotalsOnly(cart) {
 }
 
 function updateItemPriceOnly($itemRow, quantity, cart) {
-  // Find the specific item in cart data using line number
-  var lineNumber = $itemRow.data('line');
+  // Find the specific item in cart data using dynamic line number
+  var lineNumber = getCurrentLineNumber($itemRow);
   var cartItem = null;
   
   // Line numbers are 1-indexed, array is 0-indexed
