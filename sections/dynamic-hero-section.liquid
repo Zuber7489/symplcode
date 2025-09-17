@@ -229,8 +229,8 @@
   .hero-slider {
     position: relative;
     width: 100%;
-    height: 100vh; /* Full viewport height for maximum tallness */
-    min-height: 800px;
+    height: 80vh; /* Increased from 70vh to 80vh for more visual impact */
+    min-height: 700px; /* Increased from 600px to 700px */
   }
 
   .hero-slide {
@@ -283,7 +283,7 @@
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: cover;
+    object-fit: cover; /* Back to cover for better visual impact */
     object-position: center;
     /* Ensure images maintain quality and don't get cut off */
     image-rendering: -webkit-optimize-contrast;
@@ -292,7 +292,7 @@
 
   @media (max-width: 768px) {
     .hero__media-content {
-      object-fit: cover;
+      object-fit: cover; /* Back to cover for consistency */
       object-position: center;
       width: 100%;
       height: 100%;
@@ -884,13 +884,38 @@
           heroSection.style.height = calculatedHeight + 'px';
         }
       } else {
-        // On desktop, use the CSS-defined height (70vh with min/max constraints)
-        // Don't override with natural aspect ratio to maintain consistent height
+        // On desktop, use natural image aspect ratio to prevent cropping
         const heroSlider = document.querySelector('.hero-slider');
-        if (heroSlider) {
-          const sliderHeight = heroSlider.offsetHeight;
-          mediaWrapper.style.height = sliderHeight + 'px';
-          slide.style.height = sliderHeight + 'px';
+        if (heroSlider && media.naturalWidth && media.naturalHeight) {
+          // Calculate height based on natural image aspect ratio
+          const containerWidth = mediaWrapper.offsetWidth;
+          const naturalAspectRatio = media.naturalWidth / media.naturalHeight;
+          const calculatedHeight = containerWidth / naturalAspectRatio;
+          
+          // Set reasonable min/max constraints to prevent extreme heights
+          const minHeight = 600; // Increased from 500px
+          const maxHeight = Math.min(window.innerHeight * 0.9, 1000); // 90vh or 1000px max
+          const finalHeight = Math.max(minHeight, Math.min(calculatedHeight, maxHeight));
+          
+          // Set the height on both the media wrapper and the slide
+          mediaWrapper.style.height = finalHeight + 'px';
+          slide.style.height = finalHeight + 'px';
+          
+          // Update hero slider height
+          heroSlider.style.height = finalHeight + 'px';
+          
+          // Also update the hero section height if it exists
+          if (heroSection) {
+            heroSection.style.height = finalHeight + 'px';
+          }
+        } else {
+          // Fallback to CSS height if natural dimensions not available
+          const heroSlider = document.querySelector('.hero-slider');
+          if (heroSlider) {
+            const sliderHeight = heroSlider.offsetHeight;
+            mediaWrapper.style.height = sliderHeight + 'px';
+            slide.style.height = sliderHeight + 'px';
+          }
         }
       }
     });
