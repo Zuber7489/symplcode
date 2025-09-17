@@ -1,12 +1,12 @@
 <!-- Dynamic Hero Section Two - Supports both Product Metafields and Theme Editor -->
 <div
-  class="dynamic-hero-section-two {% if section.settings.text_alignment %}hero-two-align-{{ section.settings.text_alignment }}{% else %}hero-two-align-center{% endif %}"
+  class="dynamic-hero-section-two {% if section.settings.text_alignment %}hero-v2-align-{{ section.settings.text_alignment }}{% else %}hero-v2-align-center{% endif %}"
   data-auto-slide="{{ section.settings.auto_slide }}"
   {% if section.settings.slide_interval != blank %}data-slide-interval="{{ section.settings.slide_interval | times: 1000 }}"{% endif %}
   data-template="{{ template.name }}"
   data-product-id="{{ product.id }}"
 >
-  <div class="dynamic-hero-slider-two">
+  <div class="dynamic-hero-slider-v2">
     {% comment %} PRODUCT PAGE: Use metafields for dynamic content {% endcomment %}
     {% if template.name == 'product' and product.metafields.custom.hero_content_two %}
       {% assign hero_content = product.metafields.custom.hero_content_two.value %}
@@ -14,27 +14,27 @@
         <!-- Debug: Hero content found -->
         <!-- {{ hero_content | json }} -->
         {% for item in hero_content %}
-          <div class="dynamic-hero-slide-two" data-slide-index="{{ forloop.index0 }}">
-            <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
+          <div class="dynamic-hero-slide-v2" data-slide-index="{{ forloop.index0 }}">
+            <div class="hero-v2-media-wrapper {% if section.settings.fix %}hero-v2-media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
                 <img 
                   src="{{ item.desktop_image }}" 
-                  class="hero-media-content hero-desktop-only" 
+                  class="hero-v2-media-content hero-v2-desktop-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
                 <img 
                   src="{{ item.mobile_image }}" 
-                  class="hero-media-content hero-mobile-only" 
+                  class="hero-v2-media-content hero-v2-mobile-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
               {% elsif item.content_type == 'video' %}
-                <div class="hero-video-container hero-desktop-only">
+                <div class="hero-v2-video-container hero-v2-desktop-only">
                   <video 
-                    class="hero-video" 
+                    class="hero-v2-video" 
                     {% if item.autoplay %}autoplay{% endif %} 
                     {% if item.loop %}loop{% endif %} 
                     {% if item.muted %}muted{% endif %} 
@@ -48,9 +48,9 @@
                     {% endif %}
                   </video>
                 </div>
-                <div class="hero-video-container hero-mobile-only">
+                <div class="hero-v2-video-container hero-v2-mobile-only">
                   <video 
-                    class="hero-video" 
+                    class="hero-v2-video" 
                     {% if item.autoplay %}autoplay{% endif %} 
                     {% if item.loop %}loop{% endif %} 
                     {% if item.muted %}muted{% endif %} 
@@ -70,20 +70,20 @@
             </div>
 
             {% unless section.settings.hide_text_content %}
-            <div class="hero-container">
-              <div class="hero-content" style="{% if item.mobile_padding_top != blank %}--mobile-padding-top: {{ item.mobile_padding_top }}px;{% endif %}">
-                <div class="hero-content-wrapper">
-                  <div class="hero-text-content">
+            <div class="hero-v2-container">
+              <div class="hero-v2-content" style="{% if item.mobile_padding_top != blank %}--mobile-padding-top: {{ item.mobile_padding_top }}px;{% endif %}">
+                <div class="hero-v2-content-wrapper">
+                  <div class="hero-v2-text-content">
                     {% if item.heading %}
-                      <h1 class="hero-title" style="font-weight:550 !important">{{ item.heading }}</h1>
+                      <h1 class="hero-v2-title" style="font-weight:550 !important">{{ item.heading }}</h1>
                     {% endif %}
                     {% if item.text %}
-                      <div class="hero-description">{{ item.text }}</div>
+                      <div class="hero-v2-description">{{ item.text }}</div>
                     {% endif %}
 
                     {% if item.btn_url and item.btn_text %}
-                      <div class="hero-cta-wrapper">
-                        <a href="{{ item.btn_url }}" class="hero-cta-button">{{ item.btn_text }}</a>
+                      <div class="hero-v2-cta-wrapper">
+                        <a href="{{ item.btn_url }}" class="hero-v2-cta-button">{{ item.btn_text }}</a>
                       </div>
                     {% endif %}
                   </div>
@@ -100,14 +100,14 @@
     {% if template.name != 'product' or product.metafields.custom.hero_content_two == blank %}
       {% for block in section.blocks %}
         {% if block.type == 'slide' %}
-          <div class="dynamic-hero-slide-two" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
-            <div class="hero-media-wrapper {% if section.settings.fix %}hero-media-fixed{% endif %}">
+          <div class="dynamic-hero-slide-v2" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
+            <div class="hero-v2-media-wrapper {% if section.settings.fix %}hero-v2-media-fixed{% endif %}">
               {% if block.settings.content_type == 'image' %}
                 <img 
                   src="{{ block.settings.desktop_image | img_url: '1920x' }}" 
                   srcset="{{ block.settings.desktop_image | img_url: '1200x' }} 1200w, {{ block.settings.desktop_image | img_url: '1920x' }} 1920w"
                   sizes="100vw"
-                  class="hero-media-content hero-desktop-only" 
+                  class="hero-v2-media-content hero-v2-desktop-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
@@ -115,14 +115,14 @@
                   src="{{ block.settings.mobile_image | img_url: '768x' }}" 
                   srcset="{{ block.settings.mobile_image | img_url: '480x' }} 480w, {{ block.settings.mobile_image | img_url: '768x' }} 768w"
                   sizes="100vw"
-                  class="hero-media-content hero-mobile-only" 
+                  class="hero-v2-media-content hero-v2-mobile-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
               {% elsif block.settings.content_type == 'video' %}
-                <div class="hero-video-container hero-desktop-only">
+                <div class="hero-v2-video-container hero-v2-desktop-only">
                   <video 
-                    class="hero-video" 
+                    class="hero-v2-video" 
                     {% if block.settings.autoplay %}autoplay{% endif %} 
                     {% if block.settings.loop %}loop{% endif %} 
                     {% if block.settings.muted %}muted{% endif %} 
@@ -136,9 +136,9 @@
                     {% endif %}
                   </video>
                 </div>
-                <div class="hero-video-container hero-mobile-only">
+                <div class="hero-v2-video-container hero-v2-mobile-only">
                   <video 
-                    class="hero-video" 
+                    class="hero-v2-video" 
                     {% if block.settings.autoplay %}autoplay{% endif %} 
                     {% if block.settings.loop %}loop{% endif %} 
                     {% if block.settings.muted %}muted{% endif %} 
@@ -158,20 +158,20 @@
             </div>
 
             {% unless section.settings.hide_text_content %}
-            <div class="hero-container">
-              <div class="hero-content" style="{% if block.settings.mobile_padding_top != blank %}--mobile-padding-top: {{ block.settings.mobile_padding_top }}px;{% endif %}">
-                <div class="hero-content-wrapper">
-                  <div class="hero-text-content">
+            <div class="hero-v2-container">
+              <div class="hero-v2-content" style="{% if block.settings.mobile_padding_top != blank %}--mobile-padding-top: {{ block.settings.mobile_padding_top }}px;{% endif %}">
+                <div class="hero-v2-content-wrapper">
+                  <div class="hero-v2-text-content">
                     {% if block.settings.heading %}
-                      <h1 class="hero-title">{{ block.settings.heading }}</h1>
+                      <h1 class="hero-v2-title">{{ block.settings.heading }}</h1>
                     {% endif %}
                     {% if block.settings.text %}
-                      <div class="hero-description">{{ block.settings.text }}</div>
+                      <div class="hero-v2-description">{{ block.settings.text }}</div>
                     {% endif %}
 
                     {% if block.settings.btn_url and block.settings.btn_text %}
-                      <div class="hero-cta-wrapper">
-                        <a href="{{ block.settings.btn_url }}" class="hero-cta-button">{{ block.settings.btn_text }}</a>
+                      <div class="hero-v2-cta-wrapper">
+                        <a href="{{ block.settings.btn_url }}" class="hero-v2-cta-button">{{ block.settings.btn_text }}</a>
                       </div>
                     {% endif %}
                   </div>
@@ -195,23 +195,23 @@
 {% endif %}
 
 {% if slide_count > 1 %}
-  <div class="hero-bottom-nav-two" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
+  <div class="hero-v2-bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
     <!-- Arrows and Line Navigation -->
-    <div class="hero-nav-arrows-two" style="display: flex; gap: 10px;">
-      <button class="hero-slider-prev-two" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
+    <div class="hero-v2-nav-arrows" style="display: flex; gap: 10px;">
+      <button class="hero-v2-slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-      <button class="hero-slider-next-two" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
+      <button class="hero-v2-slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
     </div>
     
-    <div class="hero-slider-line-two" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
-      <div class="hero-slider-progress-two" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
+    <div class="hero-v2-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
+      <div class="hero-v2-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
     </div>
   </div>
 {% endif %}
@@ -225,14 +225,14 @@
     background: #000;
   }
 
-  .dynamic-hero-slider-two {
+  .dynamic-hero-slider-v2 {
     position: relative;
     width: 100%;
     height: 100vh; /* Full viewport height for maximum tallness */
     min-height: 800px;
   }
 
-  .dynamic-hero-slide-two {
+  .dynamic-hero-slide-v2 {
     position: absolute;
     top: 0;
     left: 0;
@@ -247,17 +247,17 @@
     background: #000;
   }
 
-  .dynamic-hero-slide-two:first-child {
+  .dynamic-hero-slide-v2:first-child {
     opacity: 1;
     z-index: 1;
   }
 
-  .dynamic-hero-slide-two.active {
+  .dynamic-hero-slide-v2.active {
     opacity: 1;
     z-index: 2;
   }
 
-  .hero-media-wrapper {
+  .hero-v2-media-wrapper {
     position: absolute;
     top: 0;
     left: 0;
@@ -266,7 +266,7 @@
     overflow: hidden;
   }
 
-  .hero-media-content {
+  .hero-v2-media-content {
     width: 100%;
     height: 100%;
     display: block;
@@ -274,14 +274,14 @@
     object-position: center;
   }
 
-  .hero-video-container {
+  .hero-v2-video-container {
     position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
   }
 
-  .hero-video {
+  .hero-v2-video {
     width: 100%;
     height: 100%;
     display: block;
@@ -289,7 +289,7 @@
     object-position: center;
   }
 
-  .hero-container {
+  .hero-v2-container {
     position: relative;
     z-index: 2;
     width: 100%;
@@ -298,23 +298,23 @@
     padding: 0 20px;
   }
 
-  .hero-content {
+  .hero-v2-content {
     text-align: center;
     color: #fff;
     padding-top: var(--mobile-padding-top, 50px);
   }
 
-  .hero-content-wrapper {
+  .hero-v2-content-wrapper {
     max-width: 800px;
     margin: 0 auto;
   }
 
-  .hero-text-content {
+  .hero-v2-text-content {
     padding: 40px;
     border-radius: 8px;
   }
 
-  .hero-title {
+  .hero-v2-title {
     margin-bottom: 15px;
     color: #ffffff;
     font-weight: 550; /* Updated font weight */
@@ -323,7 +323,7 @@
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
-  .hero-description {
+  .hero-v2-description {
     margin-bottom: 20px;
     color: #ffffff;
     font-size: 22px; /* Updated font size */
@@ -332,11 +332,11 @@
     letter-spacing: 0.5px; /* Added letter spacing */
   }
 
-  .hero-cta-wrapper {
+  .hero-v2-cta-wrapper {
     margin-top: 30px;
   }
 
-  .hero-cta-button {
+  .hero-v2-cta-button {
     border-radius: 50px;
     padding: 12px 32px;
     border: 0.8px solid #ffffff;
@@ -357,7 +357,7 @@
     z-index: 1;
   }
 
-  .hero-cta-button:hover {
+  .hero-v2-cta-button:hover {
     border: 0.8px solid #ffffff;
     background-color: transparent;
     color: #ffffff;
@@ -366,17 +366,17 @@
     box-shadow: none;
   }
 
-  .hero-cta-button:active {
+  .hero-v2-cta-button:active {
     transform: none;
   }
 
-  .hero-cta-button:focus {
+  .hero-v2-cta-button:focus {
     outline: none;
     box-shadow: none;
   }
 
   /* Hero Bottom Navigation - Positioned outside hero block */
-  .hero-bottom-nav-two {
+  .hero-v2-bottom-nav {
     justify-content: flex-start !important;
     padding: 20px !important;
     margin-top: 0 !important;
@@ -386,142 +386,142 @@
     width: 100%;
   }
 
-  .hero-nav-arrows-two button {
+  .hero-v2-nav-arrows button {
     padding: 6px !important;
     
     transition: all 0.3s ease;
   }
 
-  .hero-nav-arrows-two button:disabled {
+  .hero-v2-nav-arrows button:disabled {
     opacity: 0.3 !important;
     cursor: not-allowed !important;
     pointer-events: none;
   }
 
-  .hero-nav-arrows-two button:not(:disabled):hover {
+  .hero-v2-nav-arrows button:not(:disabled):hover {
     opacity: 0.7;
   }
 
-  .hero-nav-arrows-two svg {
+  .hero-v2-nav-arrows svg {
     width: 24px !important;
     height: 24px !important;
   }
 
-  .hero-slider-line-two {
+  .hero-v2-slider-line {
     max-width: 120px !important;
     height: 2px ;
   }
 
   /* Text Alignment Variants */
-  .hero-two-align-left .hero-content {
+  .hero-v2-align-left .hero-v2-content {
     text-align: left;
   }
 
-  .hero-two-align-center .hero-content {
+  .hero-v2-align-center .hero-v2-content {
     text-align: center;
   }
 
-  .hero-two-align-justify .hero-content {
+  .hero-v2-align-justify .hero-v2-content {
     text-align: justify;
   }
 
   /* Mobile Styles */
   @media (max-width: 768px) {
-    .dynamic-hero-slider-two {
+    .dynamic-hero-slider-v2 {
       height: auto;
       min-height: 300px;
     }
 
-    .hero-title {
+    .hero-v2-title {
       font-size: 24px !important; /* Updated mobile font size */
       font-weight: 550 !important; /* Updated mobile font weight */
       margin-bottom: 10px;
     }
 
-    .hero-description {
+    .hero-v2-description {
       font-size: 16px !important; /* Updated mobile font size to 16px */
       letter-spacing: 0.5px;
     }
 
-    .hero-cta-button {
+    .hero-v2-cta-button {
       padding: 10px 24px;
       font-size: 16px; /* Updated mobile font size to 16px */
       font-weight: 500; /* Updated mobile font weight */
       min-width: 140px;
     }
 
-    .hero-text-content {
+    .hero-v2-text-content {
       padding: 20px;
       margin: 0 10px;
     }
 
       /* Mobile navigation adjustments */
-  .hero-bottom-nav-two {
+  .hero-v2-bottom-nav {
     justify-content: flex-start !important;
     margin-left: 0 !important;
     padding: 15px 20px !important; /* Slightly reduced padding for mobile */
   }
 
     /* Hide arrows on mobile */
-    .hero-nav-arrows-two {
+    .hero-v2-nav-arrows {
       display: none !important;
     }
 
     /* Left align progress line on mobile */
-    .hero-slider-line-two {
+    .hero-v2-slider-line {
       max-width: 100px !important;
       margin-left: 0 !important;
       height: 2px !important;
     }
 
-    .hero-nav-arrows-two button:disabled {
+    .hero-v2-nav-arrows button:disabled {
       opacity: 0.3 !important;
     }
   }
 
   /* Hide mobile/desktop specific content */
-  .hero-mobile-only {
+  .hero-v2-mobile-only {
     display: none;
   }
 
-  .hero-desktop-only {
+  .hero-v2-desktop-only {
     display: block;
   }
 
   @media (min-width: 768px) {
-    .hero-title {
+    .hero-v2-title {
       font-size: 56px;
     }
 
-    .hero-description {
+    .hero-v2-description {
       font-size: 22px; /* Keep updated font size */
     }
   }
 
   @media (max-width: 768px) {
-    .hero-mobile-only {
+    .hero-v2-mobile-only {
       display: block;
     }
 
-    .hero-desktop-only {
+    .hero-v2-desktop-only {
       display: none;
     }
   }
 
   /* Extra small screens */
   @media (max-width: 480px) {
-    .hero-title {
+    .hero-v2-title {
       font-size: 24px !important;
       line-height: 1.3;
       font-weight: 550 !important;
     }
 
-    .hero-description {
+    .hero-v2-description {
       font-size: 16px !important; /* Updated to 16px for consistency */
       letter-spacing: 0.5px;
     }
 
-    .hero-cta-button {
+    .hero-v2-cta-button {
       padding: 8px 20px;
       font-size: 16px; /* Updated to 16px for consistency */
       font-weight: 500;
@@ -535,11 +535,11 @@
     const heroSection = document.querySelector('.dynamic-hero-section-two');
     if (!heroSection) return;
 
-    const slider = heroSection.querySelector('.dynamic-hero-slider-two');
-    const slides = heroSection.querySelectorAll('.dynamic-hero-slide-two');
-    const prevBtn = document.querySelector('.hero-slider-prev-two');
-    const nextBtn = document.querySelector('.hero-slider-next-two');
-    const progressBar = document.querySelector('.hero-slider-progress-two');
+    const slider = heroSection.querySelector('.dynamic-hero-slider-v2');
+    const slides = heroSection.querySelectorAll('.dynamic-hero-slide-v2');
+    const prevBtn = document.querySelector('.hero-v2-slider-prev');
+    const nextBtn = document.querySelector('.hero-v2-slider-next');
+    const progressBar = document.querySelector('.hero-v2-slider-progress');
     
     let currentSlide = 0;
     let autoSlideInterval;
@@ -789,9 +789,9 @@
 
   // Function to maintain aspect ratio for hero media and adjust container height
   function maintainHeroAspectRatioTwo() {
-    document.querySelectorAll('.dynamic-hero-slide-two').forEach(slide => {
-      const mediaWrapper = slide.querySelector('.hero-media-wrapper');
-      const media = slide.querySelector('.hero-media-content, .hero-video');
+    document.querySelectorAll('.dynamic-hero-slide-v2').forEach(slide => {
+      const mediaWrapper = slide.querySelector('.hero-v2-media-wrapper');
+      const media = slide.querySelector('.hero-v2-media-content, .hero-v2-video');
       const heroSection = slide.closest('.dynamic-hero-section-two');
       
       if (!media) return;
@@ -829,7 +829,7 @@
   window.addEventListener('resize', maintainHeroAspectRatioTwo);
   
   // Also run when images/videos are loaded to ensure proper sizing
-  document.querySelectorAll('.dynamic-hero-section-two .hero-media-content, .dynamic-hero-section-two .hero-video').forEach(media => {
+  document.querySelectorAll('.dynamic-hero-section-two .hero-v2-media-content, .dynamic-hero-section-two .hero-v2-video').forEach(media => {
     media.addEventListener('load', maintainHeroAspectRatioTwo);
     if (media.tagName.toLowerCase() === 'video') {
       media.addEventListener('loadedmetadata', maintainHeroAspectRatioTwo);
