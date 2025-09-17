@@ -229,9 +229,8 @@
   .hero-slider {
     position: relative;
     width: 100%;
-    height: 80vh; /* Increased from 70vh to 80vh for slightly more height */
-    min-height: 600px; /* Increased from 500px to 600px */
-    max-height: 900px; /* Increased from 800px to 900px */
+    height: 100vh; /* Full viewport height for maximum tallness */
+    min-height: 800px;
   }
 
   .hero-slide {
@@ -531,36 +530,12 @@
   }
 
   @media (min-width: 768px) {
-    .hero-slider {
-      height: 80vh;
-      min-height: 600px;
-      max-height: 900px;
-    }
-
     .hero__title {
       font-size: 56px;
     }
 
     .hero__description {
       font-size: 22px; /* Keep updated font size */
-    }
-  }
-
-  /* Large desktop screens - slightly taller for better proportions */
-  @media (min-width: 1200px) {
-    .hero-slider {
-      height: 85vh;
-      min-height: 700px;
-      max-height: 1000px;
-    }
-  }
-
-  /* Extra large screens - prevent excessive height */
-  @media (min-width: 1600px) {
-    .hero-slider {
-      height: 90vh;
-      min-height: 800px;
-      max-height: 1100px;
     }
   }
 
