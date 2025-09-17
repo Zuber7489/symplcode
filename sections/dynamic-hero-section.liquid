@@ -14,7 +14,10 @@
         <!-- Debug: Hero content found -->
         <!-- {{ hero_content | json }} -->
         {% for item in hero_content %}
-          <div class="hero-slide" data-slide-index="{{ forloop.index0 }}">
+          <div class="hero-slide" 
+               data-slide-index="{{ forloop.index0 }}"
+               data-autoplay="{% if item.autoplay != blank %}{{ item.autoplay }}{% else %}false{% endif %}"
+               data-autoplay-duration="{% if item.autoplay_duration != blank %}{{ item.autoplay_duration | times: 1000 }}{% else %}5000{% endif %}">
             <div class="hero__media-wrapper {% if section.settings.fix %}hero__media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
                 <img 
@@ -610,6 +613,19 @@
     let autoSlideInterval;
     const autoSlide = heroSection.dataset.autoSlide === 'true';
     const slideInterval = parseInt(heroSection.dataset.slideInterval) || 5000;
+    
+    // Per-slide autoplay settings
+    function getSlideAutoplaySettings(slideIndex) {
+      const slide = slides[slideIndex];
+      if (!slide) return { enabled: false, duration: 5000 };
+      
+      const autoplay = slide.dataset.autoplay === 'true';
+      const duration = parseInt(slide.dataset.autoplayDuration) || 5000;
+      
+      console.log('Slide', slideIndex, 'autoplay settings:', { autoplay, duration });
+      
+      return { enabled: autoplay, duration: duration };
+    }
 
     // Touch/swipe variables
     let touchStartX = 0;
@@ -639,13 +655,20 @@
       updateNavigationState();
       
       // Start auto-slide if enabled and multiple slides
-      if (autoSlide && slides.length > 1) {
-        startAutoSlide();
+      if (slides.length > 1) {
+        // Check if any slide has autoplay enabled or global autoplay is on
+        const hasAutoplay = autoSlide || Array.from(slides).some(slide => slide.dataset.autoplay === 'true');
+        if (hasAutoplay) {
+          console.log('Initializing autoplay...');
+          startAutoSlide();
+        }
       }
     }
 
     // Show slide
     function showSlide(index) {
+      console.log('showSlide() called with index:', index);
+      
       // Remove active class from all slides
       slides.forEach(slide => {
         slide.classList.remove('active');
@@ -656,11 +679,19 @@
       if (slides[index]) {
         slides[index].classList.add('active');
         slides[index].style.zIndex = '2';
+        console.log('Activated slide:', index);
       }
       
       currentSlide = index;
       updateProgressBar();
       updateNavigationState();
+      
+      // Restart autoplay with new slide settings
+      if (autoSlide || getSlideAutoplaySettings(index).enabled) {
+        console.log('Restarting autoplay for slide:', index);
+        stopAutoSlide();
+        startAutoSlide();
+      }
     }
 
     // Update progress bar
@@ -700,7 +731,9 @@
 
     // Next slide
     function nextSlide() {
+      console.log('nextSlide() called, currentSlide:', currentSlide, 'total slides:', slides.length);
       const next = (currentSlide + 1) % slides.length;
+      console.log('Moving to slide:', next);
       showSlide(next);
     }
 
@@ -710,7 +743,7 @@
       showSlide(prev);
     }
 
-    // Start auto-slide
+    // Start auto-slide with per-slide settings
     function startAutoSlide() {
       // Clear any existing timeout
       if (userInteractionTimeout) {
@@ -718,7 +751,31 @@
         userInteractionTimeout = null;
       }
       
-      autoSlideInterval = setInterval(nextSlide, slideInterval);
+      // Stop any existing interval
+      if (autoSlideInterval) {
+        clearInterval(autoSlideInterval);
+      }
+      
+      // Check if current slide has autoplay enabled
+      const slideSettings = getSlideAutoplaySettings(currentSlide);
+      
+      if (slideSettings.enabled) {
+        // Use per-slide duration
+        console.log('Starting autoplay for slide', currentSlide, 'with duration', slideSettings.duration);
+        autoSlideInterval = setInterval(() => {
+          console.log('Interval triggered - calling nextSlide()');
+          nextSlide();
+        }, slideSettings.duration);
+        console.log('Interval created with ID:', autoSlideInterval);
+      } else if (autoSlide) {
+        // Fall back to global settings
+        console.log('Starting global autoplay with duration', slideInterval);
+        autoSlideInterval = setInterval(() => {
+          console.log('Global interval triggered - calling nextSlide()');
+          nextSlide();
+        }, slideInterval);
+        console.log('Global interval created with ID:', autoSlideInterval);
+      }
     }
 
     // Stop auto-slide
@@ -916,6 +973,14 @@
     {
       "type": "paragraph",
       "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content' as a JSON list."
+    },
+    {
+      "type": "paragraph",
+      "content": "JSON Structure for metafields: [{\"content_type\": \"image\", \"desktop_image\": \"url\", \"mobile_image\": \"url\", \"heading\": \"text\", \"text\": \"description\", \"btn_text\": \"button\", \"btn_url\": \"link\", \"autoplay\": true, \"autoplay_duration\": 5}, ...]"
+    },
+    {
+      "type": "paragraph",
+      "content": "Per-slide autoplay settings: Set 'autoplay' to true/false for each slide, and 'autoplay_duration' to the desired seconds (e.g., 2, 5, 10, 15). Each slide can have different timing."
     },
     {
       "type": "header",
