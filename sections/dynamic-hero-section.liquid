@@ -1,8 +1,6 @@
 <!-- Dynamic Hero Section - Supports both Product Metafields and Theme Editor -->
 <div
   class="hero-section {% if section.settings.text_alignment %}hero--align-{{ section.settings.text_alignment }}{% else %}hero--align-center{% endif %}"
-  data-auto-slide="{{ section.settings.auto_slide }}"
-  {% if section.settings.slide_interval != blank %}data-slide-interval="{{ section.settings.slide_interval | times: 1000 }}"{% endif %}
   data-template="{{ template.name }}"
   data-product-id="{{ product.id }}"
 >
@@ -611,8 +609,6 @@
     
     let currentSlide = 0;
     let autoSlideInterval;
-    const autoSlide = heroSection.dataset.autoSlide === 'true';
-    const slideInterval = parseInt(heroSection.dataset.slideInterval) || 5000;
     
     // Per-slide autoplay settings
     function getSlideAutoplaySettings(slideIndex) {
@@ -656,8 +652,8 @@
       
       // Start auto-slide if enabled and multiple slides
       if (slides.length > 1) {
-        // Check if any slide has autoplay enabled or global autoplay is on
-        const hasAutoplay = autoSlide || Array.from(slides).some(slide => slide.dataset.autoplay === 'true');
+        // Check if any slide has autoplay enabled
+        const hasAutoplay = Array.from(slides).some(slide => slide.dataset.autoplay === 'true');
         if (hasAutoplay) {
           console.log('Initializing autoplay...');
           startAutoSlide();
@@ -687,7 +683,7 @@
       updateNavigationState();
       
       // Restart autoplay with new slide settings
-      if (autoSlide || getSlideAutoplaySettings(index).enabled) {
+      if (getSlideAutoplaySettings(index).enabled) {
         console.log('Restarting autoplay for slide:', index);
         stopAutoSlide();
         startAutoSlide();
@@ -767,14 +763,6 @@
           nextSlide();
         }, slideSettings.duration);
         console.log('Interval created with ID:', autoSlideInterval);
-      } else if (autoSlide) {
-        // Fall back to global settings
-        console.log('Starting global autoplay with duration', slideInterval);
-        autoSlideInterval = setInterval(() => {
-          console.log('Global interval triggered - calling nextSlide()');
-          nextSlide();
-        }, slideInterval);
-        console.log('Global interval created with ID:', autoSlideInterval);
       }
     }
 
@@ -796,7 +784,7 @@
       
       // Resume auto-slide after delay
       userInteractionTimeout = setTimeout(() => {
-        if (autoSlide && slides.length > 1) {
+        if (slides.length > 1) {
           startAutoSlide();
         }
       }, userInteractionDelay);
@@ -820,9 +808,7 @@
         }
         
         // Pause auto-slide temporarily after user interaction
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        pauseAutoSlideTemporarily();
       }
     }
 
@@ -833,9 +819,7 @@
       isSwiping = false;
       
       // Stop auto-slide during touch
-      if (autoSlide) {
-        stopAutoSlide();
-      }
+      stopAutoSlide();
     }
 
     function handleTouchMove(e) {
@@ -852,9 +836,7 @@
         handleSwipe();
       } else {
         // If no swipe was detected, resume auto-slide after delay
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        pauseAutoSlideTemporarily();
       }
     }
 
@@ -869,39 +851,31 @@
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
         prevSlide();
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        pauseAutoSlideTemporarily();
       });
     }
 
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
         nextSlide();
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        pauseAutoSlideTemporarily();
       });
     }
 
     // Pause auto-slide on hover
     slider.addEventListener('mouseenter', stopAutoSlide);
     slider.addEventListener('mouseleave', () => {
-      if (autoSlide) startAutoSlide();
+      startAutoSlide();
     });
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
       if (e.key === 'ArrowLeft') {
         prevSlide();
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        pauseAutoSlideTemporarily();
       } else if (e.key === 'ArrowRight') {
         nextSlide();
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        pauseAutoSlideTemporarily();
       }
     });
 
@@ -980,7 +954,7 @@
     },
     {
       "type": "paragraph",
-      "content": "Per-slide autoplay settings: Set 'autoplay' to true/false for each slide, and 'autoplay_duration' to the desired seconds (e.g., 2, 5, 10, 15). Each slide can have different timing."
+      "content": "Per-slide autoplay settings: Set 'autoplay' to true/false for each slide, and 'autoplay_duration' to the desired seconds (e.g., 2, 5, 10, 15). Each slide can have different timing. Autoplay is ONLY controlled through metafields - theme settings are disabled to prevent conflicts."
     },
     {
       "type": "header",
@@ -1024,28 +998,6 @@
       "default": "center",
       "info": "Controls how text is aligned within the content area"
     },
-    {
-      "type": "header",
-      "content": "Slider Settings"
-    },
-    {
-      "type": "checkbox",
-      "id": "auto_slide",
-      "label": "Enable Auto-Slide",
-      "default": true,
-      "info": "Automatically rotate through slides. When disabled, users must click arrows to navigate."
-    },
-    {
-      "type": "range",
-      "id": "slide_interval",
-      "min": 3,
-      "max": 10,
-      "step": 1,
-      "unit": "s",
-      "label": "Auto-Slide Interval",
-      "default": 5,
-      "info": "Time between slide transitions (in seconds). Only applies when auto-slide is enabled."
-    }
   ],
   "blocks": [
     {

@@ -1,8 +1,6 @@
 <!-- Dynamic Hero Section Two - Supports both Product Metafields and Theme Editor -->
 <div
   class="dynamic-hero-section-two {% if section.settings.text_alignment %}hero-v2-align-{{ section.settings.text_alignment }}{% else %}hero-v2-align-center{% endif %}"
-  data-auto-slide="{{ section.settings.auto_slide }}"
-  {% if section.settings.slide_interval != blank %}data-slide-interval="{{ section.settings.slide_interval | times: 1000 }}"{% endif %}
   data-template="{{ template.name }}"
   data-product-id="{{ product.id }}"
 >
@@ -14,7 +12,10 @@
         <!-- Debug: Hero content found -->
         <!-- {{ hero_content | json }} -->
         {% for item in hero_content %}
-          <div class="dynamic-hero-slide-v2" data-slide-index="{{ forloop.index0 }}">
+          <div class="dynamic-hero-slide-v2" 
+               data-slide-index="{{ forloop.index0 }}"
+               data-autoplay="{% if item.autoplay != blank %}{{ item.autoplay }}{% else %}false{% endif %}"
+               data-autoplay-duration="{% if item.autoplay_duration != blank %}{{ item.autoplay_duration | times: 1000 }}{% else %}5000{% endif %}">
             <div class="hero-v2-media-wrapper {% if section.settings.fix %}hero-v2-media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
                 <img 
@@ -579,14 +580,25 @@
 
     const slider = heroSection.querySelector('.dynamic-hero-slider-v2');
     const slides = heroSection.querySelectorAll('.dynamic-hero-slide-v2');
-    const prevBtn = document.querySelector('.hero-v2-slider-prev');
-    const nextBtn = document.querySelector('.hero-v2-slider-next');
-    const progressBar = document.querySelector('.hero-v2-slider-progress');
+    const prevBtn = heroSection.querySelector('.hero-v2-slider-prev');
+    const nextBtn = heroSection.querySelector('.hero-v2-slider-next');
+    const progressBar = heroSection.querySelector('.hero-v2-slider-progress');
     
     let currentSlide = 0;
     let autoSlideInterval;
-    const autoSlide = heroSection.dataset.autoSlide === 'true';
-    const slideInterval = parseInt(heroSection.dataset.slideInterval) || 5000;
+    
+    // Per-slide autoplay settings for hero section two
+    function getSlideAutoplaySettingsV2(slideIndex) {
+      const slide = slides[slideIndex];
+      if (!slide) return { enabled: false, duration: 5000 };
+      
+      const autoplay = slide.dataset.autoplay === 'true';
+      const duration = parseInt(slide.dataset.autoplayDuration) || 5000;
+      
+      console.log('Hero V2 - Slide', slideIndex, 'autoplay settings:', { autoplay, duration });
+      
+      return { enabled: autoplay, duration: duration };
+    }
 
     // Touch/swipe variables
     let touchStartX = 0;
@@ -600,8 +612,8 @@
     let userInteractionTimeout;
     const userInteractionDelay = 3000; // 3 seconds delay after user interaction
 
-    // Initialize slider immediately
-    function initSlider() {
+    // Initialize slider immediately for hero section two
+    function initSliderV2() {
       // Show first slide immediately
       if (slides.length > 0) {
         slides[0].classList.add('active');
@@ -610,19 +622,26 @@
       }
       
       // Update progress bar
-      updateProgressBar();
+      updateProgressBarV2();
       
       // Update navigation state
-      updateNavigationState();
+      updateNavigationStateV2();
       
       // Start auto-slide if enabled and multiple slides
-      if (autoSlide && slides.length > 1) {
-        startAutoSlide();
+      if (slides.length > 1) {
+        // Check if any slide has autoplay enabled
+        const hasAutoplay = Array.from(slides).some(slide => slide.dataset.autoplay === 'true');
+        if (hasAutoplay) {
+          console.log('Hero V2 - Initializing autoplay...');
+          startAutoSlideV2();
+        }
       }
     }
 
-    // Show slide
-    function showSlide(index) {
+    // Show slide for hero section two
+    function showSlideV2(index) {
+      console.log('Hero V2 - showSlide() called with index:', index);
+      
       // Remove active class from all slides
       slides.forEach(slide => {
         slide.classList.remove('active');
@@ -633,23 +652,31 @@
       if (slides[index]) {
         slides[index].classList.add('active');
         slides[index].style.zIndex = '2';
+        console.log('Hero V2 - Activated slide:', index);
       }
       
       currentSlide = index;
-      updateProgressBar();
-      updateNavigationState();
+      updateProgressBarV2();
+      updateNavigationStateV2();
+      
+      // Restart autoplay with new slide settings
+      if (getSlideAutoplaySettingsV2(index).enabled) {
+        console.log('Hero V2 - Restarting autoplay for slide:', index);
+        stopAutoSlideV2();
+        startAutoSlideV2();
+      }
     }
 
-    // Update progress bar
-    function updateProgressBar() {
+    // Update progress bar for hero section two
+    function updateProgressBarV2() {
       if (progressBar && slides.length > 1) {
         const progress = ((currentSlide + 1) / slides.length) * 100;
         progressBar.style.width = progress + '%';
       }
     }
 
-    // Update navigation arrows state (enable/disable)
-    function updateNavigationState() {
+    // Update navigation arrows state (enable/disable) for hero section two
+    function updateNavigationStateV2() {
       if (prevBtn && nextBtn) {
         // Disable previous button on first slide
         if (currentSlide === 0) {
@@ -675,39 +702,57 @@
       }
     }
 
-    // Next slide
-    function nextSlide() {
+    // Next slide for hero section two
+    function nextSlideV2() {
+      console.log('Hero V2 - nextSlide() called, currentSlide:', currentSlide, 'total slides:', slides.length);
       const next = (currentSlide + 1) % slides.length;
-      showSlide(next);
+      console.log('Hero V2 - Moving to slide:', next);
+      showSlideV2(next);
     }
 
-    // Previous slide
-    function prevSlide() {
+    // Previous slide for hero section two
+    function prevSlideV2() {
       const prev = (currentSlide - 1 + slides.length) % slides.length;
-      showSlide(prev);
+      showSlideV2(prev);
     }
 
-    // Start auto-slide
-    function startAutoSlide() {
+    // Start auto-slide with per-slide settings for hero section two
+    function startAutoSlideV2() {
       // Clear any existing timeout
       if (userInteractionTimeout) {
         clearTimeout(userInteractionTimeout);
         userInteractionTimeout = null;
       }
       
-      autoSlideInterval = setInterval(nextSlide, slideInterval);
+      // Stop any existing interval
+      if (autoSlideInterval) {
+        clearInterval(autoSlideInterval);
+      }
+      
+      // Check if current slide has autoplay enabled
+      const slideSettings = getSlideAutoplaySettingsV2(currentSlide);
+      
+      if (slideSettings.enabled) {
+        // Use per-slide duration
+        console.log('Hero V2 - Starting autoplay for slide', currentSlide, 'with duration', slideSettings.duration);
+        autoSlideInterval = setInterval(() => {
+          console.log('Hero V2 - Interval triggered - calling nextSlide()');
+          nextSlideV2();
+        }, slideSettings.duration);
+        console.log('Hero V2 - Interval created with ID:', autoSlideInterval);
+      }
     }
 
-    // Stop auto-slide
-    function stopAutoSlide() {
+    // Stop auto-slide for hero section two
+    function stopAutoSlideV2() {
       if (autoSlideInterval) {
         clearInterval(autoSlideInterval);
       }
     }
 
-    // Pause auto-slide temporarily after user interaction
-    function pauseAutoSlideTemporarily() {
-      stopAutoSlide();
+    // Pause auto-slide temporarily after user interaction for hero section two
+    function pauseAutoSlideTemporarilyV2() {
+      stopAutoSlideV2();
       
       // Clear any existing timeout
       if (userInteractionTimeout) {
@@ -716,14 +761,14 @@
       
       // Resume auto-slide after delay
       userInteractionTimeout = setTimeout(() => {
-        if (autoSlide && slides.length > 1) {
-          startAutoSlide();
+        if (slides.length > 1) {
+          startAutoSlideV2();
         }
       }, userInteractionDelay);
     }
 
-    // Handle swipe detection
-    function handleSwipe() {
+    // Handle swipe detection for hero section two
+    function handleSwipeV2() {
       const swipeDistance = touchEndX - touchStartX;
       const verticalDistance = Math.abs(touchEndY - touchStartY);
       const horizontalDistance = Math.abs(swipeDistance);
@@ -733,100 +778,89 @@
       if (horizontalDistance > verticalDistance && horizontalDistance > minSwipeDistance) {
         if (swipeDistance > 0) {
           // Swipe right - go to previous slide
-          prevSlide();
+          prevSlideV2();
         } else {
           // Swipe left - go to next slide
-          nextSlide();
+          nextSlideV2();
         }
         
         // Pause auto-slide temporarily after user interaction
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        pauseAutoSlideTemporarilyV2();
       }
     }
 
-    // Touch event handlers
-    function handleTouchStart(e) {
+    // Touch event handlers for hero section two
+    function handleTouchStartV2(e) {
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
       isSwiping = false;
       
       // Stop auto-slide during touch
-      if (autoSlide) {
-        stopAutoSlide();
-      }
+      stopAutoSlideV2();
     }
 
-    function handleTouchMove(e) {
+    function handleTouchMoveV2(e) {
       if (!isSwiping) {
         isSwiping = true;
       }
     }
 
-    function handleTouchEnd(e) {
+    function handleTouchEndV2(e) {
       touchEndX = e.changedTouches[0].clientX;
       touchEndY = e.changedTouches[0].clientY;
       
       if (isSwiping) {
-        handleSwipe();
+        handleSwipeV2();
       } else {
         // If no swipe was detected, resume auto-slide after delay
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        pauseAutoSlideTemporarilyV2();
       }
     }
 
-    // Add touch event listeners to slider
+    // Add touch event listeners to slider for hero section two
     if (slider) {
-      slider.addEventListener('touchstart', handleTouchStart, { passive: true });
-      slider.addEventListener('touchmove', handleTouchMove, { passive: true });
-      slider.addEventListener('touchend', handleTouchEnd, { passive: true });
+      slider.addEventListener('touchstart', handleTouchStartV2, { passive: true });
+      slider.addEventListener('touchmove', handleTouchMoveV2, { passive: true });
+      slider.addEventListener('touchend', handleTouchEndV2, { passive: true });
     }
 
-    // Event listeners
+    // Event listeners for hero section two
     if (prevBtn) {
       prevBtn.addEventListener('click', () => {
-        prevSlide();
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        prevSlideV2();
+        pauseAutoSlideTemporarilyV2();
       });
     }
 
     if (nextBtn) {
       nextBtn.addEventListener('click', () => {
-        nextSlide();
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
+        nextSlideV2();
+        pauseAutoSlideTemporarilyV2();
       });
     }
 
-    // Pause auto-slide on hover
-    slider.addEventListener('mouseenter', stopAutoSlide);
+    // Pause auto-slide on hover for hero section two
+    slider.addEventListener('mouseenter', stopAutoSlideV2);
     slider.addEventListener('mouseleave', () => {
-      if (autoSlide) startAutoSlide();
+      startAutoSlideV2();
     });
 
-    // Keyboard navigation
+    // Keyboard navigation for hero section two
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') {
-        prevSlide();
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
-        }
-      } else if (e.key === 'ArrowRight') {
-        nextSlide();
-        if (autoSlide) {
-          pauseAutoSlideTemporarily();
+      // Only handle keyboard events if this hero section is in focus
+      if (heroSection.contains(document.activeElement) || heroSection.matches(':hover')) {
+        if (e.key === 'ArrowLeft') {
+          prevSlideV2();
+          pauseAutoSlideTemporarilyV2();
+        } else if (e.key === 'ArrowRight') {
+          nextSlideV2();
+          pauseAutoSlideTemporarilyV2();
         }
       }
     });
 
     // Initialize immediately for faster loading
-    initSlider();
+    initSliderV2();
   });
 
   // Function to maintain aspect ratio for hero media and adjust container height
@@ -912,6 +946,14 @@
       "content": "On product pages, this section will automatically use product metafields for dynamic content. Set up metafields with namespace 'custom' and key 'hero_content_two' as a JSON list."
     },
     {
+      "type": "paragraph",
+      "content": "JSON Structure for metafields: [{\"content_type\": \"image\", \"desktop_image\": \"url\", \"mobile_image\": \"url\", \"heading\": \"text\", \"text\": \"description\", \"btn_text\": \"button\", \"btn_url\": \"link\", \"autoplay\": true, \"autoplay_duration\": 5}, ...]"
+    },
+    {
+      "type": "paragraph",
+      "content": "Per-slide autoplay settings: Set 'autoplay' to true/false for each slide, and 'autoplay_duration' to the desired seconds (e.g., 2, 5, 10, 15). Each slide can have different timing. Autoplay is ONLY controlled through metafields - theme settings are disabled to prevent conflicts."
+    },
+    {
       "type": "header",
       "content": "Content Display"
     },
@@ -953,28 +995,6 @@
       "default": "center",
       "info": "Controls how text is aligned within the content area"
     },
-    {
-      "type": "header",
-      "content": "Slider Settings"
-    },
-    {
-      "type": "checkbox",
-      "id": "auto_slide",
-      "label": "Enable Auto-Slide",
-      "default": true,
-      "info": "Automatically rotate through slides. When disabled, users must click arrows to navigate."
-    },
-    {
-      "type": "range",
-      "id": "slide_interval",
-      "min": 3,
-      "max": 10,
-      "step": 1,
-      "unit": "s",
-      "label": "Auto-Slide Interval",
-      "default": 5,
-      "info": "Time between slide transitions (in seconds). Only applies when auto-slide is enabled."
-    }
   ],
   "blocks": [
     {
