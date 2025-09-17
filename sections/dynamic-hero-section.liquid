@@ -14,8 +14,8 @@
         {% for item in hero_content %}
           <div class="hero-slide" 
                data-slide-index="{{ forloop.index0 }}"
-               data-autoplay="{% if item.autoplay != blank %}{{ item.autoplay }}{% else %}false{% endif %}"
-               data-autoplay-duration="{% if item.autoplay_duration != blank %}{{ item.autoplay_duration | times: 1000 }}{% else %}5000{% endif %}">
+               data-autoplay="{% if item.autoplay != blank %}{{ item.autoplay }}{% endif %}"
+               data-autoplay-duration="{% if item.autoplay_duration != blank %}{{ item.autoplay_duration | times: 1000 }}{% endif %}">
             <div class="hero__media-wrapper {% if section.settings.fix %}hero__media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
                 <img 
@@ -613,10 +613,10 @@
     // Per-slide autoplay settings
     function getSlideAutoplaySettings(slideIndex) {
       const slide = slides[slideIndex];
-      if (!slide) return { enabled: false, duration: 5000 };
+      if (!slide) return { enabled: false, duration: 0 };
       
       const autoplay = slide.dataset.autoplay === 'true';
-      const duration = parseInt(slide.dataset.autoplayDuration) || 5000;
+      const duration = parseInt(slide.dataset.autoplayDuration) || 0;
       
       console.log('Slide', slideIndex, 'autoplay settings:', { autoplay, duration });
       
