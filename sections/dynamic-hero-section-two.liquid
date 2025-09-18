@@ -250,7 +250,7 @@
 
   @media (max-width: 768px) {
     .dynamic-hero-slide-v2 {
-      aspect-ratio: 3/4; /* 3:4 aspect ratio for mobile */
+      aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
     }
   }
 
@@ -275,7 +275,7 @@
 
   @media (max-width: 768px) {
     .hero-v2-media-wrapper {
-      aspect-ratio: 3/4; /* 3:4 aspect ratio for mobile */
+      aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
     }
   }
 
@@ -305,7 +305,7 @@
 
   @media (max-width: 768px) {
     .hero-v2-video-container {
-      aspect-ratio: 3/4; /* 3:4 aspect ratio for mobile */
+      aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
     }
   }
 
@@ -472,7 +472,7 @@
     .dynamic-hero-slider-v2 {
       height: auto;
       min-height: 300px;
-      aspect-ratio: 3/4; /* 3:4 aspect ratio for mobile */
+      aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
     }
 
     .hero-v2-title {
@@ -872,9 +872,9 @@
       const isMobile = window.innerWidth <= 768;
       
       if (isMobile) {
-        // On mobile, use 3:4 aspect ratio
+        // On mobile, use 4:5 aspect ratio
         const containerWidth = mediaWrapper.offsetWidth;
-        const calculatedHeight = containerWidth / (3/4); // 3:4 aspect ratio
+        const calculatedHeight = containerWidth / (4/5); // 4:5 aspect ratio
         
         // Set the height on both the media wrapper and the slide
         mediaWrapper.style.height = calculatedHeight + 'px';
