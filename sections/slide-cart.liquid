@@ -2895,16 +2895,16 @@ function removeItemFromCart(lineNumber, $button) {
       if ($button) {
         $button.prop('disabled', false).removeClass('is-loading');
       }
-      
+
       // Fast update: Update only cart totals and remove item
       $itemRow.remove();
-      
+
       // Refresh line numbers after item removal
       refreshCartLineNumbers();
-      
+
       updateCartTotalsOnly(cart);
       updateCartHeader(cart.item_count);
-      
+
       // Show empty cart if no items
       if (cart.item_count === 0) {
         // Hide cart sections but keep free shipping progress visible
@@ -2912,22 +2912,27 @@ function removeItemFromCart(lineNumber, $button) {
         $('.bundle-save-section').hide();
         $('.checkout-section').hide();
         $('.free-shipping-progress').show(); // Keep free shipping progress visible
-        
+
         // Show empty cart message
         $('.cart-items-container').html('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
-        
+
         // Force hide checkout section with important and add class
         $('.checkout-section').css('display', 'none !important').addClass('hidden-when-empty');
-        
+
         // Update cart title to show 0 items
         $('.cart-title').text('Your bag (0)');
-        
+
         // Update free shipping progress for empty cart
         updateFreeShippingProgress(0);
       } else {
         // Show sections when cart has items
         $('.checkout-section').show().removeClass('hidden-when-empty');
         $('.free-shipping-progress').show();
+
+        // Refresh bundle products after item removal to show previously hidden products
+        setTimeout(function() {
+          refreshBundleProducts(cart);
+        }, 100);
       }
     },
     error: function(xhr) {
@@ -3045,7 +3050,7 @@ function updateFreeShippingProgress(cartTotal) {
 // Function to update total savings display in checkout section
 function updateTotalSavingsDisplay(cart) {
   var totalSavings = 0;
-  
+
   if (cart.items && cart.items.length > 0) {
     for (var i = 0; i < cart.items.length; i++) {
       var item = cart.items[i];
@@ -3055,12 +3060,12 @@ function updateTotalSavingsDisplay(cart) {
       }
     }
   }
-  
+
   // Add cart-level discounts
   if (cart.total_discount > 0) {
     totalSavings += cart.total_discount;
   }
-  
+
   // Update savings display in checkout section
   if (totalSavings > 0) {
     $('#savings-display').show();
@@ -3068,6 +3073,36 @@ function updateTotalSavingsDisplay(cart) {
   } else {
     $('#savings-display').hide();
   }
+}
+
+// Function to refresh bundle products after cart changes
+function refreshBundleProducts(cart) {
+  // Since bundle products are removed from DOM when added to cart,
+  // we need to refresh the bundle section from server when items are removed
+  $.ajax({
+    type: "GET",
+    url: "/cart",
+    dataType: "html",
+    cache: false,
+    success: function(html) {
+      var $cartHtml = $(html);
+      var $newBundleSection = $cartHtml.find('.bundle-save-section');
+
+      if ($newBundleSection.length > 0) {
+        // Replace the current bundle section with the fresh one from server
+        $('.bundle-save-section').replaceWith($newBundleSection);
+
+        // Re-initialize bundle functionality after refresh
+        setTimeout(function() {
+          new BundleSlideNavigation();
+          initializeBundleProductImages();
+        }, 100);
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('Error refreshing bundle products:', error);
+    }
+  });
 }
 
 // Duplicate function removed - using the AJAX version above
