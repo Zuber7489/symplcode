@@ -76,13 +76,30 @@
                     <div class="cart-item-pricing">
                       <div class="price-container">
                         {% assign original_price = item.variant.compare_at_price | default: item.original_price %}
+                        {% assign has_discount = false %}
+                        {% assign discount_amount = 0 %}
+                        
+                        {% comment %} Check for product-level discounts (compare_at_price) {% endcomment %}
                         {% if original_price and original_price > item.price %}
+                          {% assign has_discount = true %}
+                          {% assign discount_amount = original_price | minus: item.price | times: item.quantity %}
+                        {% endif %}
+                        
+                        {% comment %} Check for cart-level discounts {% endcomment %}
+                        {% if item.discounts.size > 0 %}
+                          {% assign has_discount = true %}
+                          {% for discount in item.discounts %}
+                            {% assign discount_amount = discount_amount | plus: discount.amount %}
+                          {% endfor %}
+                        {% endif %}
+                        
+                        {% if has_discount %}
                           <div class="original-price-top">{{ item.original_line_price | money }}</div>
                           <div class="price-comparison">
                             <span class="original-price">{{ original_price | times: item.quantity | money }}</span>
                             <span class="discounted-price">{{ item.line_price | money }}</span>
                           </div>
-                          <div class="savings">(Save {{ original_price | minus: item.price | times: item.quantity | money }})</div>
+                          <div class="savings">(Save {{ discount_amount | money }})</div>
                           
                           {% comment %} Get coupon code from item discounts array {% endcomment %}
                           {% assign item_discount_code = '' %}
@@ -241,6 +258,25 @@
       <div class="discount-code-section">
         <input type="text" id="discount-code" class="discount-input" placeholder="Discount Code" maxlength="20">
         <button id="apply-discount" class="apply-discount-btn">Apply</button>
+      </div>
+      
+      <!-- Applied Discount Codes Display -->
+      <div id="applied-discounts" class="applied-discounts-section" style="display: none;">
+        {% if cart.discount_codes.size > 0 %}
+          {% for discount_code in cart.discount_codes %}
+            {% if discount_code.applicable %}
+              <div class="discount-tag" data-code="{{ discount_code.code }}">
+                <span class="discount-tag-icon">🏷️</span>
+                <span class="discount-tag-text">{{ discount_code.code }}</span>
+                <button class="discount-tag-remove" data-code="{{ discount_code.code }}" aria-label="Remove discount code">
+                  <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
       </div>
       
       {% assign total_savings = 0 %}
@@ -1045,6 +1081,57 @@
 
 .apply-discount-btn:hover {
   background: #374151;
+}
+
+/* Applied Discount Codes Section */
+.applied-discounts-section {
+  margin-bottom: 12px;
+}
+
+.discount-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0f9ff;
+  border: 1px solid #0891b2;
+  border-radius: 6px;
+  padding: 6px 8px;
+  margin: 4px 0;
+  font-size: 12px;
+  color: #0891b2;
+}
+
+.discount-tag-icon {
+  font-size: 14px;
+}
+
+.discount-tag-text {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.discount-tag-remove {
+  background: none;
+  border: none;
+  color: #0891b2;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.discount-tag-remove:hover {
+  background: #0891b2;
+  color: white;
+}
+
+.discount-tag-remove svg {
+  width: 14px;
+  height: 14px;
 }
 
 .savings-row {
@@ -2283,9 +2370,8 @@ function applyDiscountCode(code) {
       }
       
       if (discountApplied) {
-        // Refresh cart content to show updated prices and savings
-        updateTotalSavingsDisplay(newCart);
-        updateCartTotalsOnly(newCart);
+        // Refresh cart content completely to show updated prices, savings, and discount tags
+        refreshCartAfterDiscount(newCart);
         
         // Show success visual feedback
         $('#discount-code').removeClass('error').addClass('success').val('');
@@ -2314,6 +2400,137 @@ function applyDiscountCode(code) {
       $('#apply-discount').prop("disabled", false).removeClass("is-loading");
     }
   });
+}
+
+// Function to remove discount code
+function removeDiscountCode(code) {
+  // Add loading state to the remove button
+  $('.discount-tag-remove[data-code="' + code + '"]').prop("disabled", true);
+  
+  // Remove discount code by updating cart without it
+  $.ajax({
+    type: "POST",
+    url: "/cart/update.js",
+    dataType: "json",
+    data: {
+      'discount': '' // Clearing discount codes
+    },
+    success: function(newCart) {
+      // Refresh cart content completely to show updated prices and remove discount tags
+      refreshCartAfterDiscount(newCart);
+      
+      // Remove loading state
+      $('.discount-tag-remove').prop("disabled", false);
+    },
+    error: function(xhr, status, error) {
+      console.error('Error removing discount code:', error);
+      alert('Error removing discount code. Please try again.');
+      
+      // Remove loading state
+      $('.discount-tag-remove').prop("disabled", false);
+    }
+  });
+}
+
+// Function to refresh cart after discount application/removal
+function refreshCartAfterDiscount(cartData) {
+  // Full HTML refresh to show updated discount information
+  $.ajax({
+    type: "GET",
+    url: "/cart",
+    dataType: "html",
+    cache: false,
+    success: function(html) {
+      var $cartHtml = $(html);
+      var $newCartSection = $cartHtml.find('.r-side-cart');
+      
+      if ($newCartSection.length > 0) {
+        // Get current cart state
+        var wasActive = $('.r-side-cart').hasClass('active');
+        var bodyHasCartOpen = $('body').hasClass('g-cart-open');
+        
+        // Replace cart content with fresh server HTML
+        $('.r-side-cart').html($newCartSection.html());
+        
+        // Restore cart state
+        if (wasActive) {
+          $('.r-side-cart').addClass('active');
+        }
+        if (bodyHasCartOpen) {
+          $('body').addClass('g-cart-open');
+        }
+        
+        // Update cart counts from the fresh HTML
+        var cartCount = $cartHtml.find('.count').text() || cartData.item_count.toString();
+        $(".count").html(cartCount);
+        $("#cart-count").html(cartCount);
+        $(".hcart").html(cartCount);
+        
+        // Update cart title
+        $('.cart-title').text('Your bag (' + cartCount + ')');
+        
+        // Show/hide applied discounts section
+        updateAppliedDiscountsDisplay(cartData);
+        
+        // Re-initialize bundle functionality after cart update
+        setTimeout(function() {
+          new BundleSlideNavigation();
+          initializeBundleProductImages();
+          hideProductsAlreadyInCart();
+        }, 50);
+        
+      } else {
+        // Fallback to data-only update
+        updateTotalSavingsDisplay(cartData);
+        updateCartTotalsOnly(cartData);
+        updateAppliedDiscountsDisplay(cartData);
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('Error refreshing cart after discount:', error);
+      // Fallback to data-only update
+      updateTotalSavingsDisplay(cartData);
+      updateCartTotalsOnly(cartData);
+      updateAppliedDiscountsDisplay(cartData);
+    }
+  });
+}
+
+// Function to update applied discounts display
+function updateAppliedDiscountsDisplay(cartData) {
+  var $appliedDiscountsSection = $('#applied-discounts');
+  
+  if (cartData.discount_codes && cartData.discount_codes.length > 0) {
+    var hasApplicableDiscounts = cartData.discount_codes.some(function(dc) {
+      return dc.applicable === true;
+    });
+    
+    if (hasApplicableDiscounts) {
+      // Build discount tags HTML
+      var discountTagsHTML = '';
+      cartData.discount_codes.forEach(function(discount_code) {
+        if (discount_code.applicable) {
+          discountTagsHTML += `
+            <div class="discount-tag" data-code="${discount_code.code}">
+              <span class="discount-tag-icon">🏷️</span>
+              <span class="discount-tag-text">${discount_code.code}</span>
+              <button class="discount-tag-remove" data-code="${discount_code.code}" aria-label="Remove discount code">
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          `;
+        }
+      });
+      
+      $appliedDiscountsSection.html(discountTagsHTML).show();
+    } else {
+      $appliedDiscountsSection.hide();
+    }
+  } else {
+    $appliedDiscountsSection.hide();
+  }
 }
 
 // Function to hide products that are already in the cart
@@ -2612,6 +2829,15 @@ $(document).ready(function() {
       e.preventDefault();
       var code = $(this).val().trim();
       applyDiscountCode(code);
+    }
+  });
+  
+  // Remove discount code handler
+  $(document).on('click', '.discount-tag-remove', function(e) {
+    e.preventDefault();
+    var code = $(this).data('code');
+    if (code) {
+      removeDiscountCode(code);
     }
   });
 });
@@ -3073,6 +3299,9 @@ function updateTotalSavingsDisplay(cart) {
   } else {
     $('#savings-display').hide();
   }
+  
+  // Also update applied discounts display
+  updateAppliedDiscountsDisplay(cart);
 }
 
 // Function to refresh bundle products after cart changes
