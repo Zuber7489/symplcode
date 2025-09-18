@@ -1134,6 +1134,37 @@
   height: 14px;
 }
 
+/* Loading state for discount tag remove button */
+.discount-tag-remove.is-loading {
+  opacity: 0.7;
+  pointer-events: none;
+  position: relative;
+}
+
+.discount-tag-remove.is-loading svg {
+  opacity: 0;
+}
+
+.discount-tag-remove.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 2px solid #0891b2;
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: discount-spinner 1s linear infinite;
+}
+
+@keyframes discount-spinner {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
 .savings-row {
   display: flex;
   justify-content: space-between;
@@ -2404,8 +2435,17 @@ function applyDiscountCode(code) {
 
 // Function to remove discount code
 function removeDiscountCode(code) {
-  // Add loading state to the remove button
-  $('.discount-tag-remove[data-code="' + code + '"]').prop("disabled", true);
+  // Add loading state to the specific remove button
+  var $removeButton = $('.discount-tag-remove[data-code="' + code + '"]');
+  $removeButton.prop("disabled", true).addClass("is-loading");
+  
+  // Safety timeout to prevent stuck loading state
+  var safetyTimeout = setTimeout(function() {
+    if ($removeButton.hasClass('is-loading')) {
+      $removeButton.prop("disabled", false).removeClass("is-loading");
+      console.warn('Discount code removal timeout - removing loading state');
+    }
+  }, 10000); // 10 seconds timeout
   
   // Remove discount code by updating cart without it
   $.ajax({
@@ -2416,18 +2456,24 @@ function removeDiscountCode(code) {
       'discount': '' // Clearing discount codes
     },
     success: function(newCart) {
+      // Clear the safety timeout
+      clearTimeout(safetyTimeout);
+      
       // Refresh cart content completely to show updated prices and remove discount tags
       refreshCartAfterDiscount(newCart);
       
-      // Remove loading state
-      $('.discount-tag-remove').prop("disabled", false);
+      // Remove loading state from all remove buttons (in case of multiple)
+      $('.discount-tag-remove').prop("disabled", false).removeClass("is-loading");
     },
     error: function(xhr, status, error) {
+      // Clear the safety timeout
+      clearTimeout(safetyTimeout);
+      
       console.error('Error removing discount code:', error);
       alert('Error removing discount code. Please try again.');
       
-      // Remove loading state
-      $('.discount-tag-remove').prop("disabled", false);
+      // Remove loading state from the specific button
+      $removeButton.prop("disabled", false).removeClass("is-loading");
     }
   });
 }
@@ -2835,7 +2881,14 @@ $(document).ready(function() {
   // Remove discount code handler
   $(document).on('click', '.discount-tag-remove', function(e) {
     e.preventDefault();
-    var code = $(this).data('code');
+    var $button = $(this);
+    var code = $button.data('code');
+    
+    // Prevent multiple clicks during loading
+    if ($button.hasClass('is-loading') || $button.prop('disabled')) {
+      return false;
+    }
+    
     if (code) {
       removeDiscountCode(code);
     }
