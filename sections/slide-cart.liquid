@@ -235,7 +235,7 @@
         {% endif %}
     </div>
 
-    <!-- Sticky Checkout Section -->
+    <!-- Sticky Checkout Section - Only show when cart has items -->
     {% if cart.item_count > 0 %}
     <div class="checkout-section">
       <div class="discount-code-section">
@@ -325,11 +325,55 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   transform: translateX(100%);
   visibility: hidden;
+  opacity: 0;
 }
 
 .r-side-cart.active {
   transform: translateX(0);
   visibility: visible;
+  opacity: 1;
+}
+
+.r-side-cart.active .cart-items-container,
+.r-side-cart.active .bundle-save-section,
+.r-side-cart.active .checkout-section {
+  display: block !important;
+}
+
+/* Hide sections when cart is empty */
+.r-side-cart .empty-cart {
+  display: block;
+}
+
+.r-side-cart .empty-cart ~ * {
+  display: none !important;
+}
+
+/* Force hide checkout section when cart is empty */
+.r-side-cart:not(.active) .checkout-section,
+.r-side-cart .empty-cart + .checkout-section,
+.r-side-cart .checkout-section:not(:has(.discount-code-section)) {
+  display: none !important;
+}
+
+/* Additional rule to hide checkout section when cart is empty */
+.r-side-cart .cart-items-container:has(.empty-cart) ~ .checkout-section {
+  display: none !important;
+}
+
+/* Hide checkout section when cart is empty - most specific rule */
+.r-side-cart .checkout-section {
+  display: block;
+}
+
+.r-side-cart .empty-cart ~ .checkout-section,
+.r-side-cart .cart-items-container:has(.empty-cart) + .checkout-section {
+  display: none !important;
+}
+
+/* Hide checkout section with class */
+.r-side-cart .checkout-section.hidden-when-empty {
+  display: none !important;
 }
 
 .cart-overlay {
@@ -1737,8 +1781,23 @@ $(document).on('cart:refresh-complete', function() {
   // Ensure cart content is visible after refresh
   setTimeout(function() {
     if ($('.r-side-cart').hasClass('active')) {
-      $('.Cart_Drawer__Content').show();
-      $('.empty-cart').hide();
+      // Check if cart is empty
+      var cartItemCount = parseInt($('.cart-title').text().match(/\d+/)) || 0;
+      
+      if (cartItemCount === 0) {
+        // Show empty cart state
+        $('.cart-items-container').html('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
+        $('.checkout-section').hide().addClass('hidden-when-empty');
+        $('.bundle-save-section').hide();
+        $('.free-shipping-progress').show(); // Keep free shipping progress visible
+        
+        // Update free shipping progress for empty cart
+        updateFreeShippingProgress(0);
+      } else {
+        // Show cart content
+        $('.Cart_Drawer__Content').show();
+        $('.empty-cart').hide();
+      }
     }
   }, 100);
 });
@@ -2617,8 +2676,19 @@ function updateBundleProductsWithHTML() {
         $("#cart-count").html(cartCount);
         $(".hcart").html(cartCount);
         
+        // Update cart title
+        $('.cart-title').text('Your bag (' + cartCount + ')');
+        
         if (cartCount == '0') {
           $(".hcart").hide();
+          // Ensure empty cart state is properly displayed
+          $('.cart-items-container').html('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
+          $('.checkout-section').hide().addClass('hidden-when-empty');
+          $('.bundle-save-section').hide();
+          $('.free-shipping-progress').show(); // Keep free shipping progress visible
+          
+          // Update free shipping progress for empty cart
+          updateFreeShippingProgress(0);
         } else {
           $(".hcart").show();
         }
@@ -2837,10 +2907,27 @@ function removeItemFromCart(lineNumber, $button) {
       
       // Show empty cart if no items
       if (cart.item_count === 0) {
+        // Hide cart sections but keep free shipping progress visible
         $('.cart-items-list').hide();
         $('.bundle-save-section').hide();
         $('.checkout-section').hide();
-        $('.cart-items-container').append('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
+        $('.free-shipping-progress').show(); // Keep free shipping progress visible
+        
+        // Show empty cart message
+        $('.cart-items-container').html('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
+        
+        // Force hide checkout section with important and add class
+        $('.checkout-section').css('display', 'none !important').addClass('hidden-when-empty');
+        
+        // Update cart title to show 0 items
+        $('.cart-title').text('Your bag (0)');
+        
+        // Update free shipping progress for empty cart
+        updateFreeShippingProgress(0);
+      } else {
+        // Show sections when cart has items
+        $('.checkout-section').show().removeClass('hidden-when-empty');
+        $('.free-shipping-progress').show();
       }
     },
     error: function(xhr) {
@@ -2868,6 +2955,24 @@ function updateCartTotalsOnly(cart) {
   $('.hcart').text(cart.item_count);
   $('.cart-btn').html('<span class="fa fa-shopping-bag"></span><span>' + cart.item_count + '</span>');
   
+  // Update cart title
+  $('.cart-title').text('Your bag (' + cart.item_count + ')');
+  
+  // Handle empty cart state
+  if (cart.item_count === 0) {
+    $('.cart-items-container').html('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
+    $('.checkout-section').hide().addClass('hidden-when-empty');
+    $('.bundle-save-section').hide();
+    $('.free-shipping-progress').show(); // Keep free shipping progress visible
+    $('.hcart').hide();
+    
+    // Update free shipping progress for empty cart
+    updateFreeShippingProgress(0);
+    return; // Exit early for empty cart
+  } else {
+    $('.hcart').show();
+  }
+  
   // Update total savings using dedicated function
   updateTotalSavingsDisplay(cart);
   
@@ -2876,17 +2981,7 @@ function updateCartTotalsOnly(cart) {
   $('.shipping-row').not('#savings-display').find('.shipping-cost').text(shippingCost);
   
   // Update free shipping progress
-  var freeShippingThreshold = 9900;
-  var remainingAmount = freeShippingThreshold - cart.total_price;
-  var progressPercentage = Math.min(100, (cart.total_price * 100) / freeShippingThreshold);
-  
-  if (remainingAmount > 0) {
-    $('.free-shipping-progress-text').html('Almost there! Add $' + (remainingAmount / 100).toFixed(2) + ' more for free shipping');
-  } else {
-    $('.free-shipping-progress-text').html('<span class="free-shipping-achieved">You got free shipping!</span>');
-  }
-  
-  $('.progress-bar').css('width', progressPercentage + '%');
+  updateFreeShippingProgress(cart.total_price);
 }
 
 function updateItemPriceOnly($itemRow, quantity, cart) {
@@ -2930,6 +3025,21 @@ function updateItemPriceOnly($itemRow, quantity, cart) {
 
 function updateCartHeader(itemCount) {
   $('.cart-title').text('Your bag (' + itemCount + ')');
+}
+
+// Function to update free shipping progress
+function updateFreeShippingProgress(cartTotal) {
+  var freeShippingThreshold = 9900; // $99.00 in cents
+  var remainingAmount = freeShippingThreshold - cartTotal;
+  var progressPercentage = Math.min(100, (cartTotal * 100) / freeShippingThreshold);
+  
+  if (remainingAmount > 0) {
+    $('.free-shipping-progress-text').html('Almost there! Add $' + (remainingAmount / 100).toFixed(2) + ' more for free shipping');
+  } else {
+    $('.free-shipping-progress-text').html('<span class="free-shipping-achieved">You got free shipping!</span>');
+  }
+  
+  $('.progress-bar').css('width', progressPercentage + '%');
 }
 
 // Function to update total savings display in checkout section
