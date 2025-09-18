@@ -839,11 +839,7 @@
       });
     }
 
-    // Pause auto-slide on hover for hero section two
-    slider.addEventListener('mouseenter', stopAutoSlideV2);
-    slider.addEventListener('mouseleave', () => {
-      startAutoSlideV2();
-    });
+    // Mouse hover events removed - autoplay continues on hover
 
     // Keyboard navigation for hero section two
     document.addEventListener('keydown', (e) => {

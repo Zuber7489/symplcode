@@ -837,11 +837,7 @@
       });
     }
 
-    // Pause auto-slide on hover
-    slider.addEventListener('mouseenter', stopAutoSlide);
-    slider.addEventListener('mouseleave', () => {
-      startAutoSlide();
-    });
+    // Mouse hover events removed - autoplay continues on hover
 
     // Keyboard navigation
     document.addEventListener('keydown', (e) => {
