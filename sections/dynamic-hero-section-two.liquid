@@ -24,14 +24,14 @@
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
-                  onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
+                  onerror="this.style.display='none'; ">
                 <img 
                   src="{{ item.mobile_image }}" 
                   class="hero-v2-media-content hero-v2-mobile-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
-                  onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
+                  onerror="this.style.display='none'; ">
               {% elsif item.content_type == 'video' %}
                 <div class="hero-v2-video-container hero-v2-desktop-only">
                   <video 
@@ -595,7 +595,6 @@
       const autoplay = slide.dataset.autoplay === 'true';
       const duration = parseInt(slide.dataset.autoplayDuration) || 0;
       
-      console.log('Hero V2 - Slide', slideIndex, 'autoplay settings:', { autoplay, duration });
       
       return { enabled: autoplay, duration: duration };
     }
@@ -632,7 +631,6 @@
         // Check if any slide has autoplay enabled
         const hasAutoplay = Array.from(slides).some(slide => slide.dataset.autoplay === 'true');
         if (hasAutoplay) {
-          console.log('Hero V2 - Initializing autoplay...');
           startAutoSlideV2();
         }
       }
@@ -640,7 +638,6 @@
 
     // Show slide for hero section two
     function showSlideV2(index) {
-      console.log('Hero V2 - showSlide() called with index:', index);
       
       // Remove active class from all slides
       slides.forEach(slide => {
@@ -652,7 +649,6 @@
       if (slides[index]) {
         slides[index].classList.add('active');
         slides[index].style.zIndex = '2';
-        console.log('Hero V2 - Activated slide:', index);
       }
       
       currentSlide = index;
@@ -661,7 +657,6 @@
       
       // Restart autoplay with new slide settings
       if (getSlideAutoplaySettingsV2(index).enabled) {
-        console.log('Hero V2 - Restarting autoplay for slide:', index);
         stopAutoSlideV2();
         startAutoSlideV2();
       }
@@ -704,9 +699,7 @@
 
     // Next slide for hero section two
     function nextSlideV2() {
-      console.log('Hero V2 - nextSlide() called, currentSlide:', currentSlide, 'total slides:', slides.length);
       const next = (currentSlide + 1) % slides.length;
-      console.log('Hero V2 - Moving to slide:', next);
       showSlideV2(next);
     }
 
@@ -734,12 +727,9 @@
       
       if (slideSettings.enabled) {
         // Use per-slide duration
-        console.log('Hero V2 - Starting autoplay for slide', currentSlide, 'with duration', slideSettings.duration);
         autoSlideInterval = setInterval(() => {
-          console.log('Hero V2 - Interval triggered - calling nextSlide()');
           nextSlideV2();
         }, slideSettings.duration);
-        console.log('Hero V2 - Interval created with ID:', autoSlideInterval);
       }
     }
 

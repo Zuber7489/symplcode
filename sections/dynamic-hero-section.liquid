@@ -24,14 +24,14 @@
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
-                  onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
+                  onerror="this.style.display='none'; ">
                 <img 
                   src="{{ item.mobile_image }}" 
                   class="hero__media-content hero__mobile-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
-                  onerror="this.style.display='none'; console.log('Image failed to load:', this.src);">
+                  onerror="this.style.display='none'; ">
               {% elsif item.content_type == 'video' %}
                 <div class="hero__video-container hero__desktop-only">
                   <video 
@@ -595,7 +595,6 @@
       const autoplay = slide.dataset.autoplay === 'true';
       const duration = parseInt(slide.dataset.autoplayDuration) || 0;
       
-      console.log('Slide', slideIndex, 'autoplay settings:', { autoplay, duration });
       
       return { enabled: autoplay, duration: duration };
     }
@@ -632,7 +631,6 @@
         // Check if any slide has autoplay enabled
         const hasAutoplay = Array.from(slides).some(slide => slide.dataset.autoplay === 'true');
         if (hasAutoplay) {
-          console.log('Initializing autoplay...');
           startAutoSlide();
         }
       }
@@ -640,7 +638,6 @@
 
     // Show slide
     function showSlide(index) {
-      console.log('showSlide() called with index:', index);
       
       // Remove active class from all slides
       slides.forEach(slide => {
@@ -652,7 +649,6 @@
       if (slides[index]) {
         slides[index].classList.add('active');
         slides[index].style.zIndex = '2';
-        console.log('Activated slide:', index);
       }
       
       currentSlide = index;
@@ -661,7 +657,6 @@
       
       // Restart autoplay with new slide settings
       if (getSlideAutoplaySettings(index).enabled) {
-        console.log('Restarting autoplay for slide:', index);
         stopAutoSlide();
         startAutoSlide();
       }
@@ -704,9 +699,7 @@
 
     // Next slide
     function nextSlide() {
-      console.log('nextSlide() called, currentSlide:', currentSlide, 'total slides:', slides.length);
       const next = (currentSlide + 1) % slides.length;
-      console.log('Moving to slide:', next);
       showSlide(next);
     }
 
@@ -734,12 +727,9 @@
       
       if (slideSettings.enabled) {
         // Use per-slide duration
-        console.log('Starting autoplay for slide', currentSlide, 'with duration', slideSettings.duration);
         autoSlideInterval = setInterval(() => {
-          console.log('Interval triggered - calling nextSlide()');
           nextSlide();
         }, slideSettings.duration);
-        console.log('Interval created with ID:', autoSlideInterval);
       }
     }
 
