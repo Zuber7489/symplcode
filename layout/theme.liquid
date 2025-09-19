@@ -163,6 +163,62 @@
     handleScroll();
   });
 
+  // Global cart close functionality - works on all pages
+  document.addEventListener('click', function(event) {
+    // Check if cart is open
+    if ($('.r-side-cart').hasClass('active') || $('body').hasClass('g-cart-open')) {
+      // Check if the clicked element is not inside the cart or cart buttons
+      const cartElement = document.querySelector('.r-side-cart');
+      const cartButton = document.querySelector('.cart-i');
+      const cartCloseButton = document.querySelector('.cart-icon');
+      
+      // Check if click is outside cart and not on cart buttons
+      const isClickInsideCart = cartElement && cartElement.contains(event.target);
+      const isClickOnCartButton = cartButton && cartButton.contains(event.target);
+      const isClickOnCartCloseButton = cartCloseButton && cartCloseButton.contains(event.target);
+      
+      if (!isClickInsideCart && !isClickOnCartButton && !isClickOnCartCloseButton) {
+        // Close the cart
+        $('.r-side-cart').removeClass('active');
+        $('body').removeClass('g-cart-open');
+      }
+    }
+  });
+
+  // Additional click handler for cart overlay
+  document.addEventListener('DOMContentLoaded', function() {
+    const cartOverlay = document.querySelector('.cart-overlay');
+    if (cartOverlay) {
+      cartOverlay.addEventListener('click', function() {
+        $('.r-side-cart').removeClass('active');
+        $('body').removeClass('g-cart-open');
+      });
+    }
+  });
+
+  // Enhanced global click handler with jQuery for better compatibility
+  $(document).on('click', function(event) {
+    // Check if cart is open
+    if ($('.r-side-cart').hasClass('active') || $('body').hasClass('g-cart-open')) {
+      // Check if the clicked element is not inside the cart or cart buttons
+      const $target = $(event.target);
+      const $cart = $('.r-side-cart');
+      const $cartButton = $('.cart-i');
+      const $cartCloseButton = $('.cart-icon');
+      
+      // Check if click is outside cart and not on cart buttons
+      const isClickInsideCart = $cart.length && $target.closest('.r-side-cart').length > 0;
+      const isClickOnCartButton = $cartButton.length && $target.closest('.cart-i').length > 0;
+      const isClickOnCartCloseButton = $cartCloseButton.length && $target.closest('.cart-icon').length > 0;
+      
+      if (!isClickInsideCart && !isClickOnCartButton && !isClickOnCartCloseButton) {
+        // Close the cart
+        $('.r-side-cart').removeClass('active');
+        $('body').removeClass('g-cart-open');
+      }
+    }
+  });
+
   // All cart tracking removed to prevent infinite cart.js calls
   </script>
 </html>
