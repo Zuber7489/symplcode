@@ -463,11 +463,10 @@ $(".cart-i").click(function () {
 });
 
 
-$(".cart-icon").click(function () {
+$(".cart-icon").click(function (e) {
+    e.preventDefault();
     $(".r-side-cart").toggleClass("active");
-  
-  
-   
+    $("body").toggleClass("g-cart-open");
 });
 
 
