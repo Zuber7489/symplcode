@@ -2695,39 +2695,14 @@ $(document).ready(function() {
     $('.r-side-cart').removeClass('active');
     $('body').removeClass('g-cart-open');
   });
-
-  // Click outside cart to close functionality
-  $(document).on('click', function(e) {
-    // Only close if cart is currently open
-    if ($('.r-side-cart').hasClass('active')) {
-      // Check if click was outside the cart content area
-      if (!$(e.target).closest('.cart-content').length) {
-        e.preventDefault();
-        $('.r-side-cart').removeClass('active');
-        $('body').removeClass('g-cart-open');
-      }
-    }
-  });
   
   // Initialize on cart open
-  $(document).on('click', '.cart-icon', function(e) {
-    e.preventDefault();
-    
-    // Toggle cart open/close
-    if ($('.r-side-cart').hasClass('active')) {
-      $('.r-side-cart').removeClass('active');
-      $('body').removeClass('g-cart-open');
-    } else {
-      $('.r-side-cart').addClass('active');
-      $('body').addClass('g-cart-open');
-      
-      // Initialize bundle functionality when opening
-      setTimeout(() => {
-        new BundleSlideNavigation();
-        initializeBundleProductImages();
-        hideProductsAlreadyInCart(); // Hide products that are already in cart
-      }, 300);
-    }
+  $(document).on('click', '.cart-icon', function() {
+    setTimeout(() => {
+      new BundleSlideNavigation();
+      initializeBundleProductImages();
+      hideProductsAlreadyInCart(); // Hide products that are already in cart
+    }, 300);
   });
   
   // Initialize after cart refresh

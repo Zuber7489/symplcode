@@ -1,4 +1,4 @@
-	  var lastScrollTop = 0;
+var lastScrollTop = 0;
 $(window).scroll(function(){
   
    var st = $(this).scrollTop();
@@ -463,10 +463,11 @@ $(".cart-i").click(function () {
 });
 
 
-$(".cart-icon").click(function (e) {
-    e.preventDefault();
+$(".cart-icon").click(function () {
     $(".r-side-cart").toggleClass("active");
-    $("body").toggleClass("g-cart-open");
+  
+  
+   
 });
 
 
