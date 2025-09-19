@@ -797,8 +797,7 @@
       touchStartY = e.touches[0].clientY;
       isSwiping = false;
       
-      // Stop auto-slide during touch
-      stopAutoSlide();
+      // Don't stop auto-slide on touch start - let it continue
     }
 
     function handleTouchMove(e) {
@@ -813,10 +812,10 @@
       
       if (isSwiping) {
         handleSwipe();
-      } else {
-        // If no swipe was detected, resume auto-slide after delay
+        // Only pause autoplay if a swipe was actually performed
         pauseAutoSlideTemporarily();
       }
+      // If no swipe was detected, don't pause autoplay - let it continue normally
     }
 
     // Add touch event listeners to slider
