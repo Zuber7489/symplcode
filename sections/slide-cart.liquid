@@ -1,3 +1,12 @@
+{% comment %}
+  ===========================================
+  FREE SHIPPING CONFIGURATION - CHANGE ONLY HERE
+  ===========================================
+  Change the value below to update free shipping amount everywhere
+  Example: 7500 = $75.00, 5000 = $50.00, 10000 = $100.00
+{% endcomment %}
+{% assign FREE_SHIPPING_THRESHOLD = 9900 %}
+
 <div id="custom-cart" class="r-side-cart">
   <div class="cart-overlay"></div>
   
@@ -6,8 +15,8 @@
     <div class="free-shipping-progress">
       <div class="progress-text">
           <span class="free-shipping-progress-text">
-            {% assign free_shipping_threshold = 9900 %}
-            {% assign remaining_amount = free_shipping_threshold | minus: cart.total_price %}
+            {% assign free_shipping_dollars = FREE_SHIPPING_THRESHOLD | divided_by: 100.0 | round: 2 %}
+            {% assign remaining_amount = FREE_SHIPPING_THRESHOLD | minus: cart.total_price %}
             {% if remaining_amount > 0 %}
               Almost there! Add ${{ remaining_amount | divided_by: 100.0 | round: 2 }} more for free shipping
             {% else %}
@@ -17,7 +26,7 @@
       </div>
       
       <div class="progress-bar-container">
-        {% assign progress_percentage = cart.total_price | times: 100 | divided_by: free_shipping_threshold %}
+        {% assign progress_percentage = cart.total_price | times: 100 | divided_by: FREE_SHIPPING_THRESHOLD %}
         {% if progress_percentage > 100 %}{% assign progress_percentage = 100 %}{% endif %}
         <div class="progress-bar" style="width: {{ progress_percentage }}%">
           <div class="truck-icon">
@@ -294,7 +303,7 @@
       
       <div class="shipping-info">
         <div class="shipping-text">
-          <p>Free shipping over $99 and easy 30 days return</p>
+          <p>Free shipping over ${{ free_shipping_dollars }} and easy 30 days return</p>
           
           <!-- Payment Methods -->
           <div class="payment-methods">
@@ -329,7 +338,7 @@
           <div class="shipping-row">
             <span class="shipping-label">Shipping :</span>
             <span class="shipping-cost">
-                {% if cart.total_price >= 9900 %}
+                {% if cart.total_price >= FREE_SHIPPING_THRESHOLD %}
                   Free
                 {% else %}
                   $5.00
@@ -1836,6 +1845,9 @@ if (typeof Shopify === 'undefined') {
   window.Shopify = {};
 }
 Shopify.money_format = "{{ shop.money_format | strip_html }}";
+
+// Free Shipping Configuration - This gets the value from Liquid template
+window.FREE_SHIPPING_THRESHOLD = {{ FREE_SHIPPING_THRESHOLD }};
 
 // Add formatMoney function to Shopify object if not available
 if (typeof Shopify.formatMoney !== 'function') {
@@ -3430,7 +3442,8 @@ function updateCartTotalsOnly(cart) {
   updateTotalSavingsDisplay(cart);
   
   // Update shipping (but not the savings amount)
-  var shippingCost = cart.total_price >= 9900 ? 'Free' : '$5.00';
+  var freeShippingThreshold = window.FREE_SHIPPING_THRESHOLD; // Uses global variable from Liquid template
+  var shippingCost = cart.total_price >= freeShippingThreshold ? 'Free' : '$5.00';
   $('.shipping-row').not('#savings-display').find('.shipping-cost').text(shippingCost);
   
   // Update free shipping progress
@@ -3482,7 +3495,8 @@ function updateCartHeader(itemCount) {
 
 // Function to update free shipping progress
 function updateFreeShippingProgress(cartTotal) {
-  var freeShippingThreshold = 9900; // $99.00 in cents
+  // Uses the global variable set from Liquid template - NO NEED TO CHANGE HERE
+  var freeShippingThreshold = window.FREE_SHIPPING_THRESHOLD;
   var remainingAmount = freeShippingThreshold - cartTotal;
   var progressPercentage = Math.min(100, (cartTotal * 100) / freeShippingThreshold);
   
