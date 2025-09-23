@@ -360,7 +360,7 @@
         </div>
       </div>
       
-      <button class="checkout-btn" id="checkout-btn" onclick="window.location.href='/checkout'">Checkout</button>
+      <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
     </div>
     {% endif %}
   </div>
@@ -2879,25 +2879,35 @@ $(document).ready(function() {
     });
   }, 5000);
   
-  // Refresh cart state when user comes back to the page (e.g., from checkout)
+  // Only refresh cart state when user comes back from checkout (not on every focus)
+  var lastPageUrl = document.referrer;
+  var isReturningFromCheckout = false;
+  
+  // Check if user is returning from checkout page
+  if (lastPageUrl && lastPageUrl.includes('/checkout')) {
+    isReturningFromCheckout = true;
+  }
+  
+  // Only refresh cart when returning from checkout, not on every focus/visibility change
   $(window).on('focus', function() {
-    // Small delay to ensure page is fully loaded
-    setTimeout(function() {
-      initializeCartStateWithValidation();
-    }, 100);
+    if (isReturningFromCheckout) {
+      // Use debounced refresh to prevent excessive calls
+      debouncedCartRefresh();
+      isReturningFromCheckout = false; // Reset flag after first refresh
+    }
   });
   
-  // Also refresh cart state when page becomes visible (handles tab switching)
+  // Only refresh cart when returning from checkout (not on tab switching)
   document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-      // Page became visible, refresh cart state with validation
-      setTimeout(function() {
-        initializeCartStateWithValidation();
-      }, 100);
+    if (!document.hidden && isReturningFromCheckout) {
+      // Use debounced refresh to prevent excessive calls
+      debouncedCartRefresh();
+      isReturningFromCheckout = false; // Reset flag after first refresh
     }
   });
   
   // Additional safety check - refresh cart state periodically to catch any sync issues
+  // Reduced frequency and only when cart is actually open
   setInterval(function() {
     // Only refresh if cart is open to avoid unnecessary requests
     if ($('.r-side-cart').hasClass('active')) {
@@ -2910,7 +2920,7 @@ $(document).ready(function() {
         initializeCartStateWithValidation();
       }
     }
-  }, 10000); // Check every 10 seconds
+  }, 30000); // Check every 30 seconds instead of 10
   
   // Add to Bag button handler for bundle products (only in cart)
   $(document).on('click', '.bundle-cart-btn', function(e) {
@@ -3198,6 +3208,30 @@ function updateBundleProductsWithHTML() {
 // Global flag to prevent multiple simultaneous cart operations
 var isCartOperationInProgress = false;
 var cartOperationTimeout = null;
+var cartRefreshTimeout = null;
+
+// Function to navigate to checkout safely
+function goToCheckout() {
+  // Close cart drawer first
+  $("body").removeClass("g-cart-open");
+  $(".r-side-cart").removeClass("active");
+  
+  // Use proper navigation method
+  window.location.href = '/checkout';
+}
+
+// Debounced cart refresh function to prevent excessive refreshes
+function debouncedCartRefresh() {
+  // Clear existing timeout
+  if (cartRefreshTimeout) {
+    clearTimeout(cartRefreshTimeout);
+  }
+  
+  // Set new timeout
+  cartRefreshTimeout = setTimeout(function() {
+    initializeCartStateWithValidation();
+  }, 200); // 200ms debounce
+}
 
 // Function to initialize cart state on page load with validation
 function initializeCartStateWithValidation() {
@@ -3242,8 +3276,30 @@ function initializeCartStateWithValidation() {
 
 // Function to initialize cart state on page load
 function initializeCartState() {
-  // Always use full HTML refresh to ensure complete synchronization
-  updateBundleProductsWithHTML();
+  // Use validation-based approach instead of always doing full HTML refresh
+  initializeCartStateWithValidation();
+}
+
+// Function to update cart totals only (lightweight refresh)
+function updateCartTotalsOnly(cartData) {
+  // Update cart count
+  $('.count').text(cartData.item_count);
+  $('.hcart').text(cartData.item_count);
+  $('.cart-btn').html('<span class="fa fa-shopping-bag"></span><span>' + cartData.item_count + '</span>');
+  
+  // Update cart title
+  $('.cart-title').text('Your bag (' + cartData.item_count + ')');
+  
+  // Update totals
+  if (cartData.item_count > 0) {
+    $('.total-amount').text(Shopify.formatMoney(cartData.total_price));
+    $('.checkout-section').show().removeClass('hidden-when-empty');
+  } else {
+    $('.checkout-section').hide().addClass('hidden-when-empty');
+  }
+  
+  // Update free shipping progress
+  updateFreeShippingProgress(cartData.total_price);
 }
 
 // Function to show empty cart state
