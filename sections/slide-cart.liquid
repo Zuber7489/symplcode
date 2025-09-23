@@ -2818,6 +2818,11 @@ $(document).ready(function() {
     // First refresh cart state to ensure we have latest data
     initializeCartStateWithValidation();
     
+    // Also refresh discount state when cart is opened
+    setTimeout(function() {
+      refreshCartDiscountState();
+    }, 200);
+    
     setTimeout(() => {
       new BundleSlideNavigation();
       initializeBundleProductImages();
@@ -2879,6 +2884,18 @@ $(document).ready(function() {
       }
     }
   }, 10000); // Check every 10 seconds
+  
+  // Special handler for when user returns from checkout page
+  // This ensures discount state is properly refreshed
+  $(window).on('pageshow', function(event) {
+    // Check if user is returning from checkout or another page
+    if (event.originalEvent.persisted || performance.navigation.type === 2) {
+      console.log('User returned to page, refreshing cart discount state...');
+      setTimeout(function() {
+        refreshCartDiscountState();
+      }, 500);
+    }
+  });
   
   // Add to Bag button handler for bundle products (only in cart)
   $(document).on('click', '.bundle-cart-btn', function(e) {
@@ -3125,6 +3142,12 @@ function updateBundleProductsWithHTML() {
           return;
         }
         
+        // Always refresh discount state when cart is refreshed
+        // This ensures coupon tags and savings are properly displayed
+        setTimeout(function() {
+          refreshCartDiscountState();
+        }, 100);
+        
         // Check if cart is empty and handle accordingly
         if (cartCount == '0' || cartCount == 0 || actualItemCount === 0) {
           $(".hcart").hide();
@@ -3191,9 +3214,11 @@ function initializeCartStateWithValidation() {
           console.warn('Cart item count mismatch. Displayed items:', displayedItems, 'Actual count:', actualCount);
           updateBundleProductsWithHTML();
         } else {
-          // Cart state is consistent, just update totals
+          // Cart state is consistent, just update totals and discount state
           updateCartTotalsOnly(cartData);
           updateCartHeader(cartData.item_count);
+          // Also refresh discount state to ensure coupon tags and savings are current
+          refreshCartDiscountState();
         }
       } else {
         // Cart is empty, ensure empty state is shown
@@ -3379,6 +3404,9 @@ function updateAllItemPrices(cart) {
     var $itemRow = $(this);
     updateItemPriceOnly($itemRow, null, cart);
   });
+  
+  // Also update total savings display to reflect current discount state
+  updateTotalSavingsDisplay(cart);
 }
 
 // Function to check and remove bundle discounts when parent items are removed
@@ -3602,10 +3630,12 @@ function updateItemPriceOnly($itemRow, quantity, cart) {
     var $savings = $priceContainer.find('.savings');
     var $couponCode = $priceContainer.find('.coupon-code');
     
-    // Check if item has discount (compare_at_price > price)
+    // Check if item has discount (compare_at_price > price) or cart-level discounts
     var hasDiscount = cartItem.original_price > cartItem.price;
+    var hasCartDiscount = cartItem.discounts && cartItem.discounts.length > 0;
+    var hasTotalDiscount = cart.total_discount > 0;
     
-    if (hasDiscount) {
+    if (hasDiscount || hasCartDiscount || hasTotalDiscount) {
       // Show discount pricing
       if ($originalPriceTop.length > 0) {
         $originalPriceTop.text(formatMoney(cartItem.original_line_price || cartItem.line_price)).show();
@@ -3706,6 +3736,33 @@ function updateTotalSavingsDisplay(cart) {
   
   // Also update applied discounts display
   updateAppliedDiscountsDisplay(cart);
+}
+
+// Function to refresh cart discount state
+function refreshCartDiscountState() {
+  // Get fresh cart data to check discount state
+  $.ajax({
+    type: "GET",
+    url: "/cart.js",
+    dataType: "json",
+    cache: false,
+    success: function(cartData) {
+      // Update applied discounts display
+      updateAppliedDiscountsDisplay(cartData);
+      
+      // Update total savings display
+      updateTotalSavingsDisplay(cartData);
+      
+      // Update all item prices to reflect current discount state
+      updateAllItemPrices(cartData);
+      
+      // Update cart totals
+      updateCartTotalsOnly(cartData);
+    },
+    error: function(xhr, status, error) {
+      console.error('Error refreshing cart discount state:', error);
+    }
+  });
 }
 
 // Function to refresh bundle products after cart changes
