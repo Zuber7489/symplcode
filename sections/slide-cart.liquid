@@ -6,7 +6,7 @@
     <div class="free-shipping-progress">
       <div class="progress-text">
           <span class="free-shipping-progress-text">
-            {% assign free_shipping_threshold = 9900 %}
+            {% assign free_shipping_threshold = 10000 %}
             {% assign remaining_amount = free_shipping_threshold | minus: cart.total_price %}
             {% if remaining_amount > 0 %}
               Almost there! Add ${{ remaining_amount | divided_by: 100.0 | round: 2 }} more for free shipping
@@ -294,7 +294,7 @@
       
       <div class="shipping-info">
         <div class="shipping-text">
-          <p>Free shipping over $50 and free 30 days return</p>
+          <p>Free shipping over $100 and easy 30 days return</p>
           
           <!-- Payment Methods -->
           <div class="payment-methods">
@@ -329,7 +329,7 @@
           <div class="shipping-row">
             <span class="shipping-label">Shipping :</span>
             <span class="shipping-cost">
-                {% if cart.total_price >= 5000 %}
+                {% if cart.total_price >= 10000 %}
                   Free
                 {% else %}
                   $5.00
@@ -1892,6 +1892,59 @@ $(document).on('cart:refresh', function() {
   }, 50);
 });
 
+// Listen for cart refresh events specifically for bundle discount removal
+$(document).on('cart:refresh-bundle-discounts', function() {
+  // Force a complete cart refresh to remove bundle discounts
+  setTimeout(function() {
+    $.ajax({
+      type: "GET",
+      url: "/cart",
+      dataType: "html",
+      cache: false,
+      success: function(html) {
+        var $cartHtml = $(html);
+        var $newCartSection = $cartHtml.find('.r-side-cart');
+        
+        if ($newCartSection.length > 0) {
+          // Get current cart state
+          var wasActive = $('.r-side-cart').hasClass('active');
+          var bodyHasCartOpen = $('body').hasClass('g-cart-open');
+          
+          // Replace cart content with fresh server HTML
+          $('.r-side-cart').html($newCartSection.html());
+          
+          // Restore cart state
+          if (wasActive) {
+            $('.r-side-cart').addClass('active');
+          }
+          if (bodyHasCartOpen) {
+            $('body').addClass('g-cart-open');
+          }
+          
+          // Update cart counts from the fresh HTML
+          var cartCount = $cartHtml.find('.count').text() || '0';
+          $(".count").html(cartCount);
+          $("#cart-count").html(cartCount);
+          $(".hcart").html(cartCount);
+          
+          // Update cart title
+          $('.cart-title').text('Your bag (' + cartCount + ')');
+          
+          // Re-initialize bundle functionality after cart update
+          setTimeout(function() {
+            new BundleSlideNavigation();
+            initializeBundleProductImages();
+            hideProductsAlreadyInCart();
+          }, 50);
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('Error refreshing cart for bundle discounts:', error);
+      }
+    });
+  }, 100);
+});
+
 // Listen for cart refresh complete events
 $(document).on('cart:refresh-complete', function() {
   // Ensure cart content is visible after refresh
@@ -2445,33 +2498,80 @@ function removeDiscountCode(code) {
     }
   }, 10000); // 10 seconds timeout
   
-  // Remove discount code by updating cart without it
+  // First, try to remove the specific discount code
   $.ajax({
     type: "POST",
     url: "/cart/update.js",
     dataType: "json",
     data: {
-      'discount': '' // Clearing discount codes
+      'discount': '' // Clearing all discount codes
     },
     success: function(newCart) {
       // Clear the safety timeout
       clearTimeout(safetyTimeout);
       
-      // Refresh cart content completely to show updated prices and remove discount tags
-      refreshCartAfterDiscount(newCart);
+      // Verify the discount was actually removed
+      var discountStillExists = false;
+      if (newCart.discount_codes && newCart.discount_codes.length > 0) {
+        for (var i = 0; i < newCart.discount_codes.length; i++) {
+          if (newCart.discount_codes[i].code === code && newCart.discount_codes[i].applicable) {
+            discountStillExists = true;
+            break;
+          }
+        }
+      }
       
-      // Remove loading state from all remove buttons (in case of multiple)
-      $('.discount-tag-remove').prop("disabled", false).removeClass("is-loading");
+      if (discountStillExists) {
+        // If discount still exists, try a more aggressive approach
+        console.warn('Discount code still exists, trying alternative removal method');
+        
+        // Try removing by setting discount to null/undefined
+        $.ajax({
+          type: "POST",
+          url: "/cart/update.js",
+          dataType: "json",
+          data: {
+            'discount': null
+          },
+          success: function(finalCart) {
+            refreshCartAfterDiscount(finalCart);
+            $('.discount-tag-remove').prop("disabled", false).removeClass("is-loading");
+          },
+          error: function() {
+            // Even if this fails, refresh the cart to show current state
+            refreshCartAfterDiscount(newCart);
+            $('.discount-tag-remove').prop("disabled", false).removeClass("is-loading");
+          }
+        });
+      } else {
+        // Discount was successfully removed
+        refreshCartAfterDiscount(newCart);
+        $('.discount-tag-remove').prop("disabled", false).removeClass("is-loading");
+      }
     },
     error: function(xhr, status, error) {
       // Clear the safety timeout
       clearTimeout(safetyTimeout);
       
       console.error('Error removing discount code:', error);
-      alert('Error removing discount code. Please try again.');
       
-      // Remove loading state from the specific button
-      $removeButton.prop("disabled", false).removeClass("is-loading");
+      // Try alternative removal method
+      $.ajax({
+        type: "POST",
+        url: "/cart/update.js",
+        dataType: "json",
+        data: {
+          'discount': null
+        },
+        success: function(newCart) {
+          refreshCartAfterDiscount(newCart);
+          $('.discount-tag-remove').prop("disabled", false).removeClass("is-loading");
+        },
+        error: function() {
+          alert('Error removing discount code. Please try again.');
+          $('.discount-tag-remove').prop("disabled", false).removeClass("is-loading");
+        }
+      });
     }
   });
 }
@@ -2513,8 +2613,11 @@ function refreshCartAfterDiscount(cartData) {
         // Update cart title
         $('.cart-title').text('Your bag (' + cartCount + ')');
         
-        // Show/hide applied discounts section
+        // Show/hide applied discounts section - use fresh cart data
         updateAppliedDiscountsDisplay(cartData);
+        
+        // Clear any cached discount input values
+        $('#discount-code').val('').removeClass('success error');
         
         // Re-initialize bundle functionality after cart update
         setTimeout(function() {
@@ -2804,7 +2907,7 @@ $(document).ready(function() {
     var $itemRow = $button.closest('.cart-item');
     var $quantityInput = $button.siblings('.quantity-input');
     var currentQuantity = parseInt($quantityInput.val());
-    var newQuantity = Math.max(1, currentQuantity - 1); // Minimum quantity of 1
+    var newQuantity = currentQuantity - 1; // Allow quantity to go to 0
     
     // Prevent multiple clicks during loading
     if ($button.hasClass('is-loading') || $button.prop('disabled')) {
@@ -2827,8 +2930,8 @@ $(document).ready(function() {
     // Update quantity input immediately for better UX
     $quantityInput.val(newQuantity);
     
-    // If quantity is 0, remove the item, otherwise update quantity
-    if (newQuantity === 0) {
+    // If quantity is 0 or less, remove the item, otherwise update quantity
+    if (newQuantity <= 0) {
       removeItemFromCart(lineNumber, $button);
     } else {
       updateCartItemQuantity(lineNumber, newQuantity, $button);
@@ -3142,6 +3245,66 @@ function updateCartItemQuantity(lineNumber, quantity, $button) {
   });
 }
 
+// Function to check and remove bundle discounts when parent items are removed
+function checkAndRemoveBundleDiscounts(cart) {
+  // Check if any items have bundle-related properties or discount codes
+  var hasBundleItems = false;
+  var hasDiscountCodes = false;
+  
+  if (cart.items) {
+    for (var i = 0; i < cart.items.length; i++) {
+      var item = cart.items[i];
+      
+      // Check for bundle properties
+      if (item.properties && (item.properties['bundle_parent'] || item.properties['bundle_child'])) {
+        hasBundleItems = true;
+      }
+      
+      // Check for discount codes on items
+      if (item.discounts && item.discounts.length > 0) {
+        hasDiscountCodes = true;
+      }
+    }
+  }
+  
+  // Check for cart-level discount codes
+  if (cart.discount_codes && cart.discount_codes.length > 0) {
+    hasDiscountCodes = true;
+  }
+  
+  // If we have bundle items or discount codes, trigger a full cart refresh
+  // This ensures server-side discount logic is properly recalculated
+  if (hasBundleItems || hasDiscountCodes) {
+    console.log('Bundle items or discount codes detected, refreshing cart to recalculate discounts');
+    
+    // Use a more aggressive refresh approach for bundle discounts
+    setTimeout(function() {
+      // First try to clear any discount codes
+      if (hasDiscountCodes) {
+        $.ajax({
+          type: "POST",
+          url: "/cart/update.js",
+          dataType: "json",
+          data: {
+            'discount': ''
+          },
+          success: function(clearedCart) {
+            // After clearing discounts, trigger bundle-specific refresh
+            $(document).trigger('cart:refresh-bundle-discounts');
+          },
+          error: function() {
+            // Even if clearing fails, trigger bundle-specific refresh
+            $(document).trigger('cart:refresh-bundle-discounts');
+          }
+        });
+      } else {
+        // Just trigger bundle-specific refresh if no discount codes
+        $(document).trigger('cart:refresh-bundle-discounts');
+      }
+    }, 100);
+  }
+}
+
 // Function to remove item from cart
 function removeItemFromCart(lineNumber, $button) {
   var $itemRow = $button.closest('.cart-item');
@@ -3178,6 +3341,14 @@ function removeItemFromCart(lineNumber, $button) {
 
       // Refresh line numbers after item removal
       refreshCartLineNumbers();
+
+      // Check and remove bundle discounts if needed
+      checkAndRemoveBundleDiscounts(cart);
+      
+      // Force refresh cart to ensure all discounts are recalculated
+      setTimeout(function() {
+        $(document).trigger('cart:refresh-bundle-discounts');
+      }, 200);
 
       updateCartTotalsOnly(cart);
       updateCartHeader(cart.item_count);
@@ -3259,7 +3430,7 @@ function updateCartTotalsOnly(cart) {
   updateTotalSavingsDisplay(cart);
   
   // Update shipping (but not the savings amount)
-  var shippingCost = cart.total_price >= 5000 ? 'Free' : '$5.00';
+  var shippingCost = cart.total_price >= 10000 ? 'Free' : '$5.00';
   $('.shipping-row').not('#savings-display').find('.shipping-cost').text(shippingCost);
   
   // Update free shipping progress
@@ -3311,7 +3482,7 @@ function updateCartHeader(itemCount) {
 
 // Function to update free shipping progress
 function updateFreeShippingProgress(cartTotal) {
-  var freeShippingThreshold = 9900; // $99.00 in cents
+  var freeShippingThreshold = 10000; // $100.00 in cents
   var remainingAmount = freeShippingThreshold - cartTotal;
   var progressPercentage = Math.min(100, (cartTotal * 100) / freeShippingThreshold);
   
@@ -3387,4 +3558,5 @@ function refreshBundleProducts(cart) {
 
 // Duplicate function removed - using the AJAX version above
 </script>
+
 
