@@ -1900,24 +1900,8 @@ if (typeof Shopify.formatMoney !== 'function') {
 $(document).on('cart:refresh', function() {
   // Add a small delay to ensure DOM is ready
   setTimeout(function() {
-    // First check if cart is empty, if so show empty state
-    $.ajax({
-      type: "GET",
-      url: "/cart.js",
-      dataType: "json",
-      cache: false,
-      success: function(cartData) {
-        if (cartData.item_count === 0) {
-          showEmptyCartState();
-        } else {
-          updateBundleProductsWithHTML(); // Use full HTML refresh for product page additions
-        }
-      },
-      error: function() {
-        // Fallback to HTML refresh
-        updateBundleProductsWithHTML();
-      }
-    });
+    // Always use full HTML refresh to ensure complete synchronization
+    updateBundleProductsWithHTML();
   }, 50);
 });
 
@@ -2812,8 +2796,8 @@ function initializeBundleProductImages() {
 
 // Initialize bundle slide navigation
 $(document).ready(function() {
-  // Initialize cart state on page load
-  initializeCartState();
+  // Initialize cart state on page load with validation
+  initializeCartStateWithValidation();
   
   // Initialize bundle functionality
   setTimeout(() => {
@@ -2832,7 +2816,7 @@ $(document).ready(function() {
   // Initialize on cart open
   $(document).on('click', '.cart-icon', function() {
     // First refresh cart state to ensure we have latest data
-    initializeCartState();
+    initializeCartStateWithValidation();
     
     setTimeout(() => {
       new BundleSlideNavigation();
@@ -2867,19 +2851,34 @@ $(document).ready(function() {
   $(window).on('focus', function() {
     // Small delay to ensure page is fully loaded
     setTimeout(function() {
-      initializeCartState();
+      initializeCartStateWithValidation();
     }, 100);
   });
   
   // Also refresh cart state when page becomes visible (handles tab switching)
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden) {
-      // Page became visible, refresh cart state
+      // Page became visible, refresh cart state with validation
       setTimeout(function() {
-        initializeCartState();
+        initializeCartStateWithValidation();
       }, 100);
     }
   });
+  
+  // Additional safety check - refresh cart state periodically to catch any sync issues
+  setInterval(function() {
+    // Only refresh if cart is open to avoid unnecessary requests
+    if ($('.r-side-cart').hasClass('active')) {
+      var displayedCount = parseInt($('.cart-title').text().match(/\d+/)) || 0;
+      var actualItems = $('.cart-item').length;
+      
+      // If there's a mismatch, refresh the cart
+      if (displayedCount !== actualItems) {
+        console.warn('Periodic cart sync check detected mismatch. Refreshing...');
+        initializeCartStateWithValidation();
+      }
+    }
+  }, 10000); // Check every 10 seconds
   
   // Add to Bag button handler for bundle products (only in cart)
   $(document).on('click', '.bundle-cart-btn', function(e) {
@@ -3112,8 +3111,22 @@ function updateBundleProductsWithHTML() {
         // Update cart title
         $('.cart-title').text('Your bag (' + cartCount + ')');
         
+        // Validate cart state consistency - check if cart count matches actual items
+        var actualItemCount = $('.cart-item').length;
+        var displayedCount = parseInt(cartCount) || 0;
+        
+        // If there's a mismatch, force a complete refresh
+        if (actualItemCount !== displayedCount) {
+          console.warn('Cart state mismatch detected. Actual items:', actualItemCount, 'Displayed count:', displayedCount);
+          // Force a complete page refresh to ensure consistency
+          setTimeout(function() {
+            window.location.reload();
+          }, 100);
+          return;
+        }
+        
         // Check if cart is empty and handle accordingly
-        if (cartCount == '0' || cartCount == 0) {
+        if (cartCount == '0' || cartCount == 0 || actualItemCount === 0) {
           $(".hcart").hide();
           // Ensure empty cart state is properly displayed
           showEmptyCartState();
@@ -3154,49 +3167,51 @@ function updateBundleProductsWithHTML() {
 var isCartOperationInProgress = false;
 var cartOperationTimeout = null;
 
-// Function to initialize cart state on page load
-function initializeCartState() {
-  // Get fresh cart data from server
+// Function to initialize cart state on page load with validation
+function initializeCartStateWithValidation() {
+  // First, get fresh cart data to validate current state
   $.ajax({
     type: "GET",
     url: "/cart.js",
     dataType: "json",
     cache: false,
     success: function(cartData) {
-      // Update cart counts immediately
-      updateCartHeader(cartData.item_count);
+      // Check if there's a mismatch between displayed cart and actual cart
+      var displayedCount = parseInt($('.cart-title').text().match(/\d+/)) || 0;
+      var actualCount = cartData.item_count || 0;
       
-      // Update cart counts in header elements
-      $(".count").html(cartData.item_count);
-      $("#cart-count").html(cartData.item_count);
-      $(".hcart").html(cartData.item_count);
-      
-      // Show/hide cart elements based on item count
-      if (cartData.item_count > 0) {
-        $(".hcart").show();
-        // Ensure cart sections are visible
-        $('.cart-items-list').show();
-        $('.bundle-save-section').show();
-        $('.checkout-section').show().removeClass('hidden-when-empty');
-        $('.free-shipping-progress').show();
+      // If there's a mismatch, force a complete refresh
+      if (displayedCount !== actualCount) {
+        console.warn('Cart state mismatch on page load. Displayed:', displayedCount, 'Actual:', actualCount);
+        updateBundleProductsWithHTML();
+      } else if (actualCount > 0) {
+        // If counts match and cart has items, validate that items are actually displayed
+        var displayedItems = $('.cart-item').length;
+        if (displayedItems !== actualCount) {
+          console.warn('Cart item count mismatch. Displayed items:', displayedItems, 'Actual count:', actualCount);
+          updateBundleProductsWithHTML();
+        } else {
+          // Cart state is consistent, just update totals
+          updateCartTotalsOnly(cartData);
+          updateCartHeader(cartData.item_count);
+        }
       } else {
-        $(".hcart").hide();
-        // Show empty cart state
+        // Cart is empty, ensure empty state is shown
         showEmptyCartState();
       }
-      
-      // Update free shipping progress
-      updateFreeShippingProgress(cartData.total_price);
-      
-      // Update total savings
-      updateTotalSavingsDisplay(cartData);
     },
     error: function(xhr, status, error) {
-      console.error('Error initializing cart state:', error);
-      // Fallback: show empty cart state
-      showEmptyCartState();
+      console.error('Error validating cart state:', error);
+      // Fallback to full refresh
+      updateBundleProductsWithHTML();
     }
   });
+}
+
+// Function to initialize cart state on page load
+function initializeCartState() {
+  // Always use full HTML refresh to ensure complete synchronization
+  updateBundleProductsWithHTML();
 }
 
 // Function to show empty cart state
