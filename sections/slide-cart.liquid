@@ -2683,16 +2683,21 @@ function refreshCartAfterDiscount(cartData) {
 function updateAppliedDiscountsDisplay(cartData) {
   var $appliedDiscountsSection = $('#applied-discounts');
   
+  console.log('Updating discount display with cart data:', cartData);
+  
   if (cartData.discount_codes && cartData.discount_codes.length > 0) {
     var hasApplicableDiscounts = cartData.discount_codes.some(function(dc) {
       return dc.applicable === true;
     });
+    
+    console.log('Has applicable discounts:', hasApplicableDiscounts);
     
     if (hasApplicableDiscounts) {
       // Build discount tags HTML
       var discountTagsHTML = '';
       cartData.discount_codes.forEach(function(discount_code) {
         if (discount_code.applicable) {
+          console.log('Adding discount tag for:', discount_code.code);
           discountTagsHTML += `
             <div class="discount-tag" data-code="${discount_code.code}">
               <span class="discount-tag-icon">🏷️</span>
@@ -2708,11 +2713,14 @@ function updateAppliedDiscountsDisplay(cartData) {
       });
       
       $appliedDiscountsSection.html(discountTagsHTML).show();
+      console.log('Discount tags displayed');
     } else {
       $appliedDiscountsSection.hide();
+      console.log('No applicable discounts, hiding section');
     }
   } else {
     $appliedDiscountsSection.hide();
+    console.log('No discount codes, hiding section');
   }
 }
 
@@ -3155,6 +3163,11 @@ function updateBundleProductsWithHTML() {
           new BundleSlideNavigation();
           initializeBundleProductImages();
           hideProductsAlreadyInCart();
+          
+          // Preserve discount tags after cart refresh (with delay to ensure HTML is loaded)
+          setTimeout(function() {
+            preserveDiscountTagsAfterRefresh();
+          }, 100);
         }, 50); // Reduced delay for faster initialization
         
       } else {
@@ -3235,6 +3248,32 @@ function showEmptyCartState() {
   updateFreeShippingProgress(0);
 }
 
+// Function to preserve discount tags after cart refresh
+function preserveDiscountTagsAfterRefresh() {
+  // Get fresh cart data to check for discount codes
+  var timestamp = new Date().getTime();
+  $.ajax({
+    type: "GET",
+    url: "/cart.js?t=" + timestamp,
+    dataType: "json",
+    cache: false,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
+    success: function(cartData) {
+      console.log('Preserving discount tags, cart has', cartData.discount_codes ? cartData.discount_codes.length : 0, 'discount codes');
+      
+      // Update applied discounts display with fresh data
+      updateAppliedDiscountsDisplay(cartData);
+    },
+    error: function(xhr, status, error) {
+      console.error('Error preserving discount tags:', error);
+    }
+  });
+}
+
 // Function to refresh cart content from server with cache busting
 function refreshCartContentFromServer() {
   var timestamp = new Date().getTime();
@@ -3284,6 +3323,11 @@ function refreshCartContentFromServer() {
           new BundleSlideNavigation();
           initializeBundleProductImages();
           hideProductsAlreadyInCart();
+          
+          // Preserve discount tags after cart refresh (with delay to ensure HTML is loaded)
+          setTimeout(function() {
+            preserveDiscountTagsAfterRefresh();
+          }, 100);
         }, 50);
       }
     },
