@@ -1900,7 +1900,31 @@ if (typeof Shopify.formatMoney !== 'function') {
 $(document).on('cart:refresh', function() {
   // Add a small delay to ensure DOM is ready
   setTimeout(function() {
-    updateBundleProductsWithHTML(); // Use full HTML refresh for product page additions
+    // First check if cart is empty, if so show empty state
+    var timestamp = new Date().getTime();
+    $.ajax({
+      type: "GET",
+      url: "/cart.js?t=" + timestamp,
+      dataType: "json",
+      cache: false,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      },
+      success: function(cartData) {
+        console.log('Cart refresh: item count =', cartData.item_count);
+        if (cartData.item_count === 0) {
+          showEmptyCartState();
+        } else {
+          updateBundleProductsWithHTML(); // Use full HTML refresh for product page additions
+        }
+      },
+      error: function() {
+        // Fallback to HTML refresh
+        updateBundleProductsWithHTML();
+      }
+    });
   }, 50);
 });
 
@@ -2795,7 +2819,10 @@ function initializeBundleProductImages() {
 
 // Initialize bundle slide navigation
 $(document).ready(function() {
-  // Initialize on page load
+  // Initialize cart state on page load
+  initializeCartState();
+  
+  // Initialize bundle functionality
   setTimeout(() => {
     new BundleSlideNavigation();
     initializeBundleProductImages();
@@ -2811,6 +2838,9 @@ $(document).ready(function() {
   
   // Initialize on cart open
   $(document).on('click', '.cart-icon', function() {
+    // First refresh cart state to ensure we have latest data
+    initializeCartState();
+    
     setTimeout(() => {
       new BundleSlideNavigation();
       initializeBundleProductImages();
@@ -2839,6 +2869,26 @@ $(document).ready(function() {
       }
     });
   }, 5000);
+  
+  // Refresh cart state when user comes back to the page (e.g., from checkout)
+  $(window).on('focus', function() {
+    // Small delay to ensure page is fully loaded
+    setTimeout(function() {
+      console.log('Window focus: refreshing cart state');
+      initializeCartState();
+    }, 100);
+  });
+  
+  // Also refresh cart state when page becomes visible (handles tab switching)
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      // Page became visible, refresh cart state
+      setTimeout(function() {
+        console.log('Page visible: refreshing cart state');
+        initializeCartState();
+      }, 100);
+    }
+  });
   
   // Add to Bag button handler for bundle products (only in cart)
   $(document).on('click', '.bundle-cart-btn', function(e) {
@@ -3010,12 +3060,18 @@ $(document).ready(function() {
 
 // Function to update bundle products after cart changes (optimized for speed)
 function updateBundleProducts() {
-  // Fast JSON-only update for better performance
+  // Fast JSON-only update for better performance with cache busting
+  var timestamp = new Date().getTime();
   $.ajax({
     type: "GET",
-    url: "/cart.js",
+    url: "/cart.js?t=" + timestamp,
     dataType: "json",
     cache: false,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
     success: function(cartData) {
       // Update cart counts and totals quickly
       updateCartTotalsOnly(cartData);
@@ -3036,12 +3092,18 @@ function updateBundleProducts() {
 
 // Function for full HTML refresh (used for product page additions)
 function updateBundleProductsWithHTML() {
-  // Full HTML refresh to show new items added from product page
+  // Full HTML refresh to show new items added from product page with cache busting
+  var timestamp = new Date().getTime();
   $.ajax({
     type: "GET",
-    url: "/cart",
+    url: "/cart?t=" + timestamp,
     dataType: "html",
     cache: false,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
     success: function(html) {
       var $cartHtml = $(html);
       var $newCartSection = $cartHtml.find('.r-side-cart');
@@ -3071,18 +3133,18 @@ function updateBundleProductsWithHTML() {
         // Update cart title
         $('.cart-title').text('Your bag (' + cartCount + ')');
         
-        if (cartCount == '0') {
+        // Check if cart is empty and handle accordingly
+        if (cartCount == '0' || cartCount == 0) {
           $(".hcart").hide();
           // Ensure empty cart state is properly displayed
-          $('.cart-items-container').html('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
-          $('.checkout-section').hide().addClass('hidden-when-empty');
-          $('.bundle-save-section').hide();
-          $('.free-shipping-progress').show(); // Keep free shipping progress visible
-          
-          // Update free shipping progress for empty cart
-          updateFreeShippingProgress(0);
+          showEmptyCartState();
         } else {
           $(".hcart").show();
+          // Ensure cart sections are visible for non-empty cart
+          $('.cart-items-list').show();
+          $('.bundle-save-section').show();
+          $('.checkout-section').show().removeClass('hidden-when-empty');
+          $('.free-shipping-progress').show();
         }
         
         // Re-initialize bundle functionality after cart update
@@ -3097,6 +3159,8 @@ function updateBundleProductsWithHTML() {
         
       } else {
         console.error('No cart section found in server response');
+        // Fallback to empty cart state
+        showEmptyCartState();
       }
     },
     error: function(xhr, status, error) {
@@ -3110,6 +3174,124 @@ function updateBundleProductsWithHTML() {
 // Global flag to prevent multiple simultaneous cart operations
 var isCartOperationInProgress = false;
 var cartOperationTimeout = null;
+
+// Function to initialize cart state on page load
+function initializeCartState() {
+  // Get fresh cart data from server with cache busting
+  var timestamp = new Date().getTime();
+  $.ajax({
+    type: "GET",
+    url: "/cart.js?t=" + timestamp,
+    dataType: "json",
+    cache: false,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
+    success: function(cartData) {
+      console.log('Cart state initialized with', cartData.item_count, 'items');
+      
+      // Update cart counts immediately
+      updateCartHeader(cartData.item_count);
+      
+      // Update cart counts in header elements
+      $(".count").html(cartData.item_count);
+      $("#cart-count").html(cartData.item_count);
+      $(".hcart").html(cartData.item_count);
+      
+      // Show/hide cart elements based on item count
+      if (cartData.item_count > 0) {
+        $(".hcart").show();
+        // Force refresh cart content from server to ensure we have latest items
+        refreshCartContentFromServer();
+      } else {
+        $(".hcart").hide();
+        // Show empty cart state
+        showEmptyCartState();
+      }
+      
+      // Update free shipping progress
+      updateFreeShippingProgress(cartData.total_price);
+      
+      // Update total savings
+      updateTotalSavingsDisplay(cartData);
+    },
+    error: function(xhr, status, error) {
+      console.error('Error initializing cart state:', error);
+      // Fallback: show empty cart state
+      showEmptyCartState();
+    }
+  });
+}
+
+// Function to show empty cart state
+function showEmptyCartState() {
+  $('.cart-items-container').html('<div class="empty-cart"><p style="text-align:center; padding: 40px 0;">Cart is empty</p></div>');
+  $('.checkout-section').hide().addClass('hidden-when-empty');
+  $('.bundle-save-section').hide();
+  $('.free-shipping-progress').show();
+  $('.cart-title').text('Your bag (0)');
+  updateFreeShippingProgress(0);
+}
+
+// Function to refresh cart content from server with cache busting
+function refreshCartContentFromServer() {
+  var timestamp = new Date().getTime();
+  $.ajax({
+    type: "GET",
+    url: "/cart?t=" + timestamp,
+    dataType: "html",
+    cache: false,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
+    success: function(html) {
+      console.log('Cart content refreshed from server');
+      var $cartHtml = $(html);
+      var $newCartSection = $cartHtml.find('.r-side-cart');
+      
+      if ($newCartSection.length > 0) {
+        // Get current cart state
+        var wasActive = $('.r-side-cart').hasClass('active');
+        var bodyHasCartOpen = $('body').hasClass('g-cart-open');
+        
+        // Replace cart content with fresh server HTML
+        $('.r-side-cart').html($newCartSection.html());
+        
+        // Restore cart state
+        if (wasActive) {
+          $('.r-side-cart').addClass('active');
+        }
+        if (bodyHasCartOpen) {
+          $('body').addClass('g-cart-open');
+        }
+        
+        // Update cart counts from the fresh HTML
+        var cartCount = $cartHtml.find('.count').text() || '0';
+        $(".count").html(cartCount);
+        $("#cart-count").html(cartCount);
+        $(".hcart").html(cartCount);
+        
+        // Update cart title
+        $('.cart-title').text('Your bag (' + cartCount + ')');
+        
+        // Re-initialize bundle functionality after cart update
+        setTimeout(function() {
+          refreshCartLineNumbers();
+          new BundleSlideNavigation();
+          initializeBundleProductImages();
+          hideProductsAlreadyInCart();
+        }, 50);
+      }
+    },
+    error: function(xhr, status, error) {
+      console.error('Error refreshing cart content from server:', error);
+    }
+  });
+}
 
 // Function to get current line number dynamically (accounts for removed items)
 function getCurrentLineNumber($itemRow) {
