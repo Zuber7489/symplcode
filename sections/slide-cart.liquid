@@ -6,7 +6,7 @@
     <div class="free-shipping-progress">
       <div class="progress-text">
           <span class="free-shipping-progress-text">
-            {% assign free_shipping_threshold = 10000 %}
+            {% assign free_shipping_threshold = 9900 %}
             {% assign remaining_amount = free_shipping_threshold | minus: cart.total_price %}
             {% if remaining_amount > 0 %}
               Almost there! Add ${{ remaining_amount | divided_by: 100.0 | round: 2 }} more for free shipping
@@ -294,7 +294,7 @@
       
       <div class="shipping-info">
         <div class="shipping-text">
-          <p>Free shipping over $100 and easy 30 days return</p>
+          <p>Free shipping over $99 and easy 30 days return</p>
           
           <!-- Payment Methods -->
           <div class="payment-methods">
@@ -329,7 +329,7 @@
           <div class="shipping-row">
             <span class="shipping-label">Shipping :</span>
             <span class="shipping-cost">
-                {% if cart.total_price >= 10000 %}
+                {% if cart.total_price >= 9900 %}
                   Free
                 {% else %}
                   $5.00
@@ -3430,7 +3430,7 @@ function updateCartTotalsOnly(cart) {
   updateTotalSavingsDisplay(cart);
   
   // Update shipping (but not the savings amount)
-  var shippingCost = cart.total_price >= 10000 ? 'Free' : '$5.00';
+  var shippingCost = cart.total_price >= 9900 ? 'Free' : '$5.00';
   $('.shipping-row').not('#savings-display').find('.shipping-cost').text(shippingCost);
   
   // Update free shipping progress
@@ -3482,7 +3482,7 @@ function updateCartHeader(itemCount) {
 
 // Function to update free shipping progress
 function updateFreeShippingProgress(cartTotal) {
-  var freeShippingThreshold = 10000; // $100.00 in cents
+  var freeShippingThreshold = 9900; // $99.00 in cents
   var remainingAmount = freeShippingThreshold - cartTotal;
   var progressPercentage = Math.min(100, (cartTotal * 100) / freeShippingThreshold);
   
