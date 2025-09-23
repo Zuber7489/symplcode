@@ -65,12 +65,15 @@ $(document).ready(function () {
     function refreshCartWithRetry(retryCount) {
       retryCount = retryCount || 0;
       
-      // Add a small delay to ensure server-side cart update is complete
+      // Increase delay to ensure server-side cart update is complete
+      var delay = 300 + (retryCount * 200); // Progressive delay: 300ms, 500ms, 700ms
+      
       setTimeout(function() {
         $.ajax({
           type: "GET",
-          url: "/cart.js?_=" + new Date().getTime(), // Add cache-busting parameter
+          url: "/cart.js?_=" + new Date().getTime() + "&v=" + Math.random(), // Enhanced cache-busting
           dataType: "json",
+          cache: false, // Explicitly disable caching
           success: function(cartData) {
             // Check if cart actually has items (retry logic)
             if (cartData.item_count > 0 || retryCount >= 3) {
@@ -109,7 +112,7 @@ $(document).ready(function () {
             }
           }
         });
-      }, 300); // 300ms delay to ensure server-side update
+      }, delay); // Progressive delay to ensure server-side update
     }
     
     // Start the refresh process
