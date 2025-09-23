@@ -229,9 +229,9 @@
   .hero-slider {
     position: relative;
     width: 100%;
-    height: 100vh; /* Use full viewport height for better visual impact */
-    min-height: 600px; /* Reasonable minimum height */
-    max-height: 100vh; /* Prevent overflow */
+    height: 80vh; /* Reduced to 80% of viewport height */
+    min-height: 480px; /* 80% of 600px minimum height */
+    max-height: 80vh; /* Prevent overflow */
   }
 
   .hero-slide {
@@ -482,7 +482,7 @@
   @media (max-width: 768px) {
     .hero-slider {
       height: auto;
-      min-height: 300px;
+      min-height: 240px; /* 80% of 300px minimum height */
       aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
       max-height: none; /* Allow mobile to use aspect ratio */
     }
@@ -879,11 +879,10 @@
         slide.style.height = calculatedHeight + 'px';
         heroSlider.style.height = calculatedHeight + 'px';
       } else {
-        // On desktop, use full viewport height (let CSS handle it)
-        // Don't override the CSS height settings
+        // On desktop, use 80% of viewport height
         const viewportHeight = window.innerHeight;
-        const minHeight = 600;
-        const finalHeight = Math.max(minHeight, viewportHeight);
+        const minHeight = 480; // 80% of 600px
+        const finalHeight = Math.max(minHeight, viewportHeight * 0.8); // 80% of viewport height
         
         // Only set if it's different from current height to avoid conflicts
         if (Math.abs(heroSlider.offsetHeight - finalHeight) > 10) {
