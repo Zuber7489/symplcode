@@ -3240,6 +3240,9 @@ function updateCartItemQuantity(lineNumber, quantity, $button) {
       // Fast update: Update only the specific item's price and cart totals
       updateCartTotalsOnly(cart);
       updateItemPriceOnly($itemRow, quantity, cart);
+      
+      // Check and remove bundle discounts if needed (in case quantity change affects bundle eligibility)
+      checkAndRemoveBundleDiscounts(cart);
     },
     error: function(xhr) {
       // Remove loading state from button
@@ -3254,6 +3257,14 @@ function updateCartItemQuantity(lineNumber, quantity, $button) {
       var data = JSON.parse(xhr.responseText);
       alert(data.message || 'Error updating cart');
     }
+  });
+}
+
+// Function to update all item prices when bundle discounts are removed
+function updateAllItemPrices(cart) {
+  $('.cart-item').each(function() {
+    var $itemRow = $(this);
+    updateItemPriceOnly($itemRow, null, cart);
   });
 }
 
@@ -3314,6 +3325,10 @@ function checkAndRemoveBundleDiscounts(cart) {
         $(document).trigger('cart:refresh-bundle-discounts');
       }
     }, 100);
+  } else {
+    // If no bundle items or discount codes, update all remaining items' prices
+    // This ensures individual item discounts are removed instantly
+    updateAllItemPrices(cart);
   }
 }
 
@@ -3356,6 +3371,9 @@ function removeItemFromCart(lineNumber, $button) {
 
       // Check and remove bundle discounts if needed
       checkAndRemoveBundleDiscounts(cart);
+      
+      // Update all remaining items' prices immediately to remove bundle discounts
+      updateAllItemPrices(cart);
       
       // Force refresh cart to ensure all discounts are recalculated
       setTimeout(function() {
@@ -3465,23 +3483,60 @@ function updateItemPriceOnly($itemRow, quantity, cart) {
     var $priceContainer = $itemRow.find('.cart-item-pricing');
     var $currentPrice = $priceContainer.find('.current-price');
     var $originalPriceTop = $priceContainer.find('.original-price-top');
+    var $priceComparison = $priceContainer.find('.price-comparison');
+    var $originalPrice = $priceContainer.find('.original-price');
     var $discountedPrice = $priceContainer.find('.discounted-price');
     var $savings = $priceContainer.find('.savings');
+    var $couponCode = $priceContainer.find('.coupon-code');
     
-    if ($currentPrice.length > 0) {
-      $currentPrice.text(formatMoney(cartItem.line_price));
-    }
-    if ($originalPriceTop.length > 0) {
-      $originalPriceTop.text(formatMoney(cartItem.original_line_price || cartItem.line_price));
-    }
-    if ($discountedPrice.length > 0) {
-      $discountedPrice.text(formatMoney(cartItem.line_price));
-    }
+    // Check if item has discount (compare_at_price > price)
+    var hasDiscount = cartItem.original_price > cartItem.price;
     
-    // Update individual item savings
-    if ($savings.length > 0 && cartItem.original_price > cartItem.price) {
-      var itemSavings = (cartItem.original_price - cartItem.price) * cartItem.quantity;
-      $savings.text('(Save ' + formatMoney(itemSavings) + ')');
+    if (hasDiscount) {
+      // Show discount pricing
+      if ($originalPriceTop.length > 0) {
+        $originalPriceTop.text(formatMoney(cartItem.original_line_price || cartItem.line_price)).show();
+      }
+      if ($priceComparison.length > 0) {
+        $priceComparison.show();
+        if ($originalPrice.length > 0) {
+          $originalPrice.text(formatMoney(cartItem.original_price * cartItem.quantity));
+        }
+        if ($discountedPrice.length > 0) {
+          $discountedPrice.text(formatMoney(cartItem.line_price));
+        }
+      }
+      if ($savings.length > 0) {
+        var itemSavings = (cartItem.original_price - cartItem.price) * cartItem.quantity;
+        $savings.text('(Save ' + formatMoney(itemSavings) + ')').show();
+      }
+      // Hide current price when showing discount
+      if ($currentPrice.length > 0) {
+        $currentPrice.hide();
+      }
+    } else {
+      // Hide discount pricing and show regular price
+      if ($originalPriceTop.length > 0) {
+        $originalPriceTop.hide();
+      }
+      if ($priceComparison.length > 0) {
+        $priceComparison.hide();
+      }
+      if ($savings.length > 0) {
+        $savings.hide();
+      }
+      if ($couponCode.length > 0) {
+        $couponCode.hide();
+      }
+      
+      // Show the current price when no discount
+      if ($currentPrice.length > 0) {
+        $currentPrice.text(formatMoney(cartItem.line_price)).show();
+      } else {
+        // If current price element doesn't exist, create it
+        var priceHtml = '<div class="current-price">' + formatMoney(cartItem.line_price) + '</div>';
+        $priceContainer.append(priceHtml);
+      }
     }
   }
   
