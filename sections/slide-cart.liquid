@@ -88,18 +88,18 @@
                         {% assign has_discount = false %}
                         {% assign discount_amount = 0 %}
                         
-                        {% comment %} Check for product-level discounts (compare_at_price) {% endcomment %}
-                        {% if original_price and original_price > item.price %}
-                          {% assign has_discount = true %}
-                          {% assign discount_amount = original_price | minus: item.price | times: item.quantity %}
-                        {% endif %}
-                        
-                        {% comment %} Check for cart-level discounts {% endcomment %}
+                        {% comment %} Calculate discount amount - prioritize cart discounts over compare_at_price {% endcomment %}
                         {% if item.discounts.size > 0 %}
+                          {% comment %} Use cart-level discount amount (most accurate) {% endcomment %}
                           {% assign has_discount = true %}
+                          {% assign discount_amount = 0 %}
                           {% for discount in item.discounts %}
                             {% assign discount_amount = discount_amount | plus: discount.amount %}
                           {% endfor %}
+                        {% elsif original_price and original_price > item.price %}
+                          {% comment %} Fallback to compare_at_price discount if no cart discounts {% endcomment %}
+                          {% assign has_discount = true %}
+                          {% assign discount_amount = original_price | minus: item.price | times: item.quantity %}
                         {% endif %}
                         
                         {% if has_discount %}
@@ -289,15 +289,18 @@
       </div>
       
       {% assign total_savings = 0 %}
-      {% for item in cart.items %}
-        {% if item.variant.compare_at_price > item.variant.price %}
-          {% assign item_savings = item.variant.compare_at_price | minus: item.variant.price | times: item.quantity %}
-          {% assign total_savings = total_savings | plus: item_savings %}
-        {% endif %}
-      {% endfor %}
-      {% comment %}Only add total_discount if it's not already included in the line item calculations{% endcomment %}
+      
+      {% comment %}Use cart.total_discount as primary source to avoid double counting{% endcomment %}
       {% if cart.total_discount > 0 %}
-        {% assign total_savings = total_savings | plus: cart.total_discount %}
+        {% assign total_savings = cart.total_discount %}
+      {% else %}
+        {% comment %}Fallback: calculate individual item savings if total_discount is not available{% endcomment %}
+        {% for item in cart.items %}
+          {% if item.variant.compare_at_price > item.variant.price %}
+            {% assign item_savings = item.variant.compare_at_price | minus: item.variant.price | times: item.quantity %}
+            {% assign total_savings = total_savings | plus: item_savings %}
+          {% endif %}
+        {% endfor %}
       {% endif %}
  
       
@@ -2818,11 +2821,6 @@ $(document).ready(function() {
     // First refresh cart state to ensure we have latest data
     initializeCartStateWithValidation();
     
-    // Also refresh discount state when cart is opened
-    setTimeout(function() {
-      refreshCartDiscountState();
-    }, 200);
-    
     setTimeout(() => {
       new BundleSlideNavigation();
       initializeBundleProductImages();
@@ -2884,18 +2882,6 @@ $(document).ready(function() {
       }
     }
   }, 10000); // Check every 10 seconds
-  
-  // Special handler for when user returns from checkout page
-  // This ensures discount state is properly refreshed
-  $(window).on('pageshow', function(event) {
-    // Check if user is returning from checkout or another page
-    if (event.originalEvent.persisted || performance.navigation.type === 2) {
-      console.log('User returned to page, refreshing cart discount state...');
-      setTimeout(function() {
-        refreshCartDiscountState();
-      }, 500);
-    }
-  });
   
   // Add to Bag button handler for bundle products (only in cart)
   $(document).on('click', '.bundle-cart-btn', function(e) {
@@ -3142,12 +3128,6 @@ function updateBundleProductsWithHTML() {
           return;
         }
         
-        // Always refresh discount state when cart is refreshed
-        // This ensures coupon tags and savings are properly displayed
-        setTimeout(function() {
-          refreshCartDiscountState();
-        }, 100);
-        
         // Check if cart is empty and handle accordingly
         if (cartCount == '0' || cartCount == 0 || actualItemCount === 0) {
           $(".hcart").hide();
@@ -3214,11 +3194,9 @@ function initializeCartStateWithValidation() {
           console.warn('Cart item count mismatch. Displayed items:', displayedItems, 'Actual count:', actualCount);
           updateBundleProductsWithHTML();
         } else {
-          // Cart state is consistent, just update totals and discount state
+          // Cart state is consistent, just update totals
           updateCartTotalsOnly(cartData);
           updateCartHeader(cartData.item_count);
-          // Also refresh discount state to ensure coupon tags and savings are current
-          refreshCartDiscountState();
         }
       } else {
         // Cart is empty, ensure empty state is shown
@@ -3404,9 +3382,6 @@ function updateAllItemPrices(cart) {
     var $itemRow = $(this);
     updateItemPriceOnly($itemRow, null, cart);
   });
-  
-  // Also update total savings display to reflect current discount state
-  updateTotalSavingsDisplay(cart);
 }
 
 // Function to check and remove bundle discounts when parent items are removed
@@ -3630,12 +3605,10 @@ function updateItemPriceOnly($itemRow, quantity, cart) {
     var $savings = $priceContainer.find('.savings');
     var $couponCode = $priceContainer.find('.coupon-code');
     
-    // Check if item has discount (compare_at_price > price) or cart-level discounts
+    // Check if item has discount (compare_at_price > price)
     var hasDiscount = cartItem.original_price > cartItem.price;
-    var hasCartDiscount = cartItem.discounts && cartItem.discounts.length > 0;
-    var hasTotalDiscount = cart.total_discount > 0;
     
-    if (hasDiscount || hasCartDiscount || hasTotalDiscount) {
+    if (hasDiscount) {
       // Show discount pricing
       if ($originalPriceTop.length > 0) {
         $originalPriceTop.text(formatMoney(cartItem.original_line_price || cartItem.line_price)).show();
@@ -3711,19 +3684,21 @@ function updateFreeShippingProgress(cartTotal) {
 function updateTotalSavingsDisplay(cart) {
   var totalSavings = 0;
 
-  if (cart.items && cart.items.length > 0) {
-    for (var i = 0; i < cart.items.length; i++) {
-      var item = cart.items[i];
-      if (item.original_price > item.price) {
-        var itemSavings = (item.original_price - item.price) * item.quantity;
-        totalSavings += itemSavings;
+  // Use cart.total_discount as the primary source of savings
+  // This includes both individual item discounts and cart-level discounts
+  if (cart.total_discount > 0) {
+    totalSavings = cart.total_discount;
+  } else {
+    // Fallback: calculate individual item savings if total_discount is not available
+    if (cart.items && cart.items.length > 0) {
+      for (var i = 0; i < cart.items.length; i++) {
+        var item = cart.items[i];
+        if (item.original_price > item.price) {
+          var itemSavings = (item.original_price - item.price) * item.quantity;
+          totalSavings += itemSavings;
+        }
       }
     }
-  }
-
-  // Add cart-level discounts
-  if (cart.total_discount > 0) {
-    totalSavings += cart.total_discount;
   }
 
   // Update savings display in checkout section
@@ -3736,33 +3711,6 @@ function updateTotalSavingsDisplay(cart) {
   
   // Also update applied discounts display
   updateAppliedDiscountsDisplay(cart);
-}
-
-// Function to refresh cart discount state
-function refreshCartDiscountState() {
-  // Get fresh cart data to check discount state
-  $.ajax({
-    type: "GET",
-    url: "/cart.js",
-    dataType: "json",
-    cache: false,
-    success: function(cartData) {
-      // Update applied discounts display
-      updateAppliedDiscountsDisplay(cartData);
-      
-      // Update total savings display
-      updateTotalSavingsDisplay(cartData);
-      
-      // Update all item prices to reflect current discount state
-      updateAllItemPrices(cartData);
-      
-      // Update cart totals
-      updateCartTotalsOnly(cartData);
-    },
-    error: function(xhr, status, error) {
-      console.error('Error refreshing cart discount state:', error);
-    }
-  });
 }
 
 // Function to refresh bundle products after cart changes
