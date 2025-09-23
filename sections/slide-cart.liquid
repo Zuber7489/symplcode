@@ -102,6 +102,11 @@
                           {% assign discount_amount = original_price | minus: item.price | times: item.quantity %}
                         {% endif %}
                         
+                        {% comment %} Ensure we only show discount if cart actually has discounts applied {% endcomment %}
+                        {% if cart.discount_codes.size == 0 and item.discounts.size == 0 %}
+                          {% assign has_discount = false %}
+                        {% endif %}
+                        
                         {% if has_discount %}
                           <div class="original-price-top">{{ item.original_line_price | money }}</div>
                           <div class="price-comparison">
@@ -2520,7 +2525,8 @@ function removeDiscountCode(code) {
     url: "/cart/update.js",
     dataType: "json",
     data: {
-      'discount': '' // Clearing all discount codes
+      'discount': '', // Clearing all discount codes
+      'attributes[discount_codes]': '' // Also clear discount attributes
     },
     success: function(newCart) {
       // Clear the safety timeout
@@ -2547,7 +2553,8 @@ function removeDiscountCode(code) {
           url: "/cart/update.js",
           dataType: "json",
           data: {
-            'discount': null
+            'discount': null,
+            'attributes[discount_codes]': null
           },
           success: function(finalCart) {
             refreshCartAfterDiscount(finalCart);
@@ -2577,7 +2584,8 @@ function removeDiscountCode(code) {
         url: "/cart/update.js",
         dataType: "json",
         data: {
-          'discount': null
+          'discount': null,
+          'attributes[discount_codes]': null
         },
         success: function(newCart) {
           refreshCartAfterDiscount(newCart);
@@ -2594,12 +2602,20 @@ function removeDiscountCode(code) {
 
 // Function to refresh cart after discount application/removal
 function refreshCartAfterDiscount(cartData) {
+  // Force a complete cart refresh to remove bundle discounts
+  console.log('Refreshing cart after discount change...');
+  
   // Full HTML refresh to show updated discount information
   $.ajax({
     type: "GET",
     url: "/cart",
     dataType: "html",
     cache: false,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
     success: function(html) {
       var $cartHtml = $(html);
       var $newCartSection = $cartHtml.find('.r-side-cart');
@@ -2641,6 +2657,19 @@ function refreshCartAfterDiscount(cartData) {
           initializeBundleProductImages();
           hideProductsAlreadyInCart();
         }, 50);
+        
+        // Verify cart state after refresh
+        setTimeout(function() {
+          var hasDiscounts = $('.discount-tag').length > 0;
+          var cartTotal = $('.total-amount').text();
+          console.log('Cart refresh completed. Has discounts:', hasDiscounts, 'Total:', cartTotal);
+          
+          // If we still see discount tags but cart data shows no discounts, force page reload
+          if (hasDiscounts && cartData && cartData.discount_codes && cartData.discount_codes.length === 0) {
+            console.warn('Cart state inconsistent, forcing page reload...');
+            window.location.reload();
+          }
+        }, 100);
         
       } else {
         // Fallback to data-only update
