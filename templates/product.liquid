@@ -2727,6 +2727,22 @@ let globalTouchManager = {
         }{% unless forloop.last %},{% endunless %}
       {%- endfor -%}
     };
+
+    // Variant-specific hero content data structure
+    // Enables dynamic hero section updates based on selected variant
+    const variantHeroContent = {
+      {%- for variant in product.variants -%}
+        "{{ variant.id }}": {% if variant.metafields.custom.hero_content.value != blank %}{{ variant.metafields.custom.hero_content.value | json }}{% elsif product.metafields.custom.hero_content.value != blank %}{{ product.metafields.custom.hero_content.value | json }}{% else %}[]{% endif %}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    };
+
+    // Variant-specific hero content TWO data structure
+    // Enables dynamic hero section two updates based on selected variant
+    const variantHeroContentTwo = {
+      {%- for variant in product.variants -%}
+        "{{ variant.id }}": {% if variant.metafields.custom.hero_content_two.value != blank %}{{ variant.metafields.custom.hero_content_two.value | json }}{% elsif product.metafields.custom.hero_content_two.value != blank %}{{ product.metafields.custom.hero_content_two.value | json }}{% else %}[]{% endif %}{% unless forloop.last %},{% endunless %}
+      {%- endfor -%}
+    };
     
     document.addEventListener("DOMContentLoaded", () => {
     try {
@@ -3845,6 +3861,9 @@ let globalTouchManager = {
   }, 100);
   
   document.dispatchEvent(new CustomEvent('variant:change', { detail: { variant: currentVariant } }));
+  
+  // Dispatch variant:changed event for hero section and other components
+  document.dispatchEvent(new CustomEvent('variant:changed', { detail: { variant: currentVariant } }));
   
   // Sync with compare modal if it's open
   if (typeof window.updateCompareModalWithVariant === 'function') {

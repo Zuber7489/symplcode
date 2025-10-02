@@ -1,13 +1,16 @@
-<!-- Dynamic Hero Section - Supports both Product Metafields and Theme Editor -->
+<!-- Dynamic Hero Section - Supports Variant-Specific, Product Metafields and Theme Editor -->
 <div
   class="hero-section {% if section.settings.text_alignment %}hero--align-{{ section.settings.text_alignment }}{% else %}hero--align-center{% endif %}"
   data-template="{{ template.name }}"
   data-product-id="{{ product.id }}"
+  id="dynamic-hero-section"
 >
   <div class="hero-slider">
-    {% comment %} PRODUCT PAGE: Use metafields for dynamic content {% endcomment %}
-    {% if template.name == 'product' and product.metafields.custom.hero_content %}
-      {% assign hero_content = product.metafields.custom.hero_content.value %}
+    {% comment %} PRODUCT PAGE: Use variant-specific metafields first, then product-level {% endcomment %}
+    {% if template.name == 'product' %}
+      {% assign current_variant = product.selected_or_first_available_variant %}
+      {% assign hero_content = current_variant.metafields.custom.hero_content.value | default: product.metafields.custom.hero_content.value %}
+      
       {% if hero_content %}
         <!-- Debug: Hero content found -->
         <!-- {{ hero_content | json }} -->
@@ -95,10 +98,9 @@
           </div>
         {% endfor %}
       {% endif %}
-    {% endif %}
-
-    {% comment %} STATIC PAGES: Use theme editor blocks {% endcomment %}
-    {% if template.name != 'product' or product.metafields.custom.hero_content == blank %}
+    
+    {% comment %} STATIC PAGES OR FALLBACK: Use theme editor blocks {% endcomment %}
+    {% else %}
       {% for block in section.blocks %}
         {% if block.type == 'slide' %}
           <div class="hero-slide" {{ block.shopify_attributes }} data-slide-index="{{ forloop.index0 }}">
@@ -183,14 +185,20 @@
           </div>
         {% endif %}
       {% endfor %}
-    {% endif %}
+    {% endif %}  {% comment %} End of template.name == 'product' check {% endcomment %}
   </div>
 </div>
 
 <!-- Navigation positioned outside hero block (similar to 5-star functions) -->
 {% assign slide_count = 0 %}
-{% if template.name == 'product' and product.metafields.custom.hero_content %}
-  {% assign slide_count = product.metafields.custom.hero_content.value.size %}
+{% if template.name == 'product' %}
+  {% assign current_variant = product.selected_or_first_available_variant %}
+  {% assign hero_content = current_variant.metafields.custom.hero_content.value | default: product.metafields.custom.hero_content.value %}
+  {% if hero_content %}
+    {% assign slide_count = hero_content.size %}
+  {% else %}
+    {% assign slide_count = section.blocks.size %}
+  {% endif %}
 {% else %}
   {% assign slide_count = section.blocks.size %}
 {% endif %}
@@ -906,6 +914,124 @@
     if (media.tagName.toLowerCase() === 'video') {
       media.addEventListener('loadedmetadata', maintainHeroAspectRatio);
     }
+  });
+
+  // ============================================
+  // VARIANT-SPECIFIC HERO CONTENT UPDATE
+  // ============================================
+  // This function updates the hero section when a variant is selected
+  // Works similarly to the 5-star functions feature
+  
+  function updateHeroContentForVariant(variantId) {
+    // Check if we have variant hero content data
+    if (typeof variantHeroContent === 'undefined' || !variantHeroContent) {
+      return;
+    }
+
+    const heroData = variantHeroContent[variantId];
+    if (!heroData || heroData.length === 0) {
+      console.log('No hero content for variant:', variantId);
+      return;
+    }
+
+    const heroSection = document.getElementById('dynamic-hero-section');
+    if (!heroSection) return;
+
+    const heroSlider = heroSection.querySelector('.hero-slider');
+    if (!heroSlider) return;
+
+    // Clear existing slides
+    heroSlider.innerHTML = '';
+
+    // Create new slides from variant data
+    heroData.forEach((item, index) => {
+      const slide = document.createElement('div');
+      slide.className = 'hero-slide';
+      slide.dataset.slideIndex = index;
+      if (item.autoplay) slide.dataset.autoplay = 'true';
+      if (item.autoplay_duration) slide.dataset.autoplayDuration = item.autoplay_duration * 1000;
+
+      let mediaHTML = '';
+      const hideTextContent = {{ section.settings.hide_text_content | json }};
+      
+      // Build media content
+      if (item.content_type === 'image') {
+        mediaHTML = `
+          <div class="hero__media-wrapper">
+            <img src="${item.desktop_image}" class="hero__media-content hero__desktop-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}">
+            <img src="${item.mobile_image}" class="hero__media-content hero__mobile-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}">
+          </div>
+        `;
+      } else if (item.content_type === 'video') {
+        mediaHTML = `
+          <div class="hero__media-wrapper">
+            <div class="hero__video-container hero__desktop-only">
+              <video class="hero__video" ${item.autoplay ? 'autoplay' : ''} ${item.loop ? 'loop' : ''} ${item.muted ? 'muted' : ''} playsinline ${item.controls ? 'controls' : ''} poster="${item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}">
+                ${item.desktop_video ? `<source src="${item.desktop_video}" type="video/mp4">` : ''}
+              </video>
+            </div>
+            <div class="hero__video-container hero__mobile-only">
+              <video class="hero__video" ${item.autoplay ? 'autoplay' : ''} ${item.loop ? 'loop' : ''} ${item.muted ? 'muted' : ''} playsinline ${item.controls ? 'controls' : ''} poster="${item.video_poster_mobile || item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}">
+                ${item.mobile_video ? `<source src="${item.mobile_video}" type="video/mp4">` : item.desktop_video ? `<source src="${item.desktop_video}" type="video/mp4">` : ''}
+              </video>
+            </div>
+          </div>
+        `;
+      }
+
+      // Build text content (if not hidden)
+      let textHTML = '';
+      if (!hideTextContent && (item.heading || item.text || (item.btn_url && item.btn_text))) {
+        textHTML = `
+          <div class="hero__container">
+            <div class="hero__content" style="${item.mobile_padding_top ? '--mobile-padding-top: ' + item.mobile_padding_top + 'px;' : ''}">
+              <div class="hero__content-wrapper">
+                <div class="hero__text-content">
+                  ${item.heading ? `<h1 class="hero__title" style="font-weight:550 !important">${item.heading}</h1>` : ''}
+                  ${item.text ? `<div class="hero__description">${item.text}</div>` : ''}
+                  ${item.btn_url && item.btn_text ? `<div class="hero__cta-wrapper"><a href="${item.btn_url}" class="hero__cta-button">${item.btn_text}</a></div>` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      slide.innerHTML = mediaHTML + textHTML;
+      heroSlider.appendChild(slide);
+    });
+
+    // Reinitialize the slider
+    const slides = heroSlider.querySelectorAll('.hero-slide');
+    if (slides.length > 0) {
+      slides[0].classList.add('active');
+      slides[0].style.zIndex = '2';
+      
+      // Reinitialize slider controls
+      setTimeout(() => {
+        const event = new CustomEvent('hero-slider-reinitialized');
+        document.dispatchEvent(event);
+        
+        // Update navigation visibility
+        const bottomNav = document.querySelector('.hero__bottom-nav');
+        if (bottomNav) {
+          bottomNav.style.display = slides.length > 1 ? 'flex' : 'none';
+        }
+        
+        // Re-run aspect ratio function
+        maintainHeroAspectRatio();
+      }, 100);
+    }
+  }
+
+  // Listen for variant change events (matching product.liquid pattern)
+  document.addEventListener('DOMContentLoaded', function() {
+    // Listen for custom variant change event that product.liquid fires
+    document.addEventListener('variant:changed', function(e) {
+      if (e.detail && e.detail.variant && e.detail.variant.id) {
+        updateHeroContentForVariant(e.detail.variant.id.toString());
+      }
+    });
   });
 </script>
 
