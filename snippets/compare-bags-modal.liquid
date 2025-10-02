@@ -1340,92 +1340,94 @@ const compareProductsData = {
     ]
   },
   
-  // Get size variants for comparison - using JSON data
-  sizeVariants: window.productMetafieldsData?.allVariants?.filter(variant => {
-    // Check if this variant has a different size than the current one
+  // Dynamic functions to get variants based on current selection
+  getSizeVariants: function() {
     const currentVariant = window.productMetafieldsData?.currentVariant;
-    if (!currentVariant) return false;
+    if (!currentVariant || !window.productMetafieldsData?.allVariants) return [];
     
-    // Skip if this is the current variant
-    if (variant.id === currentVariant.id) {
+    return window.productMetafieldsData.allVariants.filter(variant => {
+      // Skip if this is the current variant
+      if (variant.id === currentVariant.id) {
+        return false;
+      }
+      
+      // For size comparison, we want variants with different size (option2) but same fabric (option1)
+      // Assuming option1 is fabric and option2 is size
+      if (variant.option2 !== currentVariant.option2 && variant.option1 === currentVariant.option1) {
+        return true;
+      }
+      
       return false;
-    }
-    
-    // For size comparison, we want variants with different size (option2) but same fabric (option1)
-    if (variant.option2 !== currentVariant.option2) {
-      return true;
-    }
-    
-    return false;
-  }).map(variant => ({
-    id: variant.id,
-    title: parseRichText(decodeHtmlEntities(variant.metafields?.productTitle)) || "{{ product.title | escape }} " + variant.option1,
-    image: parseRichText(decodeHtmlEntities(variant.metafields?.variantImage)) || variant.image || "{{ product.featured_image | img_url: '300x300' }}",
-    sizePhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_size_photo)) || "",
-    fabricPhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_fabric_photo)) || "",
-    price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
-    url: "{{ product.url }}?variant=" + variant.id,
-    isCurrentProduct: variant.id == {{ current_variant.id | default: 'null' }},
-    variantTitle: variant.option1,
-    capacity: parseRichText(decodeHtmlEntities(variant.metafields?.capacity)) || "",
-    dimensions: parseRichText(decodeHtmlEntities(variant.metafields?.dimensions)) || "",
-    weight: parseRichText(decodeHtmlEntities(variant.metafields?.weight)) || "",
-    fabric: parseRichText(decodeHtmlEntities(variant.metafields?.fabric)) || "",
-    features: parseRichText(decodeHtmlEntities(variant.metafields?.features)) || "",
-    techSpecs: parseRichText(decodeHtmlEntities(variant.metafields?.techSpecs)) || "",
-    overview: parseRichText(decodeHtmlEntities(variant.metafields?.overview)) || "",
-    colors: [
-      {% for color_variant in product.variants %}
-        {% if color_variant.option1 contains 'Color' or color_variant.option1 contains 'color' %}
-          "{{ color_variant.option1 }}",
-        {% endif %}
-      {% endfor %}
-    ]
-  })) || [],
+    }).map(variant => ({
+      id: variant.id,
+      title: parseRichText(decodeHtmlEntities(variant.metafields?.productTitle)) || "{{ product.title | escape }} " + variant.option2,
+      image: parseRichText(decodeHtmlEntities(variant.metafields?.variantImage)) || variant.image || "{{ product.featured_image | img_url: '300x300' }}",
+      sizePhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_size_photo)) || "",
+      fabricPhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_fabric_photo)) || "",
+      price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
+      url: "{{ product.url }}?variant=" + variant.id,
+      isCurrentProduct: variant.id == currentVariant.id,
+      variantTitle: variant.option2,
+      capacity: parseRichText(decodeHtmlEntities(variant.metafields?.capacity)) || "",
+      dimensions: parseRichText(decodeHtmlEntities(variant.metafields?.dimensions)) || "",
+      weight: parseRichText(decodeHtmlEntities(variant.metafields?.weight)) || "",
+      fabric: parseRichText(decodeHtmlEntities(variant.metafields?.fabric)) || "",
+      features: parseRichText(decodeHtmlEntities(variant.metafields?.features)) || "",
+      techSpecs: parseRichText(decodeHtmlEntities(variant.metafields?.techSpecs)) || "",
+      overview: parseRichText(decodeHtmlEntities(variant.metafields?.overview)) || "",
+      colors: [
+        {% for color_variant in product.variants %}
+          {% if color_variant.option1 contains 'Color' or color_variant.option1 contains 'color' %}
+            "{{ color_variant.option1 }}",
+          {% endif %}
+        {% endfor %}
+      ]
+    }));
+  },
   
-  // Get fabric variants for comparison - using JSON data
-  fabricVariants: window.productMetafieldsData?.allVariants?.filter(variant => {
-    // Check if this variant has a different fabric than the current one
+  getFabricVariants: function() {
     const currentVariant = window.productMetafieldsData?.currentVariant;
-    if (!currentVariant) return false;
+    if (!currentVariant || !window.productMetafieldsData?.allVariants) return [];
     
-    // Skip if this is the current variant
-    if (variant.id === currentVariant.id) {
+    return window.productMetafieldsData.allVariants.filter(variant => {
+      // Skip if this is the current variant
+      if (variant.id === currentVariant.id) {
+        return false;
+      }
+      
+      // For fabric comparison, we want variants with different fabric (option1) but same size (option2)
+      // Assuming option1 is fabric and option2 is size
+      if (variant.option1 !== currentVariant.option1 && variant.option2 === currentVariant.option2) {
+        return true;
+      }
+      
       return false;
-    }
-    
-    // For fabric comparison, we want variants with different fabric (option1) but same size (option2)
-    // OR variants with same fabric (option1) but different size (option2) - for comprehensive comparison
-    if (variant.option1 !== currentVariant.option1) {
-      return true;
-    }
-    
-    return false;
-  }).map(variant => ({
-    id: variant.id,
-    title: parseRichText(decodeHtmlEntities(variant.metafields?.productTitle)) || "{{ product.title | escape }} " + variant.option2,
-    image: parseRichText(decodeHtmlEntities(variant.metafields?.variantImage)) || variant.image || "{{ product.featured_image | img_url: '300x300' }}",
-    sizePhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_size_photo)) || "",
-    fabricPhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_fabric_photo)) || "",
-    price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
-    url: "{{ product.url }}?variant=" + variant.id,
-    isCurrentProduct: variant.id == {{ current_variant.id | default: 'null' }},
-    variantTitle: variant.option2,
-    capacity: parseRichText(decodeHtmlEntities(variant.metafields?.capacity)) || "",
-    dimensions: parseRichText(decodeHtmlEntities(variant.metafields?.dimensions)) || "",
-    weight: parseRichText(decodeHtmlEntities(variant.metafields?.weight)) || "",
-    fabric: parseRichText(decodeHtmlEntities(variant.metafields?.fabric)) || "",
-    features: parseRichText(decodeHtmlEntities(variant.metafields?.features)) || "",
-    techSpecs: parseRichText(decodeHtmlEntities(variant.metafields?.techSpecs)) || "",
-    overview: parseRichText(decodeHtmlEntities(variant.metafields?.overview)) || "",
-    colors: [
-      {% for color_variant in product.variants %}
-        {% if color_variant.option1 contains 'Color' or color_variant.option1 contains 'color' %}
-          "{{ color_variant.option1 }}",
-        {% endif %}
-      {% endfor %}
-    ]
-  })) || []
+    }).map(variant => ({
+      id: variant.id,
+      title: parseRichText(decodeHtmlEntities(variant.metafields?.productTitle)) || "{{ product.title | escape }} " + variant.option1,
+      image: parseRichText(decodeHtmlEntities(variant.metafields?.variantImage)) || variant.image || "{{ product.featured_image | img_url: '300x300' }}",
+      sizePhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_size_photo)) || "",
+      fabricPhoto: parseRichText(decodeHtmlEntities(variant.metafields?.comparebag_fabric_photo)) || "",
+      price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
+      url: "{{ product.url }}?variant=" + variant.id,
+      isCurrentProduct: variant.id == currentVariant.id,
+      variantTitle: variant.option1,
+      capacity: parseRichText(decodeHtmlEntities(variant.metafields?.capacity)) || "",
+      dimensions: parseRichText(decodeHtmlEntities(variant.metafields?.dimensions)) || "",
+      weight: parseRichText(decodeHtmlEntities(variant.metafields?.weight)) || "",
+      fabric: parseRichText(decodeHtmlEntities(variant.metafields?.fabric)) || "",
+      features: parseRichText(decodeHtmlEntities(variant.metafields?.features)) || "",
+      techSpecs: parseRichText(decodeHtmlEntities(variant.metafields?.techSpecs)) || "",
+      overview: parseRichText(decodeHtmlEntities(variant.metafields?.overview)) || "",
+      colors: [
+        {% for color_variant in product.variants %}
+          {% if color_variant.option1 contains 'Color' or color_variant.option1 contains 'color' %}
+            "{{ color_variant.option1 }}",
+          {% endif %}
+        {% endfor %}
+      ]
+    }));
+  }
 };
 
 
@@ -1435,8 +1437,8 @@ const compareProductsData = {
 
 // Function to determine which tabs to show based on available variants
 function determineAvailableTabs() {
-  const sizeVariants = compareProductsData.sizeVariants || [];
-  const fabricVariants = compareProductsData.fabricVariants || [];
+  const sizeVariants = compareProductsData.getSizeVariants();
+  const fabricVariants = compareProductsData.getFabricVariants();
   
   let defaultTab = 'size';
   let showTabs = false;
@@ -1586,12 +1588,12 @@ function renderCompareBagsTable(tab) {
       return;
     }
     
-    // Choose variants based on selected tab
+    // Choose variants based on selected tab using dynamic functions
     let variants = [];
     if (tab === 'size') {
-      variants = compareProductsData.sizeVariants || [];
+      variants = compareProductsData.getSizeVariants();
     } else if (tab === 'fabric') {
-      variants = compareProductsData.fabricVariants || [];
+      variants = compareProductsData.getFabricVariants();
     }
     
     // If no variants found, show only current product with a message
@@ -2451,6 +2453,8 @@ window.updateCompareModalWithVariant = function(variantId) {
       id: variantData.id,
       title: parseRichText(decodeHtmlEntities(variantData.metafields?.productTitle)) || variantData.title,
       image: parseRichText(decodeHtmlEntities(variantData.metafields?.variantImage)) || variantData.image,
+      sizePhoto: parseRichText(decodeHtmlEntities(variantData.metafields?.comparebag_size_photo)) || "",
+      fabricPhoto: parseRichText(decodeHtmlEntities(variantData.metafields?.comparebag_fabric_photo)) || "",
       price: parseRichText(decodeHtmlEntities(variantData.metafields?.customPrice)) || variantData.price,
       capacity: parseRichText(decodeHtmlEntities(variantData.metafields?.capacity)) || "",
       dimensions: parseRichText(decodeHtmlEntities(variantData.metafields?.dimensions)) || "",
@@ -2481,11 +2485,18 @@ window.updateCompareModalWithVariant = function(variantId) {
       };
     }
     
-    // If modal is open, update only the left card (current product card)
+    // If modal is open, re-render the entire modal with updated data
     const modal = document.getElementById('compareBagsModalV2');
     if (modal && modal.style.display === 'flex') {
-      // Update only the left card with the new variant data
-      updateSpecificCardWithVariant(variantId, 'left');
+      // Get the active tab
+      const activeTab = document.querySelector('.compare-modal-tab.active');
+      const tabName = activeTab ? activeTab.getAttribute('data-tab') : 'size';
+      
+      // Re-render the modal with updated data
+      renderCompareBagsTable(tabName);
+      
+      // Re-equalize heights after updating
+      setTimeout(equalizeGridHeights, 100);
     }
   }
 };
