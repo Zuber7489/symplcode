@@ -66,11 +66,23 @@
 {% endif %}
 
 {% comment %}
-  Show compare buttons only if:
-  1. Show Compare Button metafield is true (or not set, for backward compatibility)
-  2. Product has variants for comparison
+  Show compare buttons logic:
+  - If show_compare_button is explicitly true → show button (even if no variants)
+  - If show_compare_button is explicitly false → hide button
+  - If show_compare_button is not set (nil) → show only if variants exist (backward compatibility)
 {% endcomment %}
-{% if show_compare_button != false and has_variants_for_comparison %}
+{% if show_compare_button == true %}
+  {% comment %} Metafield is explicitly true - always show button {% endcomment %}
+  {% assign should_show_button = true %}
+{% elsif show_compare_button == false %}
+  {% comment %} Metafield is explicitly false - never show button {% endcomment %}
+  {% assign should_show_button = false %}
+{% else %}
+  {% comment %} Metafield is not set - show only if variants exist (backward compatibility) {% endcomment %}
+  {% assign should_show_button = has_variants_for_comparison %}
+{% endif %}
+
+{% if should_show_button %}
 
 <!-- Desktop Compare Bags Button -->
 <button id="compareBtnDesktop" class="comparedesktopbtn" data-compare-button="true" style="border: 2px solid #2f7d7d; color: #2f7d7d; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 18px; cursor: pointer; margin: 0; position: relative; z-index: 100; pointer-events: auto; white-space: nowrap;" onclick="openCompareBagsModalV2()">
