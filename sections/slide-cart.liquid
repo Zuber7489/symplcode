@@ -2828,15 +2828,23 @@ function initializeBundleProductImages() {
 
 // Initialize bundle slide navigation
 $(document).ready(function() {
-  // Initialize cart state on page load with validation
-  initializeCartStateWithValidation();
+  // Only initialize cart state if cart is open or we're returning from checkout
+  var isCartOpen = $('.r-side-cart').hasClass('active') || $('body').hasClass('g-cart-open');
+  var isReturningFromCheckout = document.referrer && document.referrer.includes('/checkout');
   
-  // Initialize bundle functionality
-  setTimeout(() => {
-    new BundleSlideNavigation();
-    initializeBundleProductImages();
-    updateBundleProducts();
-  }, 100);
+  if (isCartOpen || isReturningFromCheckout) {
+    // Initialize cart state on page load with validation
+    initializeCartStateWithValidation();
+  }
+  
+  // Initialize bundle functionality only if cart is open
+  if (isCartOpen) {
+    setTimeout(() => {
+      new BundleSlideNavigation();
+      initializeBundleProductImages();
+      updateBundleProducts();
+    }, 100);
+  }
   
   // Cart close functionality
   $(document).on('click', '.cart-close, .cart-overlay', function(e) {
@@ -2847,8 +2855,15 @@ $(document).ready(function() {
   
   // Initialize on cart open
   $(document).on('click', '.cart-icon', function() {
-    // First refresh cart state to ensure we have latest data
-    initializeCartStateWithValidation();
+    // Only refresh cart state if we haven't already done so recently
+    var lastRefreshTime = window.lastCartRefreshTime || 0;
+    var currentTime = new Date().getTime();
+    
+    // Only refresh if it's been more than 5 seconds since last refresh
+    if (currentTime - lastRefreshTime > 5000) {
+      initializeCartStateWithValidation();
+      window.lastCartRefreshTime = currentTime;
+    }
     
     setTimeout(() => {
       new BundleSlideNavigation();
@@ -2882,6 +2897,7 @@ $(document).ready(function() {
   // Only refresh cart state when user comes back from checkout (not on every focus)
   var lastPageUrl = document.referrer;
   var isReturningFromCheckout = false;
+  var hasRefreshedFromCheckout = false; // Track if we've already refreshed
   
   // Check if user is returning from checkout page
   if (lastPageUrl && lastPageUrl.includes('/checkout')) {
@@ -2890,37 +2906,24 @@ $(document).ready(function() {
   
   // Only refresh cart when returning from checkout, not on every focus/visibility change
   $(window).on('focus', function() {
-    if (isReturningFromCheckout) {
+    if (isReturningFromCheckout && !hasRefreshedFromCheckout) {
       // Use debounced refresh to prevent excessive calls
       debouncedCartRefresh();
-      isReturningFromCheckout = false; // Reset flag after first refresh
+      hasRefreshedFromCheckout = true; // Mark as refreshed
     }
   });
   
   // Only refresh cart when returning from checkout (not on tab switching)
   document.addEventListener('visibilitychange', function() {
-    if (!document.hidden && isReturningFromCheckout) {
+    if (!document.hidden && isReturningFromCheckout && !hasRefreshedFromCheckout) {
       // Use debounced refresh to prevent excessive calls
       debouncedCartRefresh();
-      isReturningFromCheckout = false; // Reset flag after first refresh
+      hasRefreshedFromCheckout = true; // Mark as refreshed
     }
   });
   
-  // Additional safety check - refresh cart state periodically to catch any sync issues
-  // Reduced frequency and only when cart is actually open
-  setInterval(function() {
-    // Only refresh if cart is open to avoid unnecessary requests
-    if ($('.r-side-cart').hasClass('active')) {
-      var displayedCount = parseInt($('.cart-title').text().match(/\d+/)) || 0;
-      var actualItems = $('.cart-item').length;
-      
-      // If there's a mismatch, refresh the cart
-      if (displayedCount !== actualItems) {
-        console.warn('Periodic cart sync check detected mismatch. Refreshing...');
-        initializeCartStateWithValidation();
-      }
-    }
-  }, 30000); // Check every 30 seconds instead of 10
+  // Remove periodic cart sync checks - they cause unnecessary refreshes
+  // The cart state is already validated on page load and cart operations
   
   // Add to Bag button handler for bundle products (only in cart)
   $(document).on('click', '.bundle-cart-btn', function(e) {
@@ -3227,14 +3230,29 @@ function debouncedCartRefresh() {
     clearTimeout(cartRefreshTimeout);
   }
   
-  // Set new timeout
-  cartRefreshTimeout = setTimeout(function() {
-    initializeCartStateWithValidation();
-  }, 200); // 200ms debounce
+  // Only refresh if cart is open or we're returning from checkout
+  var isCartOpen = $('.r-side-cart').hasClass('active') || $('body').hasClass('g-cart-open');
+  var isReturningFromCheckout = document.referrer && document.referrer.includes('/checkout');
+  
+  if (isCartOpen || isReturningFromCheckout) {
+    // Set new timeout with longer debounce to prevent excessive calls
+    cartRefreshTimeout = setTimeout(function() {
+      initializeCartStateWithValidation();
+    }, 500); // Increased to 500ms debounce
+  }
 }
 
 // Function to initialize cart state on page load with validation
 function initializeCartStateWithValidation() {
+  // Only validate if cart is actually open or if we're returning from checkout
+  var isCartOpen = $('.r-side-cart').hasClass('active') || $('body').hasClass('g-cart-open');
+  var isReturningFromCheckout = document.referrer && document.referrer.includes('/checkout');
+  
+  // Skip validation if cart is closed and we're not returning from checkout
+  if (!isCartOpen && !isReturningFromCheckout) {
+    return;
+  }
+  
   // First, get fresh cart data to validate current state
   $.ajax({
     type: "GET",
@@ -3242,25 +3260,18 @@ function initializeCartStateWithValidation() {
     dataType: "json",
     cache: false,
     success: function(cartData) {
-      // Check if there's a mismatch between displayed cart and actual cart
+      // Only check for significant mismatches, not minor differences
       var displayedCount = parseInt($('.cart-title').text().match(/\d+/)) || 0;
       var actualCount = cartData.item_count || 0;
       
-      // If there's a mismatch, force a complete refresh
-      if (displayedCount !== actualCount) {
-        console.warn('Cart state mismatch on page load. Displayed:', displayedCount, 'Actual:', actualCount);
+      // Only refresh if there's a significant mismatch (more than 1 item difference)
+      if (Math.abs(displayedCount - actualCount) > 1) {
+        console.warn('Significant cart state mismatch. Displayed:', displayedCount, 'Actual:', actualCount);
         updateBundleProductsWithHTML();
       } else if (actualCount > 0) {
-        // If counts match and cart has items, validate that items are actually displayed
-        var displayedItems = $('.cart-item').length;
-        if (displayedItems !== actualCount) {
-          console.warn('Cart item count mismatch. Displayed items:', displayedItems, 'Actual count:', actualCount);
-          updateBundleProductsWithHTML();
-        } else {
-          // Cart state is consistent, just update totals
-          updateCartTotalsOnly(cartData);
-          updateCartHeader(cartData.item_count);
-        }
+        // If counts are close, just update totals without full refresh
+        updateCartTotalsOnly(cartData);
+        updateCartHeader(cartData.item_count);
       } else {
         // Cart is empty, ensure empty state is shown
         showEmptyCartState();
@@ -3268,8 +3279,10 @@ function initializeCartStateWithValidation() {
     },
     error: function(xhr, status, error) {
       console.error('Error validating cart state:', error);
-      // Fallback to full refresh
-      updateBundleProductsWithHTML();
+      // Only fallback to full refresh if cart is open
+      if (isCartOpen) {
+        updateBundleProductsWithHTML();
+      }
     }
   });
 }
