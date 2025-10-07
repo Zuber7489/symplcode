@@ -605,6 +605,10 @@
     let currentSlide = 0;
     let autoSlideInterval;
     
+    // Store in global scope for variant updates
+    window.heroCurrentSlideV2 = 0;
+    window.heroAutoSlideIntervalV2 = null;
+    
     // Per-slide autoplay settings for hero section two
     function getSlideAutoplaySettingsV2(slideIndex) {
       const slide = slides[slideIndex];
@@ -661,15 +665,18 @@
       slides.forEach(slide => {
         slide.classList.remove('active');
         slide.style.zIndex = '0';
+        slide.style.opacity = '0';
       });
       
       // Add active class to current slide
       if (slides[index]) {
         slides[index].classList.add('active');
         slides[index].style.zIndex = '2';
+        slides[index].style.opacity = '1';
       }
       
       currentSlide = index;
+      window.heroCurrentSlideV2 = index;
       updateProgressBarV2();
       updateNavigationStateV2();
       
@@ -739,6 +746,10 @@
       if (autoSlideInterval) {
         clearInterval(autoSlideInterval);
       }
+      if (window.heroAutoSlideIntervalV2) {
+        clearInterval(window.heroAutoSlideIntervalV2);
+        window.heroAutoSlideIntervalV2 = null;
+      }
       
       // Check if current slide has autoplay enabled
       const slideSettings = getSlideAutoplaySettingsV2(currentSlide);
@@ -748,6 +759,7 @@
         autoSlideInterval = setInterval(() => {
           nextSlideV2();
         }, slideSettings.duration);
+        window.heroAutoSlideIntervalV2 = autoSlideInterval;
       }
     }
 
@@ -755,6 +767,10 @@
     function stopAutoSlideV2() {
       if (autoSlideInterval) {
         clearInterval(autoSlideInterval);
+      }
+      if (window.heroAutoSlideIntervalV2) {
+        clearInterval(window.heroAutoSlideIntervalV2);
+        window.heroAutoSlideIntervalV2 = null;
       }
     }
 
@@ -917,6 +933,173 @@
     }
   });
 
+  // Function to reattach navigation event listeners after variant update for section two
+  function reattachNavigationListenersV2() {
+    const heroSection = document.getElementById('dynamic-hero-section-two');
+    if (!heroSection) return;
+
+    const slider = heroSection.querySelector('.dynamic-hero-slider-v2');
+    const slides = heroSection.querySelectorAll('.dynamic-hero-slide-v2');
+    const prevBtn = document.querySelector('.hero-v2-slider-prev');
+    const nextBtn = document.querySelector('.hero-v2-slider-next');
+    
+    if (!slider || !slides.length) return;
+
+    // Remove existing event listeners by cloning and replacing elements
+    if (prevBtn) {
+      const newPrevBtn = prevBtn.cloneNode(true);
+      prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+    }
+    if (nextBtn) {
+      const newNextBtn = nextBtn.cloneNode(true);
+      nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+    }
+
+    // Get fresh references to the new buttons
+    const newPrevBtn = document.querySelector('.hero-v2-slider-prev');
+    const newNextBtn = document.querySelector('.hero-v2-slider-next');
+
+    // Navigation functions for variant-updated slides
+    function nextSlideVariantV2() {
+      const currentSlide = window.heroCurrentSlideV2 || 0;
+      const next = (currentSlide + 1) % slides.length;
+      showSlideVariantV2(next);
+    }
+
+    function prevSlideVariantV2() {
+      const currentSlide = window.heroCurrentSlideV2 || 0;
+      const prev = (currentSlide - 1 + slides.length) % slides.length;
+      showSlideVariantV2(prev);
+    }
+
+    function showSlideVariantV2(index) {
+      // Remove active class from all slides
+      slides.forEach(slide => {
+        slide.classList.remove('active');
+        slide.style.zIndex = '0';
+        slide.style.opacity = '0';
+      });
+      
+      // Add active class to current slide
+      if (slides[index]) {
+        slides[index].classList.add('active');
+        slides[index].style.zIndex = '2';
+        slides[index].style.opacity = '1';
+      }
+      
+      window.heroCurrentSlideV2 = index;
+      
+      // Update progress bar
+      const progressBar = document.querySelector('.hero-v2-slider-progress');
+      if (progressBar && slides.length > 1) {
+        const progress = ((index + 1) / slides.length) * 100;
+        progressBar.style.width = progress + '%';
+      }
+      
+      // Update navigation buttons
+      if (newPrevBtn && newNextBtn) {
+        newPrevBtn.disabled = index === 0;
+        newPrevBtn.style.opacity = index === 0 ? '0.3' : '1';
+        newPrevBtn.style.cursor = index === 0 ? 'not-allowed' : 'pointer';
+        
+        newNextBtn.disabled = index === slides.length - 1;
+        newNextBtn.style.opacity = index === slides.length - 1 ? '0.3' : '1';
+        newNextBtn.style.cursor = index === slides.length - 1 ? 'not-allowed' : 'pointer';
+      }
+    }
+
+    // Add event listeners
+    if (newPrevBtn) {
+      newPrevBtn.addEventListener('click', () => {
+        prevSlideVariantV2();
+        // Pause autoplay temporarily
+        if (window.heroAutoSlideIntervalV2) {
+          clearInterval(window.heroAutoSlideIntervalV2);
+          setTimeout(() => {
+            const currentSlide = window.heroCurrentSlideV2 || 0;
+            const slide = slides[currentSlide];
+            if (slide && slide.dataset.autoplay === 'true') {
+              const duration = parseInt(slide.dataset.autoplayDuration) || 5000;
+              window.heroAutoSlideIntervalV2 = setInterval(() => {
+                nextSlideVariantV2();
+              }, duration);
+            }
+          }, 3000);
+        }
+      });
+    }
+
+    if (newNextBtn) {
+      newNextBtn.addEventListener('click', () => {
+        nextSlideVariantV2();
+        // Pause autoplay temporarily
+        if (window.heroAutoSlideIntervalV2) {
+          clearInterval(window.heroAutoSlideIntervalV2);
+          setTimeout(() => {
+            const currentSlide = window.heroCurrentSlideV2 || 0;
+            const slide = slides[currentSlide];
+            if (slide && slide.dataset.autoplay === 'true') {
+              const duration = parseInt(slide.dataset.autoplayDuration) || 5000;
+              window.heroAutoSlideIntervalV2 = setInterval(() => {
+                nextSlideVariantV2();
+              }, duration);
+            }
+          }, 3000);
+        }
+      });
+    }
+
+    // Touch/swipe support for variant slides
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let isSwiping = false;
+    const minSwipeDistance = 50;
+
+    function handleSwipeVariantV2() {
+      const swipeDistance = touchEndX - touchStartX;
+      const verticalDistance = Math.abs(touchEndY - touchStartY);
+      const horizontalDistance = Math.abs(swipeDistance);
+
+      if (horizontalDistance > verticalDistance && horizontalDistance > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          prevSlideVariantV2();
+        } else {
+          nextSlideVariantV2();
+        }
+      }
+    }
+
+    function handleTouchStartVariantV2(e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      isSwiping = false;
+    }
+
+    function handleTouchMoveVariantV2(e) {
+      if (!isSwiping) {
+        isSwiping = true;
+      }
+    }
+
+    function handleTouchEndVariantV2(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      touchEndY = e.changedTouches[0].clientY;
+      
+      if (isSwiping) {
+        handleSwipeVariantV2();
+      }
+    }
+
+    // Add touch event listeners to slider
+    if (slider) {
+      slider.addEventListener('touchstart', handleTouchStartVariantV2, { passive: true });
+      slider.addEventListener('touchmove', handleTouchMoveVariantV2, { passive: true });
+      slider.addEventListener('touchend', handleTouchEndVariantV2, { passive: true });
+    }
+  }
+
   // ============================================
   // VARIANT-SPECIFIC HERO CONTENT UPDATE (SECTION TWO)
   // ============================================
@@ -939,6 +1122,12 @@
 
     const heroSlider = heroSection.querySelector('.dynamic-hero-slider-v2');
     if (!heroSlider) return;
+
+    // Stop any existing autoplay
+    if (window.heroAutoSlideIntervalV2) {
+      clearInterval(window.heroAutoSlideIntervalV2);
+      window.heroAutoSlideIntervalV2 = null;
+    }
 
     // Clear existing slides
     heroSlider.innerHTML = '';
@@ -1001,25 +1190,147 @@
       heroSlider.appendChild(slide);
     });
 
-    // Reinitialize the slider
+    // Reinitialize the slider completely
     const slides = heroSlider.querySelectorAll('.dynamic-hero-slide-v2');
     if (slides.length > 0) {
+      // Reset all slides to inactive state
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        slide.style.zIndex = '0';
+        slide.style.opacity = '0';
+      });
+      
+      // Activate first slide
       slides[0].classList.add('active');
       slides[0].style.zIndex = '2';
+      slides[0].style.opacity = '1';
       
-      // Reinitialize slider controls
-      setTimeout(() => {
-        const event = new CustomEvent('hero-slider-two-reinitialized');
-        document.dispatchEvent(event);
+      // Reset global variables
+      window.heroCurrentSlideV2 = 0;
+      
+      // Update navigation visibility
+      const bottomNav = document.querySelector('.hero-v2-bottom-nav');
+      if (bottomNav) {
+        bottomNav.style.display = slides.length > 1 ? 'flex' : 'none';
+      }
+      
+      // Update progress bar
+      const progressBar = document.querySelector('.hero-v2-slider-progress');
+      if (progressBar && slides.length > 1) {
+        progressBar.style.width = (100 / slides.length) + '%';
+      }
+      
+      // Update navigation buttons
+      const prevBtn = document.querySelector('.hero-v2-slider-prev');
+      const nextBtn = document.querySelector('.hero-v2-slider-next');
+      if (prevBtn && nextBtn) {
+        prevBtn.disabled = true;
+        prevBtn.style.opacity = '0.3';
+        prevBtn.style.cursor = 'not-allowed';
         
-        // Update navigation visibility
-        const bottomNav = document.querySelector('.hero-v2-bottom-nav');
-        if (bottomNav) {
-          bottomNav.style.display = slides.length > 1 ? 'flex' : 'none';
+        if (slides.length > 1) {
+          nextBtn.disabled = false;
+          nextBtn.style.opacity = '1';
+          nextBtn.style.cursor = 'pointer';
+        } else {
+          nextBtn.disabled = true;
+          nextBtn.style.opacity = '0.3';
+          nextBtn.style.cursor = 'not-allowed';
         }
-        
-        // Re-run aspect ratio function
+      }
+      
+      // Re-run aspect ratio function
+      setTimeout(() => {
         maintainHeroAspectRatioTwo();
+        
+        // Reattach navigation event listeners
+        reattachNavigationListenersV2();
+        
+        // Start autoplay if enabled for first slide
+        if (slides.length > 1) {
+          const firstSlide = slides[0];
+          const autoplay = firstSlide.dataset.autoplay === 'true';
+          const duration = parseInt(firstSlide.dataset.autoplayDuration) || 5000;
+          
+          if (autoplay) {
+            window.heroAutoSlideIntervalV2 = setInterval(() => {
+              const currentSlide = window.heroCurrentSlideV2 || 0;
+              const nextSlide = (currentSlide + 1) % slides.length;
+              
+              // Hide current slide
+              slides[currentSlide].classList.remove('active');
+              slides[currentSlide].style.zIndex = '0';
+              slides[currentSlide].style.opacity = '0';
+              
+              // Show next slide
+              slides[nextSlide].classList.add('active');
+              slides[nextSlide].style.zIndex = '2';
+              slides[nextSlide].style.opacity = '1';
+              
+              window.heroCurrentSlideV2 = nextSlide;
+              
+              // Update progress bar
+              if (progressBar) {
+                const progress = ((nextSlide + 1) / slides.length) * 100;
+                progressBar.style.width = progress + '%';
+              }
+              
+              // Update navigation buttons
+              if (prevBtn && nextBtn) {
+                prevBtn.disabled = nextSlide === 0;
+                prevBtn.style.opacity = nextSlide === 0 ? '0.3' : '1';
+                prevBtn.style.cursor = nextSlide === 0 ? 'not-allowed' : 'pointer';
+                
+                nextBtn.disabled = nextSlide === slides.length - 1;
+                nextBtn.style.opacity = nextSlide === slides.length - 1 ? '0.3' : '1';
+                nextBtn.style.cursor = nextSlide === slides.length - 1 ? 'not-allowed' : 'pointer';
+              }
+              
+              // Check if next slide has different autoplay settings
+              const nextSlideElement = slides[nextSlide];
+              const nextAutoplay = nextSlideElement.dataset.autoplay === 'true';
+              const nextDuration = parseInt(nextSlideElement.dataset.autoplayDuration) || 5000;
+              
+              if (nextAutoplay && nextDuration !== duration) {
+                // Restart with new duration
+                clearInterval(window.heroAutoSlideIntervalV2);
+                window.heroAutoSlideIntervalV2 = setInterval(() => {
+                  const currentSlide = window.heroCurrentSlideV2 || 0;
+                  const nextSlide = (currentSlide + 1) % slides.length;
+                  
+                  // Hide current slide
+                  slides[currentSlide].classList.remove('active');
+                  slides[currentSlide].style.zIndex = '0';
+                  slides[currentSlide].style.opacity = '0';
+                  
+                  // Show next slide
+                  slides[nextSlide].classList.add('active');
+                  slides[nextSlide].style.zIndex = '2';
+                  slides[nextSlide].style.opacity = '1';
+                  
+                  window.heroCurrentSlideV2 = nextSlide;
+                  
+                  // Update progress bar
+                  if (progressBar) {
+                    const progress = ((nextSlide + 1) / slides.length) * 100;
+                    progressBar.style.width = progress + '%';
+                  }
+                  
+                  // Update navigation buttons
+                  if (prevBtn && nextBtn) {
+                    prevBtn.disabled = nextSlide === 0;
+                    prevBtn.style.opacity = nextSlide === 0 ? '0.3' : '1';
+                    prevBtn.style.cursor = nextSlide === 0 ? 'not-allowed' : 'pointer';
+                    
+                    nextBtn.disabled = nextSlide === slides.length - 1;
+                    nextBtn.style.opacity = nextSlide === slides.length - 1 ? '0.3' : '1';
+                    nextBtn.style.cursor = nextSlide === slides.length - 1 ? 'not-allowed' : 'pointer';
+                  }
+                }, nextDuration);
+              }
+            }, duration);
+          }
+        }
       }, 100);
     }
   }
