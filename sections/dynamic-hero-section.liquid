@@ -1152,15 +1152,21 @@
           </div>
         `;
       } else if (item.content_type === 'video') {
+        // For videos, check video-specific autoplay settings (different from slider autoplay)
+        const videoAutoplay = item.video_autoplay !== undefined ? item.video_autoplay : true;
+        const videoLoop = item.video_loop !== undefined ? item.video_loop : true;
+        const videoMuted = item.video_muted !== undefined ? item.video_muted : true;
+        const videoControls = item.video_controls !== undefined ? item.video_controls : false;
+        
         mediaHTML = `
           <div class="hero__media-wrapper">
             <div class="hero__video-container hero__desktop-only">
-              <video class="hero__video" ${item.autoplay ? 'autoplay' : ''} ${item.loop ? 'loop' : ''} ${item.muted ? 'muted' : ''} playsinline ${item.controls ? 'controls' : ''} poster="${item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}" loading="${index === 0 ? 'eager' : 'lazy'}">
+              <video class="hero__video" ${videoAutoplay ? 'autoplay' : ''} ${videoLoop ? 'loop' : ''} ${videoMuted ? 'muted' : ''} playsinline ${videoControls ? 'controls' : ''} poster="${item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}" loading="${index === 0 ? 'eager' : 'lazy'}">
                 ${item.desktop_video ? `<source src="${item.desktop_video}" type="video/mp4">` : ''}
               </video>
             </div>
             <div class="hero__video-container hero__mobile-only">
-              <video class="hero__video" ${item.autoplay ? 'autoplay' : ''} ${item.loop ? 'loop' : ''} ${item.muted ? 'muted' : ''} playsinline ${item.controls ? 'controls' : ''} poster="${item.video_poster_mobile || item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}" loading="${index === 0 ? 'eager' : 'lazy'}">
+              <video class="hero__video" ${videoAutoplay ? 'autoplay' : ''} ${videoLoop ? 'loop' : ''} ${videoMuted ? 'muted' : ''} playsinline ${videoControls ? 'controls' : ''} poster="${item.video_poster_mobile || item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}" loading="${index === 0 ? 'eager' : 'lazy'}">
                 ${item.mobile_video ? `<source src="${item.mobile_video}" type="video/mp4">` : item.desktop_video ? `<source src="${item.desktop_video}" type="video/mp4">` : ''}
               </video>
             </div>
@@ -1247,12 +1253,20 @@
         reattachNavigationListeners();
         
         // Start autoplay if enabled for first slide
-        if (slides.length > 1) {
+        if (slides.length >= 1) {
           const firstSlide = slides[0];
           const autoplay = firstSlide.dataset.autoplay === 'true';
           const duration = parseInt(firstSlide.dataset.autoplayDuration) || 5000;
           
-          if (autoplay) {
+          console.log('🎬 Variant autoplay check:', { 
+            autoplay, 
+            duration, 
+            slidesCount: slides.length,
+            datasetAutoplay: firstSlide.dataset.autoplay,
+            datasetDuration: firstSlide.dataset.autoplayDuration
+          });
+          
+          if (autoplay && slides.length > 1) {
             window.heroAutoSlideInterval = setInterval(() => {
               const currentSlide = window.heroCurrentSlide || 0;
               const nextSlide = (currentSlide + 1) % slides.length;
