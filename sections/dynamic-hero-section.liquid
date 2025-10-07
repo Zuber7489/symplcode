@@ -607,6 +607,10 @@
     let currentSlide = 0;
     let autoSlideInterval;
     
+    // Store in global scope for variant updates
+    window.heroCurrentSlide = 0;
+    window.heroAutoSlideInterval = null;
+    
     // Per-slide autoplay settings
     function getSlideAutoplaySettings(slideIndex) {
       const slide = slides[slideIndex];
@@ -663,15 +667,18 @@
       slides.forEach(slide => {
         slide.classList.remove('active');
         slide.style.zIndex = '0';
+        slide.style.opacity = '0';
       });
       
       // Add active class to current slide
       if (slides[index]) {
         slides[index].classList.add('active');
         slides[index].style.zIndex = '2';
+        slides[index].style.opacity = '1';
       }
       
       currentSlide = index;
+      window.heroCurrentSlide = index;
       updateProgressBar();
       updateNavigationState();
       
@@ -741,6 +748,10 @@
       if (autoSlideInterval) {
         clearInterval(autoSlideInterval);
       }
+      if (window.heroAutoSlideInterval) {
+        clearInterval(window.heroAutoSlideInterval);
+        window.heroAutoSlideInterval = null;
+      }
       
       // Check if current slide has autoplay enabled
       const slideSettings = getSlideAutoplaySettings(currentSlide);
@@ -750,6 +761,7 @@
         autoSlideInterval = setInterval(() => {
           nextSlide();
         }, slideSettings.duration);
+        window.heroAutoSlideInterval = autoSlideInterval;
       }
     }
 
@@ -757,6 +769,10 @@
     function stopAutoSlide() {
       if (autoSlideInterval) {
         clearInterval(autoSlideInterval);
+      }
+      if (window.heroAutoSlideInterval) {
+        clearInterval(window.heroAutoSlideInterval);
+        window.heroAutoSlideInterval = null;
       }
     }
 
@@ -916,6 +932,173 @@
     }
   });
 
+  // Function to reattach navigation event listeners after variant update
+  function reattachNavigationListeners() {
+    const heroSection = document.getElementById('dynamic-hero-section');
+    if (!heroSection) return;
+
+    const slider = heroSection.querySelector('.hero-slider');
+    const slides = heroSection.querySelectorAll('.hero-slide');
+    const prevBtn = document.querySelector('.hero__slider-prev');
+    const nextBtn = document.querySelector('.hero__slider-next');
+    
+    if (!slider || !slides.length) return;
+
+    // Remove existing event listeners by cloning and replacing elements
+    if (prevBtn) {
+      const newPrevBtn = prevBtn.cloneNode(true);
+      prevBtn.parentNode.replaceChild(newPrevBtn, prevBtn);
+    }
+    if (nextBtn) {
+      const newNextBtn = nextBtn.cloneNode(true);
+      nextBtn.parentNode.replaceChild(newNextBtn, nextBtn);
+    }
+
+    // Get fresh references to the new buttons
+    const newPrevBtn = document.querySelector('.hero__slider-prev');
+    const newNextBtn = document.querySelector('.hero__slider-next');
+
+    // Navigation functions for variant-updated slides
+    function nextSlideVariant() {
+      const currentSlide = window.heroCurrentSlide || 0;
+      const next = (currentSlide + 1) % slides.length;
+      showSlideVariant(next);
+    }
+
+    function prevSlideVariant() {
+      const currentSlide = window.heroCurrentSlide || 0;
+      const prev = (currentSlide - 1 + slides.length) % slides.length;
+      showSlideVariant(prev);
+    }
+
+    function showSlideVariant(index) {
+      // Remove active class from all slides
+      slides.forEach(slide => {
+        slide.classList.remove('active');
+        slide.style.zIndex = '0';
+        slide.style.opacity = '0';
+      });
+      
+      // Add active class to current slide
+      if (slides[index]) {
+        slides[index].classList.add('active');
+        slides[index].style.zIndex = '2';
+        slides[index].style.opacity = '1';
+      }
+      
+      window.heroCurrentSlide = index;
+      
+      // Update progress bar
+      const progressBar = document.querySelector('.hero__slider-progress');
+      if (progressBar && slides.length > 1) {
+        const progress = ((index + 1) / slides.length) * 100;
+        progressBar.style.width = progress + '%';
+      }
+      
+      // Update navigation buttons
+      if (newPrevBtn && newNextBtn) {
+        newPrevBtn.disabled = index === 0;
+        newPrevBtn.style.opacity = index === 0 ? '0.3' : '1';
+        newPrevBtn.style.cursor = index === 0 ? 'not-allowed' : 'pointer';
+        
+        newNextBtn.disabled = index === slides.length - 1;
+        newNextBtn.style.opacity = index === slides.length - 1 ? '0.3' : '1';
+        newNextBtn.style.cursor = index === slides.length - 1 ? 'not-allowed' : 'pointer';
+      }
+    }
+
+    // Add event listeners
+    if (newPrevBtn) {
+      newPrevBtn.addEventListener('click', () => {
+        prevSlideVariant();
+        // Pause autoplay temporarily
+        if (window.heroAutoSlideInterval) {
+          clearInterval(window.heroAutoSlideInterval);
+          setTimeout(() => {
+            const currentSlide = window.heroCurrentSlide || 0;
+            const slide = slides[currentSlide];
+            if (slide && slide.dataset.autoplay === 'true') {
+              const duration = parseInt(slide.dataset.autoplayDuration) || 5000;
+              window.heroAutoSlideInterval = setInterval(() => {
+                nextSlideVariant();
+              }, duration);
+            }
+          }, 3000);
+        }
+      });
+    }
+
+    if (newNextBtn) {
+      newNextBtn.addEventListener('click', () => {
+        nextSlideVariant();
+        // Pause autoplay temporarily
+        if (window.heroAutoSlideInterval) {
+          clearInterval(window.heroAutoSlideInterval);
+          setTimeout(() => {
+            const currentSlide = window.heroCurrentSlide || 0;
+            const slide = slides[currentSlide];
+            if (slide && slide.dataset.autoplay === 'true') {
+              const duration = parseInt(slide.dataset.autoplayDuration) || 5000;
+              window.heroAutoSlideInterval = setInterval(() => {
+                nextSlideVariant();
+              }, duration);
+            }
+          }, 3000);
+        }
+      });
+    }
+
+    // Touch/swipe support for variant slides
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let isSwiping = false;
+    const minSwipeDistance = 50;
+
+    function handleSwipeVariant() {
+      const swipeDistance = touchEndX - touchStartX;
+      const verticalDistance = Math.abs(touchEndY - touchStartY);
+      const horizontalDistance = Math.abs(swipeDistance);
+
+      if (horizontalDistance > verticalDistance && horizontalDistance > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          prevSlideVariant();
+        } else {
+          nextSlideVariant();
+        }
+      }
+    }
+
+    function handleTouchStartVariant(e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      isSwiping = false;
+    }
+
+    function handleTouchMoveVariant(e) {
+      if (!isSwiping) {
+        isSwiping = true;
+      }
+    }
+
+    function handleTouchEndVariant(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      touchEndY = e.changedTouches[0].clientY;
+      
+      if (isSwiping) {
+        handleSwipeVariant();
+      }
+    }
+
+    // Add touch event listeners to slider
+    if (slider) {
+      slider.addEventListener('touchstart', handleTouchStartVariant, { passive: true });
+      slider.addEventListener('touchmove', handleTouchMoveVariant, { passive: true });
+      slider.addEventListener('touchend', handleTouchEndVariant, { passive: true });
+    }
+  }
+
   // ============================================
   // VARIANT-SPECIFIC HERO CONTENT UPDATE
   // ============================================
@@ -940,6 +1123,12 @@
     const heroSlider = heroSection.querySelector('.hero-slider');
     if (!heroSlider) return;
 
+    // Stop any existing autoplay
+    if (window.heroAutoSlideInterval) {
+      clearInterval(window.heroAutoSlideInterval);
+      window.heroAutoSlideInterval = null;
+    }
+
     // Clear existing slides
     heroSlider.innerHTML = '';
 
@@ -958,20 +1147,20 @@
       if (item.content_type === 'image') {
         mediaHTML = `
           <div class="hero__media-wrapper">
-            <img src="${item.desktop_image}" class="hero__media-content hero__desktop-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}">
-            <img src="${item.mobile_image}" class="hero__media-content hero__mobile-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}">
+            <img src="${item.desktop_image}" class="hero__media-content hero__desktop-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async" onerror="this.style.display='none';">
+            <img src="${item.mobile_image}" class="hero__media-content hero__mobile-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async" onerror="this.style.display='none';">
           </div>
         `;
       } else if (item.content_type === 'video') {
         mediaHTML = `
           <div class="hero__media-wrapper">
             <div class="hero__video-container hero__desktop-only">
-              <video class="hero__video" ${item.autoplay ? 'autoplay' : ''} ${item.loop ? 'loop' : ''} ${item.muted ? 'muted' : ''} playsinline ${item.controls ? 'controls' : ''} poster="${item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}">
+              <video class="hero__video" ${item.autoplay ? 'autoplay' : ''} ${item.loop ? 'loop' : ''} ${item.muted ? 'muted' : ''} playsinline ${item.controls ? 'controls' : ''} poster="${item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}" loading="${index === 0 ? 'eager' : 'lazy'}">
                 ${item.desktop_video ? `<source src="${item.desktop_video}" type="video/mp4">` : ''}
               </video>
             </div>
             <div class="hero__video-container hero__mobile-only">
-              <video class="hero__video" ${item.autoplay ? 'autoplay' : ''} ${item.loop ? 'loop' : ''} ${item.muted ? 'muted' : ''} playsinline ${item.controls ? 'controls' : ''} poster="${item.video_poster_mobile || item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}">
+              <video class="hero__video" ${item.autoplay ? 'autoplay' : ''} ${item.loop ? 'loop' : ''} ${item.muted ? 'muted' : ''} playsinline ${item.controls ? 'controls' : ''} poster="${item.video_poster_mobile || item.video_poster || ''}" preload="${index === 0 ? 'metadata' : 'none'}" loading="${index === 0 ? 'eager' : 'lazy'}">
                 ${item.mobile_video ? `<source src="${item.mobile_video}" type="video/mp4">` : item.desktop_video ? `<source src="${item.desktop_video}" type="video/mp4">` : ''}
               </video>
             </div>
@@ -1001,25 +1190,147 @@
       heroSlider.appendChild(slide);
     });
 
-    // Reinitialize the slider
+    // Reinitialize the slider completely
     const slides = heroSlider.querySelectorAll('.hero-slide');
     if (slides.length > 0) {
+      // Reset all slides to inactive state
+      slides.forEach((slide, index) => {
+        slide.classList.remove('active');
+        slide.style.zIndex = '0';
+        slide.style.opacity = '0';
+      });
+      
+      // Activate first slide
       slides[0].classList.add('active');
       slides[0].style.zIndex = '2';
+      slides[0].style.opacity = '1';
       
-      // Reinitialize slider controls
-      setTimeout(() => {
-        const event = new CustomEvent('hero-slider-reinitialized');
-        document.dispatchEvent(event);
+      // Reset global variables
+      window.heroCurrentSlide = 0;
+      
+      // Update navigation visibility
+      const bottomNav = document.querySelector('.hero__bottom-nav');
+      if (bottomNav) {
+        bottomNav.style.display = slides.length > 1 ? 'flex' : 'none';
+      }
+      
+      // Update progress bar
+      const progressBar = document.querySelector('.hero__slider-progress');
+      if (progressBar && slides.length > 1) {
+        progressBar.style.width = '25%';
+      }
+      
+      // Update navigation buttons
+      const prevBtn = document.querySelector('.hero__slider-prev');
+      const nextBtn = document.querySelector('.hero__slider-next');
+      if (prevBtn && nextBtn) {
+        prevBtn.disabled = true;
+        prevBtn.style.opacity = '0.3';
+        prevBtn.style.cursor = 'not-allowed';
         
-        // Update navigation visibility
-        const bottomNav = document.querySelector('.hero__bottom-nav');
-        if (bottomNav) {
-          bottomNav.style.display = slides.length > 1 ? 'flex' : 'none';
+        if (slides.length > 1) {
+          nextBtn.disabled = false;
+          nextBtn.style.opacity = '1';
+          nextBtn.style.cursor = 'pointer';
+        } else {
+          nextBtn.disabled = true;
+          nextBtn.style.opacity = '0.3';
+          nextBtn.style.cursor = 'not-allowed';
         }
-        
-        // Re-run aspect ratio function
+      }
+      
+      // Re-run aspect ratio function
+      setTimeout(() => {
         maintainHeroAspectRatio();
+        
+        // Reattach navigation event listeners
+        reattachNavigationListeners();
+        
+        // Start autoplay if enabled for first slide
+        if (slides.length > 1) {
+          const firstSlide = slides[0];
+          const autoplay = firstSlide.dataset.autoplay === 'true';
+          const duration = parseInt(firstSlide.dataset.autoplayDuration) || 5000;
+          
+          if (autoplay) {
+            window.heroAutoSlideInterval = setInterval(() => {
+              const currentSlide = window.heroCurrentSlide || 0;
+              const nextSlide = (currentSlide + 1) % slides.length;
+              
+              // Hide current slide
+              slides[currentSlide].classList.remove('active');
+              slides[currentSlide].style.zIndex = '0';
+              slides[currentSlide].style.opacity = '0';
+              
+              // Show next slide
+              slides[nextSlide].classList.add('active');
+              slides[nextSlide].style.zIndex = '2';
+              slides[nextSlide].style.opacity = '1';
+              
+              window.heroCurrentSlide = nextSlide;
+              
+              // Update progress bar
+              if (progressBar) {
+                const progress = ((nextSlide + 1) / slides.length) * 100;
+                progressBar.style.width = progress + '%';
+              }
+              
+              // Update navigation buttons
+              if (prevBtn && nextBtn) {
+                prevBtn.disabled = nextSlide === 0;
+                prevBtn.style.opacity = nextSlide === 0 ? '0.3' : '1';
+                prevBtn.style.cursor = nextSlide === 0 ? 'not-allowed' : 'pointer';
+                
+                nextBtn.disabled = nextSlide === slides.length - 1;
+                nextBtn.style.opacity = nextSlide === slides.length - 1 ? '0.3' : '1';
+                nextBtn.style.cursor = nextSlide === slides.length - 1 ? 'not-allowed' : 'pointer';
+              }
+              
+              // Check if next slide has different autoplay settings
+              const nextSlideElement = slides[nextSlide];
+              const nextAutoplay = nextSlideElement.dataset.autoplay === 'true';
+              const nextDuration = parseInt(nextSlideElement.dataset.autoplayDuration) || 5000;
+              
+              if (nextAutoplay && nextDuration !== duration) {
+                // Restart with new duration
+                clearInterval(window.heroAutoSlideInterval);
+                window.heroAutoSlideInterval = setInterval(() => {
+                  const currentSlide = window.heroCurrentSlide || 0;
+                  const nextSlide = (currentSlide + 1) % slides.length;
+                  
+                  // Hide current slide
+                  slides[currentSlide].classList.remove('active');
+                  slides[currentSlide].style.zIndex = '0';
+                  slides[currentSlide].style.opacity = '0';
+                  
+                  // Show next slide
+                  slides[nextSlide].classList.add('active');
+                  slides[nextSlide].style.zIndex = '2';
+                  slides[nextSlide].style.opacity = '1';
+                  
+                  window.heroCurrentSlide = nextSlide;
+                  
+                  // Update progress bar
+                  if (progressBar) {
+                    const progress = ((nextSlide + 1) / slides.length) * 100;
+                    progressBar.style.width = progress + '%';
+                  }
+                  
+                  // Update navigation buttons
+                  if (prevBtn && nextBtn) {
+                    prevBtn.disabled = nextSlide === 0;
+                    prevBtn.style.opacity = nextSlide === 0 ? '0.3' : '1';
+                    prevBtn.style.cursor = nextSlide === 0 ? 'not-allowed' : 'pointer';
+                    
+                    nextBtn.disabled = nextSlide === slides.length - 1;
+                    nextBtn.style.opacity = nextSlide === slides.length - 1 ? '0.3' : '1';
+                    nextBtn.style.cursor = nextSlide === slides.length - 1 ? 'not-allowed' : 'pointer';
+                  }
+                }, nextDuration);
+              }
+            }, duration);
+          }
+        }
       }, 100);
     }
   }
