@@ -85,9 +85,9 @@
                       <div class="hero__description">{{ item.text }}</div>
                     {% endif %}
 
-                    {% if item.btn_url and item.btn_text %}
+                    {% if item.btn_text != blank %}
                       <div class="hero__cta-wrapper">
-                        <a href="{{ item.btn_url }}" class="hero__cta-button">{{ item.btn_text }}</a>
+                        <a href="{% if item.btn_url != blank %}{{ item.btn_url }}{% else %}#{% endif %}" class="hero__cta-button">{{ item.btn_text }}</a>
                       </div>
                     {% endif %}
                   </div>
@@ -172,9 +172,9 @@
                       <div class="hero__description">{{ block.settings.text }}</div>
                     {% endif %}
 
-                    {% if block.settings.btn_url and block.settings.btn_text %}
+                    {% if block.settings.btn_text != blank %}
                       <div class="hero__cta-wrapper">
-                        <a href="{{ block.settings.btn_url }}" class="hero__cta-button">{{ block.settings.btn_text }}</a>
+                        <a href="{% if block.settings.btn_url != blank %}{{ block.settings.btn_url }}{% else %}#{% endif %}" class="hero__cta-button">{{ block.settings.btn_text }}</a>
                       </div>
                     {% endif %}
                   </div>
@@ -1179,20 +1179,26 @@
       if (!hideTextContent) {
         // Build button HTML separately
         let buttonHTML = '';
-        if (item.btn_text) {
+        // Only show button if btn_text has actual content (not empty/undefined/null)
+        // Also check that btn_text is not just whitespace and has length > 0 after trimming
+        const hasValidBtnText = item.btn_text && 
+                                typeof item.btn_text === 'string' && 
+                                item.btn_text.trim().length > 0;
+        
+        if (hasValidBtnText) {
           // Use provided URL or default to '#' if missing
-          const btnUrl = item.btn_url || '#';
-          console.log('🔘 Button found for slide', index, ':', item.btn_text, '->', btnUrl);
+          const btnUrl = (item.btn_url && item.btn_url.trim() !== '') ? item.btn_url : '#';
+          console.log('🔘 Button found for slide', index, ':', item.btn_text.trim(), '->', btnUrl);
           buttonHTML = `
             <div class="hero__cta-wrapper" style="margin-top: 30px; position: relative; z-index: 10;">
               <a href="${btnUrl}" 
                  class="hero__cta-button" 
                  style="display: inline-block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;">
-                ${item.btn_text}
+                ${item.btn_text.trim()}
               </a>
             </div>`;
         } else {
-          console.log('❌ No button text for slide', index, '- btn_url:', item.btn_url, 'btn_text:', item.btn_text);
+          console.log('⚪ Button hidden for slide', index, '- btn_text:', JSON.stringify(item.btn_text), '(empty or invalid)');
         }
         
         // Only create text content div if there's heading, text, or button
