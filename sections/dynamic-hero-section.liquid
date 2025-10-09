@@ -1176,20 +1176,41 @@
 
       // Build text content (if not hidden)
       let textHTML = '';
-      if (!hideTextContent && (item.heading || item.text || (item.btn_url && item.btn_text))) {
-        textHTML = `
-          <div class="hero__container">
-            <div class="hero__content" style="${item.mobile_padding_top ? '--mobile-padding-top: ' + item.mobile_padding_top + 'px;' : ''}">
-              <div class="hero__content-wrapper">
-                <div class="hero__text-content">
-                  ${item.heading ? `<h1 class="hero__title" style="font-weight:550 !important">${item.heading}</h1>` : ''}
-                  ${item.text ? `<div class="hero__description">${item.text}</div>` : ''}
-                  ${item.btn_url && item.btn_text ? `<div class="hero__cta-wrapper"><a href="${item.btn_url}" class="hero__cta-button">${item.btn_text}</a></div>` : ''}
+      if (!hideTextContent) {
+        // Build button HTML separately
+        let buttonHTML = '';
+        if (item.btn_text) {
+          // Use provided URL or default to '#' if missing
+          const btnUrl = item.btn_url || '#';
+          console.log('🔘 Button found for slide', index, ':', item.btn_text, '->', btnUrl);
+          buttonHTML = `
+            <div class="hero__cta-wrapper" style="margin-top: 30px; position: relative; z-index: 10;">
+              <a href="${btnUrl}" 
+                 class="hero__cta-button" 
+                 style="display: inline-block !important; visibility: visible !important; opacity: 1 !important; pointer-events: auto !important;">
+                ${item.btn_text}
+              </a>
+            </div>`;
+        } else {
+          console.log('❌ No button text for slide', index, '- btn_url:', item.btn_url, 'btn_text:', item.btn_text);
+        }
+        
+        // Only create text content div if there's heading, text, or button
+        if (item.heading || item.text || buttonHTML) {
+          textHTML = `
+            <div class="hero__container">
+              <div class="hero__content" style="${item.mobile_padding_top ? '--mobile-padding-top: ' + item.mobile_padding_top + 'px;' : ''}">
+                <div class="hero__content-wrapper">
+                  <div class="hero__text-content">
+                    ${item.heading ? `<h1 class="hero__title" style="font-weight:550 !important">${item.heading}</h1>` : ''}
+                    ${item.text ? `<div class="hero__description">${item.text}</div>` : ''}
+                    ${buttonHTML}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        `;
+          `;
+        }
       }
 
       slide.innerHTML = mediaHTML + textHTML;
