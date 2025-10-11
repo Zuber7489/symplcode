@@ -1905,18 +1905,39 @@ if (typeof Shopify.formatMoney !== 'function') {
 }
 
 // Listen for cart refresh events from cart.js
+// Debounced to prevent multiple rapid refreshes
+var cartRefreshDebounce = null;
 $(document).on('cart:refresh', function() {
-  // Add a small delay to ensure DOM is ready
-  setTimeout(function() {
-    // Always use full HTML refresh to ensure complete synchronization
-    updateBundleProductsWithHTML();
-  }, 50);
+  // Clear any pending refresh
+  if (cartRefreshDebounce) {
+    clearTimeout(cartRefreshDebounce);
+  }
+  
+  // Only refresh if cart is actually open
+  if ($('.r-side-cart').hasClass('active')) {
+    // Debounce refresh to prevent rapid-fire updates
+    cartRefreshDebounce = setTimeout(function() {
+      updateBundleProductsWithHTML();
+    }, 200); // Increased delay to allow batch operations to complete
+  }
 });
 
 // Listen for cart refresh events specifically for bundle discount removal
+// Debounced to prevent multiple rapid refreshes
+var bundleDiscountRefreshDebounce = null;
 $(document).on('cart:refresh-bundle-discounts', function() {
-  // Force a complete cart refresh to remove bundle discounts
-  setTimeout(function() {
+  // Clear any pending refresh
+  if (bundleDiscountRefreshDebounce) {
+    clearTimeout(bundleDiscountRefreshDebounce);
+  }
+  
+  // Only refresh if cart is actually open
+  if (!$('.r-side-cart').hasClass('active')) {
+    return;
+  }
+  
+  // Debounce to prevent rapid-fire refreshes
+  bundleDiscountRefreshDebounce = setTimeout(function() {
     $.ajax({
       type: "GET",
       url: "/cart",
@@ -1963,7 +1984,7 @@ $(document).on('cart:refresh-bundle-discounts', function() {
         console.error('Error refreshing cart for bundle discounts:', error);
       }
     });
-  }, 100);
+  }, 300); // Increased delay to prevent disruption during active cart use
 });
 
 // Listen for cart refresh complete events
@@ -2658,18 +2679,8 @@ function refreshCartAfterDiscount(cartData) {
           hideProductsAlreadyInCart();
         }, 50);
         
-        // Verify cart state after refresh
-        setTimeout(function() {
-          var hasDiscounts = $('.discount-tag').length > 0;
-          var cartTotal = $('.total-amount').text();
-          console.log('Cart refresh completed. Has discounts:', hasDiscounts, 'Total:', cartTotal);
-          
-          // If we still see discount tags but cart data shows no discounts, force page reload
-          if (hasDiscounts && cartData && cartData.discount_codes && cartData.discount_codes.length === 0) {
-            console.warn('Cart state inconsistent, forcing page reload...');
-            window.location.reload();
-          }
-        }, 100);
+        // REMOVED: Cart state verification that was causing unwanted page reloads
+        // The cart is already properly updated with fresh HTML from server
         
       } else {
         // Fallback to data-only update
@@ -2855,15 +2866,9 @@ $(document).ready(function() {
   
   // Initialize on cart open
   $(document).on('click', '.cart-icon', function() {
-    // Only refresh cart state if we haven't already done so recently
-    var lastRefreshTime = window.lastCartRefreshTime || 0;
-    var currentTime = new Date().getTime();
-    
-    // Only refresh if it's been more than 5 seconds since last refresh
-    if (currentTime - lastRefreshTime > 5000) {
-      initializeCartStateWithValidation();
-      window.lastCartRefreshTime = currentTime;
-    }
+    // Don't automatically refresh when opening cart - it causes disruption
+    // Cart state is already up-to-date from previous operations
+    // Only initialize UI components
     
     setTimeout(() => {
       new BundleSlideNavigation();
@@ -2894,33 +2899,33 @@ $(document).ready(function() {
     });
   }, 5000);
   
-  // Only refresh cart state when user comes back from checkout (not on every focus)
+  // DISABLED: Removing aggressive refresh on window focus/visibility
+  // These listeners were causing cart to refresh/close unexpectedly when adding multiple items
+  // Cart state is already validated on page load and after each cart operation
+  
+  /*
   var lastPageUrl = document.referrer;
   var isReturningFromCheckout = false;
-  var hasRefreshedFromCheckout = false; // Track if we've already refreshed
+  var hasRefreshedFromCheckout = false;
   
-  // Check if user is returning from checkout page
   if (lastPageUrl && lastPageUrl.includes('/checkout')) {
     isReturningFromCheckout = true;
   }
   
-  // Only refresh cart when returning from checkout, not on every focus/visibility change
   $(window).on('focus', function() {
     if (isReturningFromCheckout && !hasRefreshedFromCheckout) {
-      // Use debounced refresh to prevent excessive calls
       debouncedCartRefresh();
-      hasRefreshedFromCheckout = true; // Mark as refreshed
+      hasRefreshedFromCheckout = true;
     }
   });
   
-  // Only refresh cart when returning from checkout (not on tab switching)
   document.addEventListener('visibilitychange', function() {
     if (!document.hidden && isReturningFromCheckout && !hasRefreshedFromCheckout) {
-      // Use debounced refresh to prevent excessive calls
       debouncedCartRefresh();
-      hasRefreshedFromCheckout = true; // Mark as refreshed
+      hasRefreshedFromCheckout = true;
     }
   });
+  */
   
   // Remove periodic cart sync checks - they cause unnecessary refreshes
   // The cart state is already validated on page load and cart operations
@@ -3160,13 +3165,14 @@ function updateBundleProductsWithHTML() {
         var actualItemCount = $('.cart-item').length;
         var displayedCount = parseInt(cartCount) || 0;
         
-        // If there's a mismatch, force a complete refresh
-        if (actualItemCount !== displayedCount) {
-          console.warn('Cart state mismatch detected. Actual items:', actualItemCount, 'Displayed count:', displayedCount);
-          // Force a complete page refresh to ensure consistency
+        // Only force refresh if there's a SIGNIFICANT mismatch (more than 2 items difference)
+        // This prevents unnecessary refreshes from minor timing issues
+        if (Math.abs(actualItemCount - displayedCount) > 2) {
+          console.warn('Significant cart state mismatch detected. Actual items:', actualItemCount, 'Displayed count:', displayedCount);
+          // Use a gentler refresh instead of full page reload
           setTimeout(function() {
-            window.location.reload();
-          }, 100);
+            updateBundleProductsWithHTML();
+          }, 500);
           return;
         }
         
@@ -3264,25 +3270,25 @@ function initializeCartStateWithValidation() {
       var displayedCount = parseInt($('.cart-title').text().match(/\d+/)) || 0;
       var actualCount = cartData.item_count || 0;
       
-      // Only refresh if there's a significant mismatch (more than 1 item difference)
-      if (Math.abs(displayedCount - actualCount) > 1) {
+      // Only refresh if there's a VERY significant mismatch (more than 3 items difference)
+      // This prevents unnecessary refreshes when cart is being actively updated
+      if (Math.abs(displayedCount - actualCount) > 3) {
         console.warn('Significant cart state mismatch. Displayed:', displayedCount, 'Actual:', actualCount);
         updateBundleProductsWithHTML();
-      } else if (actualCount > 0) {
-        // If counts are close, just update totals without full refresh
+      } else if (actualCount > 0 && displayedCount > 0) {
+        // If counts are similar, just update totals without full refresh
+        // This prevents disruption when user is actively adding items
         updateCartTotalsOnly(cartData);
         updateCartHeader(cartData.item_count);
-      } else {
+      } else if (actualCount === 0 && displayedCount === 0) {
         // Cart is empty, ensure empty state is shown
         showEmptyCartState();
       }
+      // If there's a minor mismatch during active use, ignore it
     },
     error: function(xhr, status, error) {
       console.error('Error validating cart state:', error);
-      // Only fallback to full refresh if cart is open
-      if (isCartOpen) {
-        updateBundleProductsWithHTML();
-      }
+      // Don't refresh on error - this could disrupt active cart usage
     }
   });
 }
