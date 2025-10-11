@@ -1848,6 +1848,20 @@
 </style>
 
 <script>
+/**
+ * ================================================================
+ * CART API INFINITE LOOP PREVENTION - FIXES APPLIED:
+ * ================================================================
+ * 1. Removed recursive cart validation in updateBundleProductsWithHTML
+ * 2. Added time-based guards to prevent rapid-fire API calls (1-2 sec minimum)
+ * 3. Added flags to prevent multiple simultaneous refresh operations
+ * 4. Increased debounce delays to prevent excessive refreshes
+ * 5. Removed unnecessary API call on page load (updateBundleProducts)
+ * 6. Simplified initializeCartStateWithValidation to avoid recursive refreshes
+ * 7. Added console logging to track API calls and skipped refreshes
+ * ================================================================
+ */
+
 // Configure Shopify money formatting
 if (typeof Shopify === 'undefined') {
   window.Shopify = {};
@@ -1907,7 +1921,15 @@ if (typeof Shopify.formatMoney !== 'function') {
 // Listen for cart refresh events from cart.js
 // Debounced to prevent multiple rapid refreshes
 var cartRefreshDebounce = null;
+var lastCartRefreshTime = 0;
 $(document).on('cart:refresh', function() {
+  // Prevent rapid-fire refreshes (minimum 1 second between refreshes)
+  var currentTime = Date.now();
+  if (currentTime - lastCartRefreshTime < 1000) {
+    console.log('Skipping cart refresh - too soon after last refresh');
+    return;
+  }
+  
   // Clear any pending refresh
   if (cartRefreshDebounce) {
     clearTimeout(cartRefreshDebounce);
@@ -1917,15 +1939,24 @@ $(document).on('cart:refresh', function() {
   if ($('.r-side-cart').hasClass('active')) {
     // Debounce refresh to prevent rapid-fire updates
     cartRefreshDebounce = setTimeout(function() {
+      lastCartRefreshTime = Date.now();
       updateBundleProductsWithHTML();
-    }, 200); // Increased delay to allow batch operations to complete
+    }, 300); // Increased delay to allow batch operations to complete
   }
 });
 
 // Listen for cart refresh events specifically for bundle discount removal
 // Debounced to prevent multiple rapid refreshes
 var bundleDiscountRefreshDebounce = null;
+var lastBundleDiscountRefreshTime = 0;
 $(document).on('cart:refresh-bundle-discounts', function() {
+  // Prevent rapid-fire refreshes (minimum 1 second between refreshes)
+  var currentTime = Date.now();
+  if (currentTime - lastBundleDiscountRefreshTime < 1000) {
+    console.log('Skipping bundle discount refresh - too soon after last refresh');
+    return;
+  }
+  
   // Clear any pending refresh
   if (bundleDiscountRefreshDebounce) {
     clearTimeout(bundleDiscountRefreshDebounce);
@@ -1938,6 +1969,7 @@ $(document).on('cart:refresh-bundle-discounts', function() {
   
   // Debounce to prevent rapid-fire refreshes
   bundleDiscountRefreshDebounce = setTimeout(function() {
+    lastBundleDiscountRefreshTime = Date.now();
     $.ajax({
       type: "GET",
       url: "/cart",
@@ -2622,8 +2654,15 @@ function removeDiscountCode(code) {
 }
 
 // Function to refresh cart after discount application/removal
+var isRefreshingCartAfterDiscount = false;
 function refreshCartAfterDiscount(cartData) {
-  // Force a complete cart refresh to remove bundle discounts
+  // Prevent multiple simultaneous refreshes
+  if (isRefreshingCartAfterDiscount) {
+    console.log('Already refreshing cart after discount, skipping...');
+    return;
+  }
+  
+  isRefreshingCartAfterDiscount = true;
   console.log('Refreshing cart after discount change...');
   
   // Full HTML refresh to show updated discount information
@@ -2677,6 +2716,9 @@ function refreshCartAfterDiscount(cartData) {
           new BundleSlideNavigation();
           initializeBundleProductImages();
           hideProductsAlreadyInCart();
+          
+          // Reset flag after initialization complete
+          isRefreshingCartAfterDiscount = false;
         }, 50);
         
         // REMOVED: Cart state verification that was causing unwanted page reloads
@@ -2687,6 +2729,7 @@ function refreshCartAfterDiscount(cartData) {
         updateTotalSavingsDisplay(cartData);
         updateCartTotalsOnly(cartData);
         updateAppliedDiscountsDisplay(cartData);
+        isRefreshingCartAfterDiscount = false;
       }
     },
     error: function(xhr, status, error) {
@@ -2695,6 +2738,7 @@ function refreshCartAfterDiscount(cartData) {
       updateTotalSavingsDisplay(cartData);
       updateCartTotalsOnly(cartData);
       updateAppliedDiscountsDisplay(cartData);
+      isRefreshingCartAfterDiscount = false;
     }
   });
 }
@@ -2844,16 +2888,16 @@ $(document).ready(function() {
   var isReturningFromCheckout = document.referrer && document.referrer.includes('/checkout');
   
   if (isCartOpen || isReturningFromCheckout) {
-    // Initialize cart state on page load with validation
+    // Initialize cart state on page load with validation (lightweight - no full refresh)
     initializeCartStateWithValidation();
   }
   
-  // Initialize bundle functionality only if cart is open
+  // Initialize bundle functionality only if cart is open (UI ONLY - NO API CALLS)
   if (isCartOpen) {
     setTimeout(() => {
       new BundleSlideNavigation();
       initializeBundleProductImages();
-      updateBundleProducts();
+      // REMOVED: updateBundleProducts() - was causing unnecessary API call on page load
     }, 100);
   }
   
@@ -2868,9 +2912,10 @@ $(document).ready(function() {
   $(document).on('click', '.cart-icon', function() {
     // Don't automatically refresh when opening cart - it causes disruption
     // Cart state is already up-to-date from previous operations
-    // Only initialize UI components
+    // Only initialize UI components - NO API CALLS
     
     setTimeout(() => {
+      // Only initialize UI components, no data fetching
       new BundleSlideNavigation();
       initializeBundleProductImages();
       hideProductsAlreadyInCart(); // Hide products that are already in cart
@@ -3125,7 +3170,17 @@ function updateBundleProducts() {
 }
 
 // Function for full HTML refresh (used for product page additions)
+var isUpdatingBundleProductsWithHTML = false;
 function updateBundleProductsWithHTML() {
+  // Prevent multiple simultaneous refreshes
+  if (isUpdatingBundleProductsWithHTML) {
+    console.log('Already updating bundle products with HTML, skipping...');
+    return;
+  }
+  
+  isUpdatingBundleProductsWithHTML = true;
+  console.log('Updating bundle products with HTML...');
+  
   // Full HTML refresh to show new items added from product page
   $.ajax({
     type: "GET",
@@ -3161,23 +3216,11 @@ function updateBundleProductsWithHTML() {
         // Update cart title
         $('.cart-title').text('Your bag (' + cartCount + ')');
         
-        // Validate cart state consistency - check if cart count matches actual items
-        var actualItemCount = $('.cart-item').length;
-        var displayedCount = parseInt(cartCount) || 0;
-        
-        // Only force refresh if there's a SIGNIFICANT mismatch (more than 2 items difference)
-        // This prevents unnecessary refreshes from minor timing issues
-        if (Math.abs(actualItemCount - displayedCount) > 2) {
-          console.warn('Significant cart state mismatch detected. Actual items:', actualItemCount, 'Displayed count:', displayedCount);
-          // Use a gentler refresh instead of full page reload
-          setTimeout(function() {
-            updateBundleProductsWithHTML();
-          }, 500);
-          return;
-        }
+        // REMOVED: Recursive validation that was causing infinite loops
+        // Cart state is already correct from server HTML refresh
         
         // Check if cart is empty and handle accordingly
-        if (cartCount == '0' || cartCount == 0 || actualItemCount === 0) {
+        if (cartCount == '0' || cartCount == 0) {
           $(".hcart").hide();
           // Ensure empty cart state is properly displayed
           showEmptyCartState();
@@ -3198,18 +3241,23 @@ function updateBundleProductsWithHTML() {
           new BundleSlideNavigation();
           initializeBundleProductImages();
           hideProductsAlreadyInCart();
+          
+          // Reset flag after initialization complete
+          isUpdatingBundleProductsWithHTML = false;
         }, 50); // Reduced delay for faster initialization
         
       } else {
         console.error('No cart section found in server response');
         // Fallback to empty cart state
         showEmptyCartState();
+        isUpdatingBundleProductsWithHTML = false;
       }
     },
     error: function(xhr, status, error) {
       console.error('Error fetching cart HTML:', error);
       // Fallback to fast JSON update
       updateBundleProducts();
+      isUpdatingBundleProductsWithHTML = false;
     }
   });
 }
@@ -3230,7 +3278,15 @@ function goToCheckout() {
 }
 
 // Debounced cart refresh function to prevent excessive refreshes
+var lastDebouncedRefreshTime = 0;
 function debouncedCartRefresh() {
+  // Prevent rapid-fire calls (minimum 2 seconds between refreshes)
+  var currentTime = Date.now();
+  if (currentTime - lastDebouncedRefreshTime < 2000) {
+    console.log('Skipping debounced cart refresh - too soon after last refresh');
+    return;
+  }
+  
   // Clear existing timeout
   if (cartRefreshTimeout) {
     clearTimeout(cartRefreshTimeout);
@@ -3243,8 +3299,9 @@ function debouncedCartRefresh() {
   if (isCartOpen || isReturningFromCheckout) {
     // Set new timeout with longer debounce to prevent excessive calls
     cartRefreshTimeout = setTimeout(function() {
+      lastDebouncedRefreshTime = Date.now();
       initializeCartStateWithValidation();
-    }, 500); // Increased to 500ms debounce
+    }, 1000); // Increased to 1 second debounce
   }
 }
 
@@ -3266,25 +3323,19 @@ function initializeCartStateWithValidation() {
     dataType: "json",
     cache: false,
     success: function(cartData) {
-      // Only check for significant mismatches, not minor differences
+      // SIMPLIFIED: Just update totals, no recursive refreshes
+      // This prevents infinite loop issues
       var displayedCount = parseInt($('.cart-title').text().match(/\d+/)) || 0;
       var actualCount = cartData.item_count || 0;
       
-      // Only refresh if there's a VERY significant mismatch (more than 3 items difference)
-      // This prevents unnecessary refreshes when cart is being actively updated
-      if (Math.abs(displayedCount - actualCount) > 3) {
-        console.warn('Significant cart state mismatch. Displayed:', displayedCount, 'Actual:', actualCount);
-        updateBundleProductsWithHTML();
-      } else if (actualCount > 0 && displayedCount > 0) {
-        // If counts are similar, just update totals without full refresh
-        // This prevents disruption when user is actively adding items
+      if (actualCount > 0) {
+        // Update totals only
         updateCartTotalsOnly(cartData);
         updateCartHeader(cartData.item_count);
-      } else if (actualCount === 0 && displayedCount === 0) {
+      } else {
         // Cart is empty, ensure empty state is shown
         showEmptyCartState();
       }
-      // If there's a minor mismatch during active use, ignore it
     },
     error: function(xhr, status, error) {
       console.error('Error validating cart state:', error);
