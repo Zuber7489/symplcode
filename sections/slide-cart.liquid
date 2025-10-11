@@ -197,12 +197,12 @@
                    
                           <div class="bundle-product-variants">
                             {% for variant in recommended_product.variants limit: 4 %}
-                              <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ recommended_product.id }}" data-variant-index="{{ forloop.index0 }}" data-fabric="{{ variant.option1 }}">
+                              <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ recommended_product.id }}" data-variant-index="{{ forloop.index0 }}" data-fabric="{{ variant.option1 }}" data-size="{{ variant.option2 }}">
                                 <div class="dot" style="background-color: {{ variant.option1 | handleize }};"></div>
                               </div>
                             {% endfor %}
                           </div>
-                          <div class="bundle-product-material">{{ recommended_product.variants.first.option1 }}</div>
+                          <div class="bundle-product-material">{{ recommended_product.variants.first.option1 }}{% if recommended_product.variants.first.option2 %} - {{ recommended_product.variants.first.option2 }}{% endif %}</div>
                           <button class="add-to-bag-btn bundle-cart-btn" data-variant-id="{{ recommended_product.selected_or_first_available_variant.id }}" data-product-id="{{ recommended_product.id }}" data-source="bundle-cart">Add to Bag</button>
                         </div>
                       {% endunless %}
@@ -243,6 +243,7 @@
                                 title: {{ variant.title | json }},
                                 price: {{ variant.price }},
                                 fabric: {{ variant.option1 | json }},
+                                size: {{ variant.option2 | json }},
                                 featured_image: {
                                   url: "{{ variant.featured_image | default: recommended_product.featured_image | img_url: 'medium' }}",
                                   alt: "{{ variant.title | default: recommended_product.title }}"
@@ -2379,11 +2380,12 @@ class BundleSlideNavigation {
           addToBagBtn.dataset.variantId = variantId;
         }
         
-        // Update the fabric name
+        // Update the fabric and size name
         const materialElement = productContainer.querySelector('.bundle-product-material');
         if (materialElement) {
           const fabric = variantDot.dataset.fabric || '';
-          materialElement.textContent = fabric;
+          const size = variantDot.dataset.size || '';
+          materialElement.textContent = size ? `${fabric} - ${size}` : fabric;
         }
         
         // Update product image based on selected variant
@@ -2816,9 +2818,10 @@ function initializeBundleProductImages() {
           $productPrice.text(formatMoney(variant.price));
         }
         
-        // Update material
+        // Update material with size
         if (variant.fabric && $materialElement.length > 0) {
-          $materialElement.text(variant.fabric);
+          const materialText = variant.size ? `${variant.fabric} - ${variant.size}` : variant.fabric;
+          $materialElement.text(materialText);
         }
         
         // Update add to bag button variant ID
