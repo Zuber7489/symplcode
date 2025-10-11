@@ -3433,6 +3433,7 @@ function addBundleItemToCart(variantId, quantity) {
       quantity: quantity
     },
     success: function(item) {
+      console.log('✅ Item added to cart, refreshing cart display...');
       
       // Immediately hide the product from bundle section
       var productId = $button.data('product-id');
@@ -3454,28 +3455,14 @@ function addBundleItemToCart(variantId, quantity) {
       // Reset the flag
       isCartOperationInProgress = false;
       
-      // OPTIMIZED: Fetch fresh cart data with single API call
-      $.ajax({
-        type: "GET",
-        url: "/cart.js",
-        dataType: "json",
-        cache: false,
-        success: function(cart) {
-          // Update UI with cart data (no additional API calls)
-          updateCartTotalsOnly(cart);
-          updateCartHeader(cart.item_count);
-          updateFreeShippingProgress(cart.total_price);
-          
-          // Update cart count in header
-          $(".count").html(cart.item_count);
-          $("#cart-count").html(cart.item_count);
-          $(".hcart").html(cart.item_count);
-          
-          console.log('✅ Bundle item added - 2 API calls total (/cart/add.js + /cart.js)');
-        }
-      });
+      // CRITICAL FIX: Do a full HTML refresh to show the new cart item
+      // This ensures the cart items list is updated with the newly added item
+      updateBundleProductsWithHTML();
+      
+      console.log('✅ Bundle item added - cart refreshed with new item');
     },
     error: function(xhr) {
+      console.error('❌ Error adding item to cart');
       
       // Remove loading state from button
       $button.prop("disabled", false).removeClass("is-loading");
