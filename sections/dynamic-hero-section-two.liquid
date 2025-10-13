@@ -232,6 +232,7 @@
     width: 100%;
     overflow: hidden;
     background: #000;
+    z-index: 1; /* Create isolated stacking context */
   }
 
   .dynamic-hero-slider-v2 {
@@ -315,6 +316,7 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
+    z-index: 0; /* Keep video below navigation */
   }
 
   @media (max-width: 768px) {
@@ -440,6 +442,8 @@
     background-color: #f8f8f8; /* Light gray background to match reviews section */
     border-top: 1px solid #e5e5e5; /* Subtle border separator */
     width: 100%;
+    position: relative;
+    z-index: 100; /* Ensure navigation is above video content */
   }
 
   .hero-v2-nav-arrows button {
@@ -940,8 +944,10 @@
 
     const slider = heroSection.querySelector('.dynamic-hero-slider-v2');
     const slides = heroSection.querySelectorAll('.dynamic-hero-slide-v2');
-    const prevBtn = document.querySelector('.hero-v2-slider-prev');
-    const nextBtn = document.querySelector('.hero-v2-slider-next');
+    // Scope button selection to avoid conflicts with other hero sections
+    const navContainer = heroSection.parentElement.querySelector('.hero-v2-bottom-nav');
+    const prevBtn = navContainer ? navContainer.querySelector('.hero-v2-slider-prev') : document.querySelector('.hero-v2-slider-prev');
+    const nextBtn = navContainer ? navContainer.querySelector('.hero-v2-slider-next') : document.querySelector('.hero-v2-slider-next');
     
     if (!slider || !slides.length) return;
 
@@ -956,8 +962,8 @@
     }
 
     // Get fresh references to the new buttons
-    const newPrevBtn = document.querySelector('.hero-v2-slider-prev');
-    const newNextBtn = document.querySelector('.hero-v2-slider-next');
+    const newPrevBtn = navContainer ? navContainer.querySelector('.hero-v2-slider-prev') : document.querySelector('.hero-v2-slider-prev');
+    const newNextBtn = navContainer ? navContainer.querySelector('.hero-v2-slider-next') : document.querySelector('.hero-v2-slider-next');
 
     // Navigation functions for variant-updated slides
     function nextSlideVariantV2() {
