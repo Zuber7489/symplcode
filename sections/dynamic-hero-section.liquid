@@ -224,6 +224,11 @@
     z-index: 1; /* Create isolated stacking context */
   }
 
+  /* Add margin-bottom when there's only one slide (navigation hidden) */
+  .hero-section.hero-single-slide {
+    margin-bottom: 60px;
+  }
+
   .hero-slider {
     position: relative;
     width: 100%;
@@ -469,6 +474,11 @@
       max-width: 100%;
     }
 
+    /* Maintain margin-bottom on mobile for single slide */
+    .hero-section.hero-single-slide {
+      margin-bottom: 60px;
+    }
+
     .hero__title {
       font-size: 24px !important; /* Updated mobile font size */
       font-weight: 550 !important; /* Updated mobile font weight */
@@ -629,8 +639,10 @@
       const bottomNav = document.querySelector('.hero__bottom-nav');
       if (bottomNav && slides.length > 1) {
         bottomNav.style.display = 'flex';
+        heroSection.classList.remove('hero-single-slide');
         console.log('✅ Hero Section 1 - Navigation shown (slides: ' + slides.length + ')');
       } else if (bottomNav) {
+        heroSection.classList.add('hero-single-slide');
         console.log('❌ Hero Section 1 - Navigation hidden (slides: ' + slides.length + ')');
       }
       
@@ -1218,6 +1230,12 @@
       const bottomNav = document.querySelector('.hero__bottom-nav');
       if (bottomNav) {
         bottomNav.style.display = slides.length > 1 ? 'flex' : 'none';
+        // Add/remove margin class based on slide count
+        if (slides.length > 1) {
+          heroSection.classList.remove('hero-single-slide');
+        } else {
+          heroSection.classList.add('hero-single-slide');
+        }
       }
       
       // Update progress bar
