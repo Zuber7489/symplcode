@@ -206,8 +206,8 @@
   {% assign slide_count = section.blocks.size %}
 {% endif %}
 
-{% if slide_count > 1 %}
-  <div class="hero__bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
+<div class="hero__bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
+  {% if slide_count > 1 %}
     <!-- Arrows and Line Navigation -->
     <div class="hero__nav-arrows" style="display: flex; gap: 10px;">
       <button class="hero__slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
@@ -225,8 +225,8 @@
     <div class="hero__slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
       <div class="hero__slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
     </div>
-  </div>
-{% endif %}
+  {% endif %}
+</div>
 
 <style>
   /* Dynamic Hero Section Styles */
@@ -1212,10 +1212,13 @@
       // Reset global variables
       window.heroCurrentSlide = 0;
       
-      // Update navigation visibility
+      // Update navigation visibility - keep spacing but hide controls if only one slide
       const bottomNav = document.querySelector('.hero__bottom-nav');
-      if (bottomNav) {
-        bottomNav.style.display = slides.length > 1 ? 'flex' : 'none';
+      const navArrows = document.querySelector('.hero__nav-arrows');
+      const sliderLine = document.querySelector('.hero__slider-line');
+      if (navArrows && sliderLine) {
+        navArrows.style.display = slides.length > 1 ? 'flex' : 'none';
+        sliderLine.style.display = slides.length > 1 ? 'block' : 'none';
       }
       
       // Update progress bar
