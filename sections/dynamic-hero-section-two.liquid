@@ -1,4 +1,7 @@
 <!-- Dynamic Hero Section Two - Supports Variant-Specific, Product Metafields and Theme Editor -->
+<!-- CRITICAL: Desktop content MUST be 2200 x 1238 pixels (aspect ratio: 1.777:1) -->
+<!-- Mobile content should be 4:5 aspect ratio (e.g., 800 x 1000 pixels) -->
+<!-- Using object-fit: contain to prevent cropping and ensure no black bars -->
 <div
   class="dynamic-hero-section-two {% if section.settings.text_alignment %}hero-v2-align-{{ section.settings.text_alignment }}{% else %}hero-v2-align-center{% endif %}"
   data-template="{{ template.name }}"
@@ -238,9 +241,9 @@
   .dynamic-hero-slider-v2 {
     position: relative;
     width: 100%;
-    height: 80vh; /* Reduced to 80% of viewport height */
-    min-height: 480px; /* 80% of 600px minimum height */
-    max-height: 80vh; /* Prevent overflow */
+    aspect-ratio: 2200 / 1238; /* Exact aspect ratio for your content */
+    height: auto;
+    max-width: 100%;
   }
 
   .dynamic-hero-slide-v2 {
@@ -255,13 +258,7 @@
     align-items: center;
     justify-content: center;
     z-index: 0;
-    background: transparent; /* Remove black background to prevent gaps */
-  }
-
-  @media (max-width: 768px) {
-    .dynamic-hero-slide-v2 {
-      aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
-    }
+    background: #000; /* Black background matches content */
   }
 
   .dynamic-hero-slide-v2:first-child {
@@ -281,20 +278,14 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #000; /* Move background to media wrapper to prevent gaps */
-  }
-
-  @media (max-width: 768px) {
-    .hero-v2-media-wrapper {
-      aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
-    }
+    background: #000; /* Black background matches content */
   }
 
   .hero-v2-media-content {
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: cover;
+    object-fit: contain; /* Use contain to show full content without cropping */
     object-position: center;
     /* Prevent any gaps or spacing issues */
     margin: 0;
@@ -304,7 +295,7 @@
 
   @media (max-width: 768px) {
     .hero-v2-media-content {
-      object-fit: cover;
+      object-fit: contain; /* Use contain for mobile too */
       object-position: center;
       width: 100%;
       height: 100%;
@@ -319,23 +310,17 @@
     z-index: 0; /* Keep video below navigation */
   }
 
-  @media (max-width: 768px) {
-    .hero-v2-video-container {
-      aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
-    }
-  }
-
   .hero-v2-video {
     width: 100%;
     height: 100%;
     display: block;
-    object-fit: cover;
+    object-fit: contain; /* Use contain to show full video without cropping */
     object-position: center;
   }
 
   @media (max-width: 768px) {
     .hero-v2-video {
-      object-fit: cover;
+      object-fit: contain; /* Use contain for mobile too */
       object-position: center;
       width: 100%;
       height: 100%;
@@ -491,10 +476,9 @@
   /* Mobile Styles */
   @media (max-width: 768px) {
     .dynamic-hero-slider-v2 {
+      aspect-ratio: 4 / 5; /* 4:5 aspect ratio for mobile */
       height: auto;
-      min-height: 300px; /* Original mobile minimum height */
-      aspect-ratio: 4/5; /* 4:5 aspect ratio for mobile */
-      max-height: none; /* Allow mobile to use aspect ratio */
+      max-width: 100%;
     }
 
     .hero-v2-title {
@@ -888,40 +872,18 @@
 
   // Function to maintain aspect ratio for hero media and adjust container height
   function maintainHeroAspectRatioTwo() {
+    // CSS aspect-ratio handles sizing automatically
+    // This function is kept for compatibility but CSS does the heavy lifting
+    const heroSlider = document.querySelector('.dynamic-hero-slider-v2');
+    if (!heroSlider) return;
+    
+    // Ensure all slides fill the container
     document.querySelectorAll('.dynamic-hero-slide-v2').forEach(slide => {
       const mediaWrapper = slide.querySelector('.hero-v2-media-wrapper');
-      const media = slide.querySelector('.hero-v2-media-content, .hero-v2-video');
-      const heroSlider = document.querySelector('.dynamic-hero-slider-v2');
-      
-      if (!media || !heroSlider) return;
-      
-      // Check if we're on mobile (768px or below)
-      const isMobile = window.innerWidth <= 768;
-      
-      if (isMobile) {
-        // On mobile, use 4:5 aspect ratio
-        const containerWidth = mediaWrapper.offsetWidth;
-        const calculatedHeight = containerWidth / (4/5); // 4:5 aspect ratio
-        
-        // Set the height on both the media wrapper and the slide
-        mediaWrapper.style.height = calculatedHeight + 'px';
-        slide.style.height = calculatedHeight + 'px';
-        heroSlider.style.height = calculatedHeight + 'px';
-      } else {
-        // On desktop, use 80% of viewport height
-        const viewportHeight = window.innerHeight;
-        const minHeight = 480; // 80% of 600px
-        const finalHeight = Math.max(minHeight, viewportHeight * 0.8); // 80% of viewport height
-        
-        // Only set if it's different from current height to avoid conflicts
-        if (Math.abs(heroSlider.offsetHeight - finalHeight) > 10) {
-          heroSlider.style.height = finalHeight + 'px';
-        }
-        
-        // Ensure media fills the container properly
+      if (mediaWrapper) {
         mediaWrapper.style.height = '100%';
-        slide.style.height = '100%';
       }
+      slide.style.height = '100%';
     });
   }
 
@@ -1394,6 +1356,10 @@
     },
     {
       "type": "paragraph",
+      "content": "IMPORTANT: All desktop images/videos MUST be 2200 x 1238 pixels (or 2200 x 1240px). Mobile should be 4:5 aspect ratio. This ensures perfect display without black bars or cropping."
+    },
+    {
+      "type": "paragraph",
       "content": "JSON Structure for metafields: [{\"content_type\": \"image\", \"desktop_image\": \"url\", \"mobile_image\": \"url\", \"heading\": \"text\", \"text\": \"description\", \"btn_text\": \"button\", \"btn_url\": \"link\", \"autoplay\": true, \"autoplay_duration\": 5}, ...]"
     },
     {
@@ -1472,13 +1438,13 @@
           "type": "image_picker",
           "id": "desktop_image",
           "label": "Desktop Image",
-          "info": "Recommended size: 1920 x 1080 pixels"
+          "info": "Required size: 2200 x 1238 pixels (or 1240px height)"
         },
         {
           "type": "image_picker",
           "id": "mobile_image",
           "label": "Mobile Image",
-          "info": "Recommended size: 768 x 1024 pixels"
+          "info": "Recommended size: 800 x 1000 pixels (4:5 ratio)"
         },
         {
           "type": "header",
