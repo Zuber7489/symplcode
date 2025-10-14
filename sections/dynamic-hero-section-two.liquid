@@ -193,40 +193,26 @@
 </div>
 
 <!-- Navigation positioned outside hero block (similar to 5-star functions) -->
-{% assign slide_count = 0 %}
-{% if template.name == 'product' %}
-  {% assign current_variant = product.selected_or_first_available_variant %}
-  {% assign hero_content = current_variant.metafields.custom.hero_content_two.value | default: product.metafields.custom.hero_content_two.value %}
-  {% if hero_content %}
-    {% assign slide_count = hero_content.size %}
-  {% else %}
-    {% assign slide_count = section.blocks.size %}
-  {% endif %}
-{% else %}
-  {% assign slide_count = section.blocks.size %}
-{% endif %}
-
-{% if slide_count > 1 %}
-  <div class="hero-v2-bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
-    <!-- Arrows and Line Navigation -->
-    <div class="hero-v2-nav-arrows" style="display: flex; gap: 10px;">
-      <button class="hero-v2-slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <button class="hero-v2-slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>
-    
-    <div class="hero-v2-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
-      <div class="hero-v2-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
-    </div>
+<!-- CRITICAL: Always render navigation container so JavaScript can control visibility -->
+<div class="hero-v2-bottom-nav" style="display: none; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
+  <!-- Arrows and Line Navigation -->
+  <div class="hero-v2-nav-arrows" style="display: flex; gap: 10px;">
+    <button class="hero-v2-slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="hero-v2-slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
   </div>
-{% endif %}
+  
+  <div class="hero-v2-slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
+    <div class="hero-v2-slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
+  </div>
+</div>
 
 <style>
   /* Dynamic Hero Section Two Styles */
@@ -623,11 +609,27 @@
 
     // Initialize slider immediately for hero section two
     function initSliderV2() {
+      console.log('🎬 Hero Section 2 - Init:', {
+        slideCount: slides.length,
+        hasNavigation: !!prevBtn && !!nextBtn,
+        productId: heroSection.dataset.productId,
+        template: heroSection.dataset.template
+      });
+      
       // Show first slide immediately
       if (slides.length > 0) {
         slides[0].classList.add('active');
         slides[0].style.zIndex = '2';
         currentSlide = 0;
+      }
+      
+      // Show navigation if multiple slides exist
+      const bottomNav = document.querySelector('.hero-v2-bottom-nav');
+      if (bottomNav && slides.length > 1) {
+        bottomNav.style.display = 'flex';
+        console.log('✅ Hero Section 2 - Navigation shown (slides: ' + slides.length + ')');
+      } else if (bottomNav) {
+        console.log('❌ Hero Section 2 - Navigation hidden (slides: ' + slides.length + ')');
       }
       
       // Update progress bar
@@ -1212,7 +1214,13 @@
       // Update progress bar
       const progressBar = document.querySelector('.hero-v2-slider-progress');
       if (progressBar && slides.length > 1) {
-        progressBar.style.width = (100 / slides.length) + '%';
+        const initialProgress = (100 / slides.length);
+        progressBar.style.width = initialProgress + '%';
+        console.log('Hero Section 2 - Variant Update:', { 
+          slideCount: slides.length, 
+          initialProgress: initialProgress,
+          variantId: '{{ current_variant.id }}'
+        });
       }
       
       // Update navigation buttons

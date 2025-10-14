@@ -193,39 +193,25 @@
 </div>
 
 <!-- Navigation positioned outside hero block (similar to 5-star functions) -->
-{% assign slide_count = 0 %}
-{% if template.name == 'product' %}
-  {% assign current_variant = product.selected_or_first_available_variant %}
-  {% assign hero_content = current_variant.metafields.custom.hero_content.value | default: product.metafields.custom.hero_content.value %}
-  {% if hero_content %}
-    {% assign slide_count = hero_content.size %}
-  {% else %}
-    {% assign slide_count = section.blocks.size %}
-  {% endif %}
-{% else %}
-  {% assign slide_count = section.blocks.size %}
-{% endif %}
-
-<div class="hero__bottom-nav" style="display: flex; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
-  {% if slide_count > 1 %}
-    <!-- Arrows and Line Navigation -->
-    <div class="hero__nav-arrows" style="display: flex; gap: 10px;">
-      <button class="hero__slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <button class="hero__slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>
-    
-    <div class="hero__slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
-      <div class="hero__slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
-    </div>
-  {% endif %}
+<!-- CRITICAL: Always render navigation container so JavaScript can control visibility -->
+<div class="hero__bottom-nav" style="display: none; align-items: center; justify-content: flex-start; margin-top: 30px; gap: 20px; padding: 0 20px;">
+  <!-- Arrows and Line Navigation -->
+  <div class="hero__nav-arrows" style="display: flex; gap: 10px;">
+    <button class="hero__slider-prev" aria-label="Previous slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;" disabled>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M15 18L9 12L15 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="hero__slider-next" aria-label="Next slide" style="background: transparent; border: none; cursor: pointer; transition: all 0.3s ease; padding: 5px;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M9 18L15 12L9 6" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+  
+  <div class="hero__slider-line" style="flex: 1; max-width: 150px; height: 4px; background-color: #e5e5e5; border-radius: 2px; position: relative;">
+    <div class="hero__slider-progress" style="height: 100%; background-color: #000; border-radius: 2px; width: 25%; transition: width 0.3s ease;"></div>
+  </div>
 </div>
 
 <style>
@@ -625,11 +611,27 @@
 
     // Initialize slider immediately
     function initSlider() {
+      console.log('🎬 Hero Section 1 - Init:', {
+        slideCount: slides.length,
+        hasNavigation: !!prevBtn && !!nextBtn,
+        productId: heroSection.dataset.productId,
+        template: heroSection.dataset.template
+      });
+      
       // Show first slide immediately
       if (slides.length > 0) {
         slides[0].classList.add('active');
         slides[0].style.zIndex = '2';
         currentSlide = 0;
+      }
+      
+      // Show navigation if multiple slides exist
+      const bottomNav = document.querySelector('.hero__bottom-nav');
+      if (bottomNav && slides.length > 1) {
+        bottomNav.style.display = 'flex';
+        console.log('✅ Hero Section 1 - Navigation shown (slides: ' + slides.length + ')');
+      } else if (bottomNav) {
+        console.log('❌ Hero Section 1 - Navigation hidden (slides: ' + slides.length + ')');
       }
       
       // Update progress bar
@@ -1212,19 +1214,22 @@
       // Reset global variables
       window.heroCurrentSlide = 0;
       
-      // Update navigation visibility - keep spacing but hide controls if only one slide
+      // Update navigation visibility - show/hide entire nav based on slide count
       const bottomNav = document.querySelector('.hero__bottom-nav');
-      const navArrows = document.querySelector('.hero__nav-arrows');
-      const sliderLine = document.querySelector('.hero__slider-line');
-      if (navArrows && sliderLine) {
-        navArrows.style.display = slides.length > 1 ? 'flex' : 'none';
-        sliderLine.style.display = slides.length > 1 ? 'block' : 'none';
+      if (bottomNav) {
+        bottomNav.style.display = slides.length > 1 ? 'flex' : 'none';
       }
       
       // Update progress bar
       const progressBar = document.querySelector('.hero__slider-progress');
       if (progressBar && slides.length > 1) {
-        progressBar.style.width = '25%';
+        const initialProgress = (100 / slides.length);
+        progressBar.style.width = initialProgress + '%';
+        console.log('Hero Section 1 - Variant Update:', { 
+          slideCount: slides.length, 
+          initialProgress: initialProgress,
+          variantId: '{{ current_variant.id }}'
+        });
       }
       
       // Update navigation buttons
