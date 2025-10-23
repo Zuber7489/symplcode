@@ -4080,9 +4080,8 @@ function refreshBundleProducts(cart) {
 
 // Duplicate function removed - using the AJAX version above
 
-// Apple Pay Button Handler
+// Apple Pay Button Handler - Simple & Short
 $(document).ready(function() {
-  // Initialize Apple Pay button
   const applePayButton = document.getElementById('apple-pay-btn');
   
   if (applePayButton) {
@@ -4094,38 +4093,84 @@ $(document).ready(function() {
       applePayButton.addEventListener('click', function(e) {
         e.preventDefault();
         
-        // Check if cart has items
-        $.ajax({
-          type: "GET",
-          url: "/cart.js",
-          dataType: "json",
-          success: function(cart) {
-            if (cart.item_count === 0) {
-              alert('Your cart is empty');
-              return;
-            }
-            
-            // Unlock body scroll before checkout
-            bodyScrollLock.unlock();
-            
-            // Close cart drawer
-            $(".r-side-cart").removeClass("active");
-            
-            // Redirect to checkout with Apple Pay parameter
-            // Shopify will automatically detect and show Apple Pay as payment option
-            window.location.href = '/checkout';
-          },
-          error: function() {
-            alert('Error loading cart. Please try again.');
+        // Get cart and start Apple Pay
+        $.get('/cart.js', function(cart) {
+          if (cart.item_count === 0) {
+            alert('Your cart is empty');
+            return;
           }
+          
+          // Start Apple Pay Session
+          startApplePay(cart);
         });
       });
     } else {
-      // Hide Apple Pay button if not available
       applePayButton.style.display = 'none';
     }
   }
 });
+
+// Start Apple Pay Session
+function startApplePay(cart) {
+  // Calculate total
+  const freeShippingThreshold = window.FREE_SHIPPING_THRESHOLD || 9900;
+  const shippingCost = cart.total_price >= freeShippingThreshold ? 0 : 500;
+  const total = ((cart.total_price + shippingCost) / 100).toFixed(2);
+  
+  // Create payment request
+  const request = {
+    countryCode: 'US',
+    currencyCode: 'USD',
+    merchantCapabilities: ['supports3DS'],
+    supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
+    total: { label: '{{ shop.name }}', amount: total }
+  };
+  
+  // Create session
+  const session = new ApplePaySession(3, request);
+  
+  // Validate merchant
+  session.onvalidatemerchant = function(event) {
+    $.post('/wallets/checkouts.json', JSON.stringify({
+      checkout: { line_items: getCartItems() }
+    }), function(response) {
+      $.post('/wallets/checkouts/' + response.checkout.token + '/apple_pay/validate_merchant.json',
+        JSON.stringify({ validation_url: event.validationURL }),
+        function(merchantSession) {
+          session.completeMerchantValidation(merchantSession);
+        }
+      ).fail(function() {
+        session.abort();
+        goToCheckout();
+      });
+    }, 'json').fail(function() {
+      session.abort();
+      goToCheckout();
+    });
+  };
+  
+  // Payment authorized
+  session.onpaymentauthorized = function(event) {
+    session.completePayment(ApplePaySession.STATUS_SUCCESS);
+    bodyScrollLock.unlock();
+    $('.r-side-cart').removeClass('active');
+    window.location.href = '/checkout';
+  };
+  
+  // Start session
+  session.begin();
+}
+
+// Get cart items for checkout
+function getCartItems() {
+  const items = [];
+  $('.cart-item').each(function() {
+    const variantId = $(this).data('variant-id');
+    const quantity = parseInt($(this).find('.quantity-input').val()) || 1;
+    if (variantId) items.push({ variant_id: variantId, quantity: quantity });
+  });
+  return items;
+}
 </script>
 
 
