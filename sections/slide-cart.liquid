@@ -372,6 +372,9 @@
           </button>
         </div>
       </div>
+      
+      <!-- Desktop checkout button (outside shipping-totals) -->
+      <button class="checkout-btn desktop-only" id="checkout-btn-desktop" onclick="goToCheckout()">Checkout</button>
     </div>
     {% endif %}
   </div>
@@ -1314,6 +1317,27 @@ body.g-cart-open {
   text-align: right;
   margin-left: 16px;
   min-width: 270px;
+}
+
+/* Hide buttons inside shipping-totals on desktop */
+.shipping-totals .checkout-btn,
+.shipping-totals .apple-pay-btn {
+  display: none;
+}
+
+/* Show buttons inside shipping-totals on mobile */
+@media (max-width: 640px) {
+  .shipping-totals .checkout-btn,
+  .shipping-totals .apple-pay-btn {
+    display: block;
+    margin-top: 16px;
+    text-align: center;
+  }
+  
+  /* Hide desktop checkout button on mobile */
+  .desktop-only {
+    display: none !important;
+  }
 }
 
 .shipping-row, .total-row {
