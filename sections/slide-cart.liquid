@@ -270,13 +270,13 @@
     <!-- Sticky Checkout Section - Only show when cart has items -->
     {% if cart.item_count > 0 %}
     <div class="checkout-section">
-      <div class="discount-code-section">
+      <div class="discount-code-section desktop-only">
         <input type="text" id="discount-code" class="discount-input" placeholder="Discount Code" maxlength="20">
         <button id="apply-discount" class="apply-discount-btn">Apply</button>
       </div>
       
       <!-- Applied Discount Codes Display -->
-      <div id="applied-discounts" class="applied-discounts-section" style="display: none;">
+      <div id="applied-discounts" class="applied-discounts-section desktop-only" style="display: none;">
         {% if cart.discount_codes.size > 0 %}
           {% for discount_code in cart.discount_codes %}
             {% if discount_code.applicable %}
@@ -362,6 +362,15 @@
       </div>
       
       <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
+      
+      <!-- Apple Pay Button (Mobile Only) -->
+      <button class="apple-pay-btn mobile-only" id="apple-pay-btn" aria-label="Buy with Apple Pay">
+        Buy with <span class="apple-pay-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="50" height="20" viewBox="0 0 50 20">
+            <path fill="currentColor" d="M9.536 3.785c.595-.736 1.007-1.76.896-2.785-.865.036-1.916.596-2.538 1.332-.558.652-1.048 1.7-.917 2.7.97.076 1.96-.496 2.56-1.247zm.896 1.404c-1.419-.083-2.625.807-3.295.807-.67 0-1.706-.764-2.806-.743-1.445.021-2.78.848-3.525 2.154-1.502 2.615-.386 6.49 1.08 8.616.716 1.04 1.572 2.205 2.694 2.163 1.059-.042 1.46-.682 2.742-.682 1.28 0 1.644.682 2.805.661 1.162-.021 1.916-1.06 2.632-2.1.827-1.206 1.166-2.373 1.187-2.435-.026-.021-2.28-.89-2.305-3.52-.021-2.205 1.791-3.26 1.874-3.322-1.02-1.516-2.611-1.682-3.183-1.725zm11.42-.807c3.483 0 5.91 2.405 5.91 5.909 0 3.525-2.469 5.952-5.994 5.952h-3.866v6.07h-2.826V4.382h6.776zm-3.95 9.427h3.209c2.427 0 3.824-1.311 3.824-3.54 0-2.228-1.397-3.518-3.824-3.518h-3.21v7.058zm12.364 9.638c1.776 0 3.419-.912 4.164-2.354h.062v2.205h2.616V11.547c0-2.595-2.07-4.27-5.238-4.27-2.931 0-5.091 1.696-5.175 4.039h2.553c.21-1.123 1.208-1.86 2.58-1.86 1.671 0 2.616.786 2.616 2.227v.975l-3.419.21c-3.188.188-4.9 1.5-4.9 3.76 0 2.29 1.754 3.82 4.143 3.82zm.744-2.185c-1.46 0-2.385-.703-2.385-1.776 0-1.102.882-1.754 2.574-1.859l3.021-.188v.996c0 1.65-1.397 2.827-3.21 2.827zm15.615 4.251c2.931 0 4.305-1.123 5.511-4.54l5.26-14.89h-2.931l-3.524 11.355h-.063l-3.524-11.355h-3.021l5.091 14.1-.273.87c-.46 1.46-1.208 2.019-2.553 2.019-.23 0-.673-.021-.86-.042v2.29c.168.042.923.084 1.187.084z"/>
+          </svg>
+        </span>
+      </button>
     </div>
     {% endif %}
   </div>
@@ -1073,6 +1082,15 @@ body.g-cart-open {
   opacity: 0;
 }
 
+/* Desktop/Mobile Toggle Classes */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
 /* Checkout Section */
 .checkout-section {
   background: #ffffff;
@@ -1339,6 +1357,52 @@ body.g-cart-open {
   box-shadow: none;
 }
 
+/* Apple Pay Button (Mobile Only) */
+.apple-pay-btn {
+  width: 100%;
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid #d1d5db;
+  padding: 10px 24px;
+  border-radius: 9999px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.apple-pay-btn:hover:not(:disabled) {
+  background: #f9fafb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.apple-pay-btn:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.apple-pay-logo {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.apple-pay-logo svg {
+  height: 20px;
+  width: auto;
+}
+
 /* Apply discount button loading state */
 .apply-discount-btn.is-loading {
   background: #9ca3af;
@@ -1522,6 +1586,15 @@ body.g-cart-open {
 }
 
 @media (max-width: 640px) {
+  /* Show mobile elements on tablet/small screens */
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: flex !important;
+  }
+  
   .cart-content {
     width: 470px;
   }
@@ -1557,10 +1630,30 @@ body.g-cart-open {
   
   .shipping-totals {
     min-width: 160px;
+    margin-right: 0;
+  }
+  
+  .shipping-row, .total-row {
+    margin-right: 0;
+    justify-content: space-between;
+  }
+  
+  /* Hide savings on tablet too */
+  #savings-display {
+    display: none !important;
   }
 }
 
 @media (max-width: 480px) {
+  /* Hide desktop elements, show mobile elements */
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: flex !important;
+  }
+  
   .cart-content {
     width: 100%;
     height: 100vh;
@@ -1580,6 +1673,7 @@ body.g-cart-open {
   
   .cart-items-container {
     padding: 0 12px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   
   .cart-item {
@@ -1698,7 +1792,8 @@ body.g-cart-open {
   }
   
   .checkout-section {
-    padding: 14px 12px 18px;
+    padding: 16px 16px calc(env(safe-area-inset-bottom, 16px) + 16px);
+    margin-bottom: 0;
   }
   
   .discount-code-section {
@@ -1722,6 +1817,11 @@ body.g-cart-open {
     flex-direction: column;
     gap: 12px;
     margin-bottom: 16px;
+    margin-top: 0;
+  }
+  
+  .shipping-text {
+    order: 2;
   }
   
   .shipping-text p {
@@ -1744,27 +1844,58 @@ body.g-cart-open {
     text-align: left;
     min-width: auto;
     width: 100%;
+    order: 1;
   }
   
   .shipping-row, .total-row {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    margin-right: 0;
+    justify-content: space-between;
+    width: 100%;
   }
   
-  .shipping-label, .total-label, .shipping-cost, .total-amount {
-    font-size: 12px;
+  .shipping-label, .total-label {
+    font-size: 14px;
+    font-weight: 400;
+  }
+  
+  .shipping-cost, .total-amount {
+    font-size: 14px;
+    font-weight: 600;
   }
   
   .checkout-btn {
-    padding: 10px 20px;
+    padding: 12px 20px;
+    font-size: 16px;
+    margin-bottom: 0;
+  }
+  
+  .apple-pay-btn {
+    padding: 11px 24px;
     font-size: 15px;
+    margin-top: 10px;
   }
   
   .savings-amount {
     margin-right: 0;
   }
+  
+  /* Hide savings row on mobile to match mockup */
+  #savings-display {
+    display: none !important;
+  }
 }
 
 @media (max-width: 360px) {
+  /* Ensure mobile layout on small screens */
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: flex !important;
+  }
+  
   .cart-content {
     width: 100%;
   }
@@ -1783,6 +1914,7 @@ body.g-cart-open {
   
   .cart-items-container {
     padding: 0 10px;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   
   .cart-item {
@@ -1868,7 +2000,23 @@ body.g-cart-open {
   }
   
   .checkout-section {
-    padding: 12px 10px 16px;
+    padding: 14px 12px calc(env(safe-area-inset-bottom, 16px) + 16px);
+    margin-bottom: 0;
+  }
+  
+  .apple-pay-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+  
+  .shipping-row, .total-row {
+    margin-right: 0;
+    justify-content: space-between;
+  }
+  
+  /* Hide savings on small screens */
+  #savings-display {
+    display: none !important;
   }
 }
 </style>
@@ -3930,6 +4078,53 @@ function refreshBundleProducts(cart) {
 }
 
 // Duplicate function removed - using the AJAX version above
+
+// Apple Pay Button Handler
+$(document).ready(function() {
+  // Initialize Apple Pay button
+  const applePayButton = document.getElementById('apple-pay-btn');
+  
+  if (applePayButton) {
+    // Check if Apple Pay is available
+    if (window.ApplePaySession && ApplePaySession.canMakePayments()) {
+      applePayButton.style.display = 'flex';
+      
+      // Handle Apple Pay button click
+      applePayButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Check if cart has items
+        $.ajax({
+          type: "GET",
+          url: "/cart.js",
+          dataType: "json",
+          success: function(cart) {
+            if (cart.item_count === 0) {
+              alert('Your cart is empty');
+              return;
+            }
+            
+            // Unlock body scroll before checkout
+            bodyScrollLock.unlock();
+            
+            // Close cart drawer
+            $(".r-side-cart").removeClass("active");
+            
+            // Redirect to checkout with Apple Pay parameter
+            // Shopify will automatically detect and show Apple Pay as payment option
+            window.location.href = '/checkout';
+          },
+          error: function() {
+            alert('Error loading cart. Please try again.');
+          }
+        });
+      });
+    } else {
+      // Hide Apple Pay button if not available
+      applePayButton.style.display = 'none';
+    }
+  }
+});
 </script>
 
 
