@@ -378,14 +378,9 @@
 </div>
 
 <style>
-/* Prevent body scroll when cart is open */
+/* Use z-index approach instead of body locking */
 body.g-cart-open {
-  overflow: hidden !important;
-  position: fixed !important;
-  width: 100% !important;
-  height: 100vh !important;
-  left: 0 !important;
-  right: 0 !important;
+  /* No longer locking body scroll - using overlay approach instead */
 }
 
 .r-side-cart {
@@ -394,6 +389,7 @@ body.g-cart-open {
   right: 0;
   width: 100%;
   height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height for mobile browsers */
   z-index: 10000;
   display: block;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -453,15 +449,25 @@ body.g-cart-open {
 }
 
 .cart-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height */
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
+  z-index: 9999; /* Below cart but above everything else */
   touch-action: none;
   -webkit-overflow-scrolling: auto;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.r-side-cart.active .cart-overlay {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .cart-content {
@@ -470,11 +476,13 @@ body.g-cart-open {
   right: 0;
   width: 680px;
   height: 100vh;
+  height: 100dvh; /* Use dynamic viewport height for mobile browsers */
   background: #ffffff;
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  z-index: 10000; /* Above overlay */
   border-radius: 0;
   /* Prevent scroll chaining to body */
   overscroll-behavior: contain;
@@ -590,6 +598,8 @@ body.g-cart-open {
   overflow-y: auto;
   overflow-x: hidden; /* Prevent horizontal overflow */
   padding: 0 16px;
+  /* Add bottom padding for safe area on iOS */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   background: #ffffff;
   /* Smooth scrolling for better UX */
   -webkit-overflow-scrolling: touch;
@@ -1096,6 +1106,8 @@ body.g-cart-open {
 .checkout-section {
   background: #ffffff;
   padding: 20px 16px 24px;
+  /* Add safe area padding for iOS Safari bottom bar */
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
   position: sticky;
   bottom: 0;
   z-index: 10;
@@ -1658,6 +1670,7 @@ body.g-cart-open {
   .cart-content {
     width: 100%;
     height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for mobile browsers */
   }
   
   .free-shipping-progress {
@@ -2023,37 +2036,19 @@ body.g-cart-open {
 </style>
 
 <script>
-// Body Scroll Lock Management
+// Body Scroll Lock Management - Now using z-index overlay approach
 var bodyScrollLock = {
   scrollPosition: 0,
   
   lock: function() {
-    // Save current scroll position
-    this.scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
-    
-    // Add class to body
+    // Simply add class to body for cart state tracking
+    // No longer locking scroll - using overlay with z-index instead
     $('body').addClass('g-cart-open');
-    
-    // Set body top to negative scroll position to maintain visual position
-    $('body').css('top', -this.scrollPosition + 'px');
   },
   
   unlock: function() {
     // Remove class from body
     $('body').removeClass('g-cart-open');
-    
-    // Remove CSS that locked the scroll
-    $('body').css({
-      'overflow': '',
-      'position': '',
-      'width': '',
-      'height': '',
-      'top': ''
-    });
-    
-    // Restore scroll position
-    window.scrollTo(0, this.scrollPosition);
-    this.scrollPosition = 0;
   }
 };
 
