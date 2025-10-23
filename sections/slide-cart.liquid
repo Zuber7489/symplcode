@@ -368,6 +368,16 @@
 </div>
 
 <style>
+/* Prevent body scroll when cart is open */
+body.g-cart-open {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100vh !important;
+  left: 0 !important;
+  right: 0 !important;
+}
+
 .r-side-cart {
   position: fixed;
   top: 0;
@@ -380,12 +390,14 @@
   transform: translateX(100%);
   visibility: hidden;
   opacity: 0;
+  pointer-events: none;
 }
 
 .r-side-cart.active {
   transform: translateX(0);
   visibility: visible;
   opacity: 1;
+  pointer-events: auto;
 }
 
 .r-side-cart.active .cart-items-container,
@@ -438,6 +450,8 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
+  touch-action: none;
+  -webkit-overflow-scrolling: auto;
 }
 
 .cart-content {
@@ -452,6 +466,9 @@
   flex-direction: column;
   overflow: hidden;
   border-radius: 0;
+  /* Prevent scroll chaining to body */
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 /* Free Shipping Progress Bar */
@@ -567,6 +584,10 @@
   /* Smooth scrolling for better UX */
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  /* Prevent scroll chaining to prevent background scroll */
+  overscroll-behavior: contain;
+  -ms-scroll-chaining: none;
+  touch-action: pan-y;
 }
 
 .cart-items-list {
@@ -1853,6 +1874,40 @@
 </style>
 
 <script>
+// Body Scroll Lock Management
+var bodyScrollLock = {
+  scrollPosition: 0,
+  
+  lock: function() {
+    // Save current scroll position
+    this.scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Add class to body
+    $('body').addClass('g-cart-open');
+    
+    // Set body top to negative scroll position to maintain visual position
+    $('body').css('top', -this.scrollPosition + 'px');
+  },
+  
+  unlock: function() {
+    // Remove class from body
+    $('body').removeClass('g-cart-open');
+    
+    // Remove CSS that locked the scroll
+    $('body').css({
+      'overflow': '',
+      'position': '',
+      'width': '',
+      'height': '',
+      'top': ''
+    });
+    
+    // Restore scroll position
+    window.scrollTo(0, this.scrollPosition);
+    this.scrollPosition = 0;
+  }
+};
+
 // Configure Shopify money formatting
 if (typeof Shopify === 'undefined') {
   window.Shopify = {};
@@ -1944,7 +1999,8 @@ $(document).on('cart:refresh-bundle-discounts', function() {
             $('.r-side-cart').addClass('active');
           }
           if (bodyHasCartOpen) {
-            $('body').addClass('g-cart-open');
+            // Use the body scroll lock manager to properly restore locked state
+            bodyScrollLock.lock();
           }
           
           // Update cart counts from the fresh HTML
@@ -2639,7 +2695,8 @@ function refreshCartAfterDiscount(cartData) {
           $('.r-side-cart').addClass('active');
         }
         if (bodyHasCartOpen) {
-          $('body').addClass('g-cart-open');
+          // Use the body scroll lock manager to properly restore locked state
+          bodyScrollLock.lock();
         }
         
         // Update cart counts from the fresh HTML
@@ -2857,11 +2914,16 @@ $(document).ready(function() {
   $(document).on('click', '.cart-close, .cart-overlay', function(e) {
     e.preventDefault();
     $('.r-side-cart').removeClass('active');
-    $('body').removeClass('g-cart-open');
+    
+    // Unlock body scroll using the scroll lock manager
+    bodyScrollLock.unlock();
   });
   
   // Initialize on cart open
   $(document).on('click', '.cart-icon', function() {
+    // Lock body scroll when cart opens
+    bodyScrollLock.lock();
+    
     // Only refresh cart state if we haven't already done so recently
     var lastRefreshTime = window.lastCartRefreshTime || 0;
     var currentTime = new Date().getTime();
@@ -2879,6 +2941,26 @@ $(document).ready(function() {
       hideProductsAlreadyInCart(); // Hide products that are already in cart
     }, 100); // Reduced from 300ms to 100ms
   });
+  
+  // Also watch for when cart becomes active (in case opened by other means)
+  var cartObserver = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'class') {
+        var $cart = $('.r-side-cart');
+        if ($cart.hasClass('active') && !$('body').hasClass('g-cart-open')) {
+          bodyScrollLock.lock();
+        } else if (!$cart.hasClass('active') && $('body').hasClass('g-cart-open')) {
+          bodyScrollLock.unlock();
+        }
+      }
+    });
+  });
+  
+  // Start observing the cart element for class changes
+  var cartElement = document.querySelector('.r-side-cart');
+  if (cartElement) {
+    cartObserver.observe(cartElement, { attributes: true });
+  }
   
   // Initialize after cart refresh
   $(document).on('cart:refresh-complete', function() {
@@ -3151,7 +3233,8 @@ function updateBundleProductsWithHTML() {
           $('.r-side-cart').addClass('active');
         }
         if (bodyHasCartOpen) {
-          $('body').addClass('g-cart-open');
+          // Use the body scroll lock manager to properly restore locked state
+          bodyScrollLock.lock();
         }
         
         // Update cart counts from the fresh HTML
@@ -3223,8 +3306,10 @@ var lastCartUpdateTime = 0; // Track last cart update to prevent rapid successiv
 
 // Function to navigate to checkout safely
 function goToCheckout() {
-  // Close cart drawer first
-  $("body").removeClass("g-cart-open");
+  // Unlock body scroll before checkout
+  bodyScrollLock.unlock();
+  
+  // Close cart drawer
   $(".r-side-cart").removeClass("active");
   
   // Use proper navigation method
