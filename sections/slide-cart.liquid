@@ -363,11 +363,15 @@
           
           <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
           
-          <!-- Apple Pay Button (Mobile Only) -->
-          <button class="apple-pay-btn mobile-only" id="apple-pay-btn" aria-label="Buy with Apple Pay">
-            <span class="apple-pay-logo"> Buy with 
-<img src="https://www.logo.wine/a/logo/Apple_Pay/Apple_Pay-Logo.wine.svg" alt="Apple Pay Logo" width="40" height="40">
-
+          <!-- Apple Pay Button -->
+          <button class="apple-pay-btn" id="apple-pay-btn" aria-label="Buy with Apple Pay">
+            <span class="apple-pay-logo">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="40" height="40" rx="8" fill="#000000"/>
+                <path d="M20.5 12.5C21.5 11.5 22.5 9.5 21.5 7.5C20.5 5.5 18.5 4.5 16.5 5.5C15.5 6.5 14.5 8.5 15.5 10.5C16.5 12.5 19.5 13.5 20.5 12.5Z" fill="white"/>
+                <path d="M12.5 15.5C13.5 14.5 15.5 14.5 17.5 15.5C19.5 16.5 21.5 18.5 20.5 20.5C19.5 22.5 17.5 24.5 15.5 23.5C13.5 22.5 11.5 20.5 12.5 18.5C11.5 16.5 11.5 16.5 12.5 15.5Z" fill="white"/>
+              </svg>
+              Buy with Apple Pay
             </span>
           </button>
         </div>
@@ -1406,36 +1410,43 @@ body.g-cart-open {
   box-shadow: none;
 }
 
-/* Apple Pay Button (Mobile Only) */
+/* Apple Pay Button */
 .apple-pay-btn {
   width: 100%;
-  background: #ffffff;
-  color: #000000;
-  border: 1px solid #d1d5db;
-  padding: 10px 24px;
-  border-radius: 9999px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  padding: 12px 24px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   margin-top: 12px;
-  display: flex;
+  display: none; /* Hidden by default, shown via JavaScript when Apple Pay is available */
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
+  min-height: 48px;
 }
 
 .apple-pay-btn:hover:not(:disabled) {
-  background: #f9fafb;
-  border-color: #9ca3af;
+  background: #333333;
+  border-color: #333333;
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.apple-pay-btn:active:not(:disabled) {
+  background: #1a1a1a;
+  transform: translateY(0);
 }
 
 .apple-pay-btn:disabled {
   background: #f3f4f6;
   color: #9ca3af;
+  border-color: #e5e7eb;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -1444,12 +1455,13 @@ body.g-cart-open {
 .apple-pay-logo {
   display: inline-flex;
   align-items: center;
-  margin-top: 2px;
+  gap: 8px;
 }
 
 .apple-pay-logo svg {
   height: 20px;
-  width: auto;
+  width: 20px;
+  flex-shrink: 0;
 }
 
 /* Apply discount button loading state */
@@ -1921,9 +1933,10 @@ body.g-cart-open {
   }
   
   .apple-pay-btn {
-    padding: 0px;
+    padding: 10px 16px;
     font-size: 15px;
     margin-top: 10px;
+    min-height: 44px;
   }
   
   .savings-amount {
@@ -2057,6 +2070,7 @@ body.g-cart-open {
   .apple-pay-btn {
     padding: 10px 20px;
     font-size: 14px;
+    min-height: 44px;
   }
   
   .shipping-row, .total-row {
@@ -4185,7 +4199,7 @@ function refreshBundleProducts(cart) {
 
 // Duplicate function removed - using the AJAX version above
 
-// Apple Pay Button Handler - Simple & Short
+// Apple Pay Button Handler - Modern Implementation
 $(document).ready(function() {
   const applePayButton = document.getElementById('apple-pay-btn');
   
@@ -4198,16 +4212,28 @@ $(document).ready(function() {
       applePayButton.addEventListener('click', function(e) {
         e.preventDefault();
         
+        // Disable button during processing
+        applePayButton.disabled = true;
+        applePayButton.textContent = 'Processing...';
+        
         // Get cart and start Apple Pay
-        $.get('/cart.js', function(cart) {
-          if (cart.item_count === 0) {
-            alert('Your cart is empty');
-            return;
-          }
-          
-          // Start Apple Pay Session
-          startApplePay(cart);
-        });
+        fetch('/cart.js')
+          .then(response => response.json())
+          .then(cart => {
+            if (cart.item_count === 0) {
+              alert('Your cart is empty');
+              resetApplePayButton();
+              return;
+            }
+            
+            // Start Apple Pay Session
+            startApplePay(cart);
+          })
+          .catch(error => {
+            console.error('Error fetching cart:', error);
+            alert('Unable to process payment. Please try again.');
+            resetApplePayButton();
+          });
       });
     } else {
       applePayButton.style.display = 'none';
@@ -4215,65 +4241,140 @@ $(document).ready(function() {
   }
 });
 
-// Start Apple Pay Session
-function startApplePay(cart) {
-  // Calculate total
-  const freeShippingThreshold = window.FREE_SHIPPING_THRESHOLD || 9900;
-  const shippingCost = cart.total_price >= freeShippingThreshold ? 0 : 500;
-  const total = ((cart.total_price + shippingCost) / 100).toFixed(2);
-  
-  // Create payment request
-  const request = {
-    countryCode: 'US',
-    currencyCode: 'USD',
-    merchantCapabilities: ['supports3DS'],
-    supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
-    total: { label: '{{ shop.name }}', amount: total }
-  };
-  
-  // Create session
-  const session = new ApplePaySession(3, request);
-  
-  // Validate merchant
-  session.onvalidatemerchant = function(event) {
-    $.post('/wallets/checkouts.json', JSON.stringify({
-      checkout: { line_items: getCartItems() }
-    }), function(response) {
-      $.post('/wallets/checkouts/' + response.checkout.token + '/apple_pay/validate_merchant.json',
-        JSON.stringify({ validation_url: event.validationURL }),
-        function(merchantSession) {
-          session.completeMerchantValidation(merchantSession);
-        }
-      ).fail(function() {
-        session.abort();
-        goToCheckout();
-      });
-    }, 'json').fail(function() {
-      session.abort();
-      goToCheckout();
-    });
-  };
-  
-  // Payment authorized
-  session.onpaymentauthorized = function(event) {
-    session.completePayment(ApplePaySession.STATUS_SUCCESS);
-    bodyScrollLock.unlock();
-    $('.r-side-cart').removeClass('active');
-    window.location.href = '/checkout';
-  };
-  
-  // Start session
-  session.begin();
+// Reset Apple Pay button state
+function resetApplePayButton() {
+  const applePayButton = document.getElementById('apple-pay-btn');
+  if (applePayButton) {
+    applePayButton.disabled = false;
+    applePayButton.innerHTML = `
+      <span class="apple-pay-logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="40" height="40" rx="8" fill="#000000"/>
+          <path d="M20.5 12.5C21.5 11.5 22.5 9.5 21.5 7.5C20.5 5.5 18.5 4.5 16.5 5.5C15.5 6.5 14.5 8.5 15.5 10.5C16.5 12.5 19.5 13.5 20.5 12.5Z" fill="white"/>
+          <path d="M12.5 15.5C13.5 14.5 15.5 14.5 17.5 15.5C19.5 16.5 21.5 18.5 20.5 20.5C19.5 22.5 17.5 24.5 15.5 23.5C13.5 22.5 11.5 20.5 12.5 18.5C11.5 16.5 11.5 16.5 12.5 15.5Z" fill="white"/>
+        </svg>
+        Buy with Apple Pay
+      </span>
+    `;
+  }
 }
 
-// Get cart items for checkout
-function getCartItems() {
+// Start Apple Pay Session - Modern Implementation
+function startApplePay(cart) {
+  try {
+    // Calculate total with shipping
+    const freeShippingThreshold = window.FREE_SHIPPING_THRESHOLD || 9900;
+    const shippingCost = cart.total_price >= freeShippingThreshold ? 0 : 500;
+    const total = ((cart.total_price + shippingCost) / 100).toFixed(2);
+    
+    // Create payment request
+    const request = {
+      countryCode: 'US',
+      currencyCode: 'USD',
+      merchantCapabilities: ['supports3DS', 'supportsCredit', 'supportsDebit'],
+      supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
+      total: { 
+        label: '{{ shop.name }}', 
+        amount: total 
+      }
+    };
+    
+    // Create session
+    const session = new ApplePaySession(3, request);
+    
+    // Validate merchant
+    session.onvalidatemerchant = function(event) {
+      // Use Shopify's Apple Pay validation endpoint
+      fetch('/wallets/checkouts.json', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+          checkout: { 
+            line_items: getCartItemsForCheckout().length > 0 ? getCartItemsForCheckout() : undefined
+          }
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.checkout && data.checkout.token) {
+          return fetch(`/wallets/checkouts/${data.checkout.token}/apple_pay/validate_merchant.json`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ 
+              validation_url: event.validationURL 
+            })
+          });
+        } else {
+          throw new Error('Failed to create checkout');
+        }
+      })
+      .then(response => response.json())
+      .then(merchantSession => {
+        session.completeMerchantValidation(merchantSession);
+      })
+      .catch(error => {
+        console.error('Apple Pay validation error:', error);
+        session.abort();
+        alert('Payment validation failed. Please try again.');
+        resetApplePayButton();
+      });
+    };
+    
+    // Payment authorized
+    session.onpaymentauthorized = function(event) {
+      // Complete the payment
+      session.completePayment(ApplePaySession.STATUS_SUCCESS);
+      
+      // Close cart and redirect to checkout
+      if (typeof bodyScrollLock !== 'undefined') {
+        bodyScrollLock.unlock();
+      }
+      $('.r-side-cart').removeClass('active');
+      
+      // Redirect to checkout
+      window.location.href = '/checkout';
+    };
+    
+    // Handle session cancellation
+    session.oncancel = function() {
+      console.log('Apple Pay session cancelled');
+      resetApplePayButton();
+    };
+    
+    // Start session
+    session.begin();
+    
+  } catch (error) {
+    console.error('Apple Pay session error:', error);
+    alert('Unable to start Apple Pay. Please try again.');
+    resetApplePayButton();
+  }
+}
+
+// Get cart items for checkout - Updated for modern Shopify
+function getCartItemsForCheckout() {
   const items = [];
+  
+  // Try to get items from DOM first
   $('.cart-item').each(function() {
     const variantId = $(this).data('variant-id');
     const quantity = parseInt($(this).find('.quantity-input').val()) || 1;
-    if (variantId) items.push({ variant_id: variantId, quantity: quantity });
+    if (variantId) {
+      items.push({ 
+        variant_id: variantId, 
+        quantity: quantity 
+      });
+    }
   });
+  
+  // If no items found in DOM, return empty array
+  // The checkout creation will handle getting cart items from Shopify
   return items;
 }
 </script>
