@@ -363,12 +363,9 @@
           
           <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
           
-          <!-- Apple Pay Button -->
-          <button class="apple-pay-btn" id="apple-pay-btn" aria-label="Buy with Apple Pay">
-            <span class="apple-pay-logo">
-              Buy with <img src="https://www.logo.wine/a/logo/Apple_Pay/Apple_Pay-Logo.wine.svg" alt="Apple Pay Logo" width="40" height="40">
-            </span>
-          </button>
+          <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) -->
+          <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart"></div>
+          {{ content_for_additional_checkout_buttons }}
         </div>
       </div>
       
@@ -1405,7 +1402,13 @@ body.g-cart-open {
   box-shadow: none;
 }
 
-/* Apple Pay Button */
+/* Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) */
+.dynamic-checkout-buttons-cart {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* Legacy Apple Pay Button - No longer used */
 .apple-pay-btn {
   width: 100%;
   background: #ffffff;
@@ -4191,7 +4194,10 @@ function refreshBundleProducts(cart) {
 
 // Duplicate function removed - using the AJAX version above
 
-// Apple Pay Button Handler - Modern Implementation
+// Shopify Dynamic Checkout Buttons are now used for Apple Pay
+// No custom JavaScript needed - Shopify handles everything automatically
+
+// Apple Pay Button Handler - REMOVED (now using Shopify Dynamic Checkout)
 $(document).ready(function() {
   const applePayButton = document.getElementById('apple-pay-btn');
   
@@ -4246,124 +4252,42 @@ function resetApplePayButton() {
   }
 }
 
-// Start Apple Pay Session - Modern Implementation
+// Start Apple Pay Session - Simplified Shopify Approach
 function startApplePay(cart) {
   try {
-    // Calculate total with shipping
-    const freeShippingThreshold = window.FREE_SHIPPING_THRESHOLD || 9900;
-    const shippingCost = cart.total_price >= freeShippingThreshold ? 0 : 500;
-    const total = ((cart.total_price + shippingCost) / 100).toFixed(2);
+    // Simple approach - just redirect to checkout
+    // The standard checkout page will handle Apple Pay properly
     
-    // Create payment request
-    const request = {
-      countryCode: 'US',
-      currencyCode: 'USD',
-      merchantCapabilities: ['supports3DS', 'supportsCredit', 'supportsDebit'],
-      supportedNetworks: ['visa', 'masterCard', 'amex', 'discover'],
-      total: { 
-        label: '{{ shop.name }}', 
-        amount: total 
-      }
-    };
+    // Close cart drawer
+    if (typeof bodyScrollLock !== 'undefined') {
+      bodyScrollLock.unlock();
+    }
+    $('.r-side-cart').removeClass('active');
     
-    // Create session
-    const session = new ApplePaySession(3, request);
+    // Add attribute to URL to trigger Apple Pay
+    const checkoutUrl = new URL('/checkout', window.location.origin);
+    checkoutUrl.searchParams.set('apple_pay_session_id', 'init');
     
-    // Validate merchant
-    session.onvalidatemerchant = function(event) {
-      // Use Shopify's Apple Pay validation endpoint
-      fetch('/wallets/checkouts.json', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({
-          checkout: { 
-            line_items: getCartItemsForCheckout().length > 0 ? getCartItemsForCheckout() : undefined
-          }
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.checkout && data.checkout.token) {
-          return fetch(`/wallets/checkouts/${data.checkout.token}/apple_pay/validate_merchant.json`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ 
-              validation_url: event.validationURL 
-            })
-          });
-        } else {
-          throw new Error('Failed to create checkout');
-        }
-      })
-      .then(response => response.json())
-      .then(merchantSession => {
-        session.completeMerchantValidation(merchantSession);
-      })
-      .catch(error => {
-        console.error('Apple Pay validation error:', error);
-        session.abort();
-        alert('Payment validation failed. Please try again.');
-        resetApplePayButton();
-      });
-    };
+    // Redirect to checkout - Shopify will handle Apple Pay there
+    window.location.href = checkoutUrl.toString();
     
-    // Payment authorized
-    session.onpaymentauthorized = function(event) {
-      // Complete the payment
-      session.completePayment(ApplePaySession.STATUS_SUCCESS);
-      
-      // Close cart and redirect to checkout
+  } catch (error) {
+    console.error('Apple Pay session error:', error);
+    alert('Unable to process Apple Pay. Redirecting to checkout...');
+    resetApplePayButton();
+    
+    // Fallback to regular checkout
+    setTimeout(function() {
       if (typeof bodyScrollLock !== 'undefined') {
         bodyScrollLock.unlock();
       }
       $('.r-side-cart').removeClass('active');
-      
-      // Redirect to checkout
       window.location.href = '/checkout';
-    };
-    
-    // Handle session cancellation
-    session.oncancel = function() {
-      console.log('Apple Pay session cancelled');
-      resetApplePayButton();
-    };
-    
-    // Start session
-    session.begin();
-    
-  } catch (error) {
-    console.error('Apple Pay session error:', error);
-    alert('Unable to start Apple Pay. Please try again.');
-    resetApplePayButton();
+    }, 500);
   }
 }
 
-// Get cart items for checkout - Updated for modern Shopify
-function getCartItemsForCheckout() {
-  const items = [];
-  
-  // Try to get items from DOM first
-  $('.cart-item').each(function() {
-    const variantId = $(this).data('variant-id');
-    const quantity = parseInt($(this).find('.quantity-input').val()) || 1;
-    if (variantId) {
-      items.push({ 
-        variant_id: variantId, 
-        quantity: quantity 
-      });
-    }
-  });
-  
-  // If no items found in DOM, return empty array
-  // The checkout creation will handle getting cart items from Shopify
-  return items;
-}
+// Simplified Apple Pay - redirects to checkout where Shopify handles everything
 </script>
 
 
