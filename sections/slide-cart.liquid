@@ -363,9 +363,9 @@
           
           <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
           
-          <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) -->
-          <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart"></div>
-          {{ content_for_additional_checkout_buttons }}
+          <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) - Mobile Only -->
+          <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart mobile-only"></div>
+          <div class="mobile-only">{{ content_for_additional_checkout_buttons }}</div>
         </div>
       </div>
       
@@ -1406,6 +1406,20 @@ body.g-cart-open {
 .dynamic-checkout-buttons-cart {
   width: 100%;
   margin-top: 12px;
+}
+
+/* Hide dynamic checkout buttons on desktop by default */
+.dynamic-checkout-buttons-cart.mobile-only,
+.shipping-totals .mobile-only {
+  display: none;
+}
+
+/* Show dynamic checkout buttons on mobile */
+@media (max-width: 768px) {
+  .dynamic-checkout-buttons-cart.mobile-only,
+  .shipping-totals .mobile-only {
+    display: block !important;
+  }
 }
 
 /* Legacy Apple Pay Button - No longer used */
