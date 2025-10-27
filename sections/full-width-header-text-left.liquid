@@ -179,12 +179,14 @@
     
     .sympl-hero-slide.prev {
       transform: translateX(-100%);
+      opacity: 0;
+      visibility: hidden;
     }
     
-    .sympl-hero-slide:first-child {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(0);
+    .sympl-hero-slide.next {
+      transform: translateX(100%);
+      opacity: 0;
+      visibility: hidden;
     }
     
     .sympl-media-wrapper {
@@ -698,11 +700,11 @@
       const autoSlideEnabled = heroSlider.getAttribute('data-auto-slide') === 'true';
       const slideInterval = parseInt(heroSlider.getAttribute('data-slide-interval')) || 5000; // Default to 5 seconds
       
-      // Show slide function
+      // Show slide function with continuous loop logic
       function showSlide(index) {
-        // Remove active class from all slides
+        // Remove all classes from all slides first
         slides.forEach((slide, i) => {
-          slide.classList.remove('active', 'prev');
+          slide.classList.remove('active', 'prev', 'next');
           
           // Pause and unload other videos to save bandwidth
           if (i !== index) {
@@ -715,7 +717,18 @@
           }
         });
         
-        // Add active class to current slide
+        // Previous slide exits left
+        const prevIndex = (index - 1 + slides.length) % slides.length;
+        slides[prevIndex].classList.add('prev');
+        
+        // Other slides are positioned right
+        slides.forEach((slide, i) => {
+          if (i !== index && i !== prevIndex) {
+            slide.classList.add('next');
+          }
+        });
+        
+        // Current slide is active (slides in from right)
         slides[index].classList.add('active');
         
         // Handle video loading and autoplay with performance optimization
@@ -810,9 +823,16 @@
         }
       }
       
-      // Initialize slider
+      // Initialize slider with proper class distribution
       if (slides.length > 0) {
         slides[0].classList.add('active');
+        // Set other slides to 'next' position
+        for (let i = 1; i < slides.length; i++) {
+          slides[i].classList.add('next');
+        }
+        // The last slide will be the "previous" when we show the first slide
+        slides[slides.length - 1].classList.remove('next');
+        slides[slides.length - 1].classList.add('prev');
       }
       startAutoSlide(); // This will only start if auto-slide is enabled
       };
