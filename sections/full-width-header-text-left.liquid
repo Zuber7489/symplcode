@@ -152,17 +152,39 @@
       position: relative;
       width: 100%;
       height: 100%;
+      overflow: hidden;
     }
     
     .sympl-hero-slide {
       width: 100%;
       height: 100%;
-      display: none;
-      position: relative;
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out, visibility 0.8s;
+      transform: translateX(100%);
+      z-index: 1;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+    }
+    
+    .sympl-hero-slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
+      z-index: 2;
+    }
+    
+    .sympl-hero-slide.prev {
+      transform: translateX(-100%);
     }
     
     .sympl-hero-slide:first-child {
-      display: block;
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
     }
     
     .sympl-media-wrapper {
@@ -678,13 +700,23 @@
       
       // Show slide function
       function showSlide(index) {
-        // Hide all slides
-        slides.forEach(slide => {
-          slide.style.display = 'none';
+        // Remove active class from all slides
+        slides.forEach((slide, i) => {
+          slide.classList.remove('active', 'prev');
+          
+          // Pause and unload other videos to save bandwidth
+          if (i !== index) {
+            const video = slide.querySelector('video');
+            if (video) {
+              video.pause();
+              video.currentTime = 0;
+              video.preload = 'none'; // Stop loading other videos
+            }
+          }
         });
         
-        // Show current slide
-        slides[index].style.display = 'block';
+        // Add active class to current slide
+        slides[index].classList.add('active');
         
         // Handle video loading and autoplay with performance optimization
         const currentVideo = slides[index].querySelector('video');
@@ -707,18 +739,6 @@
             }
           }
         }
-        
-        // Pause and unload other videos to save bandwidth
-        slides.forEach((slide, i) => {
-          if (i !== index) {
-            const video = slide.querySelector('video');
-            if (video) {
-              video.pause();
-              video.currentTime = 0;
-              video.preload = 'none'; // Stop loading other videos
-            }
-          }
-        });
       }
       
       // Go to slide function
@@ -791,7 +811,9 @@
       }
       
       // Initialize slider
-      showSlide(currentSlide);
+      if (slides.length > 0) {
+        slides[0].classList.add('active');
+      }
       startAutoSlide(); // This will only start if auto-slide is enabled
       };
       
