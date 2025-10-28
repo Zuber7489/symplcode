@@ -2240,9 +2240,7 @@ $(document).on('cart:refresh-bundle-discounts', function() {
           
           // Re-initialize bundle functionality after cart update
           setTimeout(function() {
-            new BundleSlideNavigation();
-            initializeBundleProductImages();
-            hideProductsAlreadyInCart();
+            initializeBundleFunctionality();
           }, 50);
         }
       },
@@ -3116,6 +3114,37 @@ function initializeBundleProductImages() {
   });
 }
 
+// Function to initialize all bundle functionality
+function initializeBundleFunctionality() {
+  // Check if bundle container exists
+  const bundleContainer = document.getElementById('bundle-products-scroll');
+  if (!bundleContainer) {
+    console.log('Bundle container not found, skipping initialization');
+    return;
+  }
+  
+  // Check if there are bundle products
+  const bundleProducts = bundleContainer.querySelectorAll('.bundle-product');
+  if (bundleProducts.length === 0) {
+    console.log('No bundle products found, skipping initialization');
+    return;
+  }
+  
+  console.log('Initializing bundle functionality with', bundleProducts.length, 'products');
+  
+  // Initialize bundle slide navigation
+  new BundleSlideNavigation();
+  
+  // Initialize bundle product images
+  initializeBundleProductImages();
+  
+  // Hide products that are already in cart
+  hideProductsAlreadyInCart();
+  
+  // Update bundle products if needed
+  updateBundleProducts();
+}
+
 // Initialize bundle slide navigation
 $(document).ready(function() {
   // Only initialize cart state if cart is open or we're returning from checkout
@@ -3127,13 +3156,12 @@ $(document).ready(function() {
     initializeCartStateWithValidation();
   }
   
-  // Initialize bundle functionality only if cart is open
-  if (isCartOpen) {
+  // Initialize bundle functionality if cart is open OR has items
+  var hasCartItems = $('.cart-item').length > 0;
+  if (isCartOpen || hasCartItems) {
     setTimeout(() => {
-      new BundleSlideNavigation();
-      initializeBundleProductImages();
-      updateBundleProducts();
-    }, 100);
+      initializeBundleFunctionality();
+    }, 200); // Increased delay to ensure DOM is ready
   }
   
   // Cart close functionality
@@ -3181,12 +3209,10 @@ $(document).ready(function() {
       window.lastCartRefreshTime = currentTime;
     }
     
-    // Initialize bundle functionality without delay for better UX
+    // Initialize bundle functionality when cart opens
     setTimeout(() => {
-      new BundleSlideNavigation();
-      initializeBundleProductImages();
-      hideProductsAlreadyInCart(); // Hide products that are already in cart
-    }, 100); // Reduced from 300ms to 100ms
+      initializeBundleFunctionality();
+    }, 150); // Slight delay to ensure cart is fully open
   });
   
   // Also watch for when cart becomes active (in case opened by other means)
@@ -3551,15 +3577,14 @@ function updateBundleProductsWithHTML() {
           $('.free-shipping-progress').show();
         }
         
-        // Re-initialize bundle functionality after cart update
-        setTimeout(function() {
-          // Refresh line numbers after full cart update
-          refreshCartLineNumbers();
-          
-          new BundleSlideNavigation();
-          initializeBundleProductImages();
-          hideProductsAlreadyInCart();
-        }, 50); // Reduced delay for faster initialization
+          // Re-initialize bundle functionality after cart update
+          setTimeout(function() {
+            // Refresh line numbers after full cart update
+            refreshCartLineNumbers();
+            
+            // Initialize all bundle functionality
+            initializeBundleFunctionality();
+          }, 50); // Reduced delay for faster initialization
         
       } else {
         console.error('No cart section found in server response');
@@ -3759,7 +3784,7 @@ function addBundleItemToCart(variantId, quantity) {
           
           // Re-initialize bundle slide navigation after product removal
           setTimeout(function() {
-            new BundleSlideNavigation();
+            initializeBundleFunctionality();
           }, 100);
         });
       }
@@ -4193,11 +4218,10 @@ function refreshBundleProducts(cart) {
         // Replace the current bundle section with the fresh one from server
         $('.bundle-save-section').replaceWith($newBundleSection);
 
-        // Re-initialize bundle functionality after refresh
-        setTimeout(function() {
-          new BundleSlideNavigation();
-          initializeBundleProductImages();
-        }, 100);
+          // Re-initialize bundle functionality after refresh
+          setTimeout(function() {
+            initializeBundleFunctionality();
+          }, 100);
       }
     },
     error: function(xhr, status, error) {
