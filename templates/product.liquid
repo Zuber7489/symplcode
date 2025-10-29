@@ -326,6 +326,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         option1: "{{ current_variant.option1 | escape }}",
         option2: "{{ current_variant.option2 | escape }}",
         option3: "{{ current_variant.option3 | escape }}",
+        available: {{ current_variant.available | default: false }},
         metafields: {
           // Existing metafields
           capacity: {% if current_variant.metafields.custom.comparebag_capacity %}"{{ current_variant.metafields.custom.comparebag_capacity | escape }}"{% else %}null{% endif %},
@@ -367,6 +368,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
             option3: "{{ variant.option3 | escape }}",
             price: "{{ variant.price | money }}",
             image: "{{ variant.image | default: product.featured_image | img_url: '300x300' }}",
+            available: {{ variant.available }},
           metafields: {
             // Existing metafields
             capacity: {% if variant.metafields.custom.comparebag_capacity %}"{{ variant.metafields.custom.comparebag_capacity | escape }}"{% else %}null{% endif %},

@@ -536,6 +536,19 @@
   border: none;
 }
 
+.compare-modal-button.out-of-stock {
+  background: #ccc; 
+  color: #666; 
+  border: none;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.compare-modal-button.out-of-stock:hover {
+  background: #ccc; 
+  color: #666;
+}
+
 .compare-modal-grid { 
   align-items: stretch; 
 }
@@ -1324,6 +1337,7 @@ const compareProductsData = {
     price: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.customPrice)) || "{{ current_variant.price | money | default: product.price | money }}",
     url: "{{ product.url | default: '#' }}",
     isCurrentProduct: true,
+    available: window.productMetafieldsData?.currentVariant?.available !== undefined ? window.productMetafieldsData.currentVariant.available : {{ current_variant.available | default: true }},
     // Current variant data - using JSON data from product template with rich text parsing
     capacity: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.capacity)) || "",
     dimensions: parseRichText(decodeHtmlEntities(window.productMetafieldsData?.currentVariant?.metafields?.dimensions)) || "",
@@ -1369,6 +1383,7 @@ const compareProductsData = {
       price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
       url: "{{ product.url }}?variant=" + variant.id,
       isCurrentProduct: variant.id == currentVariant.id,
+      available: variant.available !== undefined ? variant.available : true,
       variantTitle: variant.option2,
       capacity: parseRichText(decodeHtmlEntities(variant.metafields?.capacity)) || "",
       dimensions: parseRichText(decodeHtmlEntities(variant.metafields?.dimensions)) || "",
@@ -1413,6 +1428,7 @@ const compareProductsData = {
       price: parseRichText(decodeHtmlEntities(variant.metafields?.customPrice)) || variant.price,
       url: "{{ product.url }}?variant=" + variant.id,
       isCurrentProduct: variant.id == currentVariant.id,
+      available: variant.available !== undefined ? variant.available : true,
       variantTitle: variant.option1,
       capacity: parseRichText(decodeHtmlEntities(variant.metafields?.capacity)) || "",
       dimensions: parseRichText(decodeHtmlEntities(variant.metafields?.dimensions)) || "",
@@ -1827,14 +1843,17 @@ function renderProducts(products, tab) {
         ` : '';
         
         // Generate Available in section HTML with dynamic swatches
+        const isAvailable = prod.available !== undefined ? prod.available : true;
+        const buttonClass = `${prod.isCurrentProduct ? 'primary' : 'secondary'}${!isAvailable ? ' out-of-stock' : ''}`;
+        const buttonText = isAvailable ? 'Add to Bag' : 'Out of Stock';
         const availableInHtml = `
           <div class="compare-modal-available-in">
             <div class="compare-modal-available-in-content" data-tab="${tab}">
               ${generateSwatchOptions(prod, tab, cardPosition)}
               <div class="compare-modal-available-in-price">${prod.price}</div>
             </div>
-            <button type="button" class="compare-modal-button ${prod.isCurrentProduct ? 'primary' : 'secondary'}" data-variant-id="${prod.id}" data-card-position="${cardPosition}">
-              Add to Bag
+            <button type="button" class="compare-modal-button ${buttonClass}" data-variant-id="${prod.id}" data-card-position="${cardPosition}" ${!isAvailable ? 'disabled' : ''}>
+              ${buttonText}
             </button>
           </div>
         `;
@@ -1865,14 +1884,17 @@ function renderProducts(products, tab) {
         const fabricHtml = prod.fabric || '';
         
         // Generate Available in section HTML for fabric tab with dynamic swatches
+        const isAvailable = prod.available !== undefined ? prod.available : true;
+        const buttonClass = `${prod.isCurrentProduct ? 'primary' : 'secondary'}${!isAvailable ? ' out-of-stock' : ''}`;
+        const buttonText = isAvailable ? 'Add to Bag' : 'Out of Stock';
         const availableInHtml = `
           <div class="compare-modal-available-in">
             <div class="compare-modal-available-in-content" data-tab="${tab}">
               ${generateSwatchOptions(prod, tab, cardPosition)}
               <div class="compare-modal-available-in-price">${prod.price}</div>
             </div>
-            <button type="button" class="compare-modal-button ${prod.isCurrentProduct ? 'primary' : 'secondary'}" data-variant-id="${prod.id}" data-card-position="${cardPosition}">
-              Add to Bag
+            <button type="button" class="compare-modal-button ${buttonClass}" data-variant-id="${prod.id}" data-card-position="${cardPosition}" ${!isAvailable ? 'disabled' : ''}>
+              ${buttonText}
             </button>
           </div>
         `;
@@ -1954,6 +1976,11 @@ function attachAddToBagEventHandlers() {
   
   addToBagButtons.forEach(button => {
     button.addEventListener('click', function() {
+      // Don't proceed if button is disabled (out of stock)
+      if (this.disabled || this.classList.contains('out-of-stock')) {
+        return;
+      }
+      
       const variantId = this.getAttribute('data-variant-id');
       const cardPosition = this.getAttribute('data-card-position');
       
@@ -2018,6 +2045,7 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
     price: parseRichText(decodeHtmlEntities(variantData.metafields?.customPrice)) || variantData.price,
     url: "{{ product.url }}?variant=" + variantData.id,
     isCurrentProduct: cardPosition === 'left', // Only left card is current product
+    available: variantData.available !== undefined ? variantData.available : true,
     capacity: parseRichText(decodeHtmlEntities(variantData.metafields?.capacity)) || variantData.option1,
     dimensions: parseRichText(decodeHtmlEntities(variantData.metafields?.dimensions)) || "19\" x 18\" x 4\"",
     weight: parseRichText(decodeHtmlEntities(variantData.metafields?.weight)) || "2.5lbs",
@@ -2057,14 +2085,17 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
       ` : '';
       
       // Generate Available in section HTML with dynamic swatches
+      const isAvailable = productData.available !== undefined ? productData.available : true;
+      const buttonClass = `secondary${!isAvailable ? ' out-of-stock' : ''}`;
+      const buttonText = isAvailable ? 'Add to Bag' : 'Out of Stock';
       const availableInHtml = `
         <div class="compare-modal-available-in">
           <div class="compare-modal-available-in-content" data-tab="${tabName}">
             ${generateSwatchOptions(productData, tabName, cardPosition, variantId)}
             <div class="compare-modal-available-in-price">${productData.price}</div>
           </div>
-          <button type="button" class="compare-modal-button secondary" data-variant-id="${productData.id}" data-card-position="${cardPosition}">
-            Add to Bag
+          <button type="button" class="compare-modal-button ${buttonClass}" data-variant-id="${productData.id}" data-card-position="${cardPosition}" ${!isAvailable ? 'disabled' : ''}>
+            ${buttonText}
           </button>
         </div>
       `;
@@ -2095,14 +2126,17 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
       const fabricHtml = productData.fabric || '';
       
       // Generate Available in section HTML for fabric tab with dynamic swatches
+      const isAvailable = productData.available !== undefined ? productData.available : true;
+      const buttonClass = `secondary${!isAvailable ? ' out-of-stock' : ''}`;
+      const buttonText = isAvailable ? 'Add to Bag' : 'Out of Stock';
       const availableInHtml = `
         <div class="compare-modal-available-in">
           <div class="compare-modal-available-in-content" data-tab="${tabName}">
             ${generateSwatchOptions(productData, tabName, cardPosition, variantId)}
             <div class="compare-modal-available-in-price">${productData.price}</div>
           </div>
-          <button type="button" class="compare-modal-button secondary" data-variant-id="${productData.id}" data-card-position="${cardPosition}">
-            Add to Bag
+          <button type="button" class="compare-modal-button ${buttonClass}" data-variant-id="${productData.id}" data-card-position="${cardPosition}" ${!isAvailable ? 'disabled' : ''}>
+            ${buttonText}
           </button>
         </div>
       `;
@@ -2162,6 +2196,11 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
   const newAddToBagButtons = cardElement.querySelectorAll('.compare-modal-button[data-variant-id]');
   newAddToBagButtons.forEach(button => {
     button.addEventListener('click', function() {
+      // Don't proceed if button is disabled (out of stock)
+      if (this.disabled || this.classList.contains('out-of-stock')) {
+        return;
+      }
+      
       const variantId = this.getAttribute('data-variant-id');
       const cardPosition = this.getAttribute('data-card-position');
       
@@ -2254,6 +2293,7 @@ function updateModalWithVariant(variantId) {
     title: parseRichText(decodeHtmlEntities(variantData.metafields?.productTitle)) || variantData.title,
     image: parseRichText(decodeHtmlEntities(variantData.metafields?.variantImage)) || variantData.image,
     price: parseRichText(decodeHtmlEntities(variantData.metafields?.customPrice)) || variantData.price,
+    available: variantData.available !== undefined ? variantData.available : true,
     capacity: parseRichText(decodeHtmlEntities(variantData.metafields?.capacity)) || "",
     dimensions: parseRichText(decodeHtmlEntities(variantData.metafields?.dimensions)) || "",
     weight: parseRichText(decodeHtmlEntities(variantData.metafields?.weight)) || "",
@@ -2458,6 +2498,7 @@ window.updateCompareModalWithVariant = function(variantId) {
       sizePhoto: parseRichText(decodeHtmlEntities(variantData.metafields?.comparebag_size_photo)) || "",
       fabricPhoto: parseRichText(decodeHtmlEntities(variantData.metafields?.comparebag_fabric_photo)) || "",
       price: parseRichText(decodeHtmlEntities(variantData.metafields?.customPrice)) || variantData.price,
+      available: variantData.available !== undefined ? variantData.available : true,
       capacity: parseRichText(decodeHtmlEntities(variantData.metafields?.capacity)) || "",
       dimensions: parseRichText(decodeHtmlEntities(variantData.metafields?.dimensions)) || "",
       weight: parseRichText(decodeHtmlEntities(variantData.metafields?.weight)) || "",
