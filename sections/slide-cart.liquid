@@ -197,13 +197,14 @@
                    
                           <div class="bundle-product-variants">
                             {% for variant in recommended_product.variants limit: 4 %}
-                              <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ recommended_product.id }}" data-variant-index="{{ forloop.index0 }}" data-fabric="{{ variant.option1 }}" data-size="{{ variant.option2 }}">
+                              <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ recommended_product.id }}" data-variant-index="{{ forloop.index0 }}" data-fabric="{{ variant.option1 }}" data-size="{{ variant.option2 }}" data-available="{{ variant.available }}">
                                 <div class="dot" style="background-color: {{ variant.option1 | handleize }};"></div>
                               </div>
                             {% endfor %}
                           </div>
                           <div class="bundle-product-material">{{ recommended_product.variants.first.option1 }}{% if recommended_product.variants.first.option2 %} - {{ recommended_product.variants.first.option2 }}{% endif %}</div>
-                          <button class="add-to-bag-btn bundle-cart-btn" data-variant-id="{{ recommended_product.selected_or_first_available_variant.id }}" data-product-id="{{ recommended_product.id }}" data-source="bundle-cart">Add to Bag</button>
+                          {% assign initial_variant = recommended_product.selected_or_first_available_variant %}
+                          <button class="add-to-bag-btn bundle-cart-btn{% unless initial_variant.available %} is-disabled{% endunless %}" data-variant-id="{{ initial_variant.id }}" data-product-id="{{ recommended_product.id }}" data-available="{{ initial_variant.available }}" data-source="bundle-cart" {% unless initial_variant.available %}disabled="disabled"{% endunless %}>{% if initial_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</button>
                         </div>
                       {% endunless %}
                     {% endfor %}
@@ -242,6 +243,7 @@
                                 id: {{ variant.id }},
                                 title: {{ variant.title | json }},
                                 price: {{ variant.price }},
+                                available: {{ variant.available | json }},
                                 fabric: {{ variant.option1 | json }},
                                 size: {{ variant.option2 | json }},
                                 featured_image: {
@@ -1044,6 +1046,21 @@ body.g-cart-open {
 
 .add-to-bag-btn:hover, .bundle-cart-btn:hover {
   background: #026068;
+}
+
+/* Disabled state for bundle add buttons */
+.bundle-cart-btn.is-disabled,
+.bundle-cart-btn[disabled] {
+  background: #9ca3af !important;
+  color: #ffffff !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}
+
+.bundle-cart-btn.is-disabled:hover,
+.bundle-cart-btn[disabled]:hover {
+  background: #9ca3af !important;
+  transform: none !important;
 }
 
 .add-to-bag-btn.is-loading, .bundle-cart-btn.is-loading {
@@ -2659,6 +2676,14 @@ class BundleSlideNavigation {
         const addToBagBtn = productContainer.querySelector('.bundle-cart-btn');
         if (addToBagBtn) {
           addToBagBtn.dataset.variantId = variantId;
+          // Update availability based on selected variant
+          const variantDataList = window[`bundleProductVariants_${productId}`];
+          const selectedData = variantDataList && variantDataList[variantIndex] ? variantDataList[variantIndex] : null;
+          const isAvailable = !!(selectedData && selectedData.available);
+          addToBagBtn.dataset.available = isAvailable ? 'true' : 'false';
+          addToBagBtn.disabled = !isAvailable;
+          addToBagBtn.textContent = isAvailable ? 'Add to Bag' : 'Out of Stock';
+          addToBagBtn.classList.toggle('is-disabled', !isAvailable);
         }
         
         // Update the fabric and size name
@@ -3109,6 +3134,11 @@ function initializeBundleProductImages() {
         // Update add to bag button variant ID
         if ($addToBagBtn.length > 0) {
           $addToBagBtn.attr('data-variant-id', variant.id);
+          var isAvailable = !!variant.available;
+          $addToBagBtn.attr('data-available', isAvailable ? 'true' : 'false');
+          $addToBagBtn.prop('disabled', !isAvailable);
+          $addToBagBtn.toggleClass('is-disabled', !isAvailable);
+          $addToBagBtn.text(isAvailable ? 'Add to Bag' : 'Out of Stock');
         }
       }
     }
@@ -3326,10 +3356,11 @@ $(document).ready(function() {
     
     var $button = $(this);
     var variantId = $button.data('variant-id');
+    var isAvailable = String($button.data('available')) === 'true';
     var quantity = 1; // Default quantity;
     
     // Prevent double-clicking or if cart operation is in progress
-    if ($button.hasClass('is-loading') || $button.prop('disabled') || isCartOperationInProgress) {
+    if ($button.hasClass('is-loading') || $button.prop('disabled') || !isAvailable || isCartOperationInProgress) {
       return false;
     }
     
