@@ -5640,8 +5640,8 @@ let globalTouchManager = {
             {% endif %}
           {% endfor %}
         </select>
-        <button type="submit" name="add" id="MobileAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; margin-bottom: 0; margin-top:3px; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
-          <span id="MobileAddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
+        <button type="submit" name="add" id="StickyAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; margin-bottom: 0; margin-top:3px; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
+          <span id="StickyAddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
         </button>
         
         {% comment %} Custom text below Add to Bag button (mobile) {% endcomment %}
@@ -5714,20 +5714,18 @@ let globalTouchManager = {
       if (applePayContainer) {
         applePayContainer.style.display = 'block';
       }
-      // Sync Add to Cart button state
-      function syncMobileAddToCartState() {
-        var mainBtn = document.getElementById('AddToCart');
-        var mainBtnText = document.getElementById('AddToCartText');
-        var mobileBtn = document.getElementById('MobileAddToCart');
-        var mobileBtnText = document.getElementById('MobileAddToCartText');
-        if (mainBtn && mobileBtn && mainBtnText && mobileBtnText) {
-          mobileBtn.disabled = mainBtn.disabled;
-          mobileBtn.classList.toggle('disabled', mainBtn.disabled);
-          mobileBtn.style.backgroundColor = mainBtn.disabled ? '#999' : '#2f6f6f';
-          mobileBtn.style.cursor = mainBtn.style.cursor;
-          // Set sticky cart text to match main button
-          mobileBtnText.textContent = mainBtn.disabled ? 'Out of Stock' : 'Add to Bag';
-        }
+      // Sync sticky Add to Cart button state with current variant availability
+      window.syncMobileAddToCartState = function() {
+        var stickyBtn = document.getElementById('StickyAddToCart');
+        var stickyText = document.getElementById('StickyAddToCartText');
+        if (!stickyBtn || !stickyText || !currentVariant) return;
+        var isAvailable = !!currentVariant.available;
+        stickyBtn.disabled = !isAvailable;
+        stickyBtn.classList.toggle('disabled', !isAvailable);
+        stickyBtn.style.backgroundColor = isAvailable ? '#2f6f6f' : '#999';
+        stickyBtn.style.cursor = isAvailable ? 'pointer' : 'not-allowed';
+        stickyBtn.style.opacity = isAvailable ? '1' : '0.6';
+        stickyText.textContent = isAvailable ? 'Add to Bag' : 'Out of Stock';
       }
       document.addEventListener('variant:change', syncMobileAddToCartState);
       syncMobileAddToCartState();
