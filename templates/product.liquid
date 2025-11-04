@@ -49,11 +49,8 @@
     
     
     <script>
-    // Font loading optimization - silent error handling
     (function() {
       'use strict';
-      
-      // Font loading detection with error handling - only for error prevention
       if ('fonts' in document) {
         const fontFaces = [
           { family: 'Neue Haas Display', weight: '900', style: 'normal' },
@@ -63,18 +60,14 @@
           { family: 'Neue Haas Display', weight: '300', style: 'normal' },
           { family: 'Neue Haas Display', weight: '100', style: 'normal' }
         ];
-        
-        // Load fonts with error handling - silent error catching
         Promise.all(
           fontFaces.map(fontFace => {
             return document.fonts.load(`${fontFace.weight} 1em "${fontFace.family}"`, fontFace.style)
               .catch(error => {
-                // Silent error handling - don't show console warnings
                 return null;
               });
           })
         ).catch(error => {
-          // Silent error handling - don't show console warnings
         });
       }
       
@@ -328,7 +321,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         option3: "{{ current_variant.option3 | escape }}",
         available: {{ current_variant.available | default: false }},
         metafields: {
-          // Existing metafields
           capacity: {% if current_variant.metafields.custom.comparebag_capacity %}"{{ current_variant.metafields.custom.comparebag_capacity | escape }}"{% else %}null{% endif %},
           dimensions: {% if current_variant.metafields.custom.comparebag_dimensions %}"{{ current_variant.metafields.custom.comparebag_dimensions | escape }}"{% else %}null{% endif %},
           weight: {% if current_variant.metafields.custom.comparebag_weight %}"{{ current_variant.metafields.custom.comparebag_weight | escape }}"{% else %}null{% endif %},
@@ -336,22 +328,17 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
           features: {% if current_variant.metafields.custom.comparebag_features %}"{{ current_variant.metafields.custom.comparebag_features | escape }}"{% else %}null{% endif %},
           techSpecs: {% if current_variant.metafields.custom.comparebag_tech_specs %}"{{ current_variant.metafields.custom.comparebag_tech_specs | escape }}"{% else %}null{% endif %},
           overview: {% if current_variant.metafields.custom.comparebag_overview %}"{{ current_variant.metafields.custom.comparebag_overview | escape }}"{% else %}null{% endif %},
-          
-          // New metafields for customization
           productTitle: {% if current_variant.metafields.custom.comparebag_product_title %}"{{ current_variant.metafields.custom.comparebag_product_title | escape }}"{% else %}null{% endif %},
         
           customPrice: {% if current_variant.metafields.custom.comparebag_custom_price %}"{{ current_variant.metafields.custom.comparebag_custom_price | escape }}"{% else %}null{% endif %},
           comparebag_size_photo: {% if current_variant.metafields.custom.comparebag_size_photo %}"{{ current_variant.metafields.custom.comparebag_size_photo | img_url: '300x300' }}"{% else %}null{% endif %},
           comparebag_fabric_photo: {% if current_variant.metafields.custom.comparebag_fabric_photo %}"{{ current_variant.metafields.custom.comparebag_fabric_photo | img_url: '300x300' }}"{% else %}null{% endif %},
-          // 90-degree left labels
           specsLabel: {% if current_variant.metafields.custom.comparebag_specs_label %}"{{ current_variant.metafields.custom.comparebag_specs_label | escape }}"{% else %}null{% endif %},
           featuresLabel: {% if current_variant.metafields.custom.comparebag_features_label %}"{{ current_variant.metafields.custom.comparebag_features_label | escape }}"{% else %}null{% endif %},
           availableInLabel: {% if current_variant.metafields.custom.comparebag_available_in_label %}"{{ current_variant.metafields.custom.comparebag_available_in_label | escape }}"{% else %}null{% endif %},
           fabricLabel: {% if current_variant.metafields.custom.comparebag_fabric_label %}"{{ current_variant.metafields.custom.comparebag_fabric_label | escape }}"{% else %}null{% endif %},
           techSpecsLabel: {% if current_variant.metafields.custom.comparebag_tech_specs_label %}"{{ current_variant.metafields.custom.comparebag_tech_specs_label | escape }}"{% else %}null{% endif %},
           overallDifferenceLabel: {% if current_variant.metafields.custom.comparebag_overall_difference_label %}"{{ current_variant.metafields.custom.comparebag_overall_difference_label | escape }}"{% else %}null{% endif %},
-          
-          // Golden labels
           capacityLabel: {% if current_variant.metafields.custom.comparebag_capacity_label %}"{{ current_variant.metafields.custom.comparebag_capacity_label | escape }}"{% else %}null{% endif %},
           dimensionsLabel: {% if current_variant.metafields.custom.comparebag_dimensions_label %}"{{ current_variant.metafields.custom.comparebag_dimensions_label | escape }}"{% else %}null{% endif %},
           weightLabel: {% if current_variant.metafields.custom.comparebag_weight_label %}"{{ current_variant.metafields.custom.comparebag_weight_label | escape }}"{% else %}null{% endif %},
@@ -370,7 +357,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
             image: "{{ variant.image | default: product.featured_image | img_url: '300x300' }}",
             available: {{ variant.available }},
           metafields: {
-            // Existing metafields
             capacity: {% if variant.metafields.custom.comparebag_capacity %}"{{ variant.metafields.custom.comparebag_capacity | escape }}"{% else %}null{% endif %},
             dimensions: {% if variant.metafields.custom.comparebag_dimensions %}"{{ variant.metafields.custom.comparebag_dimensions | escape }}"{% else %}null{% endif %},
             weight: {% if variant.metafields.custom.comparebag_weight %}"{{ variant.metafields.custom.comparebag_weight | escape }}"{% else %}null{% endif %},
@@ -378,25 +364,17 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
             features: {% if variant.metafields.custom.comparebag_features %}"{{ variant.metafields.custom.comparebag_features | escape }}"{% else %}null{% endif %},
             techSpecs: {% if variant.metafields.custom.comparebag_tech_specs %}"{{ variant.metafields.custom.comparebag_tech_specs | escape }}"{% else %}null{% endif %},
             overview: {% if variant.metafields.custom.comparebag_overview %}"{{ variant.metafields.custom.comparebag_overview | escape }}"{% else %}null{% endif %},
-            
-            // New metafields for customization
             productTitle: {% if variant.metafields.custom.comparebag_product_title %}"{{ variant.metafields.custom.comparebag_product_title | escape }}"{% else %}null{% endif %},
             variantImage: {% if variant.metafields.custom.comparebag_variant_image %}"{{ variant.metafields.custom.comparebag_variant_image | img_url: '300x300' }}"{% else %}null{% endif %},
             customPrice: {% if variant.metafields.custom.comparebag_custom_price %}"{{ variant.metafields.custom.comparebag_custom_price | escape }}"{% else %}null{% endif %},
-            
-            // Compare bag photos for different tabs
             comparebag_size_photo: {% if variant.metafields.custom.comparebag_size_photo %}"{{ variant.metafields.custom.comparebag_size_photo | img_url: '300x300' }}"{% else %}null{% endif %},
             comparebag_fabric_photo: {% if variant.metafields.custom.comparebag_fabric_photo %}"{{ variant.metafields.custom.comparebag_fabric_photo | img_url: '300x300' }}"{% else %}null{% endif %},
-            
-            // 90-degree left labels
             specsLabel: {% if variant.metafields.custom.comparebag_specs_label %}"{{ variant.metafields.custom.comparebag_specs_label | escape }}"{% else %}null{% endif %},
             featuresLabel: {% if variant.metafields.custom.comparebag_features_label %}"{{ variant.metafields.custom.comparebag_features_label | escape }}"{% else %}null{% endif %},
             availableInLabel: {% if variant.metafields.custom.comparebag_available_in_label %}"{{ variant.metafields.custom.comparebag_available_in_label | escape }}"{% else %}null{% endif %},
             fabricLabel: {% if variant.metafields.custom.comparebag_fabric_label %}"{{ variant.metafields.custom.comparebag_fabric_label | escape }}"{% else %}null{% endif %},
             techSpecsLabel: {% if variant.metafields.custom.comparebag_tech_specs_label %}"{{ variant.metafields.custom.comparebag_tech_specs_label | escape }}"{% else %}null{% endif %},
             overallDifferenceLabel: {% if variant.metafields.custom.comparebag_overall_difference_label %}"{{ variant.metafields.custom.comparebag_overall_difference_label | escape }}"{% else %}null{% endif %},
-            
-            // Golden labels
             capacityLabel: {% if variant.metafields.custom.comparebag_capacity_label %}"{{ variant.metafields.custom.comparebag_capacity_label | escape }}"{% else %}null{% endif %},
             dimensionsLabel: {% if variant.metafields.custom.comparebag_dimensions_label %}"{{ variant.metafields.custom.comparebag_dimensions_label | escape }}"{% else %}null{% endif %},
             weightLabel: {% if variant.metafields.custom.comparebag_weight_label %}"{{ variant.metafields.custom.comparebag_weight_label | escape }}"{% else %}null{% endif %},
@@ -739,7 +717,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
           {% endfor %}
         </select>
     
-        <button type="submit" name="add" id="MobileAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
+        <button type="submit" name="add" id="MobileAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" {% unless current_variant.available %}disabled{% endunless %} style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6; pointer-events: none;{% endunless %}">
           <span id="AddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
         </button>
         
@@ -2103,8 +2081,23 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     
     
     /* Hover effects */
-    .add-to-cart-button:hover { /* Keep existing main add to cart hover */
+    .add-to-cart-button:hover:not(:disabled):not(.disabled) { /* Keep existing main add to cart hover */
       background-color: #1f4f4f !important;
+    }
+    
+    /* Disable hover and pointer events for out-of-stock buttons */
+    .add-to-cart-button:disabled,
+    .add-to-cart-button.disabled,
+    .add-to-cart-button[disabled] {
+      pointer-events: none !important;
+      cursor: not-allowed !important;
+    }
+    
+    .add-to-cart-button:disabled:hover,
+    .add-to-cart-button.disabled:hover,
+    .add-to-cart-button[disabled]:hover {
+      background-color: #999 !important;
+      opacity: 0.6 !important;
     }
     
     .bundle-add-btn:hover { /* New hover for bundle buttons */
@@ -2523,7 +2516,6 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
     </style>
     
     <script>
-    // ENHANCED JAVASCRIPT WITH IMPROVED IMAGE URL HANDLING AND TOUCH SWIPE FOR CAROUSELS
     
     const productImages = [
     {% if current_variant.metafields.custom.variant_gallery %}
@@ -2676,16 +2668,12 @@ let currentDesktopNavigableDisplayIndex = 0;
 
 const DEFAULT_FUNCTION_IMAGE_URL = "https://symplofficial.com/cdn/shop/files/CommuterPack_V2-1_9da0b7c9-0468-4cd5-9359-d6ab8fb23fa1_400x400_crop_center.jpg?v=1746199613";
 const PLACEHOLDER_IMAGE_URL = "/placeholder.svg?height=400&width=400";
-
-// Global modal state
 let currentModalMediaIndex = 0;
 let currentModalMediaSet = [];
 let currentZoomLevel = 1;
 const ZOOM_STEP = 0.2;
 const MIN_ZOOM_LEVEL = 1;
 const MAX_ZOOM_LEVEL = 3;
-
-// Global touch management to prevent conflicts
 let globalTouchManager = {
   isHandling: false,
   handlingComponent: null,
@@ -2730,16 +2718,12 @@ let globalTouchManager = {
       {%- endfor -%}
     };
 
-    // Variant-specific hero content data structure
-    // Enables dynamic hero section updates based on selected variant
     const variantHeroContent = {
       {%- for variant in product.variants -%}
         "{{ variant.id }}": {% if variant.metafields.custom.hero_content.value != blank %}{{ variant.metafields.custom.hero_content.value | json }}{% elsif product.metafields.custom.hero_content.value != blank %}{{ product.metafields.custom.hero_content.value | json }}{% else %}[]{% endif %}{% unless forloop.last %},{% endunless %}
       {%- endfor -%}
     };
 
-    // Variant-specific hero content TWO data structure
-    // Enables dynamic hero section two updates based on selected variant
     const variantHeroContentTwo = {
       {%- for variant in product.variants -%}
         "{{ variant.id }}": {% if variant.metafields.custom.hero_content_two.value != blank %}{{ variant.metafields.custom.hero_content_two.value | json }}{% elsif product.metafields.custom.hero_content_two.value != blank %}{{ product.metafields.custom.hero_content_two.value | json }}{% else %}[]{% endif %}{% unless forloop.last %},{% endunless %}
@@ -2769,23 +2753,16 @@ let globalTouchManager = {
         currentVariant = Object.values(productVariants)[0];
         updateContentForVariant(currentVariant);
       }
-      
-      // Ensure 5-star functions section is always initialized
       const functionsCarousel = document.getElementById("functionsCarousel");
       if (functionsCarousel && functionsCarousel.children.length === 0) {
         updateFunctionsSection([], []);
       }
-      
-      // Initialize mobile navigation after everything is set up
       if (window.innerWidth <= 900) {
         setTimeout(() => {
           initMobileImageNavigation();
         }, 200);
       }
-      
-      // setTimeout(() => { toggleAccordion('description'); }, 500);
     } catch (error) {
-      // Error initializing product page
     }
     });
     
@@ -2798,20 +2775,16 @@ let globalTouchManager = {
     }
     
       function formatInitialSpecs() {
-   // Format any text followed by asterisk (*) in specs content on initial load
    const specsContainers = document.querySelectorAll('.specs-dynamic-content');
    specsContainers.forEach(container => {
      if (container && container.innerHTML) {
        let content = container.innerHTML;
-       // Replace only the word immediately before asterisk - more precise matching
        let formattedContent = content
          .replace(/(\b[a-zA-Z]+)\*/g, '<strong>$1</strong>')
          .replace(/(\b[a-zA-Z]+):\*/g, '<strong>$1</strong>:');
        container.innerHTML = formattedContent;
      }
    });
-  
-   // Also format the main specs content that might be loaded initially
    const mainSpecs = document.getElementById('dynamicSpecs');
    if (mainSpecs) {
      const specsText = mainSpecs.innerHTML;
@@ -2846,10 +2819,8 @@ let globalTouchManager = {
       if (!variant) {
         return [...productImages];
       }
-      // New: Prioritize the variant_gallery metafield
       if (variant_gallery_data[variant.id] && variant_gallery_data[variant.id].gallery.length > 0) {
         let images = [...variant_gallery_data[variant.id].gallery];
-        // Optionally, add the video if it exists for the variant
         if (variantVideos && variantVideos[variant.id]) {
           const videoItem = {
             src: variantVideos[variant.id],
@@ -2858,16 +2829,10 @@ let globalTouchManager = {
             alt: "Product Video for " + variant.title,
             type: 'video'
           };
-          
-          // Create separate arrays for mobile and desktop
           const mobileImages = [...images];
           const desktopImages = [...images];
-          
-          // Mobile: video at 3rd position (index 2)
           const mobileVideoPosition = Math.min(2, mobileImages.length);
           mobileImages.splice(mobileVideoPosition, 0, videoItem);
-          
-          // Desktop: video at 5th position (index 4)
           const desktopVideoPosition = Math.min(4, desktopImages.length);
           desktopImages.splice(desktopVideoPosition, 0, videoItem);
           
@@ -2875,8 +2840,6 @@ let globalTouchManager = {
         }
         return { mobile: images, desktop: images };
       }
-
-      // Fallback to the original logic if no variant_gallery is found
       let imagesForVariant = productImages.filter(img => {
         if (!img.alt) return false;
         const alt = img.alt.toLowerCase();
@@ -2896,16 +2859,10 @@ let globalTouchManager = {
           alt: "Product Video for " + variant.title,
           type: 'video'
         };
-        
-        // Create separate arrays for mobile and desktop
         const mobileImages = [...imagesForVariant];
         const desktopImages = [...imagesForVariant];
-        
-        // Mobile: video at 3rd position (index 2)
         const mobileVideoPosition = Math.min(2, mobileImages.length);
         mobileImages.splice(mobileVideoPosition, 0, videoItem);
-        
-        // Desktop: video at 5th position (index 4)
         const desktopVideoPosition = Math.min(4, desktopImages.length);
         desktopImages.splice(desktopVideoPosition, 0, videoItem);
         
@@ -2925,7 +2882,6 @@ let globalTouchManager = {
     }
     
     function updateGalleryImages(imagesData) {
-      // Handle both old format (array) and new format (object with mobile/desktop)
       if (Array.isArray(imagesData)) {
         currentColorImages = imagesData;
         updateMobileGallery(imagesData);
@@ -2954,8 +2910,6 @@ let globalTouchManager = {
         video.preload = 'metadata';
         video.style.cssText = 'width: 100%; height: 100%; object-fit: cover; cursor: pointer;';
         video.onclick = () => openVideoModal(video);
-        
-        // Safari video handling
         video.addEventListener('canplay', function() {
   
         });
@@ -2968,16 +2922,12 @@ let globalTouchManager = {
         source.src = itemData.src;
         source.type = 'video/mp4';
         video.appendChild(source);
-        
-        // Add WebM fallback for better Safari support
         if (itemData.src.includes('.mp4')) {
           const webmSource = document.createElement('source');
           webmSource.src = itemData.src.replace('.mp4', '.webm');
           webmSource.type = 'video/webm';
           video.appendChild(webmSource);
         }
-        
-        // Add MOV fallback for Safari
         if (itemData.src.includes('.mp4')) {
           const movSource = document.createElement('source');
           movSource.src = itemData.src.replace('.mp4', '.mov');
@@ -3022,8 +2972,6 @@ let globalTouchManager = {
         navVideo.playsInline = true;
         navVideo.webkitPlaysinline = true; // Safari-specific attribute
         navVideo.preload = 'metadata';
-        
-        // Safari event listeners
         navVideo.addEventListener('canplay', function() {
   
         });
@@ -3066,8 +3014,6 @@ let globalTouchManager = {
       const dotsContainer = document.getElementById('desktopGalleryDots');
     
       if (!desktopGrid || !dotsContainer) return;
-      
-      // Clear cached elements when gallery is updated
       cachedDesktopNavElements = null;
       
       desktopGrid.innerHTML = '';
@@ -3103,8 +3049,6 @@ let globalTouchManager = {
         updateDesktopNavigableDots(images);
       }
     }
-    
-    // Cache DOM elements for better performance
     let cachedDesktopNavElements = null;
     
     function getDesktopNavElements() {
@@ -3120,8 +3064,6 @@ let globalTouchManager = {
       }
       return cachedDesktopNavElements;
     }
-    
-    // Debounce function to prevent rapid clicks
     function debounce(func, wait) {
       let timeout;
       return function executedFunction(...args) {
@@ -3149,9 +3091,7 @@ let globalTouchManager = {
           navImg.style.display = 'none';
           navVideo.style.display = 'block';
           navVideoSource.src = currentItem.src;
-          // Use requestAnimationFrame to defer video loading and prevent UI blocking
           requestAnimationFrame(() => {
-            // Further defer video loading to ensure UI responsiveness
             setTimeout(() => {
               navVideo.load();
             }, 0);
@@ -3164,8 +3104,6 @@ let globalTouchManager = {
           navImg.alt = currentItem.alt;
           navImg.onclick = () => openImageModal(currentItem.fullSrc);
       }
-      
-      // Hide counter and navigation arrows if there are exactly 6 images total (desktop only)
       const isExactly6Images = allVariantImages.length === 6;
       const isDesktop = window.innerWidth > 900;
       
@@ -3194,8 +3132,6 @@ let globalTouchManager = {
       const navigableMediaItems = allVariantImages.slice(DESKTOP_NAVIGABLE_START_INDEX);
       const isExactly6Images = allVariantImages.length === 6;
       const isDesktop = window.innerWidth > 900;
-      
-      // Hide dots if there are exactly 6 images total (desktop only)
       if (isExactly6Images && isDesktop) {
         dotsContainer.style.display = 'none';
         return;
@@ -3208,7 +3144,6 @@ let globalTouchManager = {
           dot.setAttribute('aria-label', `Go to image ${DESKTOP_NAVIGABLE_START_INDEX + index + 1}`);
           dot.addEventListener('click', () => {
             currentDesktopNavigableDisplayIndex = index;
-            // Use debounced update for dots as well
             debounce(() => {
               updateDesktopNavigableCellContent(allVariantImages);
               updateDesktopNavigableDots(allVariantImages);
@@ -3225,8 +3160,6 @@ let globalTouchManager = {
       function initDesktopNavigableCellNavigation() {
       const desktopGrid = document.getElementById('desktopGrid');
       if (!desktopGrid) return;
-
-      // Create debounced update function to prevent rapid successive calls
       const debouncedUpdate = debounce(() => {
         updateDesktopNavigableCellContent(currentColorImages);
         updateDesktopNavigableDots(currentColorImages);
@@ -3235,8 +3168,6 @@ let globalTouchManager = {
       desktopGrid.addEventListener('click', (event) => {
         const target = event.target.closest('button.desktop-nav-arrow');
         if (!target) return;
-
-        // Prevent rapid successive clicks
         if (target.disabled) return;
 
         const navigableCell = target.closest('.desktop-navigable-cell');
@@ -3256,8 +3187,6 @@ let globalTouchManager = {
           }
         }
       });
-      
-      // Handle window resize to re-evaluate visibility of navigation elements
       window.addEventListener('resize', debounce(() => {
         if (currentColorImages && currentColorImages.length > 0) {
           updateDesktopNavigableCellContent(currentColorImages);
@@ -3272,8 +3201,6 @@ let globalTouchManager = {
       const mobileContainer = document.querySelector('.mobile-single-image');
     
       if (!mobileMainImage || !mobileMainVideo) return;
-    
-      // Reset mobile index when gallery changes
       currentMobileIndex = 0;
     
       if (images.length > 0) {
@@ -3282,23 +3209,16 @@ let globalTouchManager = {
 
           mobileMainImage.style.display = 'none';
           mobileMainVideo.style.display = 'none'; // Hide video initially
-          
-          // Show loading state immediately
           if (mobileContainer) {
             mobileContainer.classList.remove('mobile-initialized');
           }
-          
-          // Set video source and load it
           let source = mobileMainVideo.querySelector('source');
           if (!source) {
-            // Create source element if it doesn't exist
             source = document.createElement('source');
             source.type = 'video/mp4';
             mobileMainVideo.appendChild(source);
           }
           source.src = firstItem.src;
-          
-          // Safari video loading
           mobileMainVideo.addEventListener('canplay', function() {
 
             mobileMainVideo.style.display = 'block';
@@ -3318,8 +3238,6 @@ let globalTouchManager = {
           
           optimizeVideoForSafari(mobileMainVideo);
           mobileMainVideo.load();
-          
-          // Set a timeout to remove loading state if video takes too long
           setTimeout(() => {
             if (mobileContainer && !mobileContainer.classList.contains('mobile-initialized')) {
               mobileContainer.classList.add('mobile-initialized');
@@ -3327,11 +3245,7 @@ let globalTouchManager = {
           }, 5000); // 5 second timeout
         } else {
           mobileMainVideo.style.display = 'none';
-          
-          // Hybrid approach: Preload image and show with smooth transition
           const img = new Image();
-          
-          // Set a timeout to remove loading state if image takes too long
           const loadingTimeout = setTimeout(() => {
             if (mobileContainer && !mobileContainer.classList.contains('mobile-initialized')) {
               mobileContainer.classList.add('mobile-initialized');
@@ -3340,23 +3254,16 @@ let globalTouchManager = {
           
           img.onload = () => {
             clearTimeout(loadingTimeout);
-            // Set image source and show it
             mobileMainImage.src = firstItem.src;
             mobileMainImage.alt = firstItem.alt;
             mobileMainImage.style.display = 'block';
             mobileMainImage.onclick = () => openImageModal(firstItem.fullSrc);
-            
-            // Remove loading state after image is loaded
             if (mobileContainer) {
               mobileContainer.classList.add('mobile-initialized');
             }
           };
-          
-          // Handle image load errors gracefully
           img.onerror = () => {
             clearTimeout(loadingTimeout);
-
-            // Still remove loading state even if image fails
             if (mobileContainer) {
               mobileContainer.classList.add('mobile-initialized');
             }
@@ -3365,11 +3272,8 @@ let globalTouchManager = {
           img.src = firstItem.src;
         }
       } else {
-          // Hide both image and video when no images are available
           mobileMainImage.style.display = 'none';
           mobileMainVideo.style.display = 'none';
-          
-          // Remove loading state even if no images
           if (mobileContainer) {
             mobileContainer.classList.add('mobile-initialized');
           }
@@ -3379,12 +3283,8 @@ let globalTouchManager = {
     function initMobileImageNavigation() {
       const container = document.querySelector('.single-image-container');
       if (!container) return;
-      
-      // Prevent multiple initializations
       if (container._mobileNavInitialized) return;
       container._mobileNavInitialized = true;
-      
-      // Remove existing event listeners if they exist
       if (container._imageNavHandlers) {
         container.removeEventListener('touchstart', container._imageNavHandlers.touchStart);
         container.removeEventListener('touchmove', container._imageNavHandlers.touchMove);
@@ -3418,8 +3318,6 @@ let globalTouchManager = {
         
         const deltaX = Math.abs(touchCurrentX - touchStartX);
         const deltaY = Math.abs(touchCurrentY - touchStartY);
-        
-        // Determine swipe direction early
         if (deltaX > directionThreshold || deltaY > directionThreshold) {
           touchMoved = true;
           
@@ -3436,15 +3334,11 @@ let globalTouchManager = {
         const touchEndTime = Date.now();
         const touchDuration = touchEndTime - touchStartTime;
         const timeSinceLastSwipe = touchEndTime - lastSwipeTime;
-        
-        // Prevent rapid successive swipes
         if (timeSinceLastSwipe < swipeDebounceTime) {
           touchMoved = false;
           isHorizontalSwipe = false;
           return;
         }
-        
-        // More forgiving swipe detection
         if (touchDuration < timeThreshold && currentColorImages && currentColorImages.length > 1) {
           const diffX = touchStartX - e.changedTouches[0].clientX;
           
@@ -3464,8 +3358,6 @@ let globalTouchManager = {
         touchMoved = false;
         isHorizontalSwipe = false;
       }
-
-      // Store handlers for cleanup
       container._imageNavHandlers = {
         touchStart: touchStartHandler,
         touchMove: touchMoveHandler,
@@ -3483,8 +3375,6 @@ let globalTouchManager = {
       const mobileContainer = document.querySelector('.mobile-single-image');
   
       if (!mobileMainImage || !mobileMainVideo) return;
-  
-      // Ensure currentMobileIndex is within bounds
       if (currentColorImages && currentColorImages.length > 0) {
         currentMobileIndex = Math.max(0, Math.min(currentMobileIndex, currentColorImages.length - 1));
         
@@ -3493,47 +3383,31 @@ let globalTouchManager = {
   
           mobileMainImage.style.display = 'none'; 
           mobileMainVideo.style.display = 'none'; // Hide video initially
-          
-          // Show loading state immediately
           if (mobileContainer) {
             mobileContainer.classList.remove('mobile-initialized');
           }
-          
-          // Set video source and load it
           let source = mobileMainVideo.querySelector('source');
           if (!source) {
-            // Create source element if it doesn't exist
             source = document.createElement('source');
             source.type = 'video/mp4';
             mobileMainVideo.appendChild(source);
           }
           source.src = currentItem.src;
           mobileMainVideo.load();
-          
-          
-          // Show video when it's ready to play
           mobileMainVideo.oncanplay = () => {
             
             mobileMainVideo.style.display = 'block';
             mobileMainVideo.onclick = () => openVideoModal(mobileMainVideo);
-            
-            // Remove loading state when video is ready
             if (mobileContainer) {
               mobileContainer.classList.add('mobile-initialized');
               mobileContainer.classList.add('video-visible');
             }
           };
-          
-          // Handle video load errors
           mobileMainVideo.onerror = () => {
-
-            // Still remove loading state even if video fails
             if (mobileContainer) {
               mobileContainer.classList.add('mobile-initialized');
             }
           };
-          
-          // Set a timeout to remove loading state if video takes too long
           setTimeout(() => {
             if (mobileContainer && !mobileContainer.classList.contains('mobile-initialized')) {
               mobileContainer.classList.add('mobile-initialized');
@@ -3541,11 +3415,7 @@ let globalTouchManager = {
           }, 5000); // 5 second timeout
         } else if (currentItem) {
           mobileMainVideo.style.display = 'none'; 
-          
-          // Hybrid approach: Preload image for smooth transition
           const img = new Image();
-          
-          // Set a timeout to remove loading state if image takes too long
           const loadingTimeout = setTimeout(() => {
             if (mobileContainer && !mobileContainer.classList.contains('mobile-initialized')) {
               mobileContainer.classList.add('mobile-initialized');
@@ -3558,18 +3428,12 @@ let globalTouchManager = {
             mobileMainImage.alt = currentItem.alt;
             mobileMainImage.style.display = 'block';
             mobileMainImage.onclick = () => openImageModal(currentItem.fullSrc);
-            
-            // Ensure loading state is removed
             if (mobileContainer) {
               mobileContainer.classList.add('mobile-initialized');
             }
           };
-          
-          // Handle image load errors gracefully
           img.onerror = () => {
             clearTimeout(loadingTimeout);
-
-            // Still remove loading state even if image fails
             if (mobileContainer) {
               mobileContainer.classList.add('mobile-initialized');
             }
@@ -3577,8 +3441,6 @@ let globalTouchManager = {
           
           img.src = currentItem.src;
         }
-        
-        // Preload next image for smoother swiping
         const nextIndex = currentMobileIndex + 1;
         if (nextIndex < currentColorImages.length) {
           const nextItem = currentColorImages[nextIndex];
@@ -3588,11 +3450,8 @@ let globalTouchManager = {
           }
         }
       } else {
-        // No images available - hide both image and video
         mobileMainImage.style.display = 'none';
         mobileMainVideo.style.display = 'none';
-        
-        // Remove loading state even if no images
         if (mobileContainer) {
           mobileContainer.classList.add('mobile-initialized');
         }
@@ -3601,7 +3460,6 @@ let globalTouchManager = {
     
 
 
-    // Helper function to update fabric option variant IDs based on current size
     function updateFabricOptionVariantIds() {
       const currentSize = document.querySelector(".size-option.active");
       const currentSizeValue = currentSize ? currentSize.getAttribute("data-value") : null;
@@ -3611,8 +3469,6 @@ let globalTouchManager = {
       
       fabricOptions.forEach(fabricOption => {
         const fabricValue = fabricOption.getAttribute("data-value");
-        
-        // Find the best matching variant for this fabric and current size
         const selectedOptions = { fabric: fabricValue, size: currentSizeValue };
         const matchingVariant = findBestMatchingVariant(selectedOptions);
         
@@ -3622,11 +3478,8 @@ let globalTouchManager = {
       });
     }
 
-    // Helper function to find the best matching variant
     function findBestMatchingVariant(selectedOptions = {}) {
       const variants = Object.values(productVariants);
-      
-      // First, try to find exact match with all selected options
       let exactMatch = variants.find(variant => {
         return Object.entries(selectedOptions).every(([optionType, value]) => {
           return variant.option1 === value || variant.option2 === value || variant.option3 === value;
@@ -3636,9 +3489,6 @@ let globalTouchManager = {
       if (exactMatch) {
         return exactMatch;
       }
-      
-      // If no exact match, try to find variants that match the most important option first
-      // For size + fabric combinations, prioritize size matches
       let bestMatch = null;
       let bestScore = 0;
       
@@ -3646,8 +3496,6 @@ let globalTouchManager = {
         let score = 0;
         let hasSize = false;
         let hasFabric = false;
-        
-        // Check each selected option
         Object.entries(selectedOptions).forEach(([optionType, value]) => {
           if (variant.option1 === value || variant.option2 === value || variant.option3 === value) {
             score += 1;
@@ -3655,13 +3503,9 @@ let globalTouchManager = {
             if (optionType === 'fabric') hasFabric = true;
           }
         });
-        
-        // Prioritize variants that have the size match (if size is selected)
         if (selectedOptions.size && hasSize) {
           score += 10; // Give extra weight to size matches
         }
-        
-        // Prioritize variants that have the fabric match (if fabric is selected)
         if (selectedOptions.fabric && hasFabric) {
           score += 5; // Give some weight to fabric matches
         }
@@ -3675,8 +3519,6 @@ let globalTouchManager = {
       if (bestMatch) {
         return bestMatch;
       }
-      
-      // If no matches at all, return the first available variant
       const firstAvailable = variants.find(v => v.available) || variants[0];
       return firstAvailable;
     }
@@ -3694,19 +3536,12 @@ let globalTouchManager = {
           option.classList.add("active"); option.style.border = "3px solid #000";
           const fabricName = document.getElementById("selectedFabricName");
           if (fabricName) fabricName.textContent = value;
-          
-          // Get current size selection
           const currentSizeOption = document.querySelector(".size-option.active");
           const currentSize = currentSizeOption ? currentSizeOption.getAttribute("data-value") : null;
-          
-          // First try to use the specific variant ID if available, but only if no size is selected
-          // This prevents the fabric's data-variant-id from overriding the size selection
           if (variantId && productVariants[variantId] && !currentSize) {
             switchToVariant(productVariants[variantId]);
             return;
           }
-          
-          // If we have both fabric and size selected, try to find exact match
           if (currentSize) {
             const selectedOptions = { fabric: value, size: currentSize };
             const matchingVariant = findBestMatchingVariant(selectedOptions);
@@ -3714,7 +3549,6 @@ let globalTouchManager = {
               switchToVariant(matchingVariant);
             }
           } else {
-            // No size selected, just find by fabric
             const selectedOptions = { fabric: value };
             const matchingVariant = findBestMatchingVariant(selectedOptions);
             if (matchingVariant) {
@@ -3732,10 +3566,7 @@ let globalTouchManager = {
           
           const currentFabricOption = document.querySelector(".fabric-option.active");
           const currentFabric = currentFabricOption ? currentFabricOption.getAttribute("data-value") : null;
-          
-          // Handle products with only size options (no fabric)
           if (!currentFabricOption) {
-            // Find variant that matches the selected size
             const matchingVariant = Object.values(productVariants).find(v => 
               v.option1 === value || v.option2 === value || v.option3 === value
             );
@@ -3745,8 +3576,6 @@ let globalTouchManager = {
               return;
             }
           }
-          
-          // Handle products with both fabric and size options
           if (currentFabric) {
             const selectedOptions = { fabric: currentFabric, size: value };
             const matchingVariant = findBestMatchingVariant(selectedOptions);
@@ -3754,20 +3583,15 @@ let globalTouchManager = {
               switchToVariant(matchingVariant);
             }
           } else {
-            // No fabric selected, just find by size
             const selectedOptions = { size: value };
             const matchingVariant = findBestMatchingVariant(selectedOptions);
             if (matchingVariant) {
               switchToVariant(matchingVariant);
             }
           }
-          
-          // Update fabric option variant IDs to match the new size
           updateFabricOptionVariantIds();
         });
       });
-
-      // Add style options handling
       styleOptions.forEach(option => {
         option.addEventListener("click", () => {
           const value = option.getAttribute("data-value");
@@ -3776,10 +3600,7 @@ let globalTouchManager = {
           
           const currentFabricOption = document.querySelector(".fabric-option.active");
           const currentFabric = currentFabricOption ? currentFabricOption.getAttribute("data-value") : null;
-          
-          // Handle products with only style options (no fabric/color)
           if (!currentFabricOption) {
-            // Find variant that matches the selected style
             const matchingVariant = Object.values(productVariants).find(v => 
               v.option1 === value || v.option2 === value || v.option3 === value
             );
@@ -3789,8 +3610,6 @@ let globalTouchManager = {
               return;
             }
           }
-          
-          // Handle products with both fabric and style options
           if (currentFabric) {
             const selectedOptions = { fabric: currentFabric, style: value };
             const matchingVariant = findBestMatchingVariant(selectedOptions);
@@ -3798,7 +3617,6 @@ let globalTouchManager = {
               switchToVariant(matchingVariant);
             }
           } else {
-            // No fabric selected, just find by style
             const selectedOptions = { style: value };
             const matchingVariant = findBestMatchingVariant(selectedOptions);
             if (matchingVariant) {
@@ -3818,7 +3636,6 @@ let globalTouchManager = {
   const productSelect = document.getElementById("ProductSelect");
   if (productSelect) productSelect.value = currentVariant.id;
   
-  // Update ALL price elements (there are multiple with the same ID)
   const priceElements = document.querySelectorAll('[id="variantPrice"], .pricesizeadjust');
   priceElements.forEach(priceElement => {
     if (priceElement) priceElement.textContent = currentVariant.formatted_price;
@@ -3828,20 +3645,17 @@ let globalTouchManager = {
   const addToCartText = document.getElementById("AddToCartText");
   
   if (addToCartButton && addToCartText) {
-    // Simplified availability check - just check if variant is available
     const isAvailable = currentVariant.available;
     const isOutOfStock = !currentVariant.available;
-    
-    // Update button
     addToCartButton.disabled = isOutOfStock;
     addToCartButton.classList.toggle("disabled", isOutOfStock);
     addToCartButton.style.backgroundColor = isAvailable ? "#2f6f6f" : "#999";
     addToCartButton.style.cursor = isAvailable ? "pointer" : "not-allowed";
     addToCartButton.style.opacity = isAvailable ? "1" : "0.6";
+    addToCartButton.style.pointerEvents = isAvailable ? "auto" : "none";
     addToCartText.textContent = isAvailable ? "Add to Bag" : "Out of Stock";
   }
   
-  // Sync mobile sticky cart
   if (typeof syncMobileAddToCartState === 'function') {
     syncMobileAddToCartState();
   }
@@ -3849,8 +3663,6 @@ let globalTouchManager = {
   updateContentForVariant(currentVariant); 
   currentColorImages = getImagesByVariant(currentVariant);
   updateGalleryImages(currentColorImages);
-  
-  // IMPORTANT: Reinitialize all carousels and touch handlers after variant change
   setTimeout(() => {
     try {
       initMobileImageNavigation(); // Reinitialize mobile image navigation
@@ -3858,16 +3670,11 @@ let globalTouchManager = {
       initBundleCarousel(); // Reinitialize bundle carousel
       initRelatedProductsCarousel(); // Reinitialize related products carousel
     } catch (error) {
-      // Silent error handling for production
     }
   }, 100);
   
   document.dispatchEvent(new CustomEvent('variant:change', { detail: { variant: currentVariant } }));
-  
-  // Dispatch variant:changed event for hero section and other components
   document.dispatchEvent(new CustomEvent('variant:changed', { detail: { variant: currentVariant } }));
-  
-  // Sync with compare modal if it's open
   if (typeof window.updateCompareModalWithVariant === 'function') {
     window.updateCompareModalWithVariant(currentVariant.id);
   }
@@ -3893,8 +3700,6 @@ let globalTouchManager = {
       content.function_image_urls = (variantSpecificContent.function_image_urls && variantSpecificContent.function_image_urls.length > 0)
         ? variantSpecificContent.function_image_urls
         : parentContent.function_image_urls;
-        
-      // Ensure scalar fields inherit properly
       content.material = variantSpecificContent.material || parentContent.material;
       content.product_video_url = variantSpecificContent.product_video_url || parentContent.product_video_url;
       
@@ -3917,8 +3722,6 @@ let globalTouchManager = {
     if (specsElement) {
       const div = document.createElement('div');
       div.style.cssText = 'white-space: pre-wrap; margin: 0; font-family: inherit;';
-      
-      // Apply bold formatting only to the word immediately before asterisk - more precise matching
       let formattedSpecs = content.specs
         .replace(/(\b[a-zA-Z]+)\*/g, '<strong>$1</strong>')
         .replace(/(\b[a-zA-Z]+):\*/g, '<strong>$1</strong>:')
@@ -3928,8 +3731,6 @@ let globalTouchManager = {
       specsElement.innerHTML = ''; 
       specsElement.appendChild(div);
     }
-      
-      // Update features and functions
       updateFeatureHighlights(content.features);
       
       updateFunctionsSection(content.functions, content.function_image_urls);
@@ -3947,8 +3748,6 @@ let globalTouchManager = {
       const mobileList = document.querySelector(".mobilefeaturehighlighted");
       
       if (!leftList || !rightList) return;
-      
-      // Get features from current variant or inherit from parent product
       const featuresToUse = features && features.length > 0 ? features : 
         (variantContent[Object.keys(variantContent)[0]].features || []);
       
@@ -3960,22 +3759,15 @@ let globalTouchManager = {
         const halfLength = Math.ceil(featuresToUse.length / 2);
         
         featuresToUse.forEach((feature, index) => {
-          // Create desktop feature item
           const li = document.createElement('li');
           li.innerHTML = feature.replace(/\n/g, '<br>'); // Use innerHTML to render line breaks
           li.style.cssText = 'margin-bottom: 12px; font-size: 13px; font-weight: 400; letter-spacing: 0.5px; color: #111; list-style: none; position: relative; padding-left: 18px; text-indent: -10px; line-height: 1.4;';
-          
-          // Add bullet point
           li.insertAdjacentText('afterbegin', '\u2022 ');
-          
-          // Add to appropriate list
           if (index < halfLength) {
             leftList.appendChild(li);
           } else {
             rightList.appendChild(li);
           }
-          
-          // Create mobile feature item if mobile list exists
           if (mobileList) {
             const mobileLi = document.createElement('li');
             mobileLi.innerHTML = feature.replace(/\n/g, '<br>'); // Use innerHTML to render line breaks
@@ -3993,13 +3785,10 @@ let globalTouchManager = {
         
         let str = input.trim();
         let extractedUrl = null;
-        
-        // First try to extract a complete URL
         const urlMatch = str.match(/(https?:\/\/[^"'\s\[\]<>]+)/); 
         if (urlMatch && urlMatch[0]) {
             extractedUrl = urlMatch[0];
         } else {
-            // Clean up wrapped URLs
             let cleaned = str;
             if ((cleaned.startsWith('"') && cleaned.endsWith('"')) ||
                 (cleaned.startsWith("'") && cleaned.endsWith("'")) ||
@@ -4019,8 +3808,6 @@ let globalTouchManager = {
         }
         
         let processedUrl = extractedUrl;
-        
-        // Fix protocol issues
         if (processedUrl.startsWith('//')) {
             processedUrl = 'https:' + processedUrl;
         } else if (processedUrl.startsWith('http://')) {
@@ -4069,14 +3856,9 @@ let globalTouchManager = {
       
       if (urlStringToProcess) {
         let processedUrl = ensureHttpsUrl(urlStringToProcess);
-        
-        // Check if it's a video BEFORE any URL modifications
         const lowerUrl = processedUrl.toLowerCase();
         const isVideo = lowerUrl.includes('.mp4') || lowerUrl.includes('.webm') || lowerUrl.includes('.ogg') || lowerUrl.includes('.mov') || lowerUrl.includes('video');
-        
-        // Only resize images for mobile, NOT videos
         if (processedUrl.includes('cdn.shopify.com') && window.innerWidth < 900 && !isVideo) {
-          // Only add crop parameters to image URLs
           processedUrl = processedUrl.replace(/(\.[a-zA-Z0-9]+)($|\?)/, '_2000x3000_crop_center$1$2');
         }
         
@@ -4087,13 +3869,10 @@ let globalTouchManager = {
       functionItem.style.cssText = 'min-width: 400px; flex: 0 0 400px; text-align: left; max-width: 400px;'; 
       const escapedTitle = (func.title || 'Untitled Function').replace(/"/g, '&quot;');
       let mediaElementHtml = '';
-      
-      // Use the same video detection logic as above
       const lowerMediaUrl = mediaUrl.toLowerCase();
       const isVideoElement = lowerMediaUrl.includes('.mp4') || lowerMediaUrl.includes('.webm') || lowerMediaUrl.includes('.ogg') || lowerMediaUrl.includes('.mov') || lowerMediaUrl.includes('video');
       
       if (isVideoElement) {
-        // Create video element with comprehensive Safari autoplay support
         const videoId = `function-video-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         mediaElementHtml = `
           <div class="video-container" style="position: relative; width: 100%; height: 100%;">
@@ -4128,7 +3907,6 @@ let globalTouchManager = {
             </div>
           </div>`;
       } else {
-        // Create image element with fallback
         mediaElementHtml = `<img src="${mediaUrl}" alt="${escapedTitle}" style="width: 100%; height: 100%; object-fit: cover; background: #f6f6f6;" onerror="this.onerror=null; this.src='${DEFAULT_FUNCTION_IMAGE_URL}';">`;
       }
           functionItem.innerHTML = `
@@ -4161,17 +3939,13 @@ let globalTouchManager = {
           functionsCarousel.appendChild(functionItem);
         });
       }
-      
-      // Force reinitialization of the functions carousel to ensure proper touch handling
       setTimeout(() => {
         try {
           initFunctionsCarousel();
-          // Reinitialize Safari video support for new videos
           if (isSafari) {
             initSafariVideoSupport();
           }
         } catch (error) {
-          // Silent error handling for production
         }
       }, 50);
     }
@@ -4183,16 +3957,10 @@ let globalTouchManager = {
       }
       
       currentModalMediaSet = currentColorImages;
-      
-      // Try exact match first
       let initialIndex = currentModalMediaSet.findIndex(item => item.type === 'image' && item.fullSrc === src);
-      
-      // If no exact match, try matching with src property
       if (initialIndex === -1) {
         initialIndex = currentModalMediaSet.findIndex(item => item.type === 'image' && item.src === src);
       }
-      
-      // If still no match, try matching with normalized URLs
       if (initialIndex === -1) {
         const normalizedSrc = src.replace(/_[0-9]+x[0-9]+|_600x600|_1200x1200|_400x400|_300x300|_100x100|_crop_center|_crop_center/gi, '');
         initialIndex = currentModalMediaSet.findIndex(item => {
@@ -4212,7 +3980,6 @@ let globalTouchManager = {
           document.body.style.overflow = 'hidden';
         }
       } else {
-        // Fallback: open the first image
         if (currentModalMediaSet.length > 0) {
           currentModalMediaIndex = 0;
           displayModalMedia(currentModalMediaIndex);
@@ -4277,8 +4044,6 @@ let globalTouchManager = {
       if (!modalImage || !modalVideo || !modalVideoSource || !modalPrevBtn || !modalNextBtn) {
         return;
       }
-    
-      // Reset zoom and pan for new image
       currentZoomLevel = 1;
       zoomLevel = 1;
       panX = 0;
@@ -4291,8 +4056,6 @@ let globalTouchManager = {
         modalImage.style.display = 'none';
         modalVideo.style.display = 'block';
         modalVideoSource.src = item.fullSrc || item.src; 
-        
-        // Safari modal video handling
         modalVideo.addEventListener('canplay', function() {
   
         });
@@ -4300,8 +4063,6 @@ let globalTouchManager = {
         modalVideo.addEventListener('error', function(e) {
   
         });
-        
-        // Defer video loading to prevent UI blocking
         requestAnimationFrame(() => {
           modalVideo.load();
         });
@@ -4309,7 +4070,6 @@ let globalTouchManager = {
         modalVideo.style.display = 'none';
         modalVideo.pause();
         modalImage.style.display = 'block';
-        // Use original image (no compression) - same logic as the removed duplicate function
         modalImage.src = item.src.replace(/_[0-9]+x[0-9]+|_600x600|_1200x1200|_400x400|_300x300|_100x100|_crop_center|_crop_center/gi, '');
       }
     
@@ -4361,8 +4121,6 @@ let globalTouchManager = {
         closeModal();
       }
     }
-    
-    // Safari video compatibility
     const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
     
     function optimizeVideoForSafari(video) {
@@ -4383,8 +4141,6 @@ let globalTouchManager = {
         if (video.paused) video.play().catch(e => {});
       });
     }
-    
-    // Safari video initialization
     if (isSafari) {
       const enableVideos = () => {
         document.querySelectorAll('video').forEach(v => {
@@ -4397,11 +4153,8 @@ let globalTouchManager = {
       );
       
       document.addEventListener('DOMContentLoaded', () => {
-        // Safari video ready
       });
     }
-
-    // Consolidated video handling functions
     const videoHandlers = {
       canPlay: (video, title) => {
         video.style.display = 'block';
@@ -4486,22 +4239,16 @@ let globalTouchManager = {
         });
       }
     }
-
-    // Initialize enhanced Safari support when DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initSafariVideoSupport);
     } else {
       initSafariVideoSupport();
     }
-
-    // Also initialize when new videos are added
     const originalUpdateFunctionsSection = updateFunctionsSection;
     updateFunctionsSection = function(functions, functionImageUrls = []) {
       originalUpdateFunctionsSection.call(this, functions, functionImageUrls);
       setTimeout(initSafariVideoSupport, 100);
     };
-
-    // iOS video force play
     const forcePlayVideosOnIOS = () => {
       if (!/iPad|iPhone|iPod/.test(navigator.userAgent)) return;
       document.querySelectorAll('video').forEach(video => {
@@ -4553,8 +4300,19 @@ let globalTouchManager = {
       if (addToCartForm) {
         addToCartForm.addEventListener("submit", e => {
           e.preventDefault();
-          const formData = new FormData(addToCartForm);
-          addItemToCart(formData.get("id"), Number.parseInt(formData.get("quantity") || "1", 10));
+          
+      if (currentVariant && !currentVariant.available) {
+        showNotification("This product is currently out of stock.", true);
+        return;
+      }
+      const formData = new FormData(addToCartForm);
+      const variantId = formData.get("id");
+          if (variantId && productVariants[variantId] && !productVariants[variantId].available) {
+            showNotification("This product is currently out of stock.", true);
+            return;
+          }
+          
+          addItemToCart(variantId, Number.parseInt(formData.get("quantity") || "1", 10));
         });
       }
       bundleAddButtons.forEach(button => {
@@ -4570,6 +4328,17 @@ let globalTouchManager = {
     }
     
     function addItemToCart(id, quantity, callback) {
+      if (id && productVariants[id] && !productVariants[id].available) {
+        showNotification("This product is currently out of stock.", true);
+        if (callback) callback();
+        return;
+      }
+      if (currentVariant && currentVariant.id == id && !currentVariant.available) {
+        showNotification("This product is currently out of stock.", true);
+        if (callback) callback();
+        return;
+      }
+      
       const mainBtn = document.getElementById("AddToCart");
       const mainBtnText = document.getElementById("AddToCartText");
       const originalMainText = mainBtnText ? mainBtnText.textContent : "Add to Bag";
@@ -4587,10 +4356,7 @@ let globalTouchManager = {
           showNotification(data.description || data.message || "Error adding product.", true);
         } else {
           showNotification("Product added to cart!", false);
-          // Trigger cart count update in header
           document.dispatchEvent(new CustomEvent('cart:refresh'));
-          
-          // Open cart drawer
           document.body.classList.add("g-cart-open");
           document.querySelector(".r-side-cart").classList.add("active");
         }
@@ -4670,8 +4436,6 @@ let globalTouchManager = {
         nextButton.disabled = currentIndex >= Math.max(0, totalItems - itemsPerView);
         nextButton.style.opacity = nextButton.disabled ? '0.5' : '1';
       }
-    
-        // Remove existing event listeners to prevent duplicates
   prevButton.removeEventListener('click', prevButton._carouselClickHandler);
   nextButton.removeEventListener('click', nextButton._carouselClickHandler);
 
@@ -4698,10 +4462,7 @@ let globalTouchManager = {
 
   prevButton.addEventListener('click', prevClickHandler);
   nextButton.addEventListener('click', nextClickHandler);
-      
-      // Improved touch handling with proper conflict management
       if (options.enableTouch !== false && window.matchMedia("(max-width: 767px)").matches) { 
-        // Remove existing touch handlers if they exist
         if (carousel._touchHandlers) {
           carousel.removeEventListener('touchstart', carousel._touchHandlers.touchStart);
           carousel.removeEventListener('touchmove', carousel._touchHandlers.touchMove);
@@ -4722,8 +4483,6 @@ let globalTouchManager = {
 
         const touchStartHandler = function(event) {
           if (event.touches.length !== 1) return;
-          
-          // Request touch handling from global manager
           if (!globalTouchManager.requestHandling(componentId)) return;
           
           touchStartX = event.changedTouches[0].clientX;
@@ -4743,21 +4502,14 @@ let globalTouchManager = {
           
           const deltaX = Math.abs(touchCurrentX - touchStartX);
           const deltaY = Math.abs(touchCurrentY - touchStartY);
-          
-          // Only set movement flags if we've moved enough to be intentional
           if (deltaX > directionThreshold || deltaY > directionThreshold) {
             touchMoved = true;
-            
-            // Determine if this is primarily a horizontal swipe
             if (deltaX > deltaY && deltaX > directionThreshold) {
               isHorizontalSwipe = true;
-              // Only prevent default (disable scrolling) for horizontal swipes in this carousel
               event.preventDefault();
             } else if (deltaY > deltaX) {
-              // This is a vertical scroll, release touch handling
               globalTouchManager.releaseHandling(componentId);
             }
-            // For vertical scrolling (deltaY > deltaX), we let the browser handle it naturally
           }
         };
 
@@ -4766,8 +4518,6 @@ let globalTouchManager = {
           
           const touchEndTime = Date.now();
           const touchDuration = touchEndTime - touchStartTime;
-          
-          // Only handle swipe if it was intentional horizontal movement within time threshold
           if (touchMoved && isHorizontalSwipe && touchDuration < timeThreshold) {
             const diffX = touchCurrentX - touchStartX;
             const itemsPerView = itemsPerViewFn ? itemsPerViewFn() : 1;
@@ -4787,14 +4537,10 @@ let globalTouchManager = {
               }
             }
           }
-          
-          // Reset touch state and release global handling
           globalTouchManager.releaseHandling(componentId);
           touchMoved = false;
           isHorizontalSwipe = false;
         };
-
-        // Store handlers for cleanup
         carousel._touchHandlers = {
           touchStart: touchStartHandler,
           touchMove: touchMoveHandler,
@@ -4805,9 +4551,6 @@ let globalTouchManager = {
         carousel.addEventListener('touchmove', touchMoveHandler, { passive: false }); // passive: false needed for preventDefault()
         carousel.addEventListener('touchend', touchEndHandler, { passive: true });
       }
-    
-    
-      // Mouse drag for desktop
       if (!window.matchMedia("(max-width: 767px)").matches) {
         let isDragging = false;
         let startX = 0;
@@ -4828,7 +4571,6 @@ let globalTouchManager = {
           if (!isDragging) return;
           const dx = e.clientX - startX;
           if (Math.abs(dx) > 5) dragMoved = true;
-          // Optionally, you can add a visual feedback here (translateX)
         });
         window.addEventListener('mouseup', function(e) {
           if (!isDragging) return;
@@ -4847,7 +4589,6 @@ let globalTouchManager = {
             update();
           }
         });
-        // Prevent image drag
         carousel.addEventListener('dragstart', e => e.preventDefault());
       }
     
@@ -4970,24 +4711,17 @@ let globalTouchManager = {
   if (window.innerWidth < 768) {
     const mobileView = document.querySelector('.mobile-single-image');
     const desktopView = document.querySelector('.desktop-grid');
-    
-    // Ensure mobile carousels are properly initialized before showing mobile view
     setTimeout(() => {
       try {
         initMobileImageNavigation();
         initFunctionsCarousel();
         initBundleCarousel();
         initRelatedProductsCarousel();
-        
-        // Only show mobile view after initialization is complete
         if (mobileView) {
           mobileView.classList.add('mobile-initialized');
         }
         if (desktopView) desktopView.style.display = 'none';
-        
-        // Mobile carousels reinitialized on DOM ready
       } catch (error) {
-        // Error initializing mobile carousels
       }
     }, 200);
   }
@@ -5003,8 +4737,6 @@ let globalTouchManager = {
       function updateTransform() {
         modalImage.style.transform = `scale(${currentZoomLevel}) translate(0,0)`;
       }
-    
-      // Pinch to zoom (mobile)
       modalImage.addEventListener('touchstart', function(e) {
         if (e.touches.length === 2) {
           pinchStartDist = Math.sqrt(
@@ -5029,8 +4761,6 @@ let globalTouchManager = {
           updateZoomButtons();
         }
       }, { passive: false });
-    
-      // Mouse wheel zoom (desktop)
       modalImage.addEventListener('wheel', function(e) {
         e.preventDefault();
         let delta = e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP;
@@ -5040,8 +4770,6 @@ let globalTouchManager = {
         updateTransform();
         updateZoomButtons();
       }, { passive: false });
-    
-      // Always center image on load or reset
       modalImage.addEventListener('load', function() {
         updateTransform();
       });
@@ -5051,12 +4779,6 @@ let globalTouchManager = {
     document.addEventListener('DOMContentLoaded', () => {
       enableModalImageGestures();
     });
-    
-    // In displayModalMedia, after setting modalImage.src and currentZoomLevel, reset pan/zoom:
-    // modalImage.style.transform = `scale(${currentZoomLevel}) translate(0,0)`;
-    // panX = 0; panY = 0;
-    
-    // --- MODAL ZOOM/PAN LOGIC ---
     let isZoomed = false;
     let zoomLevel = 1;
     let panX = 0, panY = 0, startX = 0, startY = 0, originPanX = 0, originPanY = 0, isDragging = false;
@@ -5071,31 +4793,25 @@ let globalTouchManager = {
       return pan;
     }
     function getPanBounds(img, scale) {
-      // Calculate the displayed size of the image at scale 1
       const vw = window.innerWidth * 0.9;
       const vh = window.innerHeight * 0.9;
       const naturalW = img.naturalWidth;
       const naturalH = img.naturalHeight;
       let displayW = Math.min(naturalW, vw);
       let displayH = Math.min(naturalH, vh);
-      // Maintain aspect ratio
       if (displayW / displayH > naturalW / naturalH) {
         displayW = displayH * (naturalW / naturalH);
       } else {
         displayH = displayW * (naturalH / naturalW);
       }
-      // At current scale
       const scaledW = displayW * scale;
       const scaledH = displayH * scale;
-      // The max pan is half the overflow in each direction
       const maxPanX = Math.max(0, (scaledW - vw) / 2);
       const maxPanY = Math.max(0, (scaledH - vh) / 2);
       return { maxPanX, maxPanY };
     }
     const modalImage = document.getElementById('modalImage');
     if (modalImage) {
-      // Remove click-to-zoom
-      // Mouse wheel to zoom
       modalImage.addEventListener('wheel', function(e) {
         e.preventDefault();
         let delta = e.deltaY < 0 ? 0.15 : -0.15;
@@ -5109,8 +4825,6 @@ let globalTouchManager = {
           modalImage.style.transform = `scale(${zoomLevel}) translate(${panX}px,${panY}px)`;
         }
       }, { passive: false });
-    
-      // --- CLICK-TO-ZOOM/RESET AND DRAG-TO-PAN ---
       let mouseDown = false;
       let dragStarted = false;
       let dragStartX = 0, dragStartY = 0;
@@ -5148,7 +4862,6 @@ let globalTouchManager = {
         if (!mouseDown) return;
         modalImage.style.cursor = zoomLevel > 1 ? 'grabbing' : 'zoom-in';
         mouseDown = false;
-        // If not dragged, treat as click-to-zoom
         if (!dragStarted && e.button === 0) {
           if (zoomLevel === 1) {
             zoomLevel = CLICK_ZOOM_LEVEL;
@@ -5164,14 +4877,10 @@ let globalTouchManager = {
         }
         dragStarted = false;
       });
-    
-      // Prevent image drag
       modalImage.addEventListener('dragstart', e => e.preventDefault());
-      // Touch support for mobile
       let lastTouchX = 0, lastTouchY = 0;
       modalImage.addEventListener('touchstart', function(e) {
         if (zoomLevel === 1 && e.touches.length === 2) {
-          // Pinch to zoom start
           isDragging = false;
         } else if (zoomLevel > 1 && e.touches.length === 1) {
           isDragging = true;
@@ -5228,7 +4937,6 @@ let globalTouchManager = {
       content.style.maxHeight = isOpen ? '0px' : (content.scrollHeight + 'px');
       icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
     }
-    // Show/hide mobile accordion only on mobile
     function handleMobileFeatureHighlightsDisplay() {
       var acc = document.querySelector('.mobile-feature-highlights-accordion');
       var desktop = document.getElementById('dynamicFeatureHighlights');
@@ -5252,7 +4960,6 @@ let globalTouchManager = {
     </script>
     
     <script>
-    // Show/hide mobile headings and hide original ones on mobile
     function handleMobileHeadings() {
       if (window.innerWidth < 768) {
         var rel = document.querySelector('.related-products-section h2');
@@ -5261,7 +4968,6 @@ let globalTouchManager = {
         if (relMobile) relMobile.style.display = 'block';
         var rev = document.querySelector('.reviews-section h2');
         var revMobile = document.querySelector('.reviews-heading-mobile');
-        // if (rev) rev.style.display = 'none';
         if (revMobile) revMobile.style.display = 'block';
       } else {
         var rel = document.querySelector('.related-products-section h2');
@@ -5271,7 +4977,6 @@ let globalTouchManager = {
         var rev = document.querySelector('.reviews-section h2');
         var revMobile = document.querySelector('.reviews-heading-mobile');
         if (rev) rev.style.display = 'block';
-        // if (revMobile) revMobile.style.display = 'none';
       }
     }
     window.addEventListener('DOMContentLoaded', handleMobileHeadings);
@@ -5541,7 +5246,6 @@ let globalTouchManager = {
     </style>
     
     <style>
-    // ... existing code ...
     /* Global text-transform override for all Add to Cart buttons */
     .add-to-cart-button,
     .add-to-cart-button *,
@@ -5620,7 +5324,6 @@ let globalTouchManager = {
         color: #111 !important;
       }
     }
-    // ... existing code ...
     
     </style>
     
@@ -5640,7 +5343,7 @@ let globalTouchManager = {
             {% endif %}
           {% endfor %}
         </select>
-        <button type="submit" name="add" id="StickyAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; margin-bottom: 0; margin-top:3px; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6;{% endunless %}">
+        <button type="submit" name="add" id="StickyAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" {% unless current_variant.available %}disabled{% endunless %} style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; margin-bottom: 0; margin-top:3px; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6; pointer-events: none;{% endunless %}">
           <span id="StickyAddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
         </button>
         
@@ -5697,7 +5400,6 @@ let globalTouchManager = {
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Sync variant selection between desktop and mobile Add to Cart forms
       var mainSelect = document.getElementById('ProductSelect');
       var mobileSelect = document.getElementById('MobileProductSelect');
       if (mainSelect && mobileSelect) {
@@ -5708,13 +5410,10 @@ let globalTouchManager = {
           mainSelect.value = mobileSelect.value;
         });
       }
-      
-      // Ensure Apple Pay button is visible
       var applePayContainer = document.querySelector('.apple-pay-button-container');
       if (applePayContainer) {
         applePayContainer.style.display = 'block';
       }
-      // Sync sticky Add to Cart button state with current variant availability
       window.syncMobileAddToCartState = function() {
         var stickyBtn = document.getElementById('StickyAddToCart');
         var stickyText = document.getElementById('StickyAddToCartText');
@@ -5725,43 +5424,33 @@ let globalTouchManager = {
         stickyBtn.style.backgroundColor = isAvailable ? '#2f6f6f' : '#999';
         stickyBtn.style.cursor = isAvailable ? 'pointer' : 'not-allowed';
         stickyBtn.style.opacity = isAvailable ? '1' : '0.6';
+        stickyBtn.style.pointerEvents = isAvailable ? 'auto' : 'none';
         stickyText.textContent = isAvailable ? 'Add to Bag' : 'Out of Stock';
       }
       document.addEventListener('variant:change', syncMobileAddToCartState);
       syncMobileAddToCartState();
-      
-      // Update custom text below Add to Bag when variant changes
       document.addEventListener('variant:change', function(e) {
         if (e.detail && e.detail.variant) {
           updateCustomTextBelowAddToBag(e.detail.variant);
         }
       });
-      
-      // Function to update custom text based on variant
       function updateCustomTextBelowAddToBag(variant) {
-        // Get all custom text elements (both desktop and mobile)
         var customTextElements = document.querySelectorAll('.custom-text-below-add-to-bag');
         
         customTextElements.forEach(function(element) {
           var variantId = element.getAttribute('data-variant-id');
           
           if (variantId == variant.id || (variantId == 'product-level' && !hasVariantSpecificText(variant))) {
-            // Show text for current variant or product-level fallback
             element.style.display = 'block';
           } else {
-            // Hide text for other variants
             element.style.display = 'none';
           }
         });
       }
-      
-      // Helper function to check if variant has specific text
       function hasVariantSpecificText(variant) {
         var variantElements = document.querySelectorAll('.custom-text-below-add-to-bag[data-variant-id="' + variant.id + '"]');
         return variantElements.length > 0;
       }
-      
-      // Sticky cart scroll functionality
       function initStickyCart() {
         if (window.innerWidth > 900) return; // Only on mobile
         
@@ -5778,17 +5467,13 @@ let globalTouchManager = {
           var isMainFormVisible = mainFormRect.bottom > 0 && mainFormRect.top < window.innerHeight;
           
           if (!isMainFormVisible && !isSticky) {
-            // Main form is not visible, show sticky cart
             stickyCart.classList.add('show');
             isSticky = true;
           } else if (isMainFormVisible && isSticky) {
-            // Main form is visible, hide sticky cart
             stickyCart.classList.remove('show');
             isSticky = false;
           }
         }
-        
-        // Throttled scroll listener for performance
         var scrollTimeout;
         window.addEventListener('scroll', function() {
           if (scrollTimeout) {
@@ -5796,31 +5481,35 @@ let globalTouchManager = {
           }
           scrollTimeout = setTimeout(updateStickyCart, 10);
         });
-        
-        // Initial check
         updateStickyCart();
       }
-      
-      // Initialize sticky cart functionality
       initStickyCart();
-      
-      // Re-initialize on window resize
       window.addEventListener('resize', function() {
         setTimeout(initStickyCart, 100);
       });
-      
-      // Mobile Add to Cart form submit
       var mobileForm = document.getElementById('MobileAddToCartForm');
       if (mobileForm) {
         mobileForm.addEventListener('submit', function(e) {
           e.preventDefault();
+          if (currentVariant && !currentVariant.available) {
+            if (typeof showNotification === 'function') {
+              showNotification("This product is currently out of stock.", true);
+            }
+            return;
+          }
+          
           var id = mobileSelect.value;
+          if (id && productVariants && productVariants[id] && !productVariants[id].available) {
+            if (typeof showNotification === 'function') {
+              showNotification("This product is currently out of stock.", true);
+            }
+            return;
+          }
+          
           var quantity = 1;
-          // Use the same addItemToCart function as main form if available
           if (typeof addItemToCart === 'function') {
             addItemToCart(id, quantity);
           } else {
-            // Fallback: submit the form normally
             mobileForm.submit();
           }
         });
