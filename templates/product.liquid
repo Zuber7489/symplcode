@@ -454,9 +454,9 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
             <span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">{{ current_variant.compare_at_price | money }}</span>
           </div>
           {% if current_variant.metafields.custom.sale_text != blank %}
-            <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
+            <span class="sale-text" style="font-size: 1rem; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
           {% elsif savings_percentage > 0 %}
-            <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
+            <span class="savings-text" style="font-size: 1rem; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
           {% endif %}
         {% else %}
           {{ current_variant.price | money }}
@@ -707,9 +707,9 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
               <span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">{{ current_variant.compare_at_price | money }}</span>
             </div>
             {% if current_variant.metafields.custom.sale_text != blank %}
-              <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
+              <span class="sale-text" style="font-size: 15px; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
             {% elsif savings_percentage > 0 %}
-              <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
+              <span class="savings-text" style="font-size: 15px; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
             {% endif %}
           {% else %}
             {{ current_variant.price | money }}
@@ -3707,9 +3707,9 @@ let globalTouchManager = {
         let priceHTML = `<div style="display: flex; align-items: baseline; white-space: nowrap;"><span class="price-sale" style="color: #dc2626;">${currentVariant.formatted_price}</span><span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">${currentVariant.formatted_compare_at_price}</span></div>`;
         
         if (saleText) {
-          priceHTML += `<span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">${saleText}</span>`;
+          priceHTML += `<span class="sale-text" style="font-size: 1rem; color: #dc2626; font-weight: 500;">${saleText}</span>`;
         } else if (savingsPercentage > 0) {
-          priceHTML += `<span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">Save ${savingsPercentage}%</span>`;
+          priceHTML += `<span class="savings-text" style="font-size: 1rem; color: #dc2626; font-weight: 500;">Save ${savingsPercentage}%</span>`;
         }
         
         priceElement.innerHTML = priceHTML;
