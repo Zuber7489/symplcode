@@ -720,8 +720,15 @@
                     </h3>
                     <div class="product-price">
                       {% if size_variant.compare_at_price > size_variant.price %}
+                        {% assign savings_amount = size_variant.compare_at_price | minus: size_variant.price %}
+                        {% assign savings_percentage = savings_amount | times: 100.0 | divided_by: size_variant.compare_at_price | round %}
                         <span class="price-sale">{{ size_variant.price | money }}</span>
                         <span class="price-compare">{{ size_variant.compare_at_price | money }}</span>
+                        {% if size_variant.metafields.custom.sale_text != blank %}
+                          <span class="sale-text">{{ size_variant.metafields.custom.sale_text }}</span>
+                        {% elsif savings_percentage > 0 %}
+                          <span class="savings-text">Save {{ savings_percentage }}%</span>
+                        {% endif %}
                       {% else %}
                         <span class="price-regular">{{ size_variant.price | money }}</span>
                       {% endif %}
@@ -968,8 +975,15 @@
                     </h3>
                     <div class="product-price">
                       {% if style_variant.compare_at_price > style_variant.price %}
+                        {% assign savings_amount = style_variant.compare_at_price | minus: style_variant.price %}
+                        {% assign savings_percentage = savings_amount | times: 100.0 | divided_by: style_variant.compare_at_price | round %}
                         <span class="price-sale">{{ style_variant.price | money }}</span>
                         <span class="price-compare">{{ style_variant.compare_at_price | money }}</span>
+                        {% if style_variant.metafields.custom.sale_text != blank %}
+                          <span class="sale-text">{{ style_variant.metafields.custom.sale_text }}</span>
+                        {% elsif savings_percentage > 0 %}
+                          <span class="savings-text">Save {{ savings_percentage }}%</span>
+                        {% endif %}
                       {% else %}
                         <span class="price-regular">{{ style_variant.price | money }}</span>
                       {% endif %}
@@ -1164,8 +1178,16 @@
                 </h3>
                 <div class="product-price">
                   {% if product.compare_at_price > product.price %}
+                    {% assign savings_amount = product.compare_at_price | minus: product.price %}
+                    {% assign savings_percentage = savings_amount | times: 100.0 | divided_by: product.compare_at_price | round %}
                     <span class="price-sale">{{ product.price | money }}</span>
                     <span class="price-compare">{{ product.compare_at_price | money }}</span>
+                    {% assign sale_text_variant = product.selected_or_first_available_variant %}
+                    {% if sale_text_variant.metafields.custom.sale_text != blank %}
+                      <span class="sale-text">{{ sale_text_variant.metafields.custom.sale_text }}</span>
+                    {% elsif savings_percentage > 0 %}
+                      <span class="savings-text">Save {{ savings_percentage }}%</span>
+                    {% endif %}
                   {% else %}
                     <span class="price-regular">{{ product.price | money }}</span>
                   {% endif %}
@@ -2344,7 +2366,16 @@ body.no-scroll {
 .price-compare {
   text-decoration: line-through;
   color: #6b7280;
+  font-size: inherit;
+  opacity: 0.7;
+}
+
+.sale-text,
+.savings-text {
   font-size: 0.875rem;
+  color: #dc2626;
+  font-weight: 500;
+  margin-left: 0.5rem;
 }
 
 /* Activity Badge */
