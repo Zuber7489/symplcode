@@ -445,16 +445,18 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
           {{ product.title }}
         {% endif %}
       </h1>
-      <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; white-space: nowrap;" id="variantPrice">
+      <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;" id="variantPrice">
         {% if current_variant.compare_at_price > current_variant.price %}
           {% assign savings_amount = current_variant.compare_at_price | minus: current_variant.price %}
           {% assign savings_percentage = savings_amount | times: 100.0 | divided_by: current_variant.compare_at_price | round %}
-          <span class="price-sale" style="color: #dc2626;">{{ current_variant.price | money }}</span>
-          <span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">{{ current_variant.compare_at_price | money }}</span>
+          <div style="display: flex; align-items: baseline; white-space: nowrap;">
+            <span class="price-sale" style="color: #dc2626;">{{ current_variant.price | money }}</span>
+            <span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">{{ current_variant.compare_at_price | money }}</span>
+          </div>
           {% if current_variant.metafields.custom.sale_text != blank %}
-            <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500; margin-left: 0.5rem;">{{ current_variant.metafields.custom.sale_text }}</span>
+            <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
           {% elsif savings_percentage > 0 %}
-            <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500; margin-left: 0.5rem;">Save {{ savings_percentage }}%</span>
+            <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
           {% endif %}
         {% else %}
           {{ current_variant.price | money }}
@@ -696,32 +698,36 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
 
     
       {% if has_fabric_options or has_color_options %}
-        <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; position:relative; top: 26px; white-space: nowrap;" id="variantPrice">
+        <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; position:relative; top: 26px; display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;" id="variantPrice">
           {% if current_variant.compare_at_price > current_variant.price %}
             {% assign savings_amount = current_variant.compare_at_price | minus: current_variant.price %}
             {% assign savings_percentage = savings_amount | times: 100.0 | divided_by: current_variant.compare_at_price | round %}
-            <span class="price-sale" style="color: #dc2626;">{{ current_variant.price | money }}</span>
-            <span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">{{ current_variant.compare_at_price | money }}</span>
+            <div style="display: flex; align-items: baseline; white-space: nowrap;">
+              <span class="price-sale" style="color: #dc2626;">{{ current_variant.price | money }}</span>
+              <span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">{{ current_variant.compare_at_price | money }}</span>
+            </div>
             {% if current_variant.metafields.custom.sale_text != blank %}
-              <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500; margin-left: 0.5rem;">{{ current_variant.metafields.custom.sale_text }}</span>
+              <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
             {% elsif savings_percentage > 0 %}
-              <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500; margin-left: 0.5rem;">Save {{ savings_percentage }}%</span>
+              <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
             {% endif %}
           {% else %}
             {{ current_variant.price | money }}
           {% endif %}
         </div>
       {% else %}
-        <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; margin-left: 20px; white-space: nowrap;" id="variantPrice">
+        <div class="pricesizeadjust" style="font-size: 15px; font-weight: bold; color: #111; margin-left: 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem;" id="variantPrice">
           {% if current_variant.compare_at_price > current_variant.price %}
             {% assign savings_amount = current_variant.compare_at_price | minus: current_variant.price %}
             {% assign savings_percentage = savings_amount | times: 100.0 | divided_by: current_variant.compare_at_price | round %}
-            <span class="price-sale" style="color: #dc2626;">{{ current_variant.price | money }}</span>
-            <span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">{{ current_variant.compare_at_price | money }}</span>
+            <div style="display: flex; align-items: baseline; white-space: nowrap;">
+              <span class="price-sale" style="color: #dc2626;">{{ current_variant.price | money }}</span>
+              <span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">{{ current_variant.compare_at_price | money }}</span>
+            </div>
             {% if current_variant.metafields.custom.sale_text != blank %}
-              <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500; margin-left: 0.5rem;">{{ current_variant.metafields.custom.sale_text }}</span>
+              <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
             {% elsif savings_percentage > 0 %}
-              <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500; margin-left: 0.5rem;">Save {{ savings_percentage }}%</span>
+              <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
             {% endif %}
           {% else %}
             {{ current_variant.price | money }}
@@ -3679,6 +3685,16 @@ let globalTouchManager = {
   const priceElements = document.querySelectorAll('[id="variantPrice"], .pricesizeadjust');
   priceElements.forEach(priceElement => {
     if (priceElement) {
+      // Ensure parent container has flex column layout
+      if (!priceElement.style.display || priceElement.style.display === 'none') {
+        priceElement.style.display = 'flex';
+      }
+      if (priceElement.style.flexDirection !== 'column') {
+        priceElement.style.flexDirection = 'column';
+        priceElement.style.alignItems = 'flex-start';
+        priceElement.style.gap = '0.25rem';
+      }
+      
       // Check if variant has compare_at_price and it's greater than price
       if (currentVariant.compare_at_price && currentVariant.compare_at_price > currentVariant.price) {
         const savingsAmount = currentVariant.compare_at_price - currentVariant.price;
@@ -3687,18 +3703,23 @@ let globalTouchManager = {
         // Get sale text from metafield (if available)
         const saleText = currentVariant.sale_text || null;
         
-        // Build price HTML
-        let priceHTML = `<span class="price-sale" style="color: #dc2626;">${currentVariant.formatted_price}</span>`;
-        priceHTML += `<span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">${currentVariant.formatted_compare_at_price}</span>`;
+        // Build price HTML with sale text below
+        let priceHTML = `<div style="display: flex; align-items: baseline; white-space: nowrap;"><span class="price-sale" style="color: #dc2626;">${currentVariant.formatted_price}</span><span class="price-compare" style="text-decoration: line-through; color: #6b7280; opacity: 0.7; margin-left: 0.5rem;">${currentVariant.formatted_compare_at_price}</span></div>`;
         
         if (saleText) {
-          priceHTML += `<span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500; margin-left: 0.5rem;">${saleText}</span>`;
+          priceHTML += `<span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">${saleText}</span>`;
         } else if (savingsPercentage > 0) {
-          priceHTML += `<span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500; margin-left: 0.5rem;">Save ${savingsPercentage}%</span>`;
+          priceHTML += `<span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">Save ${savingsPercentage}%</span>`;
         }
         
         priceElement.innerHTML = priceHTML;
       } else {
+        // For regular price, just show price without flex column
+        priceElement.style.display = '';
+        priceElement.style.flexDirection = '';
+        priceElement.style.alignItems = '';
+        priceElement.style.gap = '';
+        priceElement.style.whiteSpace = 'nowrap';
         priceElement.textContent = currentVariant.formatted_price;
         priceElement.innerHTML = currentVariant.formatted_price; // Clear any previous HTML
       }
