@@ -272,13 +272,14 @@
     <!-- Sticky Checkout Section - Only show when cart has items -->
     {% if cart.item_count > 0 %}
     <div class="checkout-section">
-      <div class="discount-code-section desktop-only">
+      <!-- Discount code section - Original: desktop-only (hidden on desktop via CSS now) -->
+      <div class="discount-code-section desktop-only hide-on-desktop">
         <input type="text" id="discount-code" class="discount-input" placeholder="Discount Code" maxlength="20">
         <button id="apply-discount" class="apply-discount-btn">Apply</button>
       </div>
       
-      <!-- Applied Discount Codes Display -->
-      <div id="applied-discounts" class="applied-discounts-section desktop-only" style="display: none;">
+      <!-- Applied Discount Codes Display - Original: desktop-only (hidden on desktop via CSS now) -->
+      <div id="applied-discounts" class="applied-discounts-section desktop-only hide-on-desktop" style="display: none;">
         {% if cart.discount_codes.size > 0 %}
           {% for discount_code in cart.discount_codes %}
             {% if discount_code.applicable %}
@@ -311,14 +312,12 @@
         {% endfor %}
       {% endif %}
  
-      
-      
       <div class="shipping-info">
         <div class="shipping-text">
           <p>Free shipping over ${{ free_shipping_dollars }} and easy 30 days return</p>
           
-          <!-- Payment Methods -->
-          <div class="payment-methods">
+          <!-- Payment Methods - Hidden on desktop, visible on mobile (unchanged from original) -->
+          <div class="payment-methods desktop-hide-payment-icons">
             <!-- Visa -->
             <img src="{{ 'visa-svgrepo-com.svg' | asset_url }}" alt="Visa" class="payment-icon">
             
@@ -340,8 +339,15 @@
             <!-- Google Pay -->
             <img src="{{ 'google-pay-svgrepo-com.svg' | asset_url }}" alt="Google Pay" class="payment-icon">
           </div>
+          
+          <!-- Dynamic Quick Pay Button - Desktop only -->
+          <div class="quick-pay-button-container desktop-only" id="quick-pay-container">
+            <!-- Shopify Dynamic Checkout Buttons -->
+            <div id="dynamic-checkout-desktop" class="dynamic-checkout-buttons-desktop">
+              {{ content_for_additional_checkout_buttons }}
+            </div>
+          </div>
         </div>
-        
         
         <div class="shipping-totals">
           <div class="shipping-row" id="savings-display" {% if total_savings <= 0 %}style="display: none;"{% endif %}>
@@ -363,7 +369,7 @@
             <span class="total-amount">{{ cart.total_price | money }}</span>
           </div>
           
-          <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
+          <button class="checkout-btn mobile-only" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
           
           <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) - Mobile Only -->
           <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart mobile-only"></div>
@@ -1289,7 +1295,7 @@ body.g-cart-open {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 24px;
-  margin-top: 18px;
+  margin-top: 8px;
 }
 
 .shipping-text {
@@ -1302,10 +1308,182 @@ body.g-cart-open {
   margin: 0 0 12px 0;
 }
 
+.free-shipping-text {
+  font-size: 14px;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+/* Quick Pay Button Container - Desktop only */
+.quick-pay-button-container {
+  width: 100%;
+  margin-bottom: 0px;
+}
+
+.dynamic-checkout-buttons-desktop {
+  width: 100%;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+
+/* Style Shopify dynamic checkout buttons - remove background and border, horizontal layout */
+.dynamic-checkout-buttons-desktop > * {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+.dynamic-checkout-buttons-desktop .shopify-payment-button,
+.dynamic-checkout-buttons-desktop .dynamic-checkout__content {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+.dynamic-checkout-buttons-desktop .shopify-payment-button {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.dynamic-checkout-buttons-desktop .shopify-payment-button__button,
+.dynamic-checkout-buttons-desktop button {
+  width: 100% !important;
+  height: 100% !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #111827 !important;
+  border: none !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  font-family: inherit !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  position: relative !important;
+  box-shadow: none !important;
+  flex: 1 1 auto !important;
+}
+
+.dynamic-checkout-buttons-desktop .shopify-payment-button__button:hover,
+.dynamic-checkout-buttons-desktop button:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  transform: translateY(-1px) !important;
+  box-shadow: none !important;
+}
+
+.dynamic-checkout-buttons-desktop .shopify-payment-button__button:active,
+.dynamic-checkout-buttons-desktop button:active {
+  transform: translateY(0) !important;
+  box-shadow: none !important;
+}
+
+.quick-pay-btn {
+  width: 100%;
+  background: #f3f4f6;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+}
+
+.quick-pay-btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.quick-pay-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.quick-pay-btn:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  border-color: #e5e7eb;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.quick-pay-btn .quick-pay-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-pay-btn .quick-pay-logo img {
+  height: 20px;
+  width: auto;
+  display: block;
+}
+
+.quick-pay-btn .quick-pay-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .payment-methods {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
+}
+
+/* Hide discount codes and payment methods on desktop only */
+@media (min-width: 769px) {
+  /* Hide discount codes on desktop (override desktop-only default behavior) */
+  .discount-code-section.hide-on-desktop,
+  .applied-discounts-section.hide-on-desktop {
+    display: none !important;
+  }
+  
+  /* Hide payment icons on desktop */
+  .payment-methods.desktop-hide-payment-icons {
+    display: none !important;
+  }
+  
+  /* Position free shipping text above quick pay button on desktop */
+  .shipping-text p {
+    margin-bottom: 12px;
+  }
+}
+
+/* Mobile: Keep original behavior - discount codes hidden (desktop-only), payment icons visible */
+@media (max-width: 768px) {
+  /* Payment icons stay visible on mobile */
+  .payment-methods.desktop-hide-payment-icons {
+    display: flex !important;
+  }
+  
+  /* Discount codes stay hidden on mobile (original desktop-only behavior) */
+  .discount-code-section.desktop-only,
+  .applied-discounts-section.desktop-only {
+    display: none !important;
+  }
 }
 
 .payment-icon {
@@ -4263,6 +4441,158 @@ function refreshBundleProducts(cart) {
 }
 
 // Duplicate function removed - using the AJAX version above
+
+// Dynamic Quick Pay Button - Desktop only
+// Shows only Google Pay on all devices (including Apple devices)
+// Hides Shop Pay and Apple Pay
+function initializeQuickPayButton() {
+  // Only initialize on desktop
+  if (window.innerWidth <= 768) {
+    return;
+  }
+  
+  var $container = $('#quick-pay-container');
+  var $dynamicCheckout = $('#dynamic-checkout-desktop');
+  
+  if ($container.length === 0 || $dynamicCheckout.length === 0) {
+    return;
+  }
+  
+  // Filter Shopify's dynamic checkout buttons to show only Google Pay
+  setTimeout(function() {
+    var $buttons = $dynamicCheckout.find('.shopify-payment-button, .dynamic-checkout__content, [class*="payment-button"]');
+    
+    if ($buttons.length === 0) {
+      // If no Shopify buttons found, create fallback Google Pay button
+      createFallbackQuickPayButton(); // Always Google Pay
+      return;
+    }
+    
+    // Hide all buttons first
+    $buttons.hide();
+    
+    // Show only Google Pay button, hide Shop Pay and Apple Pay
+    var buttonFound = false;
+    
+    $buttons.each(function() {
+      var $btn = $(this);
+      var btnText = $btn.text().toLowerCase();
+      var btnHtml = $btn.html().toLowerCase();
+      var btnId = ($btn.attr('id') || '').toLowerCase();
+      var btnClass = ($btn.attr('class') || '').toLowerCase();
+      
+      // Check if this is a Google Pay button
+      var isGooglePay = btnText.indexOf('google') !== -1 || 
+                       btnHtml.indexOf('google') !== -1 ||
+                       btnId.indexOf('google') !== -1 ||
+                       btnClass.indexOf('google') !== -1 ||
+                       $btn.find('[data-testid*="google"]').length > 0 ||
+                       $btn.find('button[data-testid*="google"]').length > 0;
+      
+      // Check if this is Shop Pay (to hide it)
+      var isShopPay = btnText.indexOf('shop') !== -1 && btnText.indexOf('google') === -1 ||
+                      btnHtml.indexOf('shop') !== -1 && btnHtml.indexOf('google') === -1 ||
+                      btnId.indexOf('shop') !== -1 ||
+                      btnClass.indexOf('shop') !== -1 ||
+                      $btn.find('[data-testid*="shop"]').length > 0 ||
+                      $btn.find('button[data-testid*="shop"]').length > 0;
+      
+      // Check if this is Apple Pay (to hide it)
+      var isApplePay = btnText.indexOf('apple') !== -1 || 
+                       btnHtml.indexOf('apple') !== -1 ||
+                       btnId.indexOf('apple') !== -1 ||
+                       btnClass.indexOf('apple') !== -1 ||
+                       $btn.find('[data-testid*="apple"]').length > 0 ||
+                       $btn.find('button[data-testid*="apple"]').length > 0;
+      
+      // Show only Google Pay, hide Shop Pay and Apple Pay
+      if (isGooglePay && !isShopPay && !isApplePay) {
+        $btn.show();
+        buttonFound = true;
+        // Style the button to match our design
+        $btn.find('button').addClass('quick-pay-btn');
+      } else {
+        // Hide Shop Pay and Apple Pay buttons
+        $btn.hide();
+      }
+    });
+    
+    // If no Google Pay button found, create fallback
+    if (!buttonFound) {
+      createFallbackQuickPayButton(); // Always Google Pay
+    }
+  }, 300);
+}
+
+// Fallback function to create custom Google Pay button (always Google Pay)
+function createFallbackQuickPayButton() {
+  var $container = $('#quick-pay-container');
+  var $dynamicCheckout = $('#dynamic-checkout-desktop');
+  
+  $dynamicCheckout.empty();
+  
+  // Always create Google Pay button
+  var buttonHtml = '<button class="quick-pay-btn" id="quick-pay-btn" data-payment-type="google-pay">' +
+                   '<span class="quick-pay-logo">' +
+                   '<svg class="quick-pay-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">' +
+                   '<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>' +
+                   '<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>' +
+                   '<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>' +
+                   '<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>' +
+                   '</svg>' +
+                   '<span>Buy with Google Pay</span>' +
+                   '</span>' +
+                   '</button>';
+  
+  $dynamicCheckout.html(buttonHtml);
+  
+  // Handle button click
+  $(document).off('click', '#quick-pay-btn').on('click', '#quick-pay-btn', function(e) {
+    e.preventDefault();
+    
+    // Close cart drawer
+    if (typeof bodyScrollLock !== 'undefined') {
+      bodyScrollLock.unlock();
+    }
+    $('.r-side-cart').removeClass('active');
+    
+    // Navigate to checkout
+    setTimeout(function() {
+      window.location.href = '/checkout';
+    }, 100);
+  });
+}
+
+// Initialize quick pay button on document ready and cart refresh
+$(document).ready(function() {
+  // Initialize on page load
+  setTimeout(function() {
+    initializeQuickPayButton();
+  }, 100);
+  
+  // Re-initialize after cart refresh
+  $(document).on('cart:refresh', function() {
+    setTimeout(function() {
+      initializeQuickPayButton();
+    }, 200);
+  });
+  
+  // Re-initialize when cart opens
+  $(document).on('click', '.cart-icon', function() {
+    setTimeout(function() {
+      initializeQuickPayButton();
+    }, 200);
+  });
+  
+  // Re-initialize on window resize (in case switching between mobile/desktop)
+  var resizeTimer;
+  $(window).on('resize', function() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function() {
+      initializeQuickPayButton();
+    }, 250);
+  });
+});
 
 // Shopify Dynamic Checkout Buttons are now used for Apple Pay
 // No custom JavaScript needed - Shopify handles everything automatically
