@@ -363,6 +363,15 @@
             <span class="total-amount">{{ cart.total_price | money }}</span>
           </div>
           
+          <!-- App Blocks for Cart Widgets (e.g., Kite Free Gift) -->
+          <div class="cart-app-blocks">
+            {% for block in section.blocks %}
+              {% if block.type == '@app' %}
+                {% render block %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          
           <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
           
           <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) - Mobile Only -->
@@ -1390,6 +1399,17 @@ body.g-cart-open {
   font-size: 14px;
   font-weight: 600;
   color: #111827;
+}
+
+/* App Blocks Container for Cart Widgets (e.g., Kite Free Gift) */
+.cart-app-blocks {
+  width: 100%;
+  margin: 16px 0;
+  padding: 0;
+}
+
+.cart-app-blocks:empty {
+  display: none;
 }
 
 .checkout-btn {
@@ -4358,6 +4378,6 @@ function startApplePay(cart) {
 }
 
 // Simplified Apple Pay - redirects to checkout where Shopify handles everything
-</script>
+</script> 
 
 
