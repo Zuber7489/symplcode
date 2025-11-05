@@ -1836,11 +1836,47 @@ function renderProducts(products, tab) {
         `;
         
         // Generate features HTML with proper bullet points - only if features exist
-        const featuresHtml = prod.features ? `
-          <ul>
-            ${prod.features.split(/[•\n]/).filter(feature => feature.trim()).map(feature => feature.trim()).map(feature => `<li>${feature}</li>`).join('')}
-          </ul>
-        ` : '';
+        const featuresHtml = prod.features ? (() => {
+          let features = prod.features;
+          
+          // Decode HTML entities if present
+          features = decodeHtmlEntities(features);
+          
+          // If it contains HTML li tags, extract them
+          if (features.includes('<li>') || features.includes('&lt;li&gt;')) {
+            // Handle escaped HTML
+            const decoded = features.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            const liMatches = decoded.match(/<li[^>]*>(.*?)<\/li>/gi);
+            if (liMatches && liMatches.length > 0) {
+              return `<ul>${liMatches.map(li => {
+                const text = li.replace(/<\/?li[^>]*>/gi, '').trim();
+                return text ? `<li>${text}</li>` : '';
+              }).filter(li => li).join('')}</ul>`;
+            }
+          }
+          
+          // Split by " - " pattern (most common format from rich text editor)
+          const dashSplit = features.split(/\s+-\s+/);
+          if (dashSplit.length > 1) {
+            return `<ul>${dashSplit.map(f => {
+              const trimmed = f.trim();
+              // Remove leading dash if present (handles cases like "- Feature1 - Feature2")
+              const cleaned = trimmed.replace(/^-\s*/, '');
+              return cleaned ? `<li>${cleaned}</li>` : '';
+            }).filter(li => li).join('')}</ul>`;
+          }
+          
+          // Fallback: Split by various delimiters: bullets, newlines, or line breaks
+          const featureList = features
+            .split(/(?:[•\n\r]|<\/li>)/)
+            .map(f => f.trim().replace(/^-\s*/, '')) // Remove leading dashes
+            .filter(f => f && f.length > 0 && !f.match(/^<li/i));
+          
+          // Default: use the featureList we found
+          return featureList.length > 0 
+            ? `<ul>${featureList.map(f => `<li>${f}</li>`).join('')}</ul>`
+            : '';
+        })() : '';
         
         // Generate Available in section HTML with dynamic swatches
         const isAvailable = prod.available !== undefined ? prod.available : true;
@@ -2078,11 +2114,47 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
       `;
       
       // Generate features HTML with proper bullet points - only if features exist
-      const featuresHtml = productData.features ? `
-        <ul>
-          ${productData.features.split(/[•\n]/).filter(feature => feature.trim()).map(feature => feature.trim()).map(feature => `<li>${feature}</li>`).join('')}
-        </ul>
-      ` : '';
+      const featuresHtml = productData.features ? (() => {
+        let features = productData.features;
+        
+        // Decode HTML entities if present
+        features = decodeHtmlEntities(features);
+        
+        // If it contains HTML li tags, extract them
+        if (features.includes('<li>') || features.includes('&lt;li&gt;')) {
+          // Handle escaped HTML
+          const decoded = features.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+          const liMatches = decoded.match(/<li[^>]*>(.*?)<\/li>/gi);
+          if (liMatches && liMatches.length > 0) {
+            return `<ul>${liMatches.map(li => {
+              const text = li.replace(/<\/?li[^>]*>/gi, '').trim();
+              return text ? `<li>${text}</li>` : '';
+            }).filter(li => li).join('')}</ul>`;
+          }
+        }
+        
+        // Split by " - " pattern (most common format from rich text editor)
+        const dashSplit = features.split(/\s+-\s+/);
+        if (dashSplit.length > 1) {
+          return `<ul>${dashSplit.map(f => {
+            const trimmed = f.trim();
+            // Remove leading dash if present (handles cases like "- Feature1 - Feature2")
+            const cleaned = trimmed.replace(/^-\s*/, '');
+            return cleaned ? `<li>${cleaned}</li>` : '';
+          }).filter(li => li).join('')}</ul>`;
+        }
+        
+        // Fallback: Split by various delimiters: bullets, newlines, or line breaks
+        const featureList = features
+          .split(/(?:[•\n\r]|<\/li>)/)
+          .map(f => f.trim().replace(/^-\s*/, '')) // Remove leading dashes
+          .filter(f => f && f.length > 0 && !f.match(/^<li/i));
+        
+        // Default: use the featureList we found
+        return featureList.length > 0 
+          ? `<ul>${featureList.map(f => `<li>${f}</li>`).join('')}</ul>`
+          : '';
+      })() : '';
       
       // Generate Available in section HTML with dynamic swatches
       const isAvailable = productData.available !== undefined ? productData.available : true;
