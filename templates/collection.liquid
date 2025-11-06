@@ -670,6 +670,10 @@
                           {% if matched_variant.metafields.custom.variant_gallery.value != blank %}data-variant-gallery="true"{% endif %}
                           data-product-id="{{ product.id }}-{{ size_variant.id }}"
                           data-variant-index="{{ forloop.index0 }}"
+                          data-variant-price="{{ matched_variant.price }}"
+                          data-variant-formatted-price="{{ matched_variant.price | money }}"
+                          {% if matched_variant.compare_at_price %}data-variant-compare-price="{{ matched_variant.compare_at_price }}" data-variant-formatted-compare-price="{{ matched_variant.compare_at_price | money }}"{% endif %}
+                          {% if matched_variant.metafields.custom.sale_text != blank %}data-variant-sale-text="{{ matched_variant.metafields.custom.sale_text | escape }}"{% endif %}
                           title="{{ value | capitalize }}"
                           style="display:inline-block; cursor:pointer; text-align:center;"
                           onclick="updateProductLink(this, '{{ product.url }}', '{{ matched_variant.id }}'); event.preventDefault(); event.stopPropagation();"
@@ -927,6 +931,10 @@
                           {% if matched_variant.metafields.custom.variant_gallery.value != blank %}data-variant-gallery="true"{% endif %}
                           data-product-id="{{ product.id }}-{{ style_variant.id }}"
                           data-variant-index="{{ forloop.index0 }}"
+                          data-variant-price="{{ matched_variant.price }}"
+                          data-variant-formatted-price="{{ matched_variant.price | money }}"
+                          {% if matched_variant.compare_at_price %}data-variant-compare-price="{{ matched_variant.compare_at_price }}" data-variant-formatted-compare-price="{{ matched_variant.compare_at_price | money }}"{% endif %}
+                          {% if matched_variant.metafields.custom.sale_text != blank %}data-variant-sale-text="{{ matched_variant.metafields.custom.sale_text | escape }}"{% endif %}
                           title="{{ value | capitalize }}"
                           style="display:inline-block; cursor:pointer; text-align:center;"
                           onclick="updateProductLink(this, '{{ product.url }}', '{{ matched_variant.id }}'); event.preventDefault(); event.stopPropagation();"
@@ -1135,6 +1143,10 @@
                       {% if matched_variant.metafields.custom.variant_gallery.value != blank %}data-variant-gallery="true"{% endif %}
                       data-product-id="{{ product.id }}"
                       data-variant-index="{{ forloop.index0 }}"
+                      data-variant-price="{{ matched_variant.price }}"
+                      data-variant-formatted-price="{{ matched_variant.price | money }}"
+                      {% if matched_variant.compare_at_price %}data-variant-compare-price="{{ matched_variant.compare_at_price }}" data-variant-formatted-compare-price="{{ matched_variant.compare_at_price | money }}"{% endif %}
+                      {% if matched_variant.metafields.custom.sale_text != blank %}data-variant-sale-text="{{ matched_variant.metafields.custom.sale_text | escape }}"{% endif %}
                       title="{{ value | capitalize }}"
                       style="display:inline-block; cursor:pointer; text-align:center;"
                       onclick="updateProductLink(this, '{{ product.url }}', '{{ matched_variant.id }}'); event.preventDefault(); event.stopPropagation();"
@@ -1442,6 +1454,62 @@ function updateProductLink(element, productUrl, variantId) {
   const activeVariant = element.querySelector('.variant-underline');
   if (activeVariant) {
     activeVariant.style.background = 'black';
+  }
+  
+  // Update variant price
+  const priceContainer = productCard.querySelector('.product-price');
+  if (priceContainer) {
+    const variantPrice = element.getAttribute('data-variant-formatted-price');
+    const variantComparePrice = element.getAttribute('data-variant-formatted-compare-price');
+    const variantSaleText = element.getAttribute('data-variant-sale-text');
+    const variantPriceRaw = parseInt(element.getAttribute('data-variant-price')) || 0;
+    const variantComparePriceRaw = parseInt(element.getAttribute('data-variant-compare-price')) || 0;
+    
+    if (variantPrice) {
+      // Clear existing price content
+      priceContainer.innerHTML = '';
+      
+      if (variantComparePriceRaw > variantPriceRaw && variantComparePrice) {
+        // Sale price - show both prices
+        const priceWrapper = document.createElement('div');
+        priceWrapper.style.cssText = 'display: flex; align-items: baseline; white-space: nowrap;';
+        
+        const salePrice = document.createElement('span');
+        salePrice.className = 'price-sale';
+        salePrice.textContent = variantPrice;
+        
+        const comparePrice = document.createElement('span');
+        comparePrice.className = 'price-compare';
+        comparePrice.textContent = variantComparePrice;
+        
+        priceWrapper.appendChild(salePrice);
+        priceWrapper.appendChild(comparePrice);
+        priceContainer.appendChild(priceWrapper);
+        
+        // Add sale text or savings percentage
+        if (variantSaleText) {
+          const saleText = document.createElement('span');
+          saleText.className = 'sale-text';
+          saleText.textContent = variantSaleText;
+          priceContainer.appendChild(saleText);
+        } else {
+          const savingsAmount = variantComparePriceRaw - variantPriceRaw;
+          const savingsPercentage = Math.round((savingsAmount / variantComparePriceRaw) * 100);
+          if (savingsPercentage > 0) {
+            const savingsText = document.createElement('span');
+            savingsText.className = 'savings-text';
+            savingsText.textContent = 'Save ' + savingsPercentage + '%';
+            priceContainer.appendChild(savingsText);
+          }
+        }
+      } else {
+        // Regular price
+        const regularPrice = document.createElement('span');
+        regularPrice.className = 'price-regular';
+        regularPrice.textContent = variantPrice;
+        priceContainer.appendChild(regularPrice);
+      }
+    }
   }
 }
 
