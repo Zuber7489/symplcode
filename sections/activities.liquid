@@ -483,25 +483,40 @@
     });
 
     // Handle click events for desktop images - make images clickable
-    activityImages.forEach(image => {
-      image.addEventListener('click', function(e) {
+    // Use event delegation on the image container to handle clicks properly
+    const imageContainer = document.querySelector('.activity-image-container');
+    if (imageContainer) {
+      imageContainer.addEventListener('click', function(e) {
         if (!isMobile()) {
           e.preventDefault();
           e.stopPropagation();
           
-          // Extract activity ID from image ID (format: activity-image-{blockId})
-          const activityId = this.id.replace('activity-image-', '');
-          const activityItem = document.querySelector(`[data-activity="${activityId}"]`);
+          // Find the currently active activity item
+          const activeActivityItem = document.querySelector('.activity-item.active');
           
-          if (activityItem) {
-            const link = activityItem.getAttribute('data-link');
+          if (activeActivityItem) {
+            const link = activeActivityItem.getAttribute('data-link');
             if (link && link.trim() !== '') {
               window.location.href = link;
+            }
+          } else {
+            // Fallback: try to get link from the clicked image
+            const clickedImage = e.target.closest('.activity-image');
+            if (clickedImage && clickedImage.id) {
+              const activityId = clickedImage.id.replace('activity-image-', '');
+              const activityItem = document.querySelector(`[data-activity="${activityId}"]`);
+              
+              if (activityItem) {
+                const link = activityItem.getAttribute('data-link');
+                if (link && link.trim() !== '') {
+                  window.location.href = link;
+                }
+              }
             }
           }
         }
       });
-    });
+    }
 
     // Mobile-specific functionality
     function isMobile() {
