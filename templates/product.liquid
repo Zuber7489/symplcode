@@ -456,7 +456,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
           {% if current_variant.metafields.custom.sale_text != blank %}
             <span class="sale-text" style="font-size: 1rem; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
           {% elsif savings_percentage > 0 %}
-            <span class="savings-text" style="font-size: 1rem; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
+            <span class="savings-text" style="font-size: 14px; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
           {% endif %}
         {% else %}
           {{ current_variant.price | money }}
@@ -709,7 +709,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
             {% if current_variant.metafields.custom.sale_text != blank %}
               <span class="sale-text" style="font-size: 15px; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
             {% elsif savings_percentage > 0 %}
-              <span class="savings-text" style="font-size: 15px; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
+              <span class="savings-text" style="font-size: 14px; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
             {% endif %}
           {% else %}
             {{ current_variant.price | money }}
@@ -727,7 +727,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
             {% if current_variant.metafields.custom.sale_text != blank %}
               <span class="sale-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">{{ current_variant.metafields.custom.sale_text }}</span>
             {% elsif savings_percentage > 0 %}
-              <span class="savings-text" style="font-size: 0.875rem; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
+              <span class="savings-text" style="font-size: 14px; color: #dc2626; font-weight: 500;">Save {{ savings_percentage }}%</span>
             {% endif %}
           {% else %}
             {{ current_variant.price | money }}
@@ -3709,7 +3709,7 @@ let globalTouchManager = {
         if (saleText) {
           priceHTML += `<span class="sale-text" style="font-size: 1rem; color: #dc2626; font-weight: 500;">${saleText}</span>`;
         } else if (savingsPercentage > 0) {
-          priceHTML += `<span class="savings-text" style="font-size: 1rem; color: #dc2626; font-weight: 500;">Save ${savingsPercentage}%</span>`;
+          priceHTML += `<span class="savings-text" style="font-size: 14px; color: #dc2626; font-weight: 500;">Save ${savingsPercentage}%</span>`;
         }
         
         priceElement.innerHTML = priceHTML;
