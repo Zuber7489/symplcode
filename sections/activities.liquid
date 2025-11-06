@@ -184,6 +184,7 @@
     height: 600px; /* Approximately 6in at 96dpi */
     overflow: hidden;
     border-radius: 20px; /* More rounded corners for less rectangular shape */
+    cursor: pointer;
   }
   @media screen and (min-width: 1440px) {
   .activity-image-container {
@@ -205,6 +206,7 @@
     opacity: 0;
     transition: opacity 0.5s ease;
     border-radius: 20px;
+    cursor: pointer;
   }
   
   .activity-image.active {
@@ -475,6 +477,27 @@
           const link = this.getAttribute('data-link');
           if (link && link.trim() !== '') {
             window.location.href = link;
+          }
+        }
+      });
+    });
+
+    // Handle click events for desktop images - make images clickable
+    activityImages.forEach(image => {
+      image.addEventListener('click', function(e) {
+        if (!isMobile()) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Extract activity ID from image ID (format: activity-image-{blockId})
+          const activityId = this.id.replace('activity-image-', '');
+          const activityItem = document.querySelector(`[data-activity="${activityId}"]`);
+          
+          if (activityItem) {
+            const link = activityItem.getAttribute('data-link');
+            if (link && link.trim() !== '') {
+              window.location.href = link;
+            }
           }
         }
       });
