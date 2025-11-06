@@ -760,7 +760,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         </select>
     
         <button type="submit" name="add" id="MobileAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" {% unless current_variant.available %}disabled{% endunless %} style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6; pointer-events: none;{% endunless %}">
-          <span id="AddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
+          <span id="AddToCartText" style="text-transform: none !important;">{% if current_variant.available %}{% if current_variant.metafields.custom.button_text %}{{ current_variant.metafields.custom.button_text }}{% else %}Add to Bag{% endif %}{% else %}Out of Stock{% endif %}</span>
         </button>
         
         {% comment %} Custom text below Add to Bag button {% endcomment %}
@@ -2597,6 +2597,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
         compare_at_price: {% if variant.compare_at_price %}{{ variant.compare_at_price }}{% else %}null{% endif %}, // Compare at price in cents
         formatted_compare_at_price: {% if variant.compare_at_price %}"{{ variant.compare_at_price | money }}"{% else %}null{% endif %}, // Shopify formatted compare at price
         sale_text: {% if variant.metafields.custom.sale_text %}"{{ variant.metafields.custom.sale_text | escape }}"{% else %}null{% endif %}, // Custom sale text metafield
+        button_text: {% if variant.metafields.custom.button_text %}"{{ variant.metafields.custom.button_text | escape }}"{% else %}null{% endif %}, // Custom button text metafield (e.g., "Pre-Order Now")
         available: {{ variant.available }},
         inventory_quantity: {{ variant.inventory_quantity | default: 0 }},
         featured_image: {% if variant.featured_image %}"{{ variant.featured_image | img_url: '600x600' }}"{% else %}null{% endif %},
@@ -3732,13 +3733,15 @@ let globalTouchManager = {
   if (addToCartButton && addToCartText) {
     const isAvailable = currentVariant.available;
     const isOutOfStock = !currentVariant.available;
+    const variantData = productVariants[currentVariant.id];
+    const customButtonText = variantData && variantData.button_text ? variantData.button_text : null;
     addToCartButton.disabled = isOutOfStock;
     addToCartButton.classList.toggle("disabled", isOutOfStock);
     addToCartButton.style.backgroundColor = isAvailable ? "#2f6f6f" : "#999";
     addToCartButton.style.cursor = isAvailable ? "pointer" : "not-allowed";
     addToCartButton.style.opacity = isAvailable ? "1" : "0.6";
     addToCartButton.style.pointerEvents = isAvailable ? "auto" : "none";
-    addToCartText.textContent = isAvailable ? "Add to Bag" : "Out of Stock";
+    addToCartText.textContent = isAvailable ? (customButtonText || "Add to Bag") : "Out of Stock";
   }
   
   if (typeof syncMobileAddToCartState === 'function') {
@@ -5429,7 +5432,7 @@ let globalTouchManager = {
           {% endfor %}
         </select>
         <button type="submit" name="add" id="StickyAddToCart" class="btn add-to-cart-button{% unless current_variant.available %} disabled{% endunless %}" {% unless current_variant.available %}disabled{% endunless %} style="width: 100%; padding: 16px 24px; background-color: {% if current_variant.available %}#2f6f6f{% else %}#999{% endif %}; color: white; border: none; border-radius: 999px; font-size: 18px; font-weight: 400; cursor: {% if current_variant.available %}pointer{% else %}not-allowed{% endif %}; border-radius:31px !important; margin-bottom: 0; margin-top:3px; transition: background 0.3s; text-transform: none !important; {% unless current_variant.available %}opacity: 0.6; pointer-events: none;{% endunless %}">
-          <span id="StickyAddToCartText" style="text-transform: none !important;">{% if current_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</span>
+          <span id="StickyAddToCartText" style="text-transform: none !important;">{% if current_variant.available %}{% if current_variant.metafields.custom.button_text %}{{ current_variant.metafields.custom.button_text }}{% else %}Add to Bag{% endif %}{% else %}Out of Stock{% endif %}</span>
         </button>
         
         {% comment %} Custom text below Add to Bag button (mobile) {% endcomment %}
@@ -5504,13 +5507,15 @@ let globalTouchManager = {
         var stickyText = document.getElementById('StickyAddToCartText');
         if (!stickyBtn || !stickyText || !currentVariant) return;
         var isAvailable = !!currentVariant.available;
+        var variantData = productVariants[currentVariant.id];
+        var customButtonText = variantData && variantData.button_text ? variantData.button_text : null;
         stickyBtn.disabled = !isAvailable;
         stickyBtn.classList.toggle('disabled', !isAvailable);
         stickyBtn.style.backgroundColor = isAvailable ? '#2f6f6f' : '#999';
         stickyBtn.style.cursor = isAvailable ? 'pointer' : 'not-allowed';
         stickyBtn.style.opacity = isAvailable ? '1' : '0.6';
         stickyBtn.style.pointerEvents = isAvailable ? 'auto' : 'none';
-        stickyText.textContent = isAvailable ? 'Add to Bag' : 'Out of Stock';
+        stickyText.textContent = isAvailable ? (customButtonText || 'Add to Bag') : 'Out of Stock';
       }
       document.addEventListener('variant:change', syncMobileAddToCartState);
       syncMobileAddToCartState();
