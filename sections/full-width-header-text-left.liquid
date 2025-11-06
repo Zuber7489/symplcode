@@ -116,6 +116,9 @@
       height: 100vh;
       width: 100%;
       background-color: #000;
+      /* Prevent height change on mobile when header hides/shows */
+      min-height: 100vh;
+      max-height: 100vh;
     }
     
     /* CONTAINER STYLING */
@@ -511,8 +514,14 @@
     
       @media (max-width: 768px) {
     .sympl-hero-section {
+      /* Fixed height on mobile to prevent height increase when header hides/shows */
       height: 100vh;
-      height: 100dvh; /* Dynamic viewport height for better mobile support */
+      height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      min-height: 100vh;
+      max-height: 100vh;
+      /* Prevent height recalculation on scroll */
+      position: relative;
+      overflow: hidden;
     }
     
     .sympl-hero-content {
@@ -655,11 +664,40 @@
     }
   }
   
-  /* Fallback for older browsers that don't support dvh */
+  /* Prevent height change on mobile when header hides/shows */
+  @media (max-width: 768px) {
+    /* Lock hero section height to prevent expansion when header hides */
+    .sympl-hero-section {
+      height: 100vh !important;
+      min-height: 100vh !important;
+      max-height: 100vh !important;
+      /* Use CSS custom properties to maintain fixed height */
+      --hero-height: 100vh;
+      height: var(--hero-height) !important;
+      min-height: var(--hero-height) !important;
+      max-height: var(--hero-height) !important;
+    }
+    
+    /* Ensure slider maintains fixed height */
+    .sympl-hero-slider {
+      height: 100% !important;
+      min-height: 100% !important;
+      max-height: 100% !important;
+    }
+    
+    /* Prevent height recalculation on scroll */
+    .sympl-slides-container {
+      height: 100% !important;
+    }
+  }
+  
+  /* Fallback for older browsers */
   @supports not (height: 100dvh) {
     @media (max-width: 768px) {
       .sympl-hero-section {
-        height: 100vh;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
       }
     }
   }
@@ -706,6 +744,42 @@
       
       // Initialize container width
       updateContainerWidth();
+      
+      // Lock hero section height on mobile to prevent expansion when header hides/shows
+      function lockHeroHeight() {
+        if (window.innerWidth <= 768) {
+          const heroSection = document.querySelector('.sympl-hero-section');
+          if (heroSection) {
+            // Get initial viewport height and lock it
+            const initialHeight = window.innerHeight;
+            // Set fixed height in pixels
+            heroSection.style.height = `${initialHeight}px`;
+            heroSection.style.minHeight = `${initialHeight}px`;
+            heroSection.style.maxHeight = `${initialHeight}px`;
+          }
+        }
+      }
+      
+      // Lock height on load
+      lockHeroHeight();
+      
+      // Lock height on resize (only if significant change, not from header hide/show)
+      let lastHeight = window.innerHeight;
+      let resizeTimeout;
+      window.addEventListener('resize', function() {
+        if (window.innerWidth <= 768) {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(function() {
+            const currentHeight = window.innerHeight;
+            // Only update if height change is significant (more than 100px)
+            // This prevents header hide/show from affecting hero height
+            if (Math.abs(currentHeight - lastHeight) > 100) {
+              lockHeroHeight();
+              lastHeight = currentHeight;
+            }
+          }, 200);
+        }
+      });
       
       // Show slide function - moves container horizontally like reference animation
       function showSlide(index) {
