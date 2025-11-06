@@ -93,7 +93,7 @@
   .top_bar {
     width: 100%;
     position: relative;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, opacity 0.2s ease, transform 0.2s ease, max-height 0.2s ease;
     background-color: {{ section.settings.bg_color_1 }};
     margin-bottom: 0; /* Remove any bottom margin */
     border-bottom: none; /* Remove any border */
@@ -432,11 +432,12 @@
     left: 0;
     width: 100%;
     z-index: 1002;
-    transition: transform 0.3s ease, background 0.3s, box-shadow 0.3s, top 0.3s;
+    transition: transform 0.3s ease, background 0.3s, box-shadow 0.3s, top 0s;
     margin-top: -1px; /* Remove any gap between announcement bar and header */
   }
   .header_wrap.header-hidden {
     transform: translateY(-100%);
+    transition: transform 0.3s ease, background 0.3s, box-shadow 0.3s, top 0s;
   }
   .header_wrap.sticky-bg {
     background: #fff !important;
@@ -526,12 +527,25 @@
   @media (max-width: 767px) {
     .header_wrap {
       top: 40px;
+      transition: transform 0.3s ease, background 0.3s, box-shadow 0.3s, top 0s !important;
     }
     .header_wrap.sticky-bg {
-      top: 0;
+      top: 0 !important;
     }
     .top_bar {
       position: static;
+      transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.2s ease;
+    }
+    /* Hide announcement bar when header is sticky on mobile */
+    body.has-sticky-header .top_bar,
+    .top_bar.hidden-on-scroll {
+      opacity: 0 !important;
+      transform: translateY(-100%) !important;
+      max-height: 0 !important;
+      overflow: hidden !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      visibility: hidden !important;
     }
   }
 </style>
@@ -899,33 +913,100 @@
 
     function onScroll() {
       if (!siteHeader) return;
-      if (window.scrollY <= 0) {
-        // Always show header at the very top, with gap for announcement bar
+      
+      const isMobile = window.innerWidth <= 767;
+      const scrollThreshold = isMobile ? 10 : 100; // Lower threshold for mobile
+      const currentScrollY = window.scrollY;
+      const scrollDirection = currentScrollY > lastScrollY ? 'down' : 'up';
+      
+      // At the very top - always show header with announcement bar
+      if (currentScrollY <= 0) {
         siteHeader.classList.remove('header-hidden', 'sticky-bg');
-        siteHeader.style.top = '40px';
+        siteHeader.style.top = isMobile ? '40px' : '40px';
+        const topBar = document.querySelector('.top_bar');
+        if (topBar) {
+          topBar.classList.remove('hidden-on-scroll');
+          document.body.classList.remove('has-sticky-header');
+        }
+        lastScrollY = currentScrollY;
         return;
       }
-      if (window.scrollY > lastScrollY && window.scrollY > 100) {
-        siteHeader.classList.add('header-hidden');
-        siteHeader.classList.remove('sticky-bg');
-        siteHeader.style.top = '0';
+      
+      // Mobile behavior: hide on scroll down, show on scroll up
+      if (isMobile) {
+        const topBar = document.querySelector('.top_bar');
+        
+        // If scrolled past threshold
+        if (currentScrollY > scrollThreshold) {
+          if (scrollDirection === 'down') {
+            // Scrolling down - hide header
+            siteHeader.classList.add('header-hidden');
+            siteHeader.classList.remove('sticky-bg');
+            siteHeader.style.top = '0';
+            // Hide announcement bar
+            if (topBar) {
+              topBar.classList.add('hidden-on-scroll');
+              document.body.classList.add('has-sticky-header');
+            }
+          } else {
+            // Scrolling up - show header
+            siteHeader.classList.remove('header-hidden');
+            siteHeader.classList.add('sticky-bg');
+            siteHeader.style.top = '0';
+            // Keep announcement bar hidden when sticky
+            if (topBar) {
+              topBar.classList.add('hidden-on-scroll');
+              document.body.classList.add('has-sticky-header');
+            }
+          }
+        } else {
+          // Within threshold - show header and stick to top
+          siteHeader.classList.remove('header-hidden');
+          siteHeader.classList.add('sticky-bg');
+          siteHeader.style.top = '0';
+          // Hide announcement bar when sticky
+          if (topBar) {
+            topBar.classList.add('hidden-on-scroll');
+            document.body.classList.add('has-sticky-header');
+          }
+        }
       } else {
-        siteHeader.classList.remove('header-hidden');
-        siteHeader.classList.add('sticky-bg');
-        siteHeader.style.top = '0';
+        // Desktop behavior: hide/show based on scroll direction
+        if (scrollDirection === 'down' && currentScrollY > scrollThreshold) {
+          siteHeader.classList.add('header-hidden');
+          siteHeader.classList.remove('sticky-bg');
+          siteHeader.style.top = '0';
+        } else {
+          siteHeader.classList.remove('header-hidden');
+          siteHeader.classList.add('sticky-bg');
+          siteHeader.style.top = '0';
+        }
       }
-      lastScrollY = window.scrollY;
+      
+      lastScrollY = currentScrollY;
     }
 
     // Always show header on load
     if (siteHeader) {
       siteHeader.classList.remove('header-hidden');
+      const isMobile = window.innerWidth <= 767;
+      const topBar = document.querySelector('.top_bar');
       if (window.scrollY > 0) {
         siteHeader.classList.add('sticky-bg');
         siteHeader.style.top = '0';
+        // Hide announcement bar if already scrolled
+        if (isMobile && topBar) {
+          topBar.classList.add('hidden-on-scroll');
+          document.body.classList.add('has-sticky-header');
+        }
       } else {
         siteHeader.classList.remove('sticky-bg');
-        siteHeader.style.top = '40px';
+        siteHeader.style.top = isMobile ? '40px' : '40px';
+        // Show announcement bar at top
+        if (topBar) {
+          topBar.classList.remove('hidden-on-scroll');
+          document.body.classList.remove('has-sticky-header');
+        }
       }
     }
 
