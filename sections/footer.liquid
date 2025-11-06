@@ -145,6 +145,17 @@
     font-size: 14px;
     font-family: 'Neue Haas Display', sans-serif;
     border-radius: 25px;
+    transition: border-color 0.2s ease;
+  }
+
+  .footer__newsletter-input[aria-invalid="true"] {
+    border: 1px solid #c62828;
+    background-color: #ffebee;
+  }
+
+  .footer__newsletter-input:focus {
+    outline: none;
+    border: none;
   }
 
   .footer__newsletter-btn {
@@ -153,6 +164,16 @@
     cursor: pointer;
     padding: 0 15px;
     margin-left: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .footer__newsletter-btn:hover:not(:disabled) {
+    opacity: 0.7;
+  }
+
+  .footer__newsletter-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   .icon__arrow {
@@ -179,6 +200,17 @@
     color: #fff;
     border-radius: 25px;
     font-family: 'Neue Haas Display', sans-serif;
+  }
+
+  .footerbtn:hover:not(:disabled) {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+
+  .footerbtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
   }
 
   /* Desktop vs Mobile button text control */
@@ -338,6 +370,42 @@
     background-color: #ffebee;
     color: #c62828;
     border: 1px solid #ef9a9a;
+  }
+
+  /* CAPTCHA styling - fixes positioning issues */
+  .footer__newsletter-form .g-recaptcha,
+  .footer__newsletter-form .shopify-challenge__container,
+  .footer__newsletter-form iframe[src*="recaptcha"],
+  .footer__newsletter-form .g-recaptcha > div {
+    margin: 15px 0 !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    position: relative !important;
+    left: 0 !important;
+    right: auto !important;
+    float: none !important;
+    clear: both !important;
+    overflow: visible !important;
+  }
+
+  .footer__newsletter-form .g-recaptcha iframe {
+    width: 100% !important;
+    max-width: 304px !important;
+    margin: 0 auto !important;
+    display: block !important;
+  }
+
+  /* Ensure CAPTCHA container doesn't overflow */
+  .footer__newsletter-form {
+    position: relative;
+    overflow: visible;
+  }
+
+  /* CAPTCHA loading state */
+  .footer__newsletter-form .shopify-challenge__container {
+    min-height: 78px;
+    padding: 10px 0;
   }
 
   /* Toast Notification Styles */
@@ -609,16 +677,30 @@
           <!-- Klaviyo List ID -->
           <input type="hidden" name="g" value="W7Kxzn">
           
+          <!-- Display form errors if any -->
+          {% if form.errors %}
+            <div class="footer__form-message footer__form-message--error" role="alert">
+              <strong>Error:</strong> {{ form.errors | default_errors }}
+            </div>
+          {% endif %}
+
+          {% if form.posted_successfully? %}
+            <div class="footer__form-message footer__form-message--success" role="status">
+              Thank you for subscribing!
+            </div>
+          {% endif %}
+          
           <div class="footer__newsletter-input-wrapper">
             <input type="email" 
                   name="contact[email]" 
                   id="ContactFooter-email" 
                   class="footer__newsletter-input" 
-                  value="" 
+                  value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}" 
                   placeholder="Email Address" 
                   aria-label="Email Address" 
-                  required>
-            <button type="submit" class="footer__newsletter-btn" name="commit" aria-label="Subscribe">
+                  required
+                  {% if form.errors contains 'email' %}aria-invalid="true"{% endif %}>
+            <button type="submit" class="footer__newsletter-btn" name="commit" aria-label="Subscribe" id="ContactFooter-submit-arrow">
               <span class="icon__arrow">→</span>
             </button>
           </div>
@@ -796,6 +878,11 @@
     // Handle newsletter form submission
     const newsletterForm = document.getElementById('ContactFooter');
     const subscribeButton = document.querySelector('.footerbtn');
+    const arrowButton = document.getElementById('ContactFooter-submit-arrow');
+    const emailInput = document.getElementById('ContactFooter-email');
+    
+    // Track if form is submitting to prevent double submission
+    let isSubmitting = false;
     
     // Define helper functions
     function showToastNotification() {
@@ -842,43 +929,122 @@
       }
     }
     
-    if (newsletterForm && subscribeButton) {
-      // Handle form submit - just add Klaviyo integration
-      newsletterForm.addEventListener('submit', function(e) {
-        const emailInput = document.getElementById('ContactFooter-email');
-        const email = emailInput ? emailInput.value : '';
-        
-        if (email && isValidEmail(email)) {
-          // Submit to Klaviyo in parallel
-          submitToKlaviyo(email);
-        }
-        
-        // Let Shopify handle the form naturally (no e.preventDefault())
-      });
+    // Handle form submission (for both arrow button and submit events)
+    function handleFormSubmit(e) {
+      if (isSubmitting) {
+        e.preventDefault();
+        return false;
+      }
       
-      // Handle button click - trigger form submission
+      const email = emailInput ? emailInput.value.trim() : '';
+      
+      // Validate email
+      if (!email || !isValidEmail(email)) {
+        e.preventDefault();
+        if (emailInput) {
+          emailInput.focus();
+          emailInput.setAttribute('aria-invalid', 'true');
+        }
+        return false;
+      }
+      
+      // Mark as submitting
+      isSubmitting = true;
+      
+      // Disable buttons to prevent double submission
+      if (arrowButton) arrowButton.disabled = true;
+      if (subscribeButton) subscribeButton.disabled = true;
+      
+      // Submit to Klaviyo in parallel (non-blocking)
+      submitToKlaviyo(email);
+      
+      // Show toast notification for better UX
+      showToastNotification();
+      
+      // Let Shopify handle the form submission naturally
+      // The form will submit to /contact which handles CAPTCHA
+      return true;
+    }
+    
+    // Set up form submission handler
+    if (newsletterForm) {
+      newsletterForm.addEventListener('submit', function(e) {
+        // Only prevent default if validation fails
+        if (!handleFormSubmit(e)) {
+          isSubmitting = false;
+          // Re-enable buttons if validation failed
+          if (arrowButton) arrowButton.disabled = false;
+          if (subscribeButton) subscribeButton.disabled = false;
+        }
+      });
+    }
+    
+    // Handle arrow button click (explicit handler to ensure it works)
+    if (arrowButton) {
+      arrowButton.addEventListener('click', function(e) {
+        // Don't prevent default - let the form submit naturally
+        // The form submit handler will validate and handle everything
+      });
+    }
+    
+    // Handle separate subscribe button click
+    if (subscribeButton) {
       subscribeButton.addEventListener('click', function(e) {
         e.preventDefault();
         
-        const emailInput = document.getElementById('ContactFooter-email');
-        const email = emailInput ? emailInput.value : '';
-        
-        if (email && isValidEmail(email)) {
-          // Show toast notification immediately for better UX
-          showToastNotification();
+        if (!isSubmitting && newsletterForm) {
+          // Trigger form submission
+          const email = emailInput ? emailInput.value.trim() : '';
           
-          // Submit to Klaviyo
-          submitToKlaviyo(email);
-        }
-        
-        // Add small delay to appear more human-like (reduces CAPTCHA)
-        setTimeout(function() {
-          if (newsletterForm) {
-            newsletterForm.submit();
+          if (email && isValidEmail(email)) {
+            // Create a submit event and dispatch it
+            const submitEvent = new Event('submit', {
+              bubbles: true,
+              cancelable: true
+            });
+            newsletterForm.dispatchEvent(submitEvent);
+            
+            // If the event wasn't prevented, submit the form
+            if (!submitEvent.defaultPrevented) {
+              newsletterForm.submit();
+            }
+          } else {
+            // Focus email input if invalid
+            if (emailInput) {
+              emailInput.focus();
+              emailInput.setAttribute('aria-invalid', 'true');
+            }
           }
-        }, 100); // 100ms delay
+        }
       });
     }
+    
+    // Handle Enter key in email input
+    if (emailInput) {
+      emailInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !isSubmitting) {
+          e.preventDefault();
+          if (newsletterForm) {
+            newsletterForm.dispatchEvent(new Event('submit', {
+              bubbles: true,
+              cancelable: true
+            }));
+          }
+        }
+      });
+      
+      // Clear invalid state on input
+      emailInput.addEventListener('input', function() {
+        emailInput.removeAttribute('aria-invalid');
+      });
+    }
+    
+    // Reset submitting flag after a delay (in case form submission fails silently)
+    setTimeout(function() {
+      isSubmitting = false;
+      if (arrowButton) arrowButton.disabled = false;
+      if (subscribeButton) subscribeButton.disabled = false;
+    }, 5000);
     
     // Chat bubble functionality
     const chatBubble = document.querySelector('.chat-bubble');
@@ -900,6 +1066,6 @@
   </div>
   <div class="toast-notification__content">
     <h3 class="toast-notification__title">Successfully Subscribed!</h3>
-    <p class="toast-notification__message">Check your email for a confirmation message.</p>
+    <p class="toast-notification__message">Thanks for Subscribe.</p>
   </div>
 </div>
