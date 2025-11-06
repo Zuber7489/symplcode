@@ -1860,8 +1860,15 @@ function renderProducts(products, tab) {
           if (dashSplit.length > 1) {
             return `<ul>${dashSplit.map(f => {
               const trimmed = f.trim();
-              // Remove leading dash if present (handles cases like "- Feature1 - Feature2")
-              const cleaned = trimmed.replace(/^-\s*/, '');
+              // Normalize and ensure each feature has "- " prefix
+              let cleaned = trimmed;
+              // If it starts with "-" (with or without space), normalize to "- Feature"
+              if (cleaned.startsWith('-')) {
+                cleaned = '- ' + cleaned.replace(/^-\s*/, '');
+              } else {
+                // If no dash, add it
+                cleaned = '- ' + cleaned;
+              }
               return cleaned ? `<li>${cleaned}</li>` : '';
             }).filter(li => li).join('')}</ul>`;
           }
@@ -1869,7 +1876,14 @@ function renderProducts(products, tab) {
           // Fallback: Split by various delimiters: bullets, newlines, or line breaks
           const featureList = features
             .split(/(?:[•\n\r]|<\/li>)/)
-            .map(f => f.trim().replace(/^-\s*/, '')) // Remove leading dashes
+            .map(f => {
+              const trimmed = f.trim();
+              // Keep dash if present, add if not
+              if (trimmed && !trimmed.startsWith('-')) {
+                return '- ' + trimmed;
+              }
+              return trimmed;
+            })
             .filter(f => f && f.length > 0 && !f.match(/^<li/i));
           
           // Default: use the featureList we found
@@ -2138,8 +2152,15 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
         if (dashSplit.length > 1) {
           return `<ul>${dashSplit.map(f => {
             const trimmed = f.trim();
-            // Remove leading dash if present (handles cases like "- Feature1 - Feature2")
-            const cleaned = trimmed.replace(/^-\s*/, '');
+            // Normalize and ensure each feature has "- " prefix
+            let cleaned = trimmed;
+            // If it starts with "-" (with or without space), normalize to "- Feature"
+            if (cleaned.startsWith('-')) {
+              cleaned = '- ' + cleaned.replace(/^-\s*/, '');
+            } else {
+              // If no dash, add it
+              cleaned = '- ' + cleaned;
+            }
             return cleaned ? `<li>${cleaned}</li>` : '';
           }).filter(li => li).join('')}</ul>`;
         }
@@ -2147,7 +2168,14 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
         // Fallback: Split by various delimiters: bullets, newlines, or line breaks
         const featureList = features
           .split(/(?:[•\n\r]|<\/li>)/)
-          .map(f => f.trim().replace(/^-\s*/, '')) // Remove leading dashes
+          .map(f => {
+            const trimmed = f.trim();
+            // Keep dash if present, add if not
+            if (trimmed && !trimmed.startsWith('-')) {
+              return '- ' + trimmed;
+            }
+            return trimmed;
+          })
           .filter(f => f && f.length > 0 && !f.match(/^<li/i));
         
         // Default: use the featureList we found
