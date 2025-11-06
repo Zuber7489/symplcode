@@ -66,17 +66,17 @@
   }
   
   .template-search__search .field:hover {
-    border-color: #000;
+    border-color: #e5e7eb;
   }
   
   .template-search__search .field:focus-within {
-    border-color: #000;
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    border-color: #e5e7eb;
+    box-shadow: none;
   }
   
   .template-search__search .search__input.field__input {
     width: 100%;
-    padding: 1rem 90px 1rem 1.5rem;
+    padding: 1rem 3.5rem 1rem 1.5rem;
     border: none;
     outline: none;
     font-size: 1rem;
@@ -114,47 +114,43 @@
     right: 0.5rem;
     top: 50%;
     transform: translateY(-50%);
-    width: auto;
-    min-width: 80px;
+    width: 2.5rem;
     height: 2.5rem;
-    background: #fff;
-    border: 2px solid #000;
-    border-radius: 6px;
+    min-width: 2.5rem;
+    background: transparent;
+    border: none;
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.3s ease;
-    padding: 0 1rem;
+    transition: none;
+    padding: 0;
     margin: 0;
-    font-size: 0.875rem;
-    font-weight: 600;
     color: #000;
-    text-transform: none;
-    letter-spacing: 0;
   }
   
   .template-search__search .search__button.field__button:hover {
-    background: #000;
-    color: #fff;
-    transform: translateY(-50%) scale(1.02);
+    background: transparent;
+    color: #000;
+    transform: translateY(-50%);
   }
   
   .template-search__search .search__button.field__button:active {
-    transform: translateY(-50%) scale(0.98);
+    transform: translateY(-50%);
   }
   
   .template-search__search .search__button.field__button .icon,
   .template-search__search .search__button.field__button svg {
-    display: none;
+    display: block;
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+    stroke: currentColor;
   }
   
   .template-search__search .search__button.field__button .search-button-text {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: inherit;
-    display: block;
-    line-height: 1;
+    display: none;
   }
   
   /* Search Results Grid Styles */
@@ -267,9 +263,8 @@
             {%- endif -%}
 
             <button type="submit" class="search__button field__button" aria-label="{{ 'general.search.search' | t }}">
-              <span class="search-button-text">{{ 'general.search.search' | t }}</span>
-              <svg class="icon icon-search" style="display: none;">
-                <use xlink:href="#icon-search">
+              <svg class="icon icon-search" width="20" height="20" viewBox="0 0 512 512" fill="currentColor" aria-hidden="true">
+                <path id="search-svg" d="M460.355,421.59L353.844,315.078c20.041-27.553,31.885-61.437,31.885-98.037 C385.729,124.934,310.793,50,218.686,50C126.58,50,51.645,124.934,51.645,217.041c0,92.106,74.936,167.041,167.041,167.041 c34.912,0,67.352-10.773,94.184-29.158L419.945,462L460.355,421.59z M100.631,217.041c0-65.096,52.959-118.056,118.055-118.056 c65.098,0,118.057,52.959,118.057,118.056c0,65.096-52.959,118.056-118.057,118.056C153.59,335.097,100.631,282.137,100.631,217.041 z" fill="currentColor" stroke="currentColor"></path>
               </svg>
             </button>
           </div>
