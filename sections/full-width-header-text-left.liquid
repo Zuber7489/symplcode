@@ -7,9 +7,10 @@
     {% if section.settings.slide_interval != blank %}data-slide-interval="{{ section.settings.slide_interval | times: 1000 }}"{% endif %}
   >
     <div class="sympl-hero-slider">
-      {% for block in section.blocks %}
-        {% if block.type == 'slide' %}
-          <div class="sympl-hero-slide" {{ block.shopify_attributes }}>
+      <div class="sympl-slides-container">
+        {% for block in section.blocks %}
+          {% if block.type == 'slide' %}
+            <div class="sympl-hero-slide" {{ block.shopify_attributes }}>
             <div class="sympl-media-wrapper {% if section.settings.fix %}sympl-media-fixed{% endif %}">
               {% if block.settings.content_type == 'image' %}
                 <img 
@@ -82,9 +83,10 @@
                 </div>
               </div>
             </div>
-          </div>
-        {% endif %}
-      {% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
     </div>
 
     <!-- Slider navigation -->
@@ -113,6 +115,7 @@
       overflow: hidden;
       height: 100vh;
       width: 100%;
+      background-color: #000;
     }
     
     /* CONTAINER STYLING */
@@ -153,48 +156,28 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
+      background-color: #000;
     }
     
-    .sympl-hero-slide {
-      width: 100%;
+    .sympl-slides-container {
+      position: relative;
+      display: flex;
       height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      opacity: 0.7;
-      visibility: hidden;
-      transition: opacity 0.2s ease-in-out, transform 0.8s ease-in-out, visibility 0.8s;
-      transform: translateX(100%);
-      z-index: 1;
-      will-change: transform, opacity;
+      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+      will-change: transform;
       backface-visibility: hidden;
     }
     
-    .sympl-hero-slide.active {
+    .sympl-hero-slide {
+      width: 100vw;
+      min-width: 100vw;
+      height: 100%;
+      flex-shrink: 0;
+      position: relative;
       opacity: 1;
       visibility: visible;
-      transform: translateX(0);
-      z-index: 2;
-    }
-    
-    /* First slide visible on page load */
-    .sympl-hero-slide:first-child {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(0);
-      z-index: 2;
-    }
-    
-    .sympl-hero-slide.prev {
-      opacity: 0.7;
-      transform: translateX(-100%);
-      visibility: hidden;
-    }
-    
-    .sympl-hero-slide.next {
-      opacity: 0.7;
-      transform: translateX(100%);
-      visibility: hidden;
+      will-change: transform;
+      backface-visibility: hidden;
     }
     
     .sympl-media-wrapper {
@@ -699,6 +682,7 @@
         if (slides.length <= 1) return;
       
       const heroSlider = document.querySelector('.sympl-hero-section');
+      const slidesContainer = document.querySelector('.sympl-slides-container');
       const prevButton = document.querySelector('.sympl-slider-prev');
       const nextButton = document.querySelector('.sympl-slider-next');
       let currentSlide = 0;
@@ -708,13 +692,32 @@
       const autoSlideEnabled = heroSlider.getAttribute('data-auto-slide') === 'true';
       const slideInterval = parseInt(heroSlider.getAttribute('data-slide-interval')) || 5000; // Default to 5 seconds
       
-      // Show slide function with continuous loop logic
+      // Calculate container width based on number of slides
+      // Each slide is 100vw, so container should be (number of slides * 100vw)
+      const numberOfSlides = slides.length;
+      let viewportWidth = window.innerWidth;
+      
+      // Function to update container width
+      function updateContainerWidth() {
+        viewportWidth = window.innerWidth;
+        const containerWidth = numberOfSlides * viewportWidth;
+        slidesContainer.style.width = `${containerWidth}px`;
+      }
+      
+      // Initialize container width
+      updateContainerWidth();
+      
+      // Show slide function - moves container horizontally like reference animation
       function showSlide(index) {
-        // Remove all classes from all slides first
+        // Calculate the translateX value: for slide N, move by -N viewport widths
+        // Slide 0: translateX(0)
+        // Slide 1: translateX(-100vw) or translateX(-viewportWidth)
+        // Slide 2: translateX(-200vw) or translateX(-2 * viewportWidth)
+        const translateX = -viewportWidth * index;
+        slidesContainer.style.transform = `translateX(${translateX}px)`;
+        
+        // Pause and unload other videos to save bandwidth
         slides.forEach((slide, i) => {
-          slide.classList.remove('active', 'prev', 'next');
-          
-          // Pause and unload other videos to save bandwidth
           if (i !== index) {
             const video = slide.querySelector('video');
             if (video) {
@@ -724,20 +727,6 @@
             }
           }
         });
-        
-        // Previous slide exits left
-        const prevIndex = (index - 1 + slides.length) % slides.length;
-        slides[prevIndex].classList.add('prev');
-        
-        // Other slides are positioned right
-        slides.forEach((slide, i) => {
-          if (i !== index && i !== prevIndex) {
-            slide.classList.add('next');
-          }
-        });
-        
-        // Current slide is active (slides in from right)
-        slides[index].classList.add('active');
         
         // Handle video loading and autoplay with performance optimization
         const currentVideo = slides[index].querySelector('video');
@@ -805,6 +794,17 @@
       if (prevButton) prevButton.addEventListener('click', prevSlide);
       if (nextButton) nextButton.addEventListener('click', nextSlide);
       
+      // Handle window resize to recalculate container width
+      let resizeTimeout;
+      window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(function() {
+          updateContainerWidth();
+          // Recalculate current position
+          showSlide(currentSlide);
+        }, 250);
+      });
+      
       // Touch swipe functionality
       let touchStartX = 0;
       let touchEndX = 0;
@@ -831,16 +831,10 @@
         }
       }
       
-      // Initialize slider with proper class distribution
+      // Initialize slider - show first slide
       if (slides.length > 0) {
-        slides[0].classList.add('active');
-        // Set other slides to 'next' position
-        for (let i = 1; i < slides.length; i++) {
-          slides[i].classList.add('next');
-        }
-        // The last slide will be the "previous" when we show the first slide
-        slides[slides.length - 1].classList.remove('next');
-        slides[slides.length - 1].classList.add('prev');
+        currentSlide = 0;
+        showSlide(0);
       }
       startAutoSlide(); // This will only start if auto-slide is enabled
       };
