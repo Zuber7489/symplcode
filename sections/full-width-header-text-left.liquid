@@ -713,212 +713,207 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Performance optimization: Use requestIdleCallback for non-critical initialization
+      // Initialize hero slider
       const initSlider = () => {
-        // Initialize hero slider
+        const heroSlider = document.querySelector('.sympl-hero-section');
+        if (!heroSlider) return;
+        
         const slides = document.querySelectorAll('.sympl-hero-slide');
-        if (slides.length <= 1) return;
-      
-      const heroSlider = document.querySelector('.sympl-hero-section');
-      const slidesContainer = document.querySelector('.sympl-slides-container');
-      const prevButton = document.querySelector('.sympl-slider-prev');
-      const nextButton = document.querySelector('.sympl-slider-next');
-      let currentSlide = 0;
-      let autoSlideInterval;
-      
-      // Get auto-slide setting from data attribute
-      const autoSlideEnabled = heroSlider.getAttribute('data-auto-slide') === 'true';
-      const slideInterval = parseInt(heroSlider.getAttribute('data-slide-interval')) || 5000; // Default to 5 seconds
-      
-      // Calculate container width based on number of slides
-      // Each slide is 100vw, so container should be (number of slides * 100vw)
-      const numberOfSlides = slides.length;
-      let viewportWidth = window.innerWidth;
-      
-      // Function to update container width
-      function updateContainerWidth() {
-        viewportWidth = window.innerWidth;
-        const containerWidth = numberOfSlides * viewportWidth;
-        slidesContainer.style.width = `${containerWidth}px`;
-      }
-      
-      // Initialize container width
-      updateContainerWidth();
-      
-      // Lock hero section height on mobile to prevent expansion when header hides/shows
-      function lockHeroHeight() {
-        if (window.innerWidth <= 768) {
-          const heroSection = document.querySelector('.sympl-hero-section');
-          if (heroSection) {
-            // Get initial viewport height and lock it
-            const initialHeight = window.innerHeight;
-            // Set fixed height in pixels
-            heroSection.style.height = `${initialHeight}px`;
-            heroSection.style.minHeight = `${initialHeight}px`;
-            heroSection.style.maxHeight = `${initialHeight}px`;
+        if (slides.length === 0) return;
+        
+        const slidesContainer = document.querySelector('.sympl-slides-container');
+        if (!slidesContainer) return;
+        
+        const prevButton = document.querySelector('.sympl-slider-prev');
+        const nextButton = document.querySelector('.sympl-slider-next');
+        
+        let currentSlide = 0;
+        let autoSlideInterval;
+        
+        // Get auto-slide setting from data attribute
+        const autoSlideEnabled = heroSlider.getAttribute('data-auto-slide') === 'true';
+        const slideInterval = parseInt(heroSlider.getAttribute('data-slide-interval')) || 5000;
+        
+        // Calculate container width based on number of slides
+        const numberOfSlides = slides.length;
+        let viewportWidth = window.innerWidth;
+        
+        // Function to update container width
+        function updateContainerWidth() {
+          viewportWidth = window.innerWidth;
+          const containerWidth = numberOfSlides * viewportWidth;
+          slidesContainer.style.width = `${containerWidth}px`;
+        }
+        
+        // Initialize container width
+        updateContainerWidth();
+        
+        // Lock hero section height on mobile to prevent expansion when header hides/shows
+        function lockHeroHeight() {
+          if (window.innerWidth <= 768) {
+            const heroSection = document.querySelector('.sympl-hero-section');
+            if (heroSection) {
+              const initialHeight = window.innerHeight;
+              heroSection.style.height = `${initialHeight}px`;
+              heroSection.style.minHeight = `${initialHeight}px`;
+              heroSection.style.maxHeight = `${initialHeight}px`;
+            }
           }
         }
-      }
-      
-      // Lock height on load
-      lockHeroHeight();
-      
-      // Lock height on resize (only if significant change, not from header hide/show)
-      let lastHeight = window.innerHeight;
-      let resizeTimeout;
-      window.addEventListener('resize', function() {
-        if (window.innerWidth <= 768) {
-          clearTimeout(resizeTimeout);
-          resizeTimeout = setTimeout(function() {
-            const currentHeight = window.innerHeight;
-            // Only update if height change is significant (more than 100px)
-            // This prevents header hide/show from affecting hero height
-            if (Math.abs(currentHeight - lastHeight) > 100) {
-              lockHeroHeight();
-              lastHeight = currentHeight;
-            }
-          }, 200);
-        }
-      });
-      
-      // Show slide function - moves container horizontally like reference animation
-      function showSlide(index) {
-        // Calculate the translateX value: for slide N, move by -N viewport widths
-        // Slide 0: translateX(0)
-        // Slide 1: translateX(-100vw) or translateX(-viewportWidth)
-        // Slide 2: translateX(-200vw) or translateX(-2 * viewportWidth)
-        const translateX = -viewportWidth * index;
-        slidesContainer.style.transform = `translateX(${translateX}px)`;
         
-        // Pause and unload other videos to save bandwidth
-        slides.forEach((slide, i) => {
-          if (i !== index) {
-            const video = slide.querySelector('video');
-            if (video) {
-              video.pause();
-              video.currentTime = 0;
-              video.preload = 'none'; // Stop loading other videos
-            }
+        // Lock height on load
+        lockHeroHeight();
+        
+        // Lock height on resize (only if significant change, not from header hide/show)
+        let lastHeight = window.innerHeight;
+        let heightResizeTimeout;
+        window.addEventListener('resize', function() {
+          if (window.innerWidth <= 768) {
+            clearTimeout(heightResizeTimeout);
+            heightResizeTimeout = setTimeout(function() {
+              const currentHeight = window.innerHeight;
+              if (Math.abs(currentHeight - lastHeight) > 100) {
+                lockHeroHeight();
+                lastHeight = currentHeight;
+              }
+            }, 200);
           }
         });
         
-        // Handle video loading and autoplay with performance optimization
-        const currentVideo = slides[index].querySelector('video');
-        if (currentVideo) {
-          // Set preload to metadata for current video to start loading
-          currentVideo.preload = 'metadata';
+        // Show slide function - moves container horizontally
+        function showSlide(index) {
+          if (index < 0 || index >= slides.length) return;
           
-          // Only autoplay if explicitly set and video is ready
-          if (currentVideo.hasAttribute('autoplay')) {
-            // Wait for video to be ready before playing
-            if (currentVideo.readyState >= 2) { // HAVE_CURRENT_DATA
-              currentVideo.currentTime = 0;
-              currentVideo.play().catch(e => console.log('Video autoplay prevented:', e));
-            } else {
-              // Wait for video to load metadata before playing
-              currentVideo.addEventListener('loadedmetadata', function() {
+          const translateX = -viewportWidth * index;
+          slidesContainer.style.transform = `translateX(${translateX}px)`;
+          
+          // Pause and unload other videos to save bandwidth
+          slides.forEach((slide, i) => {
+            if (i !== index) {
+              const video = slide.querySelector('video');
+              if (video) {
+                video.pause();
+                video.currentTime = 0;
+                video.preload = 'none';
+              }
+            }
+          });
+          
+          // Handle video loading and autoplay
+          const currentVideo = slides[index].querySelector('video');
+          if (currentVideo) {
+            currentVideo.preload = 'metadata';
+            
+            if (currentVideo.hasAttribute('autoplay')) {
+              if (currentVideo.readyState >= 2) {
                 currentVideo.currentTime = 0;
                 currentVideo.play().catch(e => console.log('Video autoplay prevented:', e));
-              }, { once: true });
+              } else {
+                currentVideo.addEventListener('loadedmetadata', function() {
+                  currentVideo.currentTime = 0;
+                  currentVideo.play().catch(e => console.log('Video autoplay prevented:', e));
+                }, { once: true });
+              }
             }
           }
         }
-      }
-      
-      // Go to slide function
-      function goToSlide(index) {
-        currentSlide = index;
-        showSlide(currentSlide);
-        resetAutoSlide();
-      }
-      
-      // Next slide function
-      function nextSlide() {
-        currentSlide = (currentSlide + 1) % slides.length;
-        showSlide(currentSlide);
-        resetAutoSlide();
-      }
-      
-      // Previous slide function
-      function prevSlide() {
-        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-        showSlide(currentSlide);
-        resetAutoSlide();
-      }
-      
-      // Auto slide function
-      function startAutoSlide() {
-        if (!autoSlideEnabled) return; // Don't start auto-slide if disabled
         
-        if (autoSlideInterval) {
-          clearInterval(autoSlideInterval);
-        }
-        autoSlideInterval = setInterval(nextSlide, slideInterval);
-      }
-      
-      // Reset auto slide timer
-      function resetAutoSlide() {
-        if (!autoSlideEnabled) return; // Don't reset if auto-slide is disabled
-        
-        clearInterval(autoSlideInterval);
-        startAutoSlide();
-      }
-      
-      // Event listeners
-      if (prevButton) prevButton.addEventListener('click', prevSlide);
-      if (nextButton) nextButton.addEventListener('click', nextSlide);
-      
-      // Handle window resize to recalculate container width
-      let resizeTimeout;
-      window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(function() {
-          updateContainerWidth();
-          // Recalculate current position
+        // Next slide function
+        function nextSlide() {
+          if (slides.length <= 1) return;
+          currentSlide = (currentSlide + 1) % slides.length;
           showSlide(currentSlide);
-        }, 250);
-      });
-      
-      // Touch swipe functionality
-      let touchStartX = 0;
-      let touchEndX = 0;
-      
-      const slider = document.querySelector('.sympl-hero-slider');
-      
-      slider.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-      }, {passive: true});
-      
-      slider.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-      }, {passive: true});
-      
-      function handleSwipe() {
-        const swipeThreshold = 50;
-        if (touchEndX < touchStartX - swipeThreshold) {
-          // Swipe left, go to next slide
-          nextSlide();
-        } else if (touchEndX > touchStartX + swipeThreshold) {
-          // Swipe right, go to previous slide
-          prevSlide();
+          resetAutoSlide();
         }
-      }
-      
-      // Initialize slider - show first slide
-      if (slides.length > 0) {
+        
+        // Previous slide function
+        function prevSlide() {
+          if (slides.length <= 1) return;
+          currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+          showSlide(currentSlide);
+          resetAutoSlide();
+        }
+        
+        // Auto slide function
+        function startAutoSlide() {
+          if (!autoSlideEnabled || slides.length <= 1) return;
+          
+          if (autoSlideInterval) {
+            clearInterval(autoSlideInterval);
+          }
+          autoSlideInterval = setInterval(nextSlide, slideInterval);
+        }
+        
+        // Reset auto slide timer
+        function resetAutoSlide() {
+          if (!autoSlideEnabled || slides.length <= 1) return;
+          
+          clearInterval(autoSlideInterval);
+          startAutoSlide();
+        }
+        
+        // Event listeners for navigation buttons
+        if (prevButton) {
+          prevButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            prevSlide();
+          });
+        }
+        
+        if (nextButton) {
+          nextButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            nextSlide();
+          });
+        }
+        
+        // Handle window resize to recalculate container width
+        let widthResizeTimeout;
+        window.addEventListener('resize', function() {
+          clearTimeout(widthResizeTimeout);
+          widthResizeTimeout = setTimeout(function() {
+            updateContainerWidth();
+            showSlide(currentSlide);
+          }, 250);
+        });
+        
+        // Touch swipe functionality
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        const slider = document.querySelector('.sympl-hero-slider');
+        if (slider && slides.length > 1) {
+          slider.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+          }, {passive: true});
+          
+          slider.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+          }, {passive: true});
+        }
+        
+        function handleSwipe() {
+          if (slides.length <= 1) return;
+          
+          const swipeThreshold = 50;
+          if (touchEndX < touchStartX - swipeThreshold) {
+            nextSlide();
+          } else if (touchEndX > touchStartX + swipeThreshold) {
+            prevSlide();
+          }
+        }
+        
+        // Initialize slider - show first slide
         currentSlide = 0;
         showSlide(0);
-      }
-      startAutoSlide(); // This will only start if auto-slide is enabled
+        startAutoSlide();
       };
       
-      // Use requestIdleCallback for better performance, fallback to setTimeout
-      if (window.requestIdleCallback) {
-        requestIdleCallback(initSlider, { timeout: 1000 });
-      } else {
-        setTimeout(initSlider, 100);
-      }
+      // Initialize immediately
+      initSlider();
     });
   </script>
 
