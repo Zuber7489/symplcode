@@ -432,17 +432,31 @@
     left: 0;
     width: 100%;
     z-index: 1002;
-    transition: transform 0.3s ease, background 0.3s, box-shadow 0.3s, top 0s;
+    /* Smooth transitions for desktop */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                background 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     margin-top: -1px; /* Remove any gap between announcement bar and header */
+    will-change: transform, background, box-shadow; /* Optimize for smooth animations */
   }
   .header_wrap.header-hidden {
     transform: translateY(-100%);
-    transition: transform 0.3s ease, background 0.3s, box-shadow 0.3s, top 0s;
+    /* Smooth hide transition for desktop */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                background 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .header_wrap.sticky-bg {
     background: #fff !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     top: 0;
+    /* Smooth show transition for desktop */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                background 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .header_wrap.sticky-bg,
   .header_wrap.sticky-bg * {
@@ -489,6 +503,11 @@
   .header_wrap:focus-within {
     background: #fff !important;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    /* Smooth hover transition for desktop */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                background 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .header_wrap:hover *,
   .header_wrap:focus-within * {
@@ -524,6 +543,30 @@
     padding-top: 0;
     border-top: none;
   }
+  /* Desktop smooth transitions */
+  @media (min-width: 768px) {
+    .header_wrap {
+      /* Enhanced smooth transitions for desktop */
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                  background 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform, background, box-shadow;
+    }
+    .header_wrap.header-hidden {
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                  background 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .header_wrap.sticky-bg {
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                  background 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                  top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  }
+  
   @media (max-width: 767px) {
     .header_wrap {
       top: 40px;
