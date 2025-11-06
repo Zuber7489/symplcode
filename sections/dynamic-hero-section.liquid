@@ -20,8 +20,8 @@
         {% for item in hero_content %}
           <div class="hero-slide" 
                data-slide-index="{{ forloop.index0 }}"
-               data-autoplay="{% if item.autoplay != blank %}{{ item.autoplay }}{% endif %}"
-               data-autoplay-duration="{% if item.autoplay_duration != blank %}{{ item.autoplay_duration | times: 1000 }}{% endif %}">
+               data-autoplay="{% if item.autoplay == true %}true{% else %}false{% endif %}"
+               data-autoplay-duration="{% if item.autoplay_duration != blank %}{{ item.autoplay_duration | times: 1000 }}{% else %}0{% endif %}">
             <div class="hero__media-wrapper {% if section.settings.fix %}hero__media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
                 <img 
@@ -39,10 +39,12 @@
                   decoding="async"
                   onerror="this.style.display='none'; ">
               {% elsif item.content_type == 'video' %}
+                {% comment %} Use video_autoplay for video element autoplay (separate from carousel autoplay) {% endcomment %}
+                {% assign video_autoplay = item.video_autoplay | default: item.autoplay | default: true %}
                 <div class="hero__video-container hero__desktop-only">
                   <video 
                     class="hero__video" 
-                    {% if item.autoplay %}autoplay{% endif %} 
+                    {% if video_autoplay %}autoplay{% endif %} 
                     {% if item.loop %}loop{% endif %} 
                     {% if item.muted %}muted{% endif %} 
                     playsinline 
@@ -58,7 +60,7 @@
                 <div class="hero__video-container hero__mobile-only">
                   <video 
                     class="hero__video" 
-                    {% if item.autoplay %}autoplay{% endif %} 
+                    {% if video_autoplay %}autoplay{% endif %} 
                     {% if item.loop %}loop{% endif %} 
                     {% if item.muted %}muted{% endif %} 
                     playsinline 
@@ -1122,7 +1124,8 @@
       const slide = document.createElement('div');
       slide.className = 'hero-slide';
       slide.dataset.slideIndex = index;
-      if (item.autoplay) slide.dataset.autoplay = 'true';
+      // Always set autoplay attribute (true or false) to prevent errors
+      slide.dataset.autoplay = (item.autoplay === true) ? 'true' : 'false';
       if (item.autoplay_duration) slide.dataset.autoplayDuration = item.autoplay_duration * 1000;
 
       let mediaHTML = '';
