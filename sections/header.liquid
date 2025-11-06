@@ -663,8 +663,9 @@
                 <span>X</span>
               </a>
               <div class="serch_box_v">
-                <form action="">
-                  <input placeholder="Search">
+                <form action="{{ routes.search_url }}" method="get" role="search">
+                  <input type="search" name="q" placeholder="Search" value="{{ search.terms | escape }}" autocomplete="off">
+                  <input type="hidden" name="options[prefix]" value="last">
                 </form>
               </div>
             </li>

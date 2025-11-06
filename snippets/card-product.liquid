@@ -1,0 +1,121 @@
+{%- comment -%}
+  Renders a product card for search results with inline styles
+{%- endcomment -%}
+
+{%- liquid
+  assign product = card_product
+-%}
+
+<style>
+.card-product-search {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.card-product-search__image-wrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  overflow: hidden;
+  background: #f6f6f6;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.card-product-search__image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
+
+.card-product-search__image-secondary {
+  display: none;
+}
+
+.card-product-search__title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.5rem 0;
+  color: #000;
+  line-height: 1.4;
+}
+
+.card-product-search__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.card-product-search__title a:hover {
+  text-decoration: underline;
+}
+
+.card-product-search__price {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #000;
+  margin: 0.5rem 0;
+}
+
+.card-product-search__price s {
+  color: #999;
+  margin-left: 0.5rem;
+  font-size: 0.9em;
+}
+
+.card-product-search__vendor {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+</style>
+
+<div class="card-product-search">
+  <a href="{{ product.url }}" style="text-decoration: none; color: inherit;">
+    <div class="card-product-search__image-wrapper">
+      {%- if product.featured_image -%}
+        <img 
+          src="{{ product.featured_image.src | img_url: 'large' }}" 
+          alt="{{ product.featured_image.alt | escape }}" 
+          class="card-product-search__image"
+          {% unless lazy_load == false %}loading="lazy"{% endunless %} 
+        />
+      {%- else -%}
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f0f0f0;">
+          <span style="color: #999;">No Image</span>
+        </div>
+      {%- endif -%}
+    </div>
+  </a>
+  
+  <div class="card-product-search__title">
+    <a href="{{ product.url }}">{{ product.title }}</a>
+  </div>
+  
+  {%- if show_rating -%}
+    <div class='jdgm-widget jdgm-preview-badge' data-id='{{ product.id }}' data-auto-install='false'>
+      {{ product.metafields.judgeme.badge }}
+    </div>
+  {%- endif -%}
+  
+  <div class="card-product-search__price">
+    {{ product.selected_or_first_available_variant.price | money }}
+    {%- if product.selected_or_first_available_variant.compare_at_price > product.selected_or_first_available_variant.price -%}
+      <s>{{ product.selected_or_first_available_variant.compare_at_price | money }}</s>
+    {%- endif -%}
+  </div>
+  
+  {%- if show_vendor and product.vendor != blank -%}
+    <div class="card-product-search__vendor">
+      {{ product.vendor }}
+    </div>
+  {%- endif -%}
+</div>
+
