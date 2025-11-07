@@ -149,6 +149,15 @@
               {% endfor %}
           </div>
           
+          <!-- App Blocks for Cart Widgets (e.g., Kite Free Gift) -->
+          <div class="cart-app-blocks" style="padding: 0 20px; margin: 20px 0;">
+            {% for block in section.blocks %}
+              {% if block.type == '@app' %}
+                {% render block %}
+              {% endif %}
+            {% endfor %}
+          </div>
+          
           <!-- Bundle & Save Section -->
           <div class="bundle-save-section">
             <h3 class="bundle-title">Bundle & save</h3>
@@ -260,15 +269,6 @@
                 </script>
               </div>
             </div>
-          </div>
-          
-          <!-- App Blocks for Cart Widgets (e.g., Kite Free Gift) -->
-          <div class="cart-app-blocks" style="padding: 0 20px; margin: 20px 0;">
-            {% for block in section.blocks %}
-              {% if block.type == '@app' %}
-                {% render block %}
-              {% endif %}
-            {% endfor %}
           </div>
         </form>
         {% else %}
