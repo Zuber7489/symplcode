@@ -397,6 +397,39 @@ body.g-cart-open {
   right: 0 !important;
 }
 
+/* Ensure top_bar (announcement bar) maintains its position when cart opens */
+body.g-cart-open .top_bar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1001 !important;
+  transform: none !important;
+}
+
+/* Ensure header maintains its position when cart opens */
+body.g-cart-open .header_wrap {
+  position: fixed !important;
+  top: 40px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1002 !important;
+  transform: none !important;
+}
+
+body.g-cart-open .header_wrap.sticky-bg {
+  top: 0 !important;
+}
+
+/* Prevent gap between top of page and header when cart opens */
+body.g-cart-open #header {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  transform: none !important;
+}
+
 .r-side-cart {
   position: fixed;
   top: 0;
@@ -4378,6 +4411,16 @@ function startApplePay(cart) {
 }
 
 // Simplified Apple Pay - redirects to checkout where Shopify handles everything
-</script> 
+</script>
 
-
+{% schema %}
+{
+  "name": "Slide Cart",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ]
+}
+{% endschema %}
