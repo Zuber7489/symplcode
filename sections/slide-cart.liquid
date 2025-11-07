@@ -261,6 +261,15 @@
               </div>
             </div>
           </div>
+          
+          <!-- App Blocks for Cart Widgets (e.g., Kite Free Gift) -->
+          <div class="cart-app-blocks" style="padding: 0 20px; margin: 20px 0;">
+            {% for block in section.blocks %}
+              {% if block.type == '@app' %}
+                {% render block %}
+              {% endif %}
+            {% endfor %}
+          </div>
         </form>
         {% else %}
           <div class="empty-cart">
@@ -361,15 +370,6 @@
           <div class="total-row">
             <span class="total-label">Total :</span>
             <span class="total-amount">{{ cart.total_price | money }}</span>
-          </div>
-          
-          <!-- App Blocks for Cart Widgets (e.g., Kite Free Gift) -->
-          <div class="cart-app-blocks">
-            {% for block in section.blocks %}
-              {% if block.type == '@app' %}
-                {% render block %}
-              {% endif %}
-            {% endfor %}
           </div>
           
           <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
