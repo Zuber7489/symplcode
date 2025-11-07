@@ -1842,6 +1842,25 @@ function renderProducts(products, tab) {
           // Decode HTML entities if present
           features = decodeHtmlEntities(features);
           
+          // If it contains HTML p tags (from rich text editor), extract them
+          if (features.includes('<p>') || features.includes('&lt;p&gt;')) {
+            // Handle escaped HTML
+            const decoded = features.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+            const pMatches = decoded.match(/<p[^>]*>(.*?)<\/p>/gi);
+            if (pMatches && pMatches.length > 0) {
+              return `<ul>${pMatches.map(p => {
+                const text = p.replace(/<\/?p[^>]*>/gi, '').trim();
+                // Filter out empty paragraphs and ensure text exists
+                if (!text || text.length === 0 || text === '-' || text === '- ') {
+                  return '';
+                }
+                // If text already starts with dash, keep it; otherwise add it
+                const finalText = text.startsWith('-') ? text : '- ' + text;
+                return finalText ? `<li>${finalText}</li>` : '';
+              }).filter(li => li && li !== '<li>- </li>' && li !== '<li></li>').join('')}</ul>`;
+            }
+          }
+          
           // If it contains HTML li tags, extract them
           if (features.includes('<li>') || features.includes('&lt;li&gt;')) {
             // Handle escaped HTML
@@ -1850,27 +1869,47 @@ function renderProducts(products, tab) {
             if (liMatches && liMatches.length > 0) {
               return `<ul>${liMatches.map(li => {
                 const text = li.replace(/<\/?li[^>]*>/gi, '').trim();
-                return text ? `<li>${text}</li>` : '';
-              }).filter(li => li).join('')}</ul>`;
+                // Filter out empty list items
+                if (!text || text.length === 0 || text === '-' || text === '- ') {
+                  return '';
+                }
+                // If text already starts with dash, keep it; otherwise add it
+                const finalText = text.startsWith('-') ? text : '- ' + text;
+                return finalText ? `<li>${finalText}</li>` : '';
+              }).filter(li => li && li !== '<li>- </li>' && li !== '<li></li>').join('')}</ul>`;
             }
           }
           
           // Split by " - " pattern (most common format from rich text editor)
           const dashSplit = features.split(/\s+-\s+/);
           if (dashSplit.length > 1) {
-            return `<ul>${dashSplit.map(f => {
-              const trimmed = f.trim();
-              // Normalize and ensure each feature has "- " prefix
-              let cleaned = trimmed;
-              // If it starts with "-" (with or without space), normalize to "- Feature"
-              if (cleaned.startsWith('-')) {
-                cleaned = '- ' + cleaned.replace(/^-\s*/, '');
-              } else {
-                // If no dash, add it
-                cleaned = '- ' + cleaned;
-              }
-              return cleaned ? `<li>${cleaned}</li>` : '';
-            }).filter(li => li).join('')}</ul>`;
+            return `<ul>${dashSplit
+              .map(f => f.trim())
+              .filter(f => f && f.length > 0) // Filter out empty strings first
+              .map(f => {
+                // Normalize and ensure each feature has "- " prefix
+                let cleaned = f;
+                // If it starts with "-" (with or without space), normalize to "- Feature"
+                if (cleaned.startsWith('-')) {
+                  const withoutDash = cleaned.replace(/^-\s*/, '').trim();
+                  // Skip if there's no text after the dash
+                  if (!withoutDash || withoutDash.length === 0) {
+                    return '';
+                  }
+                  cleaned = '- ' + withoutDash;
+                } else {
+                  // If no dash, add it
+                  cleaned = '- ' + cleaned;
+                }
+                // Final check: ensure we don't have just "- " (dash and space only)
+                const finalCleaned = cleaned.trim();
+                if (!finalCleaned || finalCleaned === '-' || finalCleaned.length <= 2) {
+                  return '';
+                }
+                return `<li>${cleaned}</li>`;
+              })
+              .filter(li => li && li !== '<li>- </li>' && li !== '<li></li>') // Filter out empty or dash-only items
+              .join('')}</ul>`;
           }
           
           // Fallback: Split by various delimiters: bullets, newlines, or line breaks
@@ -2134,6 +2173,25 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
         // Decode HTML entities if present
         features = decodeHtmlEntities(features);
         
+        // If it contains HTML p tags (from rich text editor), extract them
+        if (features.includes('<p>') || features.includes('&lt;p&gt;')) {
+          // Handle escaped HTML
+          const decoded = features.replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+          const pMatches = decoded.match(/<p[^>]*>(.*?)<\/p>/gi);
+          if (pMatches && pMatches.length > 0) {
+            return `<ul>${pMatches.map(p => {
+              const text = p.replace(/<\/?p[^>]*>/gi, '').trim();
+              // Filter out empty paragraphs and ensure text exists
+              if (!text || text.length === 0 || text === '-' || text === '- ') {
+                return '';
+              }
+              // If text already starts with dash, keep it; otherwise add it
+              const finalText = text.startsWith('-') ? text : '- ' + text;
+              return finalText ? `<li>${finalText}</li>` : '';
+            }).filter(li => li && li !== '<li>- </li>' && li !== '<li></li>').join('')}</ul>`;
+          }
+        }
+        
         // If it contains HTML li tags, extract them
         if (features.includes('<li>') || features.includes('&lt;li&gt;')) {
           // Handle escaped HTML
@@ -2142,27 +2200,47 @@ function updateSpecificCardWithVariant(variantId, cardPosition) {
           if (liMatches && liMatches.length > 0) {
             return `<ul>${liMatches.map(li => {
               const text = li.replace(/<\/?li[^>]*>/gi, '').trim();
-              return text ? `<li>${text}</li>` : '';
-            }).filter(li => li).join('')}</ul>`;
+              // Filter out empty list items
+              if (!text || text.length === 0 || text === '-' || text === '- ') {
+                return '';
+              }
+              // If text already starts with dash, keep it; otherwise add it
+              const finalText = text.startsWith('-') ? text : '- ' + text;
+              return finalText ? `<li>${finalText}</li>` : '';
+            }).filter(li => li && li !== '<li>- </li>' && li !== '<li></li>').join('')}</ul>`;
           }
         }
         
         // Split by " - " pattern (most common format from rich text editor)
         const dashSplit = features.split(/\s+-\s+/);
         if (dashSplit.length > 1) {
-          return `<ul>${dashSplit.map(f => {
-            const trimmed = f.trim();
-            // Normalize and ensure each feature has "- " prefix
-            let cleaned = trimmed;
-            // If it starts with "-" (with or without space), normalize to "- Feature"
-            if (cleaned.startsWith('-')) {
-              cleaned = '- ' + cleaned.replace(/^-\s*/, '');
-            } else {
-              // If no dash, add it
-              cleaned = '- ' + cleaned;
-            }
-            return cleaned ? `<li>${cleaned}</li>` : '';
-          }).filter(li => li).join('')}</ul>`;
+          return `<ul>${dashSplit
+            .map(f => f.trim())
+            .filter(f => f && f.length > 0) // Filter out empty strings first
+            .map(f => {
+              // Normalize and ensure each feature has "- " prefix
+              let cleaned = f;
+              // If it starts with "-" (with or without space), normalize to "- Feature"
+              if (cleaned.startsWith('-')) {
+                const withoutDash = cleaned.replace(/^-\s*/, '').trim();
+                // Skip if there's no text after the dash
+                if (!withoutDash || withoutDash.length === 0) {
+                  return '';
+                }
+                cleaned = '- ' + withoutDash;
+              } else {
+                // If no dash, add it
+                cleaned = '- ' + cleaned;
+              }
+              // Final check: ensure we don't have just "- " (dash and space only)
+              const finalCleaned = cleaned.trim();
+              if (!finalCleaned || finalCleaned === '-' || finalCleaned.length <= 2) {
+                return '';
+              }
+              return `<li>${cleaned}</li>`;
+            })
+            .filter(li => li && li !== '<li>- </li>' && li !== '<li></li>') // Filter out empty or dash-only items
+            .join('')}</ul>`;
         }
         
         // Fallback: Split by various delimiters: bullets, newlines, or line breaks
