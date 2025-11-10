@@ -4344,6 +4344,86 @@ function startApplePay(cart) {
 }
 
 // Simplified Apple Pay - redirects to checkout where Shopify handles everything
+
+/**
+ * KITE FREE GIFT WIDGET - Hide MAIN DIV when button is gray/disabled
+ * Targets: gfgFreeGiftMsgParentContainerForDropDown (main Kite widget container)
+ */
+function hideKiteWidgetOnGrayButton() {
+  function checkAndHideMainDiv() {
+    // Find the main Kite widget container div
+    const mainKiteDiv = document.querySelector('.gfgFreeGiftMsgParentContainerForDropDown') ||
+                        document.querySelector('.gfgFreeGiftSideCartWrapperV4') ||
+                        document.querySelector('[class*="gfgFreeGiftMsgParent"]');
+    
+    if (!mainKiteDiv) {
+      // Main div not found yet, wait
+      return;
+    }
+    
+    // Find the Claim button inside the main div
+    const claimButton = mainKiteDiv.querySelector('.gfgFreeGiftInvalidProductClaimButton') ||
+                       mainKiteDiv.querySelector('.gfgFreeGiftClaimButton') ||
+                       mainKiteDiv.querySelector('button');
+    
+    if (claimButton) {
+      const computedStyle = window.getComputedStyle(claimButton);
+      const bgColor = computedStyle.backgroundColor;
+      
+      // Check if button is gray (disabled state)
+      // Gray: rgb(229, 229, 229) = #e5e5e5
+      // Black: rgb(26, 26, 26) or rgb(0, 0, 0)
+      
+      const isGray = bgColor.includes('229') || // rgb(229, 229, 229)
+                     bgColor === 'rgb(229, 229, 229)' ||
+                     bgColor === '#e5e5e5' ||
+                     claimButton.classList.contains('gfgFreeGiftInvalidProductClaimButton') ||
+                     computedStyle.pointerEvents === 'none';
+      
+      if (isGray) {
+        // Button is gray/disabled - HIDE MAIN DIV
+        mainKiteDiv.style.display = 'none';
+        console.log('❌ Hiding Kite widget - Button is gray');
+      } else {
+        // Button is black/active - SHOW MAIN DIV
+        mainKiteDiv.style.display = 'block';
+        console.log('✅ Showing Kite widget - Button is black');
+      }
+    }
+  }
+  
+  // Check multiple times to catch Kite app loading
+  setTimeout(checkAndHideMainDiv, 500);
+  setTimeout(checkAndHideMainDiv, 1000);
+  setTimeout(checkAndHideMainDiv, 2000);
+  setTimeout(checkAndHideMainDiv, 3000);
+  
+  // Watch for changes in the entire document (Kite app injects dynamically)
+  const observer = new MutationObserver(function(mutations) {
+    checkAndHideMainDiv();
+  });
+  
+  // Observe the cart container for changes
+  const cartContainer = document.querySelector('.cart-app-blocks') || document.body;
+  observer.observe(cartContainer, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class', 'style']
+  });
+}
+
+// Initialize on page ready
+$(document).ready(function() {
+  setTimeout(hideKiteWidgetOnGrayButton, 500);
+});
+
+// Re-run when cart updates
+$(document).on('cart:updated', function() {
+  setTimeout(hideKiteWidgetOnGrayButton, 500);
+  setTimeout(hideKiteWidgetOnGrayButton, 1500);
+});
+
 </script>
 
 {% schema %}
