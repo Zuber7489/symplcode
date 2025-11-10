@@ -4347,17 +4347,34 @@ function startApplePay(cart) {
 
 /**
  * KITE FREE GIFT WIDGET - Hide MAIN DIV when button is gray/disabled
+ * ONLY IN SLIDE CART - Does not affect product page widgets
  * Targets: gfgFreeGiftMsgParentContainerForDropDown (main Kite widget container)
  */
 function hideKiteWidgetOnGrayButton() {
   function checkAndHideMainDiv() {
-    // Find the main Kite widget container div
-    const mainKiteDiv = document.querySelector('.gfgFreeGiftMsgParentContainerForDropDown') ||
-                        document.querySelector('.gfgFreeGiftSideCartWrapperV4') ||
-                        document.querySelector('[class*="gfgFreeGiftMsgParent"]');
+    // IMPORTANT: Only target widgets inside the slide cart, not product pages
+    const slideCart = document.querySelector('.r-side-cart') || 
+                      document.querySelector('#custom-cart') ||
+                      document.querySelector('.cart-app-blocks');
+    
+    if (!slideCart) {
+      // Slide cart not found, don't do anything (might be on product page)
+      return;
+    }
+    
+    // Find the main Kite widget container div ONLY inside slide cart
+    const mainKiteDiv = slideCart.querySelector('.gfgFreeGiftMsgParentContainerForDropDown') ||
+                        slideCart.querySelector('.gfgFreeGiftSideCartWrapperV4') ||
+                        slideCart.querySelector('[class*="gfgFreeGiftMsgParent"]');
     
     if (!mainKiteDiv) {
-      // Main div not found yet, wait
+      // Main div not found in slide cart yet, wait
+      return;
+    }
+    
+    // Verify it's actually inside the slide cart (double check)
+    if (!slideCart.contains(mainKiteDiv)) {
+      // Widget is not in slide cart, skip (might be on product page)
       return;
     }
     
@@ -4381,13 +4398,13 @@ function hideKiteWidgetOnGrayButton() {
                      computedStyle.pointerEvents === 'none';
       
       if (isGray) {
-        // Button is gray/disabled - HIDE MAIN DIV
+        // Button is gray/disabled - HIDE MAIN DIV (only in slide cart)
         mainKiteDiv.style.display = 'none';
-        console.log('❌ Hiding Kite widget - Button is gray');
+        console.log('❌ Hiding Kite widget in slide cart - Button is gray');
       } else {
         // Button is black/active - SHOW MAIN DIV
         mainKiteDiv.style.display = 'block';
-        console.log('✅ Showing Kite widget - Button is black');
+        console.log('✅ Showing Kite widget in slide cart - Button is black');
       }
     }
   }
@@ -4398,19 +4415,23 @@ function hideKiteWidgetOnGrayButton() {
   setTimeout(checkAndHideMainDiv, 2000);
   setTimeout(checkAndHideMainDiv, 3000);
   
-  // Watch for changes in the entire document (Kite app injects dynamically)
-  const observer = new MutationObserver(function(mutations) {
-    checkAndHideMainDiv();
-  });
+  // Watch for changes ONLY in the slide cart container
+  const cartContainer = document.querySelector('.cart-app-blocks') || 
+                       document.querySelector('.r-side-cart') ||
+                       document.querySelector('#custom-cart');
   
-  // Observe the cart container for changes
-  const cartContainer = document.querySelector('.cart-app-blocks') || document.body;
-  observer.observe(cartContainer, {
-    childList: true,
-    subtree: true,
-    attributes: true,
-    attributeFilter: ['class', 'style']
-  });
+  if (cartContainer) {
+    const observer = new MutationObserver(function(mutations) {
+      checkAndHideMainDiv();
+    });
+    
+    observer.observe(cartContainer, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class', 'style']
+    });
+  }
 }
 
 // Initialize on page ready
