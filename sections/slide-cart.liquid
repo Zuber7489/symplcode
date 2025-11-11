@@ -44,6 +44,19 @@
       <button class="cart-close cart-icon" aria-label="Close cart">✕</button>
     </div>
 
+    <!-- Express Checkout Options - Right after cart header -->
+    {% if cart.item_count > 0 %}
+    <div class="express-checkout-section">
+      <h3 class="express-checkout-title">Express Checkout Options</h3>
+      <div class="express-checkout-buttons">
+        <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, PayPal via hidepay app) -->
+        <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart"></div>
+        <div class="dynamic-checkout-wrapper">{{ content_for_additional_checkout_buttons }}</div>
+      </div>
+    
+    </div>
+    {% endif %}
+
     <!-- Cart Items and Bundle Section Container -->
     <div class="cart-items-container">
         {% if cart.item_count > 0 %}
@@ -351,10 +364,6 @@
           
           <!-- Checkout button - shown on both mobile and desktop -->
           <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
-          
-          <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, PayPal via hidepay app) - Both Mobile and Desktop -->
-          <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart"></div>
-          <div class="dynamic-checkout-wrapper">{{ content_for_additional_checkout_buttons }}</div>
         </div>
       </div>
     </div>
@@ -1375,16 +1384,48 @@ body.g-cart-open {
   box-shadow: none;
 }
 
+/* Express Checkout Options Section */
+.express-checkout-section {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px 16px;
+  margin: 0 16px 16px 16px;
+  border: 1px solid #e5e7eb;
+}
+
+.express-checkout-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 16px 0;
+  font-family: inherit;
+}
+
+.express-checkout-buttons {
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.express-checkout-disclaimer {
+  font-size: 11px;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 12px 0 0 0;
+  text-align: left;
+}
+
 /* Dynamic Checkout Buttons (Apple Pay, Google Pay, PayPal via hidepay app) - Both Mobile and Desktop */
 .dynamic-checkout-buttons-cart {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 0;
+  margin-bottom: 0;
   display: block;
 }
 
 .dynamic-checkout-wrapper {
   width: 100%;
-  margin-top: 12px;
+  margin-top: 0;
+  margin-bottom: 0;
   display: block;
 }
 
@@ -1392,6 +1433,30 @@ body.g-cart-open {
 .dynamic-checkout-buttons-cart,
 .dynamic-checkout-wrapper {
   display: block !important;
+}
+
+/* Style Shopify cleanslate wrapper to display buttons side by side */
+.express-checkout-buttons .shopify-cleanslate,
+.express-checkout-buttons > div {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+/* Make individual payment button containers equal width and side by side */
+.express-checkout-buttons .shopify-cleanslate > div,
+.express-checkout-buttons > div > div {
+  flex: 1 1 calc(50% - 6px) !important;
+  min-width: 0 !important;
+  max-width: calc(50% - 6px) !important;
+}
+
+/* Ensure buttons take full width of their container */
+.express-checkout-buttons button,
+.express-checkout-buttons [role="button"] {
+  width: 100% !important;
 }
 
 /* Legacy Apple Pay Button - No longer used */
@@ -1833,6 +1898,34 @@ body.g-cart-open {
   .checkout-section {
     padding: 16px 16px calc(env(safe-area-inset-bottom, 16px) + 16px);
     margin-bottom: 0;
+  }
+  
+  .express-checkout-section {
+    padding: 16px 12px;
+    margin: 0 12px 16px 12px;
+  }
+  
+  .express-checkout-title {
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+  
+  .express-checkout-disclaimer {
+    font-size: 10px;
+  }
+  
+  /* Stack buttons vertically on very small screens if needed */
+  @media (max-width: 360px) {
+    .express-checkout-buttons .shopify-cleanslate,
+    .express-checkout-buttons > div {
+      flex-direction: column !important;
+    }
+    
+    .express-checkout-buttons .shopify-cleanslate > div,
+    .express-checkout-buttons > div > div {
+      flex: 1 1 100% !important;
+      max-width: 100% !important;
+    }
   }
   
   .discount-code-section {
