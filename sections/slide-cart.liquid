@@ -281,13 +281,14 @@
     <!-- Sticky Checkout Section - Only show when cart has items -->
     {% if cart.item_count > 0 %}
     <div class="checkout-section">
-      <div class="discount-code-section desktop-only">
+      <!-- Discount code section hidden on both desktop and mobile per requirements -->
+      <div class="discount-code-section" style="display: none !important;">
         <input type="text" id="discount-code" class="discount-input" placeholder="Discount Code" maxlength="20">
         <button id="apply-discount" class="apply-discount-btn">Apply</button>
       </div>
       
-      <!-- Applied Discount Codes Display -->
-      <div id="applied-discounts" class="applied-discounts-section desktop-only" style="display: none;">
+      <!-- Applied Discount Codes Display - Hidden on both desktop and mobile -->
+      <div id="applied-discounts" class="applied-discounts-section" style="display: none !important;">
         {% if cart.discount_codes.size > 0 %}
           {% for discount_code in cart.discount_codes %}
             {% if discount_code.applicable %}
@@ -325,30 +326,6 @@
       <div class="shipping-info">
         <div class="shipping-text">
           <p>Free shipping over ${{ free_shipping_dollars }} and easy 30 days return</p>
-          
-          <!-- Payment Methods -->
-          <div class="payment-methods">
-            <!-- Visa -->
-            <img src="{{ 'visa-svgrepo-com.svg' | asset_url }}" alt="Visa" class="payment-icon">
-            
-            <!-- Mastercard -->
-            <img src="{{ 'mastercard-svgrepo-com.svg' | asset_url }}" alt="Mastercard" class="payment-icon">
-            
-            <!-- PayPal -->
-            <img src="{{ 'paypal-svgrepo-com.svg' | asset_url }}" alt="PayPal" class="payment-icon">
-            
-            <!-- Apple Pay -->
-            <img src="{{ 'apple-pay-svgrepo-com.svg' | asset_url }}" alt="Apple Pay" class="payment-icon">
-            
-            <!-- American Express -->
-            <img src="{{ 'amex-svgrepo-com.svg' | asset_url }}" alt="American Express" class="payment-icon">
-            
-            <!-- Shop Pay -->
-            <img src="{{ 'Shop pay.svg' | asset_url }}" alt="Shop Pay" class="payment-icon">
-            
-            <!-- Google Pay -->
-            <img src="{{ 'google-pay-svgrepo-com.svg' | asset_url }}" alt="Google Pay" class="payment-icon">
-          </div>
         </div>
         
         
@@ -372,16 +349,14 @@
             <span class="total-amount">{{ cart.total_price | money }}</span>
           </div>
           
+          <!-- Checkout button - shown on both mobile and desktop -->
           <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
           
-          <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) - Mobile Only -->
-          <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart mobile-only"></div>
-          <div class="mobile-only">{{ content_for_additional_checkout_buttons }}</div>
+          <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, PayPal via hidepay app) - Both Mobile and Desktop -->
+          <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart"></div>
+          <div class="dynamic-checkout-wrapper">{{ content_for_additional_checkout_buttons }}</div>
         </div>
       </div>
-      
-      <!-- Desktop checkout button (outside shipping-totals) -->
-      <button class="checkout-btn desktop-only" id="checkout-btn-desktop" onclick="goToCheckout()">Checkout</button>
     </div>
     {% endif %}
   </div>
@@ -1307,29 +1282,7 @@ body.g-cart-open {
   margin: 0 0 12px 0;
 }
 
-.payment-methods {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-
-.payment-icon {
-  height: 24px;
-  width: 40px;
-  max-width: 40px;
-  opacity: 0.8;
-  transition: all 0.2s ease;
-  filter: grayscale(20%);
-  border-radius: 4px;
-  object-fit: contain;
-  display: block;
-}
-
-.payment-icon:hover {
-  opacity: 1;
-  filter: grayscale(0%);
-  transform: scale(1.05);
-}
+/* Payment methods icons removed per requirements */
 
 .shipping-totals {
   text-align: right;
@@ -1337,25 +1290,11 @@ body.g-cart-open {
   min-width: 270px;
 }
 
-/* Hide buttons inside shipping-totals on desktop */
-.shipping-totals .checkout-btn,
-.shipping-totals .apple-pay-btn {
-  display: none;
-}
-
-/* Show buttons inside shipping-totals on mobile */
-@media (max-width: 640px) {
-  .shipping-totals .checkout-btn,
-  .shipping-totals .apple-pay-btn {
-    display: block;
-    margin-top: 16px;
-    text-align: center;
-  }
-  
-  /* Hide desktop checkout button on mobile */
-  .desktop-only {
-    display: none !important;
-  }
+/* Checkout button and dynamic checkout buttons shown on both desktop and mobile */
+.shipping-totals .checkout-btn {
+  display: block;
+  margin-top: 16px;
+  width: 100%;
 }
 
 .shipping-row, .total-row {
@@ -1436,24 +1375,23 @@ body.g-cart-open {
   box-shadow: none;
 }
 
-/* Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) */
+/* Dynamic Checkout Buttons (Apple Pay, Google Pay, PayPal via hidepay app) - Both Mobile and Desktop */
 .dynamic-checkout-buttons-cart {
   width: 100%;
   margin-top: 12px;
+  display: block;
 }
 
-/* Hide dynamic checkout buttons on desktop by default */
-.dynamic-checkout-buttons-cart.mobile-only,
-.shipping-totals .mobile-only {
-  display: none;
+.dynamic-checkout-wrapper {
+  width: 100%;
+  margin-top: 12px;
+  display: block;
 }
 
-/* Show dynamic checkout buttons on mobile */
-@media (max-width: 768px) {
-  .dynamic-checkout-buttons-cart.mobile-only,
-  .shipping-totals .mobile-only {
-    display: block !important;
-  }
+/* Ensure dynamic checkout buttons are visible on both desktop and mobile */
+.dynamic-checkout-buttons-cart,
+.dynamic-checkout-wrapper {
+  display: block !important;
 }
 
 /* Legacy Apple Pay Button - No longer used */
@@ -1677,12 +1615,6 @@ body.g-cart-open {
   
   .shipping-text p {
     font-size: 12px;
-  }
-  
-  .payment-icon {
-    height: 20px;
-    width: 32px;
-    max-width: 32px;
   }
   
   .checkout-btn {
@@ -1934,16 +1866,6 @@ body.g-cart-open {
   .shipping-text p {
     font-size: 11px;
     margin-bottom: 8px;
-  }
-  
-  .payment-methods {
-    gap: 3px;
-  }
-  
-  .payment-icon {
-    height: 18px;
-    width: 28px;
-    max-width: 28px;
   }
   
   .shipping-totals {
