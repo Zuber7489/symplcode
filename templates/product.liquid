@@ -3808,16 +3808,22 @@ let globalTouchManager = {
       
       const specsElement = document.getElementById("dynamicSpecs");
     if (specsElement) {
-      const div = document.createElement('div');
-      div.style.cssText = 'white-space: pre-wrap; margin: 0; font-family: inherit;';
-      let formattedSpecs = content.specs
-        .replace(/(\b[a-zA-Z]+)\*/g, '<strong>$1</strong>')
-        .replace(/(\b[a-zA-Z]+):\*/g, '<strong>$1</strong>:')
-        .replace(/\n/g, '<br>');
-      
-      div.innerHTML = formattedSpecs; 
-      specsElement.innerHTML = ''; 
-      specsElement.appendChild(div);
+      // Ensure content.specs exists and is a string before processing
+      if (content.specs && typeof content.specs === 'string') {
+        const div = document.createElement('div');
+        div.style.cssText = 'white-space: pre-wrap; margin: 0; font-family: inherit;';
+        let formattedSpecs = content.specs
+          .replace(/(\b[a-zA-Z]+)\*/g, '<strong>$1</strong>')
+          .replace(/(\b[a-zA-Z]+):\*/g, '<strong>$1</strong>:')
+          .replace(/\n/g, '<br>');
+        
+        div.innerHTML = formattedSpecs; 
+        specsElement.innerHTML = ''; 
+        specsElement.appendChild(div);
+      } else {
+        // Clear specs element if specs is not available
+        specsElement.innerHTML = '';
+      }
     }
       updateFeatureHighlights(content.features);
       
