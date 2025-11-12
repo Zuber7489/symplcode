@@ -375,8 +375,8 @@
           <button class="checkout-btn" id="checkout-btn" onclick="goToCheckout()">Checkout</button>
           
           <!-- Shopify Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) - Mobile Only -->
-          <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart mobile-only"></div>
-          <div class="mobile-only">{{ content_for_additional_checkout_buttons }}</div>
+          <div id="dynamic-checkout-cart" class="dynamic-checkout-buttons-cart mobile-only" style="display: none !important;"></div>
+          <div class="mobile-only" style="display: none !important;">{{ content_for_additional_checkout_buttons }}</div>
         </div>
       </div>
       
@@ -1135,9 +1135,8 @@ body.g-cart-open {
 /* Checkout Section */
 .checkout-section {
   background: #ffffff;
-  padding: 20px 16px 24px;
-  /* Add safe area padding for iOS Safari bottom bar */
-  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  padding: 4px 16px 12px;
+ 
   position: sticky;
   bottom: 0;
   z-index: 10;
@@ -1294,7 +1293,7 @@ body.g-cart-open {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 24px;
-  margin-top: 18px;
+  margin-top: 0px;
 }
 
 .shipping-text {
@@ -1438,21 +1437,22 @@ body.g-cart-open {
 
 /* Dynamic Checkout Buttons (Apple Pay, Google Pay, etc.) */
 .dynamic-checkout-buttons-cart {
+  display: none !important;
   width: 100%;
   margin-top: 12px;
 }
 
-/* Hide dynamic checkout buttons on desktop by default */
+/* Hide dynamic checkout buttons on all screen sizes */
 .dynamic-checkout-buttons-cart.mobile-only,
 .shipping-totals .mobile-only {
-  display: none;
+  display: none !important;
 }
 
-/* Show dynamic checkout buttons on mobile */
+/* Keep dynamic checkout buttons hidden on mobile */
 @media (max-width: 768px) {
   .dynamic-checkout-buttons-cart.mobile-only,
   .shipping-totals .mobile-only {
-    display: block !important;
+    display: none !important;
   }
 }
 
@@ -1660,7 +1660,7 @@ body.g-cart-open {
   }
   
   .checkout-section {
-    padding: 16px 12px 20px;
+    padding: 10px 12px 2px;
   }
   
   .discount-input {
@@ -1895,7 +1895,7 @@ body.g-cart-open {
   }
   
   .checkout-section {
-    padding: 16px 16px calc(env(safe-area-inset-bottom, 16px) + 16px);
+   
     margin-bottom: 0;
   }
   
@@ -1914,7 +1914,7 @@ body.g-cart-open {
   .shipping-info {
     flex-direction: column;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 0px;
     margin-top: 0;
   }
   
@@ -1929,6 +1929,7 @@ body.g-cart-open {
   
   .payment-methods {
     gap: 3px;
+    display:none;
   }
   
   .payment-icon {
@@ -2098,7 +2099,7 @@ body.g-cart-open {
   }
   
   .checkout-section {
-    padding: 14px 12px calc(env(safe-area-inset-bottom, 16px) + 16px);
+   
     margin-bottom: 0;
   }
   
