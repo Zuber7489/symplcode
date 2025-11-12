@@ -1189,7 +1189,7 @@ body.g-cart-open {
 
 /* Applied Discount Codes Section */
 .applied-discounts-section {
-  margin-bottom: 12px;
+  margin-bottom: 0px;
 }
 
 .discount-tag {
@@ -1293,7 +1293,7 @@ body.g-cart-open {
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 0px;
-  margin-top: 0px;
+  margin-top: 5px;
 }
 
 .shipping-text {
@@ -1748,6 +1748,7 @@ body.g-cart-open {
 
 @media (max-width: 768px) {
   /* Hide desktop elements, show mobile elements */
+  /* Note: Desktop checkout button visibility is handled by min-width: 641px media query above */
   .desktop-only {
     display: none !important;
   }
@@ -2116,6 +2117,17 @@ body.g-cart-open {
   /* Hide savings on small screens */
   #savings-display {
     display: none !important;
+  }
+}
+
+/* Show desktop-only checkout button on screens larger than 640px */
+/* This must come after all max-width queries to properly override them */
+@media (min-width: 641px) {
+  .checkout-btn.desktop-only,
+  .desktop-only.checkout-btn,
+  #checkout-btn-desktop,
+  #checkout-btn-desktop.desktop-only {
+    display: block !important;
   }
 }
 </style>
