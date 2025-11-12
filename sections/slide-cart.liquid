@@ -4449,8 +4449,20 @@ function startApplePay(cart) {
  * KITE FREE GIFT WIDGET - Hide MAIN DIV when button is gray/disabled
  * ONLY IN SLIDE CART - Does not affect product page widgets
  * Targets: gfgFreeGiftMsgParentContainerForDropDown (main Kite widget container)
+ * 
+ * FIXED: Prevents duplicate observers and widget reappearing repeatedly
  */
-function hideKiteWidgetOnGrayButton() {
+(function() {
+  'use strict';
+  
+  // Store observer reference globally to prevent duplicates
+  let kiteWidgetObserver = null;
+  let isObserverInitialized = false;
+  let checkTimeoutIds = [];
+  
+  /**
+   * Check and hide/show the Kite widget based on button state
+   */
   function checkAndHideMainDiv() {
     // IMPORTANT: Only target widgets inside the slide cart, not product pages
     const slideCart = document.querySelector('.r-side-cart') || 
@@ -4462,88 +4474,146 @@ function hideKiteWidgetOnGrayButton() {
       return;
     }
     
-    // Find the main Kite widget container div ONLY inside slide cart
-    const mainKiteDiv = slideCart.querySelector('.gfgFreeGiftMsgParentContainerForDropDown') ||
-                        slideCart.querySelector('.gfgFreeGiftSideCartWrapperV4') ||
-                        slideCart.querySelector('[class*="gfgFreeGiftMsgParent"]');
+    // Find ALL Kite widget containers to handle duplicates
+    const kiteWidgets = slideCart.querySelectorAll('.gfgFreeGiftMsgParentContainerForDropDown, .gfgFreeGiftSideCartWrapperV4, [class*="gfgFreeGiftMsgParent"]');
     
-    if (!mainKiteDiv) {
-      // Main div not found in slide cart yet, wait
+    if (kiteWidgets.length === 0) {
+      // No widgets found yet, wait
       return;
     }
     
-    // Verify it's actually inside the slide cart (double check)
-    if (!slideCart.contains(mainKiteDiv)) {
-      // Widget is not in slide cart, skip (might be on product page)
-      return;
-    }
-    
-    // Find the Claim button inside the main div
-    const claimButton = mainKiteDiv.querySelector('.gfgFreeGiftInvalidProductClaimButton') ||
-                       mainKiteDiv.querySelector('.gfgFreeGiftClaimButton') ||
-                       mainKiteDiv.querySelector('button');
-    
-    if (claimButton) {
-      const computedStyle = window.getComputedStyle(claimButton);
-      const bgColor = computedStyle.backgroundColor;
-      
-      // Check if button is gray (disabled state)
-      // Gray: rgb(229, 229, 229) = #e5e5e5
-      // Black: rgb(26, 26, 26) or rgb(0, 0, 0)
-      
-      const isGray = bgColor.includes('229') || // rgb(229, 229, 229)
-                     bgColor === 'rgb(229, 229, 229)' ||
-                     bgColor === '#e5e5e5' ||
-                     claimButton.classList.contains('gfgFreeGiftInvalidProductClaimButton') ||
-                     computedStyle.pointerEvents === 'none';
-      
-      if (isGray) {
-        // Button is gray/disabled - HIDE MAIN DIV (only in slide cart)
-        mainKiteDiv.style.display = 'none';
-        console.log('❌ Hiding Kite widget in slide cart - Button is gray');
-      } else {
-        // Button is black/active - SHOW MAIN DIV
-        mainKiteDiv.style.display = 'block';
-        console.log('✅ Showing Kite widget in slide cart - Button is black');
+    // Process each widget found (in case of duplicates)
+    kiteWidgets.forEach(function(mainKiteDiv) {
+      // Verify it's actually inside the slide cart (double check)
+      if (!slideCart.contains(mainKiteDiv)) {
+        // Widget is not in slide cart, skip (might be on product page)
+        return;
       }
+      
+      // Find the Claim button inside the main div
+      const claimButton = mainKiteDiv.querySelector('.gfgFreeGiftInvalidProductClaimButton') ||
+                         mainKiteDiv.querySelector('.gfgFreeGiftClaimButton') ||
+                         mainKiteDiv.querySelector('button');
+      
+      if (claimButton) {
+        const computedStyle = window.getComputedStyle(claimButton);
+        const bgColor = computedStyle.backgroundColor;
+        
+        // Check if button is gray (disabled state)
+        // Gray: rgb(229, 229, 229) = #e5e5e5
+        // Black: rgb(26, 26, 26) or rgb(0, 0, 0)
+        
+        const isGray = bgColor.includes('229') || // rgb(229, 229, 229)
+                       bgColor === 'rgb(229, 229, 229)' ||
+                       bgColor === '#e5e5e5' ||
+                       claimButton.classList.contains('gfgFreeGiftInvalidProductClaimButton') ||
+                       computedStyle.pointerEvents === 'none';
+        
+        if (isGray) {
+          // Button is gray/disabled - HIDE MAIN DIV (only in slide cart)
+          mainKiteDiv.style.display = 'none';
+          console.log('❌ Hiding Kite widget in slide cart - Button is gray');
+        } else {
+          // Button is black/active - SHOW MAIN DIV
+          mainKiteDiv.style.display = 'block';
+          console.log('✅ Showing Kite widget in slide cart - Button is black');
+        }
+      }
+    });
+  }
+  
+  /**
+   * Initialize the Kite widget observer (only once)
+   */
+  function initializeKiteWidgetObserver() {
+    // Prevent duplicate initialization
+    if (isObserverInitialized && kiteWidgetObserver) {
+      return;
+    }
+    
+    // Clear any existing timeouts
+    checkTimeoutIds.forEach(function(timeoutId) {
+      clearTimeout(timeoutId);
+    });
+    checkTimeoutIds = [];
+    
+    // Disconnect existing observer if any
+    if (kiteWidgetObserver) {
+      kiteWidgetObserver.disconnect();
+      kiteWidgetObserver = null;
+    }
+    
+    // Check multiple times to catch Kite app loading
+    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 500));
+    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 1000));
+    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 2000));
+    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 3000));
+    
+    // Watch for changes ONLY in the slide cart container
+    const cartContainer = document.querySelector('.cart-app-blocks') || 
+                         document.querySelector('.r-side-cart') ||
+                         document.querySelector('#custom-cart');
+    
+    if (cartContainer && !kiteWidgetObserver) {
+      kiteWidgetObserver = new MutationObserver(function(mutations) {
+        // Debounce: Only check if widget actually changed
+        let shouldCheck = false;
+        mutations.forEach(function(mutation) {
+          if (mutation.type === 'childList' || 
+              (mutation.type === 'attributes' && 
+               (mutation.attributeName === 'class' || mutation.attributeName === 'style'))) {
+            shouldCheck = true;
+          }
+        });
+        
+        if (shouldCheck) {
+          checkAndHideMainDiv();
+        }
+      });
+      
+      kiteWidgetObserver.observe(cartContainer, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['class', 'style']
+      });
+      
+      isObserverInitialized = true;
+      console.log('✅ Kite widget observer initialized');
     }
   }
   
-  // Check multiple times to catch Kite app loading
-  setTimeout(checkAndHideMainDiv, 500);
-  setTimeout(checkAndHideMainDiv, 1000);
-  setTimeout(checkAndHideMainDiv, 2000);
-  setTimeout(checkAndHideMainDiv, 3000);
-  
-  // Watch for changes ONLY in the slide cart container
-  const cartContainer = document.querySelector('.cart-app-blocks') || 
-                       document.querySelector('.r-side-cart') ||
-                       document.querySelector('#custom-cart');
-  
-  if (cartContainer) {
-    const observer = new MutationObserver(function(mutations) {
-      checkAndHideMainDiv();
+  /**
+   * Re-check widget state (for cart updates) without reinitializing observer
+   */
+  function recheckKiteWidget() {
+    // Clear previous timeouts
+    checkTimeoutIds.forEach(function(timeoutId) {
+      clearTimeout(timeoutId);
     });
+    checkTimeoutIds = [];
     
-    observer.observe(cartContainer, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['class', 'style']
-    });
+    // Re-check widget state
+    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 300));
+    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 800));
+    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 1500));
   }
-}
-
-// Initialize on page ready
-$(document).ready(function() {
-  setTimeout(hideKiteWidgetOnGrayButton, 500);
-});
-
-// Re-run when cart updates
-$(document).on('cart:updated', function() {
-  setTimeout(hideKiteWidgetOnGrayButton, 500);
-  setTimeout(hideKiteWidgetOnGrayButton, 1500);
-});
+  
+  // Initialize on page ready
+  $(document).ready(function() {
+    setTimeout(initializeKiteWidgetObserver, 500);
+  });
+  
+  // Re-check when cart updates (don't reinitialize observer)
+  $(document).on('cart:updated', function() {
+    recheckKiteWidget();
+  });
+  
+  // Also re-check when cart opens
+  $(document).on('cart:opened', function() {
+    recheckKiteWidget();
+  });
+})();
 
 </script>
 
