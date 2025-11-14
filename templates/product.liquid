@@ -989,57 +989,7 @@ margin-left: 0 !important; margin-right: 0 !important; padding-left: 0 !importan
   <hr style="border: none; height: 2px; background-color: #eee; margin: 0; width: 100%; margin-left: 0;">
 </div>
 
-            <div class="text-center">
-              <div class="bundle-section" style="margin-bottom: 60px; background-color: #fff; padding: 30px 1px; border-radius: 12px; position: relative;">
-      <h2 class="bundleandsave" style="font-size: clamp(20px, 5vw, 24px); font-weight: 500; margin-bottom: 8px; text-align: left; color: #000;  letter-spacing: 1px; font-family: 'Neue Haas Display', sans-serif !important; font-weight:400;">
-        Bundle & save
-      </h2>
-    
-      <div class="bundle-flex-wrapper" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-        <div class="bundle-prev-wrapper">
-          <button class="bundle-prev" aria-label="Previous product" >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
-    
-
-                <div class="bundle-carousel-container" style="position: relative; max-width: 430px; overflow: hidden; margin-left:-1.5px;">
-          <div class="bundle-carousel" style="display:flex; gap: 10px; padding: 0 3px; scrollbar-width: none; -ms-overflow-style: none;">
-            {% assign bundle_products = product.metafields.custom.bundle_products.value | split: ',' %}
-            {% for bundle_product_id in bundle_products %}
-              {% assign bundle_product = all_products[bundle_product_id] %}
-              {% if bundle_product.id != blank and bundle_product.id != product.id %}
-                <div class="bundle-item">
-                  <a href="{{ bundle_product.url }}" style="text-decoration: none; color: inherit; display: block;">
-                    <div style="background-color: #f6f6f6; border-radius: 8px; overflow: hidden; margin-bottom: 12px; aspect-ratio: 1/1.3; position: relative; cursor: pointer;">
-                      <img src="{{ bundle_product.featured_image | img_url: '300x300', crop: 'center' }}" alt="{{ bundle_product.title }}" style="width: 100%; height: 100%; object-fit: contain;">
-                    </div>
-                    <h4 style="font-size: 12px; margin: 0 0 8px; font-weight: 600; color: #000; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;">{{ bundle_product.title | truncate: 25 }}</h4>
-                    <p class="bundle-price" style="font-weight: 600; margin-bottom: 12px; color: #000; font-size: 15px; cursor: pointer;">{{ bundle_product.price | money }}</p>
-                  </a>
-                  <button class="bundle-add-btn" data-variant-id="{{ bundle_product.selected_or_first_available_variant.id }}" style="width: 100%; padding: 8px; background-color: transparent; color: #000; border: 1px solid #000; border-radius: 10px; font-size: 11px; font-weight: 600; cursor: pointer; transition: background-color 0.3s ease, color 0.3s ease;" onclick="event.stopPropagation();">Add to Bag</button>
-                </div>
-              {% endif %}
-            {% endfor %}
-          </div>
-        </div>
-    
-
-                  <div class="bundle-next-wrapper">
-          <button class="bundle-next" aria-label="Next product">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-        </div>
-    
-      </div>
-    </div>
-    
+            {% render 'bundle-and-save-product' %}
           </div>
     </div>
     </div>
@@ -2782,7 +2732,7 @@ let globalTouchManager = {
       initVariantSelector();
       initDesktopNavigableCellNavigation();
       initAddToCart();
-      initBundleCarousel();
+      // initBundleCarousel(); // Removed - now handled by bundle-and-save-product.liquid snippet
       initFunctionsCarousel();
       initRelatedProductsCarousel();
       initShopPayInstallments();
@@ -3755,7 +3705,7 @@ let globalTouchManager = {
     try {
       initMobileImageNavigation(); // Reinitialize mobile image navigation
       initFunctionsCarousel(); // Reinitialize 5-star functions carousel
-      initBundleCarousel(); // Reinitialize bundle carousel
+      // initBundleCarousel(); // Removed - now handled by bundle-and-save-product.liquid snippet
       initRelatedProductsCarousel(); // Reinitialize related products carousel
     } catch (error) {
     }
@@ -4689,21 +4639,22 @@ let globalTouchManager = {
       update();
     }
     
-    function initBundleCarousel() {
-      initCarousel(
-        '.bundle-carousel',
-        '.bundle-prev',
-        '.bundle-next',
-        '.bundle-item',
-        null, // No slider bar for bundle carousel
-        () => {
-          if (window.innerWidth < 768) return 3; // 3 items per scroll on mobile
-          if (window.innerWidth < 1024) return 2;
-          return 3;
-        },
-        { enableTouch: true }
-      );
-    }
+    // Bundle carousel initialization removed - now handled by bundle-and-save-product.liquid snippet
+    // function initBundleCarousel() {
+    //   initCarousel(
+    //     '.bundle-carousel',
+    //     '.bundle-prev',
+    //     '.bundle-next',
+    //     '.bundle-item',
+    //     null, // No slider bar for bundle carousel
+    //     () => {
+    //       if (window.innerWidth < 768) return 3; // 3 items per scroll on mobile
+    //       if (window.innerWidth < 1024) return 2;
+    //       return 3;
+    //     },
+    //     { enableTouch: true }
+    //   );
+    // }
     
     function initFunctionsCarousel() {
       initCarousel(
@@ -4809,7 +4760,7 @@ let globalTouchManager = {
       try {
         initMobileImageNavigation();
         initFunctionsCarousel();
-        initBundleCarousel();
+        // initBundleCarousel(); // Removed - now handled by bundle-and-save-product.liquid snippet
         initRelatedProductsCarousel();
         if (mobileView) {
           mobileView.classList.add('mobile-initialized');
