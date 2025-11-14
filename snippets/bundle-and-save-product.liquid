@@ -11,7 +11,7 @@
         {% for bundle_product_id in bundle_products %}
           {% assign bundle_product = all_products[bundle_product_id] %}
           {% if bundle_product.id != blank and bundle_product.id != product.id %}
-            <div class="bundle-product-pdp" data-product-id="{{ bundle_product.id }}">
+            <div class="bundle-product-pdp" data-product-id="{{ bundle_product.id }}" data-product-handle="{{ bundle_product.handle }}">
               <div class="bundle-product-gray-box">
                 <div class="bundle-product-image">
                   <img src="{{ bundle_product.variants.first.featured_image | default: bundle_product.featured_image | img_url: 'medium' }}" alt="{{ bundle_product.title }}">
@@ -22,13 +22,14 @@
               
               <div class="bundle-product-variants">
                 {% for variant in bundle_product.variants limit: 4 %}
-                  <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ bundle_product.id }}" data-variant-index="{{ forloop.index0 }}" data-fabric="{{ variant.option1 }}" data-size="{{ variant.option2 }}">
+                  <div class="variant-dot {% if forloop.first %}selected{% endif %}" data-variant-id="{{ variant.id }}" data-product-id="{{ bundle_product.id }}" data-variant-index="{{ forloop.index0 }}" data-fabric="{{ variant.option1 }}" data-size="{{ variant.option2 }}" data-available="{{ variant.available }}">
                     <div class="dot" style="background-color: {{ variant.option1 | handleize }};"></div>
                   </div>
                 {% endfor %}
               </div>
               <div class="bundle-product-material">{{ bundle_product.variants.first.option1 }}{% if bundle_product.variants.first.option2 %} - {{ bundle_product.variants.first.option2 }}{% endif %}</div>
-              <button class="bundle-add-btn" data-variant-id="{{ bundle_product.selected_or_first_available_variant.id }}" data-product-id="{{ bundle_product.id }}" data-source="bundle-product">Add to Bag</button>
+              {% assign initial_variant = bundle_product.selected_or_first_available_variant %}
+              <button class="bundle-add-btn{% unless initial_variant.available %} is-disabled{% endunless %}" data-variant-id="{{ initial_variant.id }}" data-product-id="{{ bundle_product.id }}" data-available="{{ initial_variant.available }}" data-source="bundle-product" {% unless initial_variant.available %}disabled="disabled"{% endunless %}>{% if initial_variant.available %}Add to Bag{% else %}Out of Stock{% endif %}</button>
             </div>
           {% endif %}
         {% endfor %}
@@ -48,6 +49,7 @@
               id: {{ variant.id }},
               title: {{ variant.title | json }},
               price: {{ variant.price }},
+              available: {{ variant.available | json }},
               fabric: {{ variant.option1 | json }},
               size: {{ variant.option2 | json }},
               featured_image: {
@@ -213,6 +215,24 @@
   border-color: #111827;
 }
 
+.variant-dot.out-of-stock .dot {
+  opacity: 0.4;
+  border-color: #d1d5db;
+  background: #f3f4f6;
+  position: relative;
+}
+
+.variant-dot.out-of-stock .dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 1px;
+  background: #9ca3af;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
 .bundle-product-material {
   font-size: 14px;
   color: #996515;
@@ -238,8 +258,22 @@
   position: relative;
 }
 
-.bundle-save-section-product .bundle-add-btn:hover {
+.bundle-save-section-product .bundle-add-btn:hover:not(:disabled) {
   background: #026068;
+}
+
+.bundle-save-section-product .bundle-add-btn.is-disabled,
+.bundle-save-section-product .bundle-add-btn[disabled] {
+  background: #9ca3af !important;
+  color: #ffffff !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}
+
+.bundle-save-section-product .bundle-add-btn.is-disabled:hover,
+.bundle-save-section-product .bundle-add-btn[disabled]:hover {
+  background: #9ca3af !important;
+  transform: none !important;
 }
 
 .bundle-save-section-product .bundle-add-btn.is-loading {
@@ -776,7 +810,28 @@
           const addToBagBtn = productContainer.querySelector('.bundle-add-btn');
           if (addToBagBtn) {
             addToBagBtn.dataset.variantId = variantId;
+            // Update availability based on selected variant
+            const variantDataList = window[`bundleProductVariants_${productId}`];
+            const selectedData = variantDataList && variantDataList[variantIndex] ? variantDataList[variantIndex] : null;
+            const isAvailable = !!(selectedData && selectedData.available);
+            addToBagBtn.dataset.available = isAvailable ? 'true' : 'false';
+            addToBagBtn.disabled = !isAvailable;
+            addToBagBtn.textContent = isAvailable ? 'Add to Bag' : 'Out of Stock';
+            addToBagBtn.classList.toggle('is-disabled', !isAvailable);
           }
+          
+          // Update variant dots availability indicators
+          const variantDots = productContainer.querySelectorAll('.variant-dot');
+          variantDots.forEach(function(dot, index) {
+            const dotVariantData = variantDataList && variantDataList[index] ? variantDataList[index] : null;
+            const dotAvailable = !!(dotVariantData && dotVariantData.available);
+            dot.setAttribute('data-available', dotAvailable ? 'true' : 'false');
+            if (!dotAvailable) {
+              dot.classList.add('out-of-stock');
+            } else {
+              dot.classList.remove('out-of-stock');
+            }
+          });
           
           // Update the fabric and size name
           const materialElement = productContainer.querySelector('.bundle-product-material');
@@ -820,15 +875,154 @@
     }
   }
 
+    // Function to fetch fresh variant availability from Shopify API
+    function refreshBundleProductAvailabilityPDP() {
+      const bundleProducts = document.querySelectorAll('.bundle-product-pdp');
+      if (bundleProducts.length === 0) {
+        return;
+      }
+      
+      // Collect all unique product handles and IDs
+      const productDataMap = {};
+      bundleProducts.forEach(function(product) {
+        const productId = product.dataset.productId;
+        const productHandle = product.dataset.productHandle;
+        if (productId && productHandle && !productDataMap[productId]) {
+          productDataMap[productId] = {
+            handle: productHandle,
+            id: productId
+          };
+        }
+      });
+      
+      const productIds = Object.keys(productDataMap);
+      if (productIds.length === 0) {
+        return;
+      }
+      
+      // Fetch fresh product data for each product
+      let completedRequests = 0;
+      const totalRequests = productIds.length;
+      
+      productIds.forEach(function(productId) {
+        const productInfo = productDataMap[productId];
+        const productHandle = productInfo.handle;
+        
+        // Fetch product data from Shopify API using handle
+        fetch("/products/" + productHandle + ".js")
+          .then(response => response.json())
+          .then(productData => {
+            // Update the variant data in window object
+            if (productData && productData.variants) {
+              const variantData = [];
+              productData.variants.slice(0, 4).forEach(function(variant) {
+                variantData.push({
+                  id: variant.id,
+                  title: variant.title,
+                  price: variant.price,
+                  available: variant.available,
+                  fabric: variant.option1 || '',
+                  size: variant.option2 || '',
+                  featured_image: {
+                    url: variant.featured_image || productData.featured_image || '',
+                    alt: variant.title || productData.title || ''
+                  }
+                });
+              });
+              
+              // Update the global variant data
+              window[`bundleProductVariants_${productId}`] = variantData;
+              
+              // Update UI for this product
+              updateBundleProductAvailabilityUIPDP(productId, variantData);
+            }
+            
+            completedRequests++;
+            if (completedRequests === totalRequests) {
+              console.log('✅ Refreshed availability for all bundle products (PDP)');
+            }
+          })
+          .catch(error => {
+            console.warn('Error fetching product availability for product ' + productHandle + ':', error);
+            completedRequests++;
+          });
+      });
+    }
+    
+    // Function to update UI with fresh availability data
+    function updateBundleProductAvailabilityUIPDP(productId, variantData) {
+      const product = document.querySelector('.bundle-product-pdp[data-product-id="' + productId + '"]');
+      if (!product) {
+        return;
+      }
+      
+      // Find the selected variant dot
+      const selectedDot = product.querySelector('.variant-dot.selected');
+      if (!selectedDot) {
+        // If no selected dot, select the first one
+        const firstDot = product.querySelector('.variant-dot');
+        if (firstDot) {
+          firstDot.classList.add('selected');
+          updateVariantAvailabilityPDP(product, variantData, 0);
+        }
+      } else {
+        // Update based on selected variant
+        const variantIndex = parseInt(selectedDot.dataset.variantIndex) || 0;
+        updateVariantAvailabilityPDP(product, variantData, variantIndex);
+      }
+    }
+    
+    // Helper function to update variant availability in UI
+    function updateVariantAvailabilityPDP(product, variantData, variantIndex) {
+      if (!variantData || !variantData[variantIndex]) {
+        return;
+      }
+      
+      const variant = variantData[variantIndex];
+      const isAvailable = !!variant.available;
+      
+      // Update the Add to Bag button
+      const addToBagBtn = product.querySelector('.bundle-add-btn');
+      if (addToBagBtn) {
+        addToBagBtn.setAttribute('data-variant-id', variant.id);
+        addToBagBtn.setAttribute('data-available', isAvailable ? 'true' : 'false');
+        addToBagBtn.disabled = !isAvailable;
+        addToBagBtn.classList.toggle('is-disabled', !isAvailable);
+        addToBagBtn.textContent = isAvailable ? 'Add to Bag' : 'Out of Stock';
+      }
+      
+      // Update variant dots availability indicators
+      const variantDots = product.querySelectorAll('.variant-dot');
+      variantDots.forEach(function(dot, index) {
+        if (variantData[index]) {
+          const dotAvailable = !!variantData[index].available;
+          dot.setAttribute('data-available', dotAvailable ? 'true' : 'false');
+          if (!dotAvailable) {
+            dot.classList.add('out-of-stock');
+          } else {
+            dot.classList.remove('out-of-stock');
+          }
+        }
+      });
+    }
+
     // Initialize bundle product page navigation on DOM ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() {
         new BundleProductPageNavigation();
         initBundleAddToCart();
+        // Refresh availability on page load to get fresh stock data
+        setTimeout(function() {
+          refreshBundleProductAvailabilityPDP();
+        }, 500);
       });
     } else {
       new BundleProductPageNavigation();
       initBundleAddToCart();
+      // Refresh availability on page load to get fresh stock data
+      setTimeout(function() {
+        refreshBundleProductAvailabilityPDP();
+      }, 500);
     }
 
     // Initialize add to cart for bundle buttons
@@ -841,6 +1035,13 @@
         
         newButton.addEventListener("click", () => {
           const variantId = newButton.getAttribute("data-variant-id");
+          const isAvailable = newButton.getAttribute("data-available") === 'true';
+          
+          // Prevent adding out of stock items
+          if (!isAvailable || newButton.disabled) {
+            return;
+          }
+          
           if (variantId) {
             const originalText = newButton.textContent;
             newButton.textContent = "Adding...";
