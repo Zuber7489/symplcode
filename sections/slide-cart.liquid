@@ -195,7 +195,7 @@
                         {% assign shown_product_ids = shown_product_ids | append: ',' | append: recommended_product.id | append: ',' %}
                         
                         {% comment %} Render the product immediately to avoid complex array management {% endcomment %}
-                        <div class="bundle-product" data-product-id="{{ recommended_product.id }}">
+                        <div class="bundle-product" data-product-id="{{ recommended_product.id }}" data-product-handle="{{ recommended_product.handle }}">
                           <div class="bundle-product-gray-box">
                             <div class="bundle-product-image">
                               <img src="{{ recommended_product.variants.first.featured_image | default: recommended_product.featured_image | img_url: 'medium' }}" alt="{{ recommended_product.title }}">
@@ -1033,6 +1033,24 @@ body.g-cart-open [class*="Georgia"] {
 .variant-dot:hover .dot {
   transform: scale(1.1);
   border-color: #111827;
+}
+
+.variant-dot.out-of-stock .dot {
+  opacity: 0.4;
+  border-color: #d1d5db;
+  background: #f3f4f6;
+  position: relative;
+}
+
+.variant-dot.out-of-stock .dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 1px;
+  background: #9ca3af;
+  transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .bundle-product-material {
@@ -2312,10 +2330,14 @@ $(document).on('cart:refresh-bundle-discounts', function() {
           // Update cart title
           $('.cart-title').text('Your bag (' + cartCount + ')');
           
-          // Re-initialize bundle functionality after cart update
+        // Re-initialize bundle functionality after cart update
+        setTimeout(function() {
+          initializeBundleFunctionality();
+          // Refresh availability after initialization
           setTimeout(function() {
-            initializeBundleFunctionality();
-          }, 50);
+            refreshBundleProductAvailability();
+          }, 300);
+        }, 50);
         }
       },
       error: function(xhr, status, error) {
@@ -3201,6 +3223,146 @@ function initializeBundleProductImages() {
   });
 }
 
+// Function to fetch fresh variant availability from Shopify API
+function refreshBundleProductAvailability() {
+  const bundleProducts = document.querySelectorAll('.bundle-product');
+  if (bundleProducts.length === 0) {
+    return;
+  }
+  
+  // Collect all unique product handles and IDs
+  const productDataMap = {};
+  bundleProducts.forEach(function(product) {
+    const productId = product.dataset.productId;
+    const productHandle = product.dataset.productHandle;
+    if (productId && productHandle && !productDataMap[productId]) {
+      productDataMap[productId] = {
+        handle: productHandle,
+        id: productId
+      };
+    }
+  });
+  
+  const productIds = Object.keys(productDataMap);
+  if (productIds.length === 0) {
+    return;
+  }
+  
+  // Fetch fresh product data for each product
+  let completedRequests = 0;
+  const totalRequests = productIds.length;
+  
+  productIds.forEach(function(productId) {
+    const productInfo = productDataMap[productId];
+    const productHandle = productInfo.handle;
+    
+    // Fetch product data from Shopify API using handle
+    $.ajax({
+      type: "GET",
+      url: "/products/" + productHandle + ".js",
+      dataType: "json",
+      cache: false,
+      headers: {
+        'Cache-Control': 'no-cache'
+      },
+      success: function(productData) {
+        // Update the variant data in window object
+        if (productData && productData.variants) {
+          const variantData = [];
+          productData.variants.slice(0, 4).forEach(function(variant) {
+            variantData.push({
+              id: variant.id,
+              title: variant.title,
+              price: variant.price,
+              available: variant.available,
+              fabric: variant.option1 || '',
+              size: variant.option2 || '',
+              featured_image: {
+                url: variant.featured_image || productData.featured_image || '',
+                alt: variant.title || productData.title || ''
+              }
+            });
+          });
+          
+          // Update the global variant data
+          window[`bundleProductVariants_${productId}`] = variantData;
+          
+          // Update UI for this product
+          updateBundleProductAvailabilityUI(productId, variantData);
+        }
+        
+        completedRequests++;
+        if (completedRequests === totalRequests) {
+          console.log('✅ Refreshed availability for all bundle products');
+        }
+      },
+      error: function(xhr, status, error) {
+        console.warn('Error fetching product availability for product ' + productHandle + ':', error);
+        completedRequests++;
+      }
+    });
+  });
+}
+
+// Function to update UI with fresh availability data
+function updateBundleProductAvailabilityUI(productId, variantData) {
+  const $product = $('.bundle-product[data-product-id="' + productId + '"]');
+  if ($product.length === 0) {
+    return;
+  }
+  
+  // Find the selected variant dot
+  const $selectedDot = $product.find('.variant-dot.selected');
+  if ($selectedDot.length === 0) {
+    // If no selected dot, select the first one
+    const $firstDot = $product.find('.variant-dot').first();
+    if ($firstDot.length > 0) {
+      $firstDot.addClass('selected');
+      updateVariantAvailability($product, variantData, 0);
+    }
+  } else {
+    // Update based on selected variant
+    const variantIndex = parseInt($selectedDot.data('variant-index')) || 0;
+    updateVariantAvailability($product, variantData, variantIndex);
+  }
+}
+
+// Helper function to update variant availability in UI
+function updateVariantAvailability($product, variantData, variantIndex) {
+  if (!variantData || !variantData[variantIndex]) {
+    return;
+  }
+  
+  const variant = variantData[variantIndex];
+  const isAvailable = !!variant.available;
+  
+  // Update the Add to Bag button
+  const $addToBagBtn = $product.find('.bundle-cart-btn');
+  if ($addToBagBtn.length > 0) {
+    $addToBagBtn.attr('data-variant-id', variant.id);
+    $addToBagBtn.attr('data-available', isAvailable ? 'true' : 'false');
+    $addToBagBtn.prop('disabled', !isAvailable);
+    $addToBagBtn.toggleClass('is-disabled', !isAvailable);
+    $addToBagBtn.text(isAvailable ? 'Add to Bag' : 'Out of Stock');
+  }
+  
+  // Update variant dots availability indicators
+  $product.find('.variant-dot').each(function(index) {
+    const $dot = $(this);
+    if (variantData[index]) {
+      const dotAvailable = !!variantData[index].available;
+      $dot.attr('data-available', dotAvailable ? 'true' : 'false');
+      
+      // Add visual indicator for out of stock variants
+      if (!dotAvailable) {
+        $dot.addClass('out-of-stock');
+      } else {
+        $dot.removeClass('out-of-stock');
+      }
+    }
+  });
+}
+
 // Function to initialize all bundle functionality
 function initializeBundleFunctionality() {
   // Check if bundle container exists
@@ -3228,6 +3390,9 @@ function initializeBundleFunctionality() {
   // Hide products that are already in cart
   hideProductsAlreadyInCart();
   
+  // Refresh variant availability from Shopify API (fixes stale stock data)
+  refreshBundleProductAvailability();
+  
   // Update bundle products if needed
   updateBundleProducts();
 }
@@ -3248,6 +3413,10 @@ $(document).ready(function() {
   if (isCartOpen || hasCartItems) {
     setTimeout(() => {
       initializeBundleFunctionality();
+      // Refresh availability on page load to get fresh stock data
+      setTimeout(function() {
+        refreshBundleProductAvailability();
+      }, 500);
     }, 200); // Increased delay to ensure DOM is ready
   }
   
@@ -3288,6 +3457,10 @@ $(document).ready(function() {
     // Initialize bundle functionality when cart opens
     setTimeout(() => {
       initializeBundleFunctionality();
+      // Refresh availability after initialization to get fresh stock data
+      setTimeout(function() {
+        refreshBundleProductAvailability();
+      }, 400);
     }, 150); // Slight delay to ensure cart is fully open
   });
   
@@ -4349,6 +4522,10 @@ function refreshBundleProducts(cart) {
           // Re-initialize bundle functionality after refresh (lightweight)
           setTimeout(function() {
             initializeBundleFunctionality();
+            // Refresh availability after initialization
+            setTimeout(function() {
+              refreshBundleProductAvailability();
+            }, 300);
           }, 50); // Reduced delay for faster initialization
         }
       },
