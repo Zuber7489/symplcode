@@ -1,7 +1,7 @@
 <!-- Bundle & Save Section - Product Page -->
 <div class="text-center">
-  <div class="bundle-save-section-product" style="margin-bottom: 60px; background-color: #fff; padding: 30px 1px; border-radius: 12px; position: relative;">
-    <h3 class="bundle-title" style="font-size: clamp(20px, 5vw, 24px); font-weight: 600 !important; margin-bottom: 16px; text-align: left; color: #111827;  letter-spacing: 0px; font-family: inherit !important;">
+  <div class="bundle-save-section-product" style="margin-bottom: 0px; background-color: #fff; padding: 30px 1px; border-radius: 12px; position: relative;">
+    <h3 class="bundle-title" style="font-size: clamp(20px, 5vw, 24px); font-weight: 600 !important; margin-bottom: 16px; text-align: left; color: #111827;  letter-spacing: 0px; font-family: inherit !important; padding-left: 16px; padding-right: 16px;">
       Bundle & save
     </h3>
 
@@ -75,7 +75,8 @@
   color: #111827;
   margin: 0 0 16px 0;
   font-family: inherit;
-  padding-left: 0;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .bundle-products-container-product {
@@ -83,8 +84,9 @@
   position: relative;
   cursor: grab;
   padding: 0;
-  max-width: calc(160px * 3.5 + 12px * 3);
+  max-width: 100%;
   margin: 0 auto;
+  width: 100%;
 }
 
 .bundle-products-container-product.grabbing {
@@ -94,7 +96,7 @@
 .bundle-products-scroll-product {
   display: flex;
   gap: 12px;
-  padding: 8px 0;
+  padding: 8px 16px;
   margin-left: 0;
   transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1); 
   will-change: transform;
@@ -268,15 +270,67 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 900px) {
+@media (min-width: 1400px) {
   .bundle-products-container-product {
-    max-width: calc(160px * 2.5 + 12px * 2);
+    padding: 0;
+    max-width: 100%;
+  }
+  
+  .bundle-products-scroll-product {
+    padding: 8px 20px;
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1399px) {
+  .bundle-products-container-product {
+    padding: 0;
+    max-width: 100%;
+  }
+  
+  .bundle-products-scroll-product {
+    padding: 8px 20px;
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .bundle-products-container-product {
+    padding: 0;
+    max-width: 100%;
+  }
+  
+  .bundle-products-scroll-product {
+    padding: 8px 20px;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .bundle-products-container-product {
+    padding: 0;
+    max-width: 100%;
+  }
+  
+  .bundle-products-scroll-product {
+    padding: 8px 16px;
   }
 }
 
 @media (max-width: 600px) {
+  .bundle-save-section-product {
+    padding: 20px 0 !important;
+  }
+  
+  .bundle-title {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  
   .bundle-products-container-product {
-    max-width: calc(140px * 2.2 + 12px * 2);
+    padding: 0;
+    max-width: 100%;
+  }
+  
+  .bundle-products-scroll-product {
+    padding: 8px 16px;
   }
   
   .bundle-product-pdp {
@@ -285,6 +339,16 @@
   
   .bundle-product-image {
     height: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bundle-product-pdp {
+    flex: 0 0 130px;
+  }
+  
+  .bundle-product-image {
+    height: 110px;
   }
 }
 </style>
@@ -334,8 +398,17 @@
         
         cardWidth = firstCard.offsetWidth + marginLeft + marginRight;
         
-        const containerWidth = bundleContainer.parentElement.offsetWidth;
-        visibleCards = Math.floor(containerWidth / cardWidth);
+        // Get parent container width (full viewport width) to show maximum items
+        const parentContainer = bundleContainer.parentElement;
+        const parentWidth = parentContainer.offsetWidth;
+        
+        // Account for scroll container padding
+        const scrollContainerStyle = window.getComputedStyle(bundleContainer);
+        const scrollPaddingLeft = parseInt(scrollContainerStyle.paddingLeft) || 0;
+        const scrollPaddingRight = parseInt(scrollContainerStyle.paddingRight) || 0;
+        const availableWidth = parentWidth - scrollPaddingLeft - scrollPaddingRight;
+        
+        visibleCards = Math.floor(availableWidth / cardWidth);
         visibleCards = Math.max(1, visibleCards);
       }
 
@@ -358,7 +431,10 @@
           calculateDimensions();
           if (isNaN(cardWidth) || cardWidth <= 0) return;
         }
-        const translateX = -currentIndex * cardWidth;
+        const scrollContainerStyle = window.getComputedStyle(bundleContainer);
+        const scrollPaddingLeft = parseInt(scrollContainerStyle.paddingLeft) || 0;
+        // Start from padding position, then scroll based on index
+        const translateX = -currentIndex * cardWidth - scrollPaddingLeft;
         bundleContainer.style.transform = `translateX(${translateX}px)`;
       }
 
@@ -415,8 +491,14 @@
         mouseLastX = currentPosition;
         mouseLastTime = Date.now();
         
-        const maxTranslate = 0;
-        const minTranslate = -(totalCards - visibleCards) * cardWidth;
+        // Allow scrolling to edges - account for padding
+        const scrollContainerStyle = window.getComputedStyle(bundleContainer);
+        const scrollPaddingLeft = parseInt(scrollContainerStyle.paddingLeft) || 0;
+        const scrollPaddingRight = parseInt(scrollContainerStyle.paddingRight) || 0;
+        // Allow first item to reach left edge (scroll left by padding amount)
+        const maxTranslate = -scrollPaddingLeft;
+        // Allow last item to reach right edge
+        const minTranslate = -(totalCards - visibleCards) * cardWidth + scrollPaddingRight;
         if (currentTranslate > maxTranslate) {
           currentTranslate = maxTranslate + diff * 0.3;
         } else if (currentTranslate < minTranslate) {
@@ -536,8 +618,14 @@
           const diff = touchCurrentX - touchStartX;
           currentTranslate = touchPrevTranslate + diff;
           
-          const maxTranslate = 0;
-          const minTranslate = -(totalCards - visibleCards) * cardWidth;
+          // Allow scrolling to edges - account for padding
+          const scrollContainerStyle = window.getComputedStyle(bundleContainer);
+          const scrollPaddingLeft = parseInt(scrollContainerStyle.paddingLeft) || 0;
+          const scrollPaddingRight = parseInt(scrollContainerStyle.paddingRight) || 0;
+          // Allow first item to reach left edge (scroll left by padding amount)
+          const maxTranslate = -scrollPaddingLeft;
+          // Allow last item to reach right edge
+          const minTranslate = -(totalCards - visibleCards) * cardWidth + scrollPaddingRight;
           if (currentTranslate > maxTranslate) {
             currentTranslate = maxTranslate + diff * 0.3;
           } else if (currentTranslate < minTranslate) {
