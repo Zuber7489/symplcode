@@ -273,7 +273,7 @@
 @media (min-width: 1400px) {
   .bundle-products-container-product {
     padding: 0;
-    max-width: 100%;
+    max-width: calc(160px * 2.5 + 12px * 2 + 40px);
   }
   
   .bundle-products-scroll-product {
@@ -284,7 +284,7 @@
 @media (min-width: 1200px) and (max-width: 1399px) {
   .bundle-products-container-product {
     padding: 0;
-    max-width: 100%;
+    max-width: calc(160px * 2.5 + 12px * 2 + 40px);
   }
   
   .bundle-products-scroll-product {
@@ -295,7 +295,7 @@
 @media (min-width: 900px) and (max-width: 1199px) {
   .bundle-products-container-product {
     padding: 0;
-    max-width: 100%;
+    max-width: calc(160px * 2.5 + 12px * 2 + 40px);
   }
   
   .bundle-products-scroll-product {
@@ -411,6 +411,11 @@
         
         visibleCards = Math.floor(availableWidth / cardWidth);
         visibleCards = Math.max(1, visibleCards);
+        
+        // Limit to 2.5 items on larger screens (900px+)
+        if (window.innerWidth >= 900) {
+          visibleCards = Math.min(visibleCards, 2.5);
+        }
       }
 
       // Initialize
