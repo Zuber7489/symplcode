@@ -393,18 +393,16 @@ body.g-cart-open {
   overflow: hidden !important;
 }
 
-/* Hide Gorgias chat bubble ONLY when cart drawer is open */
-body.g-cart-open [id*="gorgias"],
-body.g-cart-open [class*="gorgias"],
-body.g-cart-open [data-gorgias],
-body.g-cart-open iframe[src*="gorgias"],
-body.g-cart-open #gorgias-web-container,
-body.g-cart-open .gorgias-chat,
-body.g-cart-open .gorgias-chat-bubble {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
+/* Hide chat bubble when cart drawer is open - using z-index only */
+body.g-cart-open [id*="chat"],
+body.g-cart-open [class*="chat"],
+body.g-cart-open [id*="Chat"],
+body.g-cart-open [class*="Chat"],
+body.g-cart-open [id*="georgia"],
+body.g-cart-open [class*="georgia"],
+body.g-cart-open [id*="Georgia"],
+body.g-cart-open [class*="Georgia"] {
+  z-index: -1 !important;
 }
 
 .r-side-cart {
@@ -1348,7 +1346,7 @@ body.g-cart-open .gorgias-chat-bubble {
 .shipping-totals {
   text-align: right;
   margin-left: 16px;
-  min-width: 220px;
+  min-width: 270px;
 }
 
 /* Hide buttons inside shipping-totals on desktop */
@@ -1377,7 +1375,7 @@ body.g-cart-open .gorgias-chat-bubble {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-      margin-right: 15px;
+      margin-right: 99px;
 }
 
 .shipping-row:last-child {
@@ -1967,7 +1965,7 @@ body.g-cart-open .gorgias-chat-bubble {
     margin-bottom: 8px;
     margin-right: 0;
     justify-content: space-between;
-    width: 94%;
+    width: 78%;
   }
   
   .shipping-label, .total-label {
@@ -2159,9 +2157,6 @@ var bodyScrollLock = {
     
     // Add class to body to lock scroll
     $('body').addClass('g-cart-open');
-    
-    // Hide Gorgias chat bubble when cart opens
-    hideGorgiasChat();
   },
   
   unlock: function() {
@@ -2170,106 +2165,8 @@ var bodyScrollLock = {
     
     // Reset scroll position
     this.scrollPosition = 0;
-    
-    // Show Gorgias chat bubble when cart closes
-    showGorgiasChat();
   }
 };
-
-// Function to hide Gorgias chat bubble (only called when cart is open)
-function hideGorgiasChat() {
-  // Only hide if cart is actually open (safety check)
-  if (!$('.r-side-cart').hasClass('active') && !$('body').hasClass('g-cart-open')) {
-    return; // Don't hide if cart is not open
-  }
-  
-  // Multiple selectors to catch different Gorgias implementations
-  var gorgiasSelectors = [
-    '[id*="gorgias"]',
-    '[class*="gorgias"]',
-    '[data-gorgias]',
-    'iframe[src*="gorgias"]',
-    '#gorgias-web-container',
-    '.gorgias-chat',
-    '.gorgias-chat-bubble'
-  ];
-  
-  gorgiasSelectors.forEach(function(selector) {
-    try {
-      var elements = document.querySelectorAll(selector);
-      elements.forEach(function(el) {
-        if (el) {
-          // Only add inline styles if CSS didn't catch it
-          // CSS should handle most cases, this is just a backup
-          var computedStyle = window.getComputedStyle(el);
-          if (computedStyle.display !== 'none' && computedStyle.visibility !== 'hidden') {
-            // Store original values only if not already stored
-            if (!el.dataset.originalDisplay) {
-              el.dataset.originalDisplay = computedStyle.display;
-              el.dataset.originalVisibility = computedStyle.visibility;
-              el.dataset.originalOpacity = computedStyle.opacity;
-            }
-            // CSS should handle hiding, but add inline as backup
-            el.style.setProperty('display', 'none', 'important');
-          }
-        }
-      });
-    } catch (e) {
-      // Silently fail if selector doesn't match
-    }
-  });
-}
-
-// Function to show Gorgias chat bubble (only called when cart is closed)
-function showGorgiasChat() {
-  // Only show if cart is actually closed (safety check)
-  if ($('.r-side-cart').hasClass('active') || $('body').hasClass('g-cart-open')) {
-    return; // Don't show if cart is still open
-  }
-  
-  // Multiple selectors to catch different Gorgias implementations
-  var gorgiasSelectors = [
-    '[id*="gorgias"]',
-    '[class*="gorgias"]',
-    '[data-gorgias]',
-    'iframe[src*="gorgias"]',
-    '#gorgias-web-container',
-    '.gorgias-chat',
-    '.gorgias-chat-bubble'
-  ];
-  
-  gorgiasSelectors.forEach(function(selector) {
-    try {
-      var elements = document.querySelectorAll(selector);
-      elements.forEach(function(el) {
-        if (el) {
-          // Remove all inline styles to let CSS and original styles take over
-          el.style.removeProperty('display');
-          el.style.removeProperty('visibility');
-          el.style.removeProperty('opacity');
-          el.style.removeProperty('pointer-events');
-          
-          // Restore original values if stored
-          if (el.dataset.originalDisplay) {
-            el.style.setProperty('display', el.dataset.originalDisplay);
-            if (el.dataset.originalVisibility) {
-              el.style.setProperty('visibility', el.dataset.originalVisibility);
-            }
-            if (el.dataset.originalOpacity) {
-              el.style.setProperty('opacity', el.dataset.originalOpacity);
-            }
-            // Clear stored values
-            delete el.dataset.originalDisplay;
-            delete el.dataset.originalVisibility;
-            delete el.dataset.originalOpacity;
-          }
-        }
-      });
-    } catch (e) {
-      // Silently fail if selector doesn't match
-    }
-  });
-}
 
 // Configure Shopify money formatting
 if (typeof Shopify === 'undefined') {
@@ -3362,15 +3259,13 @@ $(document).ready(function() {
     // Remove active class from cart
     $('.r-side-cart').removeClass('active');
     
-    // Unlock body scroll using the scroll lock manager (this also shows Gorgias chat)
+    // Unlock body scroll using the scroll lock manager
     bodyScrollLock.unlock();
     
     // Double-check: Force remove any stuck body classes after a short delay
     setTimeout(function() {
       if (!$('.r-side-cart').hasClass('active')) {
         $('body').removeClass('g-cart-open');
-        // Ensure Gorgias chat is shown when cart is fully closed
-        showGorgiasChat();
       }
     }, 50);
   });
@@ -3402,14 +3297,13 @@ $(document).ready(function() {
       if (mutation.attributeName === 'class') {
         var $cart = $('.r-side-cart');
         if ($cart.hasClass('active') && !$('body').hasClass('g-cart-open')) {
-          bodyScrollLock.lock(); // This will hide Gorgias chat
+          bodyScrollLock.lock();
         } else if (!$cart.hasClass('active') && $('body').hasClass('g-cart-open')) {
-          bodyScrollLock.unlock(); // This will show Gorgias chat
+          bodyScrollLock.unlock();
           // Additional safety: ensure body is truly unlocked
           setTimeout(function() {
             if (!$cart.hasClass('active')) {
               $('body').removeClass('g-cart-open');
-              showGorgiasChat(); // Ensure Gorgias chat is shown
             }
           }, 100);
         }
@@ -3429,7 +3323,7 @@ $(document).ready(function() {
       if ($('.r-side-cart').hasClass('active')) {
         e.preventDefault();
         $('.r-side-cart').removeClass('active');
-        bodyScrollLock.unlock(); // This will show Gorgias chat
+        bodyScrollLock.unlock();
       }
     }
   });
@@ -3443,24 +3337,8 @@ $(document).ready(function() {
     if (isBodyLocked && !isCartActive) {
       console.log('Safety unlock: Removing stuck body lock');
       $('body').removeClass('g-cart-open');
-      showGorgiasChat(); // Ensure Gorgias chat is shown when cart is closed
-    }
-    
-    // If cart is active AND body is locked, ensure Gorgias chat is hidden
-    if (isCartActive && isBodyLocked) {
-      hideGorgiasChat();
-    } else if (!isCartActive && !isBodyLocked) {
-      // If cart is closed, ensure Gorgias chat is shown
-      showGorgiasChat();
     }
   }, 500); // Check every 500ms
-  
-  // On page load, ensure Gorgias chat is visible if cart is closed
-  setTimeout(function() {
-    if (!$('.r-side-cart').hasClass('active') && !$('body').hasClass('g-cart-open')) {
-      showGorgiasChat();
-    }
-  }, 1000);
   
   // Initialize after cart refresh
   $(document).on('cart:refresh-complete', function() {
