@@ -1438,6 +1438,11 @@ body.g-cart-open [class*="Georgia"] {
   display: none;
 }
 
+/* Hide free gift widgets with inactive claim buttons */
+.gfgSingleOffergiftContainerDiv[data-widget-hidden="inactive"] {
+  display: none !important;
+}
+
 .checkout-btn {
   width: 100%;
   background: black;
@@ -4731,6 +4736,207 @@ function startApplePay(cart) {
 }
 
 // Simplified Apple Pay - redirects to checkout where Shopify handles everything
+
+/**
+ * Hide inactive free gift widgets - only show widgets with active claim buttons
+ * Checks if claim button is active (not disabled/greyed out) and hides the widget if inactive
+ */
+function hideInactiveFreeGiftWidgets() {
+  const cartDrawer = document.querySelector('.r-side-cart');
+  if (!cartDrawer) {
+    return;
+  }
+  
+  // Find all free gift widget containers - use more specific selector
+  const giftWidgets = cartDrawer.querySelectorAll('.gfgSingleOffergiftContainerDiv');
+  
+  if (giftWidgets.length === 0) {
+    // Try alternative selectors
+    const altWidgets = cartDrawer.querySelectorAll('[class*="gfgFreeGift"][class*="Container"], [id*="FREEGIFTCAMPAIGN-"]');
+    if (altWidgets.length === 0) {
+      return;
+    }
+    altWidgets.forEach(function(widget) {
+      checkAndHideWidget(widget);
+    });
+    return;
+  }
+  
+  giftWidgets.forEach(function(widget) {
+    checkAndHideWidget(widget);
+  });
+}
+
+function checkAndHideWidget(widget) {
+  // Find the claim button within this widget - try multiple selectors
+  let claimButton = widget.querySelector('.gfgFreeGiftClaimButton');
+  
+  if (!claimButton) {
+    claimButton = widget.querySelector('[id^="FREEGIFTCAMPAIGN-"]');
+  }
+  
+  if (!claimButton) {
+    // If no claim button found, check parent containers
+    let parent = widget.parentElement;
+    let depth = 0;
+    
+    while (parent && depth < 5) {
+      claimButton = parent.querySelector('.gfgFreeGiftClaimButton, [id^="FREEGIFTCAMPAIGN-"]');
+      if (claimButton) break;
+      parent = parent.parentElement;
+      depth++;
+    }
+  }
+  
+  if (!claimButton) {
+    // No button found, keep widget visible (might be a different type)
+    return;
+  }
+  
+  // Get computed styles for accurate checking
+  const computedStyle = window.getComputedStyle(claimButton);
+  const bgColor = computedStyle.backgroundColor;
+  const pointerEvents = computedStyle.pointerEvents;
+  
+  // Check if button has inactive class (most reliable check)
+  const hasInvalidClass = claimButton.classList.contains('gfgFreeGiftInvalidProductClaimButton');
+  
+  // Check background color - grey (#e5e5e5 or rgb(229, 229, 229)) means inactive
+  const isGreyBackground = bgColor === 'rgb(229, 229, 229)' || 
+                           bgColor === '#e5e5e5' ||
+                           bgColor.toLowerCase().includes('rgb(229, 229, 229)') ||
+                           bgColor.toLowerCase().includes('229, 229, 229');
+  
+  // Check if button is disabled
+  const isDisabled = claimButton.hasAttribute('disabled') || 
+                     claimButton.disabled ||
+                     pointerEvents === 'none';
+  
+  // Check if button is actually active (black background)
+  const isBlackBackground = bgColor === 'rgb(26, 26, 26)' || 
+                           bgColor === '#1a1a1a' ||
+                           bgColor === 'black' ||
+                           bgColor.toLowerCase().includes('rgb(26, 26, 26)') ||
+                           bgColor.toLowerCase().includes('26, 26, 26');
+  
+  // Determine if widget should be hidden
+  // Hide if: has invalid class OR grey background OR disabled OR NOT black background
+  const shouldHide = hasInvalidClass || isGreyBackground || isDisabled || !isBlackBackground;
+  
+  if (shouldHide) {
+    // Hide widget if button is inactive
+    widget.style.display = 'none';
+    widget.setAttribute('data-widget-hidden', 'inactive');
+    console.log('Hiding inactive widget - Class:', hasInvalidClass, 'Grey BG:', isGreyBackground, 'Disabled:', isDisabled, 'Black BG:', isBlackBackground);
+  } else {
+    // Show widget if button is active (black background and clickable)
+    widget.style.display = '';
+    widget.removeAttribute('data-widget-hidden');
+    console.log('Showing active widget - Black BG:', isBlackBackground, 'Clickable:', pointerEvents !== 'none');
+  }
+}
+
+// Run when cart drawer opens or refreshes
+$(document).on('cart:refresh-complete', function() {
+  setTimeout(hideInactiveFreeGiftWidgets, 500);
+  setTimeout(hideInactiveFreeGiftWidgets, 1500);
+});
+
+// Run when cart drawer becomes active
+var cartDrawerObserver = new MutationObserver(function(mutations) {
+  mutations.forEach(function(mutation) {
+    if (mutation.attributeName === 'class') {
+      var $cart = $('.r-side-cart');
+      if ($cart.hasClass('active')) {
+        // Cart drawer just opened, hide inactive widgets
+        setTimeout(hideInactiveFreeGiftWidgets, 1000);
+        setTimeout(hideInactiveFreeGiftWidgets, 2500);
+      }
+    }
+  });
+});
+
+// Start observing cart drawer for class changes
+var cartElement = document.querySelector('.r-side-cart');
+if (cartElement) {
+  cartDrawerObserver.observe(cartElement, { attributes: true });
+}
+
+// Watch for dynamically added free gift widgets
+var cartContentObserver = new MutationObserver(function(mutations) {
+  let shouldCheck = false;
+  mutations.forEach(function(mutation) {
+    if (mutation.addedNodes.length > 0) {
+      mutation.addedNodes.forEach(function(node) {
+        if (node.nodeType === 1) { // Element node
+          if (node.classList && (
+              node.classList.contains('gfgSingleOffergiftContainerDiv') ||
+              node.classList.contains('gfgFreeGiftClaimButton') ||
+              node.id && node.id.startsWith('FREEGIFTCAMPAIGN-')
+          )) {
+            shouldCheck = true;
+          }
+          // Also check children
+          if (node.querySelectorAll && (
+              node.querySelectorAll('.gfgSingleOffergiftContainerDiv').length > 0 ||
+              node.querySelectorAll('.gfgFreeGiftClaimButton').length > 0 ||
+              node.querySelectorAll('[id^="FREEGIFTCAMPAIGN-"]').length > 0
+          )) {
+            shouldCheck = true;
+          }
+        }
+      });
+    }
+  });
+  
+  if (shouldCheck) {
+    setTimeout(hideInactiveFreeGiftWidgets, 500);
+  }
+});
+
+// Start observing cart content for dynamically added elements
+var cartContentElement = document.querySelector('.cart-app-blocks');
+if (cartContentElement) {
+  cartContentObserver.observe(cartContentElement, {
+    childList: true,
+    subtree: true
+  });
+} else {
+  // Wait for cart content to be available
+  $(document).ready(function() {
+    setTimeout(function() {
+      var cartContentElement = document.querySelector('.cart-app-blocks');
+      if (cartContentElement) {
+        cartContentObserver.observe(cartContentElement, {
+          childList: true,
+          subtree: true
+        });
+      }
+    }, 1000);
+  });
+}
+
+// Also run when cart opens via click
+$(document).on('click', '.cart-icon', function() {
+  setTimeout(function() {
+    hideInactiveFreeGiftWidgets();
+  }, 1500);
+  setTimeout(function() {
+    hideInactiveFreeGiftWidgets();
+  }, 3000);
+  setTimeout(function() {
+    hideInactiveFreeGiftWidgets();
+  }, 5000);
+});
+
+// Run immediately when DOM is ready and cart is open
+$(document).ready(function() {
+  setTimeout(function() {
+    if ($('.r-side-cart').hasClass('active')) {
+      hideInactiveFreeGiftWidgets();
+    }
+  }, 2000);
+});
 
 </script>
 
