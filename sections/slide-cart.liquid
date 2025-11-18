@@ -2400,7 +2400,20 @@ function formatMoney(cents) {
 
 
 
-
+// Helper function to normalize availability check
+// This handles boolean, string, and undefined/null values consistently
+function normalizeAvailability(available) {
+  if (available === undefined || available === null) {
+    return true; // Default to available if not specified
+  }
+  if (typeof available === 'boolean') {
+    return available;
+  }
+  if (typeof available === 'string') {
+    return available.toLowerCase() === 'true' || available === '1';
+  }
+  return !!available;
+}
 
 // Bundle slide navigation class
 class BundleSlideNavigation {
@@ -2738,26 +2751,41 @@ class BundleSlideNavigation {
       const variantDot = e.target.closest('.variant-dot');
       if (variantDot) {
         e.preventDefault();
-        const productId = variantDot.closest('.bundle-product').dataset.productId;
+        const productContainer = variantDot.closest('.bundle-product');
+        if (!productContainer) return;
+        
+        const productId = productContainer.dataset.productId;
         const variantId = variantDot.dataset.variantId;
-        const variantIndex = variantDot.dataset.variantIndex;
+        // Parse variantIndex as integer to ensure correct array access
+        const variantIndex = parseInt(variantDot.dataset.variantIndex, 10);
+        
+        if (!productId || isNaN(variantIndex)) {
+          console.warn('Invalid product ID or variant index');
+          return;
+        }
         
         // Update selected variant dot
-        const productContainer = variantDot.closest('.bundle-product');
         const variantDots = productContainer.querySelectorAll('.variant-dot');
         variantDots.forEach(dot => {
           dot.classList.remove('selected');
         });
         variantDot.classList.add('selected');
         
+        // Get variant data from window object
+        const variantDataList = window[`bundleProductVariants_${productId}`];
+        if (!variantDataList || !variantDataList[variantIndex]) {
+          console.warn('Variant data not found for product:', productId, 'variant index:', variantIndex);
+          return;
+        }
+        
+        const variant = variantDataList[variantIndex];
+        
         // Update the Add to Bag button with the selected variant ID
         const addToBagBtn = productContainer.querySelector('.bundle-cart-btn');
-        if (addToBagBtn) {
+        if (addToBagBtn && variant) {
           addToBagBtn.dataset.variantId = variantId;
-          // Update availability based on selected variant
-          const variantDataList = window[`bundleProductVariants_${productId}`];
-          const selectedData = variantDataList && variantDataList[variantIndex] ? variantDataList[variantIndex] : null;
-          const isAvailable = !!(selectedData && selectedData.available);
+          // Use normalizeAvailability to properly check availability
+          const isAvailable = normalizeAvailability(variant.available);
           addToBagBtn.dataset.available = isAvailable ? 'true' : 'false';
           addToBagBtn.disabled = !isAvailable;
           addToBagBtn.textContent = isAvailable ? 'Add to Bag' : 'Out of Stock';
@@ -2766,43 +2794,60 @@ class BundleSlideNavigation {
         
         // Update the fabric and size name
         const materialElement = productContainer.querySelector('.bundle-product-material');
-        if (materialElement) {
-          const fabric = variantDot.dataset.fabric || '';
-          const size = variantDot.dataset.size || '';
+        if (materialElement && variant) {
+          const fabric = variant.fabric || variantDot.dataset.fabric || '';
+          const size = variant.size || variantDot.dataset.size || '';
           materialElement.textContent = size ? `${fabric} - ${size}` : fabric;
         }
         
         // Update product image based on selected variant
         const productImage = productContainer.querySelector('.bundle-product-image img');
-        if (productImage) {
-          // Get variant data from window object (would be populated by AJAX)
-          const variantData = window[`bundleProductVariants_${productId}`];
-          if (variantData && variantData[variantIndex]) {
-            const variant = variantData[variantIndex];
-            if (variant.featured_image && variant.featured_image.url) {
-              // Add a small delay to ensure smooth transition
-              productImage.style.opacity = '0.5';
-              setTimeout(() => {
-                productImage.src = variant.featured_image.url;
-                productImage.alt = variant.title;
-                productImage.style.opacity = '1';
-              }, 100);
-            }
+        if (productImage && variant) {
+          // Get image URL from variant data
+          let imageUrl = null;
+          
+          if (variant.featured_image && variant.featured_image.url) {
+            imageUrl = variant.featured_image.url;
+          } else if (variant.featured_image) {
+            // Handle case where featured_image is a string
+            imageUrl = variant.featured_image;
+          }
+          
+          if (imageUrl && imageUrl.trim() !== '') {
+            // Add loading state with opacity transition
+            productImage.style.opacity = '0.5';
+            productImage.style.transition = 'opacity 0.3s ease';
+            
+            // Create new image to preload
+            const newImage = new Image();
+            newImage.onload = function() {
+              // Update image source after successful load
+              productImage.src = imageUrl;
+              productImage.alt = variant.title || variantDot.dataset.fabric || 'Product image';
+              productImage.style.opacity = '1';
+            };
+            newImage.onerror = function() {
+              // If image fails to load, try fallback or keep current image
+              console.warn('Failed to load variant image:', imageUrl);
+              productImage.style.opacity = '1';
+              // Try to get fallback image from product
+              const fallbackUrl = productContainer.querySelector('.bundle-product-image img')?.src;
+              if (fallbackUrl) {
+                productImage.src = fallbackUrl;
+              }
+            };
+            newImage.src = imageUrl;
+          } else {
+            console.warn('No image URL found for variant:', variant);
           }
         }
               
         // Update product price based on selected variant
         const productPrice = productContainer.querySelector('.bundle-product-price');
-        if (productPrice) {
-          const variantData = window[`bundleProductVariants_${productId}`];
-          if (variantData && variantData[variantIndex]) {
-            const variant = variantData[variantIndex];
-            if (variant.price) {
-              // Format price using existing formatMoney function
-              const newPrice = formatMoney(variant.price);
-              productPrice.textContent = newPrice;
-            }
-          }
+        if (productPrice && variant && variant.price) {
+          // Format price using existing formatMoney function
+          const newPrice = formatMoney(variant.price);
+          productPrice.textContent = newPrice;
         }
       }
     });
@@ -3193,9 +3238,26 @@ function initializeBundleProductImages() {
         var $addToBagBtn = $product.find('.bundle-cart-btn');
         
         // Update image
-        if (variant.featured_image && variant.featured_image.url && $productImage.length > 0) {
-          $productImage.attr('src', variant.featured_image.url);
-          $productImage.attr('alt', variant.title);
+        if ($productImage.length > 0 && variant.featured_image) {
+          let imageUrl = '';
+          if (variant.featured_image.url) {
+            imageUrl = variant.featured_image.url;
+          } else if (typeof variant.featured_image === 'string') {
+            imageUrl = variant.featured_image;
+          }
+          
+          if (imageUrl && imageUrl.trim() !== '') {
+            // Preload image before updating
+            const newImage = new Image();
+            newImage.onload = function() {
+              $productImage.attr('src', imageUrl);
+              $productImage.attr('alt', variant.title || 'Product image');
+            };
+            newImage.onerror = function() {
+              console.warn('Failed to load image:', imageUrl);
+            };
+            newImage.src = imageUrl;
+          }
         }
         
         // Update price
@@ -3212,7 +3274,8 @@ function initializeBundleProductImages() {
         // Update add to bag button variant ID
         if ($addToBagBtn.length > 0) {
           $addToBagBtn.attr('data-variant-id', variant.id);
-          var isAvailable = !!variant.available;
+          // Use normalizeAvailability for consistent checking
+          var isAvailable = normalizeAvailability(variant.available);
           $addToBagBtn.attr('data-available', isAvailable ? 'true' : 'false');
           $addToBagBtn.prop('disabled', !isAvailable);
           $addToBagBtn.toggleClass('is-disabled', !isAvailable);
@@ -3270,15 +3333,47 @@ function refreshBundleProductAvailability() {
         if (productData && productData.variants) {
           const variantData = [];
           productData.variants.slice(0, 4).forEach(function(variant) {
+            // Get image URL - prioritize variant image, fallback to product image
+            let imageUrl = '';
+            if (variant.featured_image) {
+              // If variant has featured_image, use it (it's a URL string from Shopify API)
+              imageUrl = variant.featured_image;
+            } else if (productData.featured_image) {
+              // Fallback to product featured image
+              imageUrl = productData.featured_image;
+            } else if (productData.images && productData.images.length > 0) {
+              // Fallback to first product image
+              imageUrl = productData.images[0];
+            }
+            
+            // Ensure image URL is properly formatted (add protocol if missing)
+            if (imageUrl && !imageUrl.startsWith('http') && !imageUrl.startsWith('//')) {
+              imageUrl = 'https:' + imageUrl;
+            }
+            
+            // Check availability properly
+            // Shopify API: variant.available is a boolean that indicates if variant can be purchased
+            // Use normalizeAvailability helper function for consistent checking
+            let isAvailable = true; // Default to available
+            
+            if (variant.available !== undefined && variant.available !== null) {
+              // Shopify API returns boolean
+              isAvailable = variant.available === true;
+            } else if (variant.inventory_quantity !== undefined) {
+              // Fallback: If inventory is tracked, check quantity
+              // But note: Shopify's available already accounts for inventory_policy
+              isAvailable = variant.inventory_quantity > 0 || variant.inventory_policy === 'continue';
+            }
+            
             variantData.push({
               id: variant.id,
               title: variant.title,
               price: variant.price,
-              available: variant.available,
+              available: isAvailable,
               fabric: variant.option1 || '',
               size: variant.option2 || '',
               featured_image: {
-                url: variant.featured_image || productData.featured_image || '',
+                url: imageUrl,
                 alt: variant.title || productData.title || ''
               }
             });
@@ -3334,7 +3429,7 @@ function updateVariantAvailability($product, variantData, variantIndex) {
   }
   
   const variant = variantData[variantIndex];
-  const isAvailable = !!variant.available;
+  const isAvailable = normalizeAvailability(variant.available);
   
   // Update the Add to Bag button
   const $addToBagBtn = $product.find('.bundle-cart-btn');
@@ -3350,7 +3445,8 @@ function updateVariantAvailability($product, variantData, variantIndex) {
   $product.find('.variant-dot').each(function(index) {
     const $dot = $(this);
     if (variantData[index]) {
-      const dotAvailable = !!variantData[index].available;
+      // Use normalizeAvailability for consistent checking
+      const dotAvailable = normalizeAvailability(variantData[index].available);
       $dot.attr('data-available', dotAvailable ? 'true' : 'false');
       
       // Add visual indicator for out of stock variants
