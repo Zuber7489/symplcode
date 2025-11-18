@@ -50,7 +50,7 @@
         <form class="Cart_Drawer__Content" action="{{ routes.cart_url }}" method="POST" novalidate>
           <div id="cart-items-list" class="cart-items-list">
               {% for item in cart.items %}
-                <div class="cart-item r-prod-row" data-item-key="{{ item.key }}" data-variant-id="{{ item.variant.id }}" data-line="{{forloop.index}}" data-product-handle="{{ item.product.handle }}" data-product-title="{{ item.product.title }}" data-product-id="{{ item.product.id }}">
+                <div class="cart-item r-prod-row" data-item-key="{{ item.key }}" data-variant-id="{{ item.variant.id }}" data-line="{{forloop.index}}">
                   <!-- Column 1: Product Image -->
                   <div class="cart-item-image">
                     <a href="{{item.url}}">
@@ -1436,11 +1436,6 @@ body.g-cart-open [class*="Georgia"] {
 
 .cart-app-blocks:empty {
   display: none;
-}
-
-/* Hide irrelevant free gift widgets */
-.gfgSingleOffergiftContainerDiv[style*="display: none"] {
-  display: none !important;
 }
 
 .checkout-btn {
@@ -3097,7 +3092,6 @@ function refreshCartAfterDiscount(cartData) {
           new BundleSlideNavigation();
           initializeBundleProductImages();
           hideProductsAlreadyInCart();
-          hideIrrelevantFreeGiftWidgets();
         }, 50);
         
         // Verify cart state after refresh
@@ -3935,9 +3929,6 @@ function updateBundleProductsWithHTML() {
             
             // Initialize all bundle functionality
             initializeBundleFunctionality();
-            
-            // Hide irrelevant free gift widgets
-            hideIrrelevantFreeGiftWidgets();
           }, 50); // Reduced delay for faster initialization
         
       } else {
@@ -4387,7 +4378,6 @@ function removeItemFromCart(lineNumber, $button) {
         // Lightweight bundle refresh - only if needed
         setTimeout(function() {
           refreshBundleProducts(cart);
-          hideIrrelevantFreeGiftWidgets();
         }, 150);
       }
       
@@ -4741,168 +4731,6 @@ function startApplePay(cart) {
 }
 
 // Simplified Apple Pay - redirects to checkout where Shopify handles everything
-
-/**
- * Hide Free Gift Widgets that don't match products in cart
- * Targets: gfgSingleOffergiftContainerDiv widgets based on widget title text
- */
-function hideIrrelevantFreeGiftWidgets() {
-  // Get all cart items and their product information
-  var cartProducts = [];
-  $('.cart-item').each(function() {
-    var productHandle = $(this).data('product-handle') || '';
-    var productTitle = $(this).data('product-title') || '';
-    var productId = $(this).data('product-id') || '';
-    
-    if (productHandle || productId) {
-      cartProducts.push({
-        handle: productHandle.toLowerCase(),
-        title: productTitle.toLowerCase(),
-        id: productId.toString()
-      });
-    }
-  });
-  
-  console.log('Cart products:', cartProducts);
-  
-  // If no cart items, hide all widgets
-  if (cartProducts.length === 0) {
-    $('.gfgSingleOffergiftContainerDiv').hide();
-    return;
-  }
-  
-  // Find all widget containers (gfgSingleOffergiftContainerDiv)
-  $('.gfgSingleOffergiftContainerDiv').each(function() {
-    var $widget = $(this);
-    var $titleBar = $widget.find('.gfgFreeGiftWidgetTitleBar');
-    var widgetTitleText = $titleBar.text().toLowerCase() || $widget.text().toLowerCase();
-    
-    var shouldShow = false;
-    
-    // Determine widget type from title text
-    var isXpacWidget = widgetTitleText.includes('x-pac commuter pack') && 
-                       !widgetTitleText.includes('carbonate');
-    var isCarbonateWidget = widgetTitleText.includes('carbonate') || 
-                           widgetTitleText.includes('20l commuter pack carbonate');
-    
-    console.log('Widget title:', widgetTitleText.substring(0, 80), {
-      isXpacWidget: isXpacWidget,
-      isCarbonateWidget: isCarbonateWidget
-    });
-    
-    // Check if widget matches any product in cart
-    cartProducts.forEach(function(product) {
-      var hasXpac = product.handle.includes('commuter-pack-x-pac') || 
-                    product.handle.includes('x-pac-commuter') ||
-                    product.title.includes('x-pac commuter pack') ||
-                    product.title.includes('x-pac');
-      
-      var hasCarbonate = product.handle.includes('carbonate') || 
-                         product.title.includes('carbonate') ||
-                         product.handle.includes('commuter-pack') && product.title.includes('carbonate');
-      
-      // Match X-Pac widget with X-Pac product (must NOT have carbonate)
-      if (isXpacWidget && hasXpac && !hasCarbonate) {
-        shouldShow = true;
-        console.log('✅ X-Pac widget matches X-Pac product');
-      }
-      
-      // Match Carbonate widget with Carbonate product
-      if (isCarbonateWidget && hasCarbonate) {
-        shouldShow = true;
-        console.log('✅ Carbonate widget matches Carbonate product');
-      }
-    });
-    
-    // Show or hide widget based on match
-    if (shouldShow) {
-      $widget.show();
-      console.log('Showing widget');
-    } else {
-      $widget.hide();
-      console.log('Hiding widget - no match');
-    }
-  });
-}
-
-// Run on cart open/update
-$(document).ready(function() {
-  // Initial check - multiple attempts to catch widgets loading
-  setTimeout(hideIrrelevantFreeGiftWidgets, 500);
-  setTimeout(hideIrrelevantFreeGiftWidgets, 1000);
-  setTimeout(hideIrrelevantFreeGiftWidgets, 2000);
-  setTimeout(hideIrrelevantFreeGiftWidgets, 3000);
-  
-  // Re-check when cart updates
-  $(document).on('cart:refresh cart:refresh-complete', function() {
-    setTimeout(hideIrrelevantFreeGiftWidgets, 500);
-    setTimeout(hideIrrelevantFreeGiftWidgets, 1500);
-    setTimeout(hideIrrelevantFreeGiftWidgets, 2500);
-  });
-  
-  // Also check when cart opens
-  $(document).on('click', '.cart-icon', function() {
-    setTimeout(hideIrrelevantFreeGiftWidgets, 500);
-    setTimeout(hideIrrelevantFreeGiftWidgets, 1500);
-    setTimeout(hideIrrelevantFreeGiftWidgets, 2500);
-  });
-  
-  // Watch for widget additions via MutationObserver
-  var widgetObserver = new MutationObserver(function(mutations) {
-    var shouldCheck = false;
-    mutations.forEach(function(mutation) {
-      if (mutation.addedNodes.length > 0) {
-        mutation.addedNodes.forEach(function(node) {
-          if (node.nodeType === 1 && 
-              (node.classList.contains('gfgSingleOffergiftContainerDiv') || 
-               node.querySelector('.gfgSingleOffergiftContainerDiv'))) {
-            shouldCheck = true;
-          }
-        });
-      }
-    });
-    if (shouldCheck) {
-      setTimeout(hideIrrelevantFreeGiftWidgets, 300);
-      setTimeout(hideIrrelevantFreeGiftWidgets, 800);
-    }
-  });
-  
-  var cartAppBlocks = document.querySelector('.cart-app-blocks');
-  if (cartAppBlocks) {
-    widgetObserver.observe(cartAppBlocks, {
-      childList: true,
-      subtree: true
-    });
-  }
-  
-  // Also watch the entire cart container for changes
-  var cartContainer = document.querySelector('.r-side-cart');
-  if (cartContainer) {
-    var cartObserver = new MutationObserver(function(mutations) {
-      var hasWidgetChanges = false;
-      mutations.forEach(function(mutation) {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          mutation.addedNodes.forEach(function(node) {
-            if (node.nodeType === 1 && 
-                (node.classList && node.classList.contains('gfgSingleOffergiftContainerDiv') || 
-                 node.querySelector && node.querySelector('.gfgSingleOffergiftContainerDiv'))) {
-              hasWidgetChanges = true;
-            }
-          });
-        }
-      });
-      if (hasWidgetChanges) {
-        setTimeout(hideIrrelevantFreeGiftWidgets, 500);
-        setTimeout(hideIrrelevantFreeGiftWidgets, 1500);
-      }
-    });
-    
-    cartObserver.observe(cartContainer, {
-      childList: true,
-      subtree: true
-    });
-  }
-});
 
 </script>
 
