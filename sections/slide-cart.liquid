@@ -1438,8 +1438,20 @@ body.g-cart-open [class*="Georgia"] {
   display: none;
 }
 
-/* Hide free gift widgets with inactive claim buttons */
+/* Hide free gift widgets with inactive claim buttons - CSS first for instant hiding */
+.gfgSingleOffergiftContainerDiv:has(.gfgFreeGiftInvalidProductClaimButton),
+.gfgSingleOffergiftContainerDiv:has(.gfgFreeGiftClaimButton.gfgFreeGiftInvalidProductClaimButton),
+.gfgSingleOffergiftContainerDiv:has([id^="FREEGIFTCAMPAIGN-"][class*="InvalidProductClaimButton"]) {
+  display: none !important;
+}
+
+/* Fallback: Hide widgets with data attribute */
 .gfgSingleOffergiftContainerDiv[data-widget-hidden="inactive"] {
+  display: none !important;
+}
+
+/* Hide widgets where claim button has grey background (inactive state) */
+.gfgSingleOffergiftContainerDiv .gfgFreeGiftClaimButton.gfgFreeGiftInvalidProductClaimButton {
   display: none !important;
 }
 
@@ -4151,6 +4163,13 @@ function addBundleItemToCart(variantId, quantity) {
       // For removals, we handle updates directly without triggering Shopify.onSuccess
       // This prevents unnecessary full HTML refreshes and slow gift app updates
       $(document).trigger('cart:refresh');
+      
+      // Immediately hide inactive widgets after adding product - NO DELAY
+      setTimeout(function() {
+        if (typeof hideInactiveFreeGiftWidgets === 'function') {
+          hideInactiveFreeGiftWidgets();
+        }
+      }, 50);
     },
     error: function(xhr) {
       
@@ -4768,6 +4787,13 @@ function hideInactiveFreeGiftWidgets() {
 }
 
 function checkAndHideWidget(widget) {
+  // Immediately hide widget if it has inactive class - no delay
+  if (widget.classList.contains('gfgFreeGiftInvalidProductClaimButton')) {
+    widget.style.display = 'none';
+    widget.setAttribute('data-widget-hidden', 'inactive');
+    return;
+  }
+  
   // Find the claim button within this widget - try multiple selectors
   let claimButton = widget.querySelector('.gfgFreeGiftClaimButton');
   
@@ -4793,13 +4819,18 @@ function checkAndHideWidget(widget) {
     return;
   }
   
+  // FIRST: Check if button has inactive class (most reliable and fastest check)
+  const hasInvalidClass = claimButton.classList.contains('gfgFreeGiftInvalidProductClaimButton');
+  if (hasInvalidClass) {
+    widget.style.display = 'none';
+    widget.setAttribute('data-widget-hidden', 'inactive');
+    return; // Exit early - no need to check other things
+  }
+  
   // Get computed styles for accurate checking
   const computedStyle = window.getComputedStyle(claimButton);
   const bgColor = computedStyle.backgroundColor;
   const pointerEvents = computedStyle.pointerEvents;
-  
-  // Check if button has inactive class (most reliable check)
-  const hasInvalidClass = claimButton.classList.contains('gfgFreeGiftInvalidProductClaimButton');
   
   // Check background color - grey (#e5e5e5 or rgb(229, 229, 229)) means inactive
   const isGreyBackground = bgColor === 'rgb(229, 229, 229)' || 
@@ -4820,19 +4851,17 @@ function checkAndHideWidget(widget) {
                            bgColor.toLowerCase().includes('26, 26, 26');
   
   // Determine if widget should be hidden
-  // Hide if: has invalid class OR grey background OR disabled OR NOT black background
-  const shouldHide = hasInvalidClass || isGreyBackground || isDisabled || !isBlackBackground;
+  // Hide if: grey background OR disabled OR NOT black background
+  const shouldHide = isGreyBackground || isDisabled || !isBlackBackground;
   
   if (shouldHide) {
-    // Hide widget if button is inactive
-    widget.style.display = 'none';
+    // Hide widget if button is inactive - use !important via inline style
+    widget.style.cssText = 'display: none !important;';
     widget.setAttribute('data-widget-hidden', 'inactive');
-    console.log('Hiding inactive widget - Class:', hasInvalidClass, 'Grey BG:', isGreyBackground, 'Disabled:', isDisabled, 'Black BG:', isBlackBackground);
   } else {
     // Show widget if button is active (black background and clickable)
     widget.style.display = '';
     widget.removeAttribute('data-widget-hidden');
-    console.log('Showing active widget - Black BG:', isBlackBackground, 'Clickable:', pointerEvents !== 'none');
   }
 }
 
@@ -4862,36 +4891,41 @@ if (cartElement) {
   cartDrawerObserver.observe(cartElement, { attributes: true });
 }
 
-// Watch for dynamically added free gift widgets
+// Watch for dynamically added free gift widgets - INSTANTLY hide inactive ones
 var cartContentObserver = new MutationObserver(function(mutations) {
-  let shouldCheck = false;
   mutations.forEach(function(mutation) {
     if (mutation.addedNodes.length > 0) {
       mutation.addedNodes.forEach(function(node) {
         if (node.nodeType === 1) { // Element node
-          if (node.classList && (
-              node.classList.contains('gfgSingleOffergiftContainerDiv') ||
-              node.classList.contains('gfgFreeGiftClaimButton') ||
-              node.id && node.id.startsWith('FREEGIFTCAMPAIGN-')
-          )) {
-            shouldCheck = true;
+          // Check if this is a widget container
+          if (node.classList && node.classList.contains('gfgSingleOffergiftContainerDiv')) {
+            // Immediately check and hide if inactive - NO DELAY
+            checkAndHideWidget(node);
           }
-          // Also check children
-          if (node.querySelectorAll && (
-              node.querySelectorAll('.gfgSingleOffergiftContainerDiv').length > 0 ||
-              node.querySelectorAll('.gfgFreeGiftClaimButton').length > 0 ||
-              node.querySelectorAll('[id^="FREEGIFTCAMPAIGN-"]').length > 0
-          )) {
-            shouldCheck = true;
+          
+          // Check if this is a claim button
+          if (node.classList && node.classList.contains('gfgFreeGiftClaimButton')) {
+            // Find parent widget and check immediately
+            const widget = node.closest('.gfgSingleOffergiftContainerDiv');
+            if (widget) {
+              checkAndHideWidget(widget);
+            }
+          }
+          
+          // Check children for widgets
+          if (node.querySelectorAll) {
+            const widgets = node.querySelectorAll('.gfgSingleOffergiftContainerDiv');
+            widgets.forEach(function(widget) {
+              checkAndHideWidget(widget);
+            });
           }
         }
       });
     }
   });
   
-  if (shouldCheck) {
-    setTimeout(hideInactiveFreeGiftWidgets, 500);
-  }
+  // Also run full check after a tiny delay to catch any missed ones
+  setTimeout(hideInactiveFreeGiftWidgets, 100);
 });
 
 // Start observing cart content for dynamically added elements
