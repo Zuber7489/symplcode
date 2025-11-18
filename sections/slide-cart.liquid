@@ -50,7 +50,7 @@
         <form class="Cart_Drawer__Content" action="{{ routes.cart_url }}" method="POST" novalidate>
           <div id="cart-items-list" class="cart-items-list">
               {% for item in cart.items %}
-                <div class="cart-item r-prod-row" data-item-key="{{ item.key }}" data-variant-id="{{ item.variant.id }}" data-line="{{forloop.index}}">
+                <div class="cart-item r-prod-row" data-item-key="{{ item.key }}" data-variant-id="{{ item.variant.id }}" data-line="{{forloop.index}}" data-product-handle="{{ item.product.handle }}" data-product-title="{{ item.product.title }}" data-product-id="{{ item.product.id }}">
                   <!-- Column 1: Product Image -->
                   <div class="cart-item-image">
                     <a href="{{item.url}}">
@@ -1436,6 +1436,11 @@ body.g-cart-open [class*="Georgia"] {
 
 .cart-app-blocks:empty {
   display: none;
+}
+
+/* Hide irrelevant free gift widgets */
+.gfgSingleOffergiftContainerDiv[style*="display: none"] {
+  display: none !important;
 }
 
 .checkout-btn {
@@ -3092,6 +3097,7 @@ function refreshCartAfterDiscount(cartData) {
           new BundleSlideNavigation();
           initializeBundleProductImages();
           hideProductsAlreadyInCart();
+          hideIrrelevantFreeGiftWidgets();
         }, 50);
         
         // Verify cart state after refresh
@@ -3929,6 +3935,9 @@ function updateBundleProductsWithHTML() {
             
             // Initialize all bundle functionality
             initializeBundleFunctionality();
+            
+            // Hide irrelevant free gift widgets
+            hideIrrelevantFreeGiftWidgets();
           }, 50); // Reduced delay for faster initialization
         
       } else {
@@ -4378,6 +4387,7 @@ function removeItemFromCart(lineNumber, $button) {
         // Lightweight bundle refresh - only if needed
         setTimeout(function() {
           refreshBundleProducts(cart);
+          hideIrrelevantFreeGiftWidgets();
         }, 150);
       }
       
@@ -4733,174 +4743,166 @@ function startApplePay(cart) {
 // Simplified Apple Pay - redirects to checkout where Shopify handles everything
 
 /**
- * KITE FREE GIFT WIDGET - Hide MAIN DIV when button is gray/disabled
- * ONLY IN SLIDE CART - Does not affect product page widgets
- * Targets: gfgFreeGiftMsgParentContainerForDropDown (main Kite widget container)
- * 
- * FIXED: Prevents duplicate observers and widget reappearing repeatedly
+ * Hide Free Gift Widgets that don't match products in cart
+ * Targets: gfgSingleOffergiftContainerDiv widgets based on widget title text
  */
-(function() {
-  'use strict';
-  
-  // Store observer reference globally to prevent duplicates
-  let kiteWidgetObserver = null;
-  let isObserverInitialized = false;
-  let checkTimeoutIds = [];
-  
-  /**
-   * Check and hide/show the Kite widget based on button state
-   */
-  function checkAndHideMainDiv() {
-    // IMPORTANT: Only target widgets inside the slide cart, not product pages
-    const slideCart = document.querySelector('.r-side-cart') || 
-                      document.querySelector('#custom-cart') ||
-                      document.querySelector('.cart-app-blocks');
+function hideIrrelevantFreeGiftWidgets() {
+  // Get all cart items and their product information
+  var cartProducts = [];
+  $('.cart-item').each(function() {
+    var productHandle = $(this).data('product-handle') || '';
+    var productTitle = $(this).data('product-title') || '';
+    var productId = $(this).data('product-id') || '';
     
-    if (!slideCart) {
-      // Slide cart not found, don't do anything (might be on product page)
-      return;
+    if (productHandle || productId) {
+      cartProducts.push({
+        handle: productHandle.toLowerCase(),
+        title: productTitle.toLowerCase(),
+        id: productId.toString()
+      });
     }
-    
-    // Find ALL Kite widget containers to handle duplicates
-    const kiteWidgets = slideCart.querySelectorAll('.gfgFreeGiftMsgParentContainerForDropDown, .gfgFreeGiftSideCartWrapperV4, [class*="gfgFreeGiftMsgParent"]');
-    
-    if (kiteWidgets.length === 0) {
-      // No widgets found yet, wait
-      return;
-    }
-    
-    // Process each widget found (in case of duplicates)
-    kiteWidgets.forEach(function(mainKiteDiv) {
-      // Verify it's actually inside the slide cart (double check)
-      if (!slideCart.contains(mainKiteDiv)) {
-        // Widget is not in slide cart, skip (might be on product page)
-        return;
-      }
-      
-      // Find the Claim button inside the main div
-      const claimButton = mainKiteDiv.querySelector('.gfgFreeGiftInvalidProductClaimButton') ||
-                         mainKiteDiv.querySelector('.gfgFreeGiftClaimButton') ||
-                         mainKiteDiv.querySelector('button');
-      
-      if (claimButton) {
-        const computedStyle = window.getComputedStyle(claimButton);
-        const bgColor = computedStyle.backgroundColor;
-        
-        // Check if button is gray (disabled state)
-        // Gray: rgb(229, 229, 229) = #e5e5e5
-        // Black: rgb(26, 26, 26) or rgb(0, 0, 0)
-        
-        const isGray = bgColor.includes('229') || // rgb(229, 229, 229)
-                       bgColor === 'rgb(229, 229, 229)' ||
-                       bgColor === '#e5e5e5' ||
-                       claimButton.classList.contains('gfgFreeGiftInvalidProductClaimButton') ||
-                       computedStyle.pointerEvents === 'none';
-        
-        if (isGray) {
-          // Button is gray/disabled - HIDE MAIN DIV (only in slide cart)
-          mainKiteDiv.style.display = 'none';
-          console.log('❌ Hiding Kite widget in slide cart - Button is gray');
-        } else {
-          // Button is black/active - SHOW MAIN DIV
-          mainKiteDiv.style.display = 'block';
-          console.log('✅ Showing Kite widget in slide cart - Button is black');
-        }
-      }
-    });
+  });
+  
+  console.log('Cart products:', cartProducts);
+  
+  // If no cart items, hide all widgets
+  if (cartProducts.length === 0) {
+    $('.gfgSingleOffergiftContainerDiv').hide();
+    return;
   }
   
-  /**
-   * Initialize the Kite widget observer (only once)
-   */
-  function initializeKiteWidgetObserver() {
-    // Prevent duplicate initialization
-    if (isObserverInitialized && kiteWidgetObserver) {
-      return;
-    }
+  // Find all widget containers (gfgSingleOffergiftContainerDiv)
+  $('.gfgSingleOffergiftContainerDiv').each(function() {
+    var $widget = $(this);
+    var $titleBar = $widget.find('.gfgFreeGiftWidgetTitleBar');
+    var widgetTitleText = $titleBar.text().toLowerCase() || $widget.text().toLowerCase();
     
-    // Clear any existing timeouts
-    checkTimeoutIds.forEach(function(timeoutId) {
-      clearTimeout(timeoutId);
+    var shouldShow = false;
+    
+    // Determine widget type from title text
+    var isXpacWidget = widgetTitleText.includes('x-pac commuter pack') && 
+                       !widgetTitleText.includes('carbonate');
+    var isCarbonateWidget = widgetTitleText.includes('carbonate') || 
+                           widgetTitleText.includes('20l commuter pack carbonate');
+    
+    console.log('Widget title:', widgetTitleText.substring(0, 80), {
+      isXpacWidget: isXpacWidget,
+      isCarbonateWidget: isCarbonateWidget
     });
-    checkTimeoutIds = [];
     
-    // Disconnect existing observer if any
-    if (kiteWidgetObserver) {
-      kiteWidgetObserver.disconnect();
-      kiteWidgetObserver = null;
+    // Check if widget matches any product in cart
+    cartProducts.forEach(function(product) {
+      var hasXpac = product.handle.includes('commuter-pack-x-pac') || 
+                    product.handle.includes('x-pac-commuter') ||
+                    product.title.includes('x-pac commuter pack') ||
+                    product.title.includes('x-pac');
+      
+      var hasCarbonate = product.handle.includes('carbonate') || 
+                         product.title.includes('carbonate') ||
+                         product.handle.includes('commuter-pack') && product.title.includes('carbonate');
+      
+      // Match X-Pac widget with X-Pac product (must NOT have carbonate)
+      if (isXpacWidget && hasXpac && !hasCarbonate) {
+        shouldShow = true;
+        console.log('✅ X-Pac widget matches X-Pac product');
+      }
+      
+      // Match Carbonate widget with Carbonate product
+      if (isCarbonateWidget && hasCarbonate) {
+        shouldShow = true;
+        console.log('✅ Carbonate widget matches Carbonate product');
+      }
+    });
+    
+    // Show or hide widget based on match
+    if (shouldShow) {
+      $widget.show();
+      console.log('Showing widget');
+    } else {
+      $widget.hide();
+      console.log('Hiding widget - no match');
     }
-    
-    // Check multiple times to catch Kite app loading
-    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 500));
-    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 1000));
-    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 2000));
-    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 3000));
-    
-    // Watch for changes ONLY in the slide cart container
-    const cartContainer = document.querySelector('.cart-app-blocks') || 
-                         document.querySelector('.r-side-cart') ||
-                         document.querySelector('#custom-cart');
-    
-    if (cartContainer && !kiteWidgetObserver) {
-      kiteWidgetObserver = new MutationObserver(function(mutations) {
-        // Debounce: Only check if widget actually changed
-        let shouldCheck = false;
-        mutations.forEach(function(mutation) {
-          if (mutation.type === 'childList' || 
-              (mutation.type === 'attributes' && 
-               (mutation.attributeName === 'class' || mutation.attributeName === 'style'))) {
+  });
+}
+
+// Run on cart open/update
+$(document).ready(function() {
+  // Initial check - multiple attempts to catch widgets loading
+  setTimeout(hideIrrelevantFreeGiftWidgets, 500);
+  setTimeout(hideIrrelevantFreeGiftWidgets, 1000);
+  setTimeout(hideIrrelevantFreeGiftWidgets, 2000);
+  setTimeout(hideIrrelevantFreeGiftWidgets, 3000);
+  
+  // Re-check when cart updates
+  $(document).on('cart:refresh cart:refresh-complete', function() {
+    setTimeout(hideIrrelevantFreeGiftWidgets, 500);
+    setTimeout(hideIrrelevantFreeGiftWidgets, 1500);
+    setTimeout(hideIrrelevantFreeGiftWidgets, 2500);
+  });
+  
+  // Also check when cart opens
+  $(document).on('click', '.cart-icon', function() {
+    setTimeout(hideIrrelevantFreeGiftWidgets, 500);
+    setTimeout(hideIrrelevantFreeGiftWidgets, 1500);
+    setTimeout(hideIrrelevantFreeGiftWidgets, 2500);
+  });
+  
+  // Watch for widget additions via MutationObserver
+  var widgetObserver = new MutationObserver(function(mutations) {
+    var shouldCheck = false;
+    mutations.forEach(function(mutation) {
+      if (mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach(function(node) {
+          if (node.nodeType === 1 && 
+              (node.classList.contains('gfgSingleOffergiftContainerDiv') || 
+               node.querySelector('.gfgSingleOffergiftContainerDiv'))) {
             shouldCheck = true;
           }
         });
-        
-        if (shouldCheck) {
-          checkAndHideMainDiv();
+      }
+    });
+    if (shouldCheck) {
+      setTimeout(hideIrrelevantFreeGiftWidgets, 300);
+      setTimeout(hideIrrelevantFreeGiftWidgets, 800);
+    }
+  });
+  
+  var cartAppBlocks = document.querySelector('.cart-app-blocks');
+  if (cartAppBlocks) {
+    widgetObserver.observe(cartAppBlocks, {
+      childList: true,
+      subtree: true
+    });
+  }
+  
+  // Also watch the entire cart container for changes
+  var cartContainer = document.querySelector('.r-side-cart');
+  if (cartContainer) {
+    var cartObserver = new MutationObserver(function(mutations) {
+      var hasWidgetChanges = false;
+      mutations.forEach(function(mutation) {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          mutation.addedNodes.forEach(function(node) {
+            if (node.nodeType === 1 && 
+                (node.classList && node.classList.contains('gfgSingleOffergiftContainerDiv') || 
+                 node.querySelector && node.querySelector('.gfgSingleOffergiftContainerDiv'))) {
+              hasWidgetChanges = true;
+            }
+          });
         }
       });
-      
-      kiteWidgetObserver.observe(cartContainer, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class', 'style']
-      });
-      
-      isObserverInitialized = true;
-      console.log('✅ Kite widget observer initialized');
-    }
-  }
-  
-  /**
-   * Re-check widget state (for cart updates) without reinitializing observer
-   */
-  function recheckKiteWidget() {
-    // Clear previous timeouts
-    checkTimeoutIds.forEach(function(timeoutId) {
-      clearTimeout(timeoutId);
+      if (hasWidgetChanges) {
+        setTimeout(hideIrrelevantFreeGiftWidgets, 500);
+        setTimeout(hideIrrelevantFreeGiftWidgets, 1500);
+      }
     });
-    checkTimeoutIds = [];
     
-    // Re-check widget state
-    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 300));
-    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 800));
-    checkTimeoutIds.push(setTimeout(checkAndHideMainDiv, 1500));
+    cartObserver.observe(cartContainer, {
+      childList: true,
+      subtree: true
+    });
   }
-  
-  // Initialize on page ready
-  $(document).ready(function() {
-    setTimeout(initializeKiteWidgetObserver, 500);
-  });
-  
-  // Re-check when cart updates (don't reinitialize observer)
-  $(document).on('cart:updated', function() {
-    recheckKiteWidget();
-  });
-  
-  // Also re-check when cart opens
-  $(document).on('cart:opened', function() {
-    recheckKiteWidget();
-  });
-})();
+});
 
 </script>
 
