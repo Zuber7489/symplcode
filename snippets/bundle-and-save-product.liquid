@@ -14,7 +14,8 @@
             <div class="bundle-product-pdp" data-product-id="{{ bundle_product.id }}">
               <div class="bundle-product-gray-box">
                 <div class="bundle-product-image">
-                  <a href="{{ bundle_product.url }}" class="bundle-product-image-link">
+                  {% assign initial_variant = bundle_product.selected_or_first_available_variant %}
+                  <a href="{{ bundle_product.url }}?variant={{ initial_variant.id }}" class="bundle-product-image-link" data-product-url="{{ bundle_product.url }}">
                     <img src="{{ bundle_product.variants.first.featured_image | default: bundle_product.featured_image | img_url: 'medium' }}" alt="{{ bundle_product.title }}">
                   </a>
                 </div>
@@ -832,6 +833,13 @@ function normalizeAvailability(available) {
           }
           
           const variant = variantDataList[variantIndex];
+          
+          // Update the product image link to point to the selected variant
+          const productImageLink = productContainer.querySelector('.bundle-product-image-link');
+          if (productImageLink && variantId) {
+            const productUrl = productImageLink.dataset.productUrl || productImageLink.getAttribute('href').split('?')[0];
+            productImageLink.href = productUrl + '?variant=' + variantId;
+          }
           
           // Update the Add to Bag button with the selected variant ID
           const addToBagBtn = productContainer.querySelector('.bundle-add-btn');
