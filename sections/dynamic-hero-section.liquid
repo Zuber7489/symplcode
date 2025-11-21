@@ -24,15 +24,20 @@
                data-autoplay-duration="{% if item.autoplay_duration != blank %}{{ item.autoplay_duration | times: 1000 }}{% else %}0{% endif %}">
             <div class="hero__media-wrapper {% if section.settings.fix %}hero__media-fixed{% endif %}">
               {% if item.content_type == 'image' %}
+                {% comment %} Get base URL without any size parameters for original/master image {% endcomment %}
+                {% assign desktop_base = item.desktop_image | split: '?' | first %}
+                {% assign mobile_base = item.mobile_image | split: '?' | first %}
+                {% comment %} Desktop image - original/master only for maximum quality {% endcomment %}
                 <img 
-                  src="{{ item.desktop_image }}" 
+                  src="{{ desktop_base }}" 
                   class="hero__media-content hero__desktop-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
                   decoding="async"
                   onerror="this.style.display='none'; ">
+                {% comment %} Mobile image - original/master only for maximum quality and pinch-zoom {% endcomment %}
                 <img 
-                  src="{{ item.mobile_image }}" 
+                  src="{{ mobile_base }}" 
                   class="hero__media-content hero__mobile-only" 
                   alt="{% if item.heading %}{{ item.heading }}{% endif %}"
                   loading="eager"
@@ -112,17 +117,13 @@
             <div class="hero__media-wrapper {% if section.settings.fix %}hero__media-fixed{% endif %}">
               {% if block.settings.content_type == 'image' %}
                 <img 
-                  src="{{ block.settings.desktop_image | img_url: '1920x' }}" 
-                  srcset="{{ block.settings.desktop_image | img_url: '1200x' }} 1200w, {{ block.settings.desktop_image | img_url: '1920x' }} 1920w"
-                  sizes="100vw"
+                  src="{{ block.settings.desktop_image | image_url }}" 
                   class="hero__media-content hero__desktop-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
                   decoding="async">
                 <img 
-                  src="{{ block.settings.mobile_image | img_url: '768x' }}" 
-                  srcset="{{ block.settings.mobile_image | img_url: '480x' }} 480w, {{ block.settings.mobile_image | img_url: '768x' }} 768w"
-                  sizes="100vw"
+                  src="{{ block.settings.mobile_image | image_url }}" 
                   class="hero__media-content hero__mobile-only" 
                   alt="{% if block.settings.heading %}{{ block.settings.heading }}{% endif %}"
                   loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
@@ -1133,10 +1134,18 @@
       
       // Build media content
       if (item.content_type === 'image') {
+        // Get base URL without any size parameters for original/master image
+        const getBaseUrl = (url) => {
+          if (!url) return '';
+          return url.split('?')[0];
+        };
+        const desktopBase = getBaseUrl(item.desktop_image);
+        const mobileBase = getBaseUrl(item.mobile_image);
+        // Use original/master image only for maximum quality
         mediaHTML = `
           <div class="hero__media-wrapper">
-            <img src="${item.desktop_image}" class="hero__media-content hero__desktop-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async" onerror="this.style.display='none';">
-            <img src="${item.mobile_image}" class="hero__media-content hero__mobile-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async" onerror="this.style.display='none';">
+            <img src="${desktopBase}" class="hero__media-content hero__desktop-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async" onerror="this.style.display='none';">
+            <img src="${mobileBase}" class="hero__media-content hero__mobile-only" alt="${item.heading || ''}" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async" onerror="this.style.display='none';">
           </div>
         `;
       } else if (item.content_type === 'video') {
